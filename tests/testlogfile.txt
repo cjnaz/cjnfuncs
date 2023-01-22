@@ -1,0 +1,6 @@
+2023-01-14 18:01:14,647        cjnfuncs.loadconfig               INFO:  Logging file  changed to <testlogfile.txt>
+2023-01-14 18:22:18,752        cjnfuncs.loadconfig               INFO:  Logging file  changed to <testlogfile.txt>
+2023-01-15 09:00:05,056        cjnfuncs.loadconfig               INFO:  Logging file  changed to <testlogfile.txt>
+2023-01-15 09:00:25,233        cjnfuncs.loadconfig               INFO:  Logging file  changed to <testlogfile.txt>
+2023-01-15 09:01:04,857        cjnfuncs.loadconfig               INFO:  Logging file  changed to <testlogfile.txt>
+2023-01-15 12:12:57,574        cjnfuncs.loadconfig               INFO:  Logging file  changed to <testlogfile.txt>
