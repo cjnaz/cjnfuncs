@@ -144,23 +144,66 @@ class set_toolname():
 
     Initial condition is no config file is known, but the directories to eventually look 
     for one are defined.
-    Logging defaults to the state directory / toolname / toolname.log.
+    Logging defaults to the site_state_directory / toolname / toolname.log for root user.
+    Logging defaults to the user_state_directory / toolname / toolname.log for non-root user.
     See the config_item class regarding selection of user or site dirs and redirecting the log_dir.
+
+
     """
     def __init__(self, tname):
         global _toolname        # handle used elsewhere in this module
         _toolname = self
+        # print (os.geteuid())
         self.toolname  = tname
         self.user_config_dir    = Path(appdirs.user_config_dir(tname))
-        self.site_config_dir    = Path(appdirs.site_config_dir(tname))
-        # TODO define user and site_data_dir, and set defail to site?  Check existance of actual user_data_dir then site_data_dir, else error?
-        # forcing user to use deploy_files to decide?
-        self.data_dir           = Path(appdirs.user_data_dir  (tname))    # may get changed to /usr/share/<toolname> by loadconfig
-        self.state_dir          = Path(appdirs.user_state_dir (tname))   # TODO may get changed?
-        self.cache_dir          = Path(appdirs.user_cache_dir (tname))   # TODO may get changed?
-        self.log_dir            = self.state_dir
-        self.log_file           = tname + ".log"
-        self.log_full_path      = self.log_dir / self.log_file
+        self.user_data_dir      = Path(appdirs.user_data_dir(tname))
+        self.site_config_dir    = Path(appdirs.site_config_dir(tname))  # /
+        self.site_data_dir      = Path("/usr/share") / tname
+
+        if self.user_config_dir.exists()  or  self.user_data_dir.exists():
+            self.config_dir = self.user_config_dir
+            self.data_dir   = self.user_data_dir
+            self.state_dir  = self.user_data_dir  # Path(appdirs.user_state_dir (tname))
+            self.cache_dir  = self.user_data_dir  # Path(appdirs.user_cache_dir (tname)) / tname
+            self.log_dir    = self.state_dir    # Defaults here.  Will be changed in config class if a config exists.
+            self.env_defined= "user"
+        elif self.site_config_dir.exists()  or  self.site_data_dir.exists():
+            self.config_dir = self.site_data_dir
+            self.data_dir   = self.site_data_dir
+            self.state_dir  = self.site_data_dir
+            self.cache_dir  = self.site_data_dir
+            self.log_dir    = self.site_data_dir    # Defaults here.  Will be changed in config class if a config exists.
+            self.env_defined= "site"
+        else:
+            self.config_dir = None
+            self.data_dir   = None
+            self.state_dir  = None
+            self.cache_dir  = None
+            self.log_dir    = None
+            self.env_defined= False
+
+        self.log_file       = tname + ".log"
+        self.log_full_path  = None
+        if self.log_dir is not None:
+            self.log_full_path = self.log_dir / self.log_file
+
+    def dump(self):
+        print (f"\nWorking directories for toolname <{self.toolname}>:")
+        print ("user_config_dir:  ", self.user_config_dir)
+        print ("user_data_dir:    ", self.user_data_dir)
+        print ("site_config_dir:  ", self.site_config_dir)
+        print ("site_data_dir:    ", self.site_data_dir)
+        print ("env_defined:      ", self.env_defined)
+
+        print (f"Based on found user or site dirs:")
+        print ("config_dir:       ", self.config_dir)
+        print ("data_dir:         ", self.data_dir)
+        print ("state_dir:        ", self.state_dir)
+        print ("cache_dir:        ", self.cache_dir)
+        print ("log_dir:          ", self.log_dir)
+        print ("log_file:         ", self.log_file)
+        print ("log_full_path:    ", self.log_full_path)
+
 
 
 class mungePath():
@@ -224,87 +267,140 @@ class mungePath():
         self.is_file = self.full_path.is_file()
 
 
-import glob
-# from importlib_resources import files
-# import importlib_resources
-try:
-    from importlib.resources import files as ir_files
-except ImportError:
-    from importlib_resources import files as ir_files
-import inspect
-
-def deploy_files(files_list):
+def deploy_files(files_list, overwrite=False):
     """
-    Distribution files to be in <package_root>/deployment_files/
+    Install setup directories and files from the module to the user/site config and data directories.
+    Distribution files and directory trees are hosted in package_root/src/module_name/deployment_files/.
 	
-    Accepts list of lists
-		[ [ file_to_push, target_path ], ]
-		file_to_push allows wildcards
-		target_path may be to a dir or dir/file (rename, single file only)
-		
-	Target_path supports std target base dirs
-		USER_CONFIG_DIR, SITE_CONFIG_DIR
-			eg:  [log_mytool.log, USER_CONFIG_DIR/logs]
-		LOG_DIR
-		USER_DATA_DIR, SITE_DATA_DIR
-		STATE_DIR
-		CACHE_DIR
-		Also absolute path 
+    deploy_files() accepts a list of directories, eg:
+        deploy_files( [
+            { "source": "creds_test", "target_dir": "USER_CONFIG_DIR/example", "file_stat": 0o600, "dir_stat": 0o707},
+            { "source": "test_dir",   "target_dir": "USER_DATA_DIR",           "file_stat": 0o633, "dir_stat": 0o770},
+            ...
+            ], overwrite=True )
+    
+    The first example will push the package_root/src/module_name/deployment_files/creds_test file to ~/.config/<toolname>/example/creds_test.
+    <toolname> is set by the set_toolname() call, 'mytool' in this example.
+    The directories ~/.config/mytool/ and ~/.config/mytool/example will have permissions 0o707 and files will have permission 0o600.
+    Directory and file owner:group settings will be user:user, or root:root if called under sudo.
 
-    TODO add permissions and ownership setting?
-    TODO support wildcards on source files
+    The second example pushes a directory (with possible subdirectories) to ~/.local/share/mytool/.  The target_dir may specify a 
+    subdirectory, such as "target_dir": "USER_DATA_DIR/mydirs"
+
+    "source" is either an individual file or directory tree within and relative to module_name/deployment_files/.  No wildcard support.
+
+    "target_dir" is expanded for user and environment vars, and supports these substitutions (per set_toolname()):
+		USER_CONFIG_DIR, SITE_CONFIG_DIR
+        USER_DATA_DIR, SITE_DATA_DIR
+		Also absolute paths
+
+    If overwrite == False (default) then only missing files will be copied.  If overwrite == True then all files will be overwritten 
+    if they exist - data may be lost!
+
+    If deployment fails then execution aborts.  This functions is intended for interactive use.
     """
 
     mapping = [
         ["USER_CONFIG_DIR", _toolname.user_config_dir],
+        ["USER_DATA_DIR",   _toolname.user_data_dir],
         ["SITE_CONFIG_DIR", _toolname.site_config_dir],
-        ["DATA_DIR",        _toolname.data_dir],
-        ["STATE_DIR",       _toolname.state_dir],
-        ["CACHE_DIR",       _toolname.cache_dir],
+        ["SITE_DATA_DIR",   _toolname.site_data_dir],
+        # ["DATA_DIR",        _toolname.data_dir],      No need to push files to these dirs, correct?
+        # ["STATE_DIR",       _toolname.state_dir],
+        # ["CACHE_DIR",       _toolname.cache_dir],
         ]
 
+    def resolve_target(_targ, mkdir=False):
+        """Do any CONFIG/DATA replacements.  Return a fully resolved mungePath.
+        """
+        base_path = ""
+        for remap in mapping:
+            if remap[0] in _targ:
+                _targ = _targ.replace(remap[0], "")
+                if len(_targ) > 0:
+                    _targ = _targ[1:]   # TODO This is weak.  Drops leading '/' after remap removed.
+                base_path = remap[1]
+                break
+        try:
+            xx = mungePath(_targ, base_path, mkdir=mkdir)
+            return xx
+        except Exception as e:
+            print (f"Can't make target directory.  Aborting.\n  {e}")
+            sys.exit(1)
+    
+    def copytree(src, dst, file_stat=None, dir_stat=None):
+        """ Adapted from link, plus permissions settings feature.  No needed support for symlinks and ignore.
+        https://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
+        """
+        for item in os.listdir(src):
+            s = os.path.join(src, item)
+            d = os.path.join(dst, item)
+            if os.path.isdir(s):
+                if not os.path.exists(d):
+                    os.makedirs(d)
+                    if dir_stat:
+                        os.chmod(d, dir_stat)
+                copytree(s, d)
+            else:
+                shutil.copy2(s, d)
+                if file_stat:
+                    os.chmod(d, file_stat)
+
+
+    try:
+        from importlib.resources import files as ir_files
+    except ImportError:
+        from importlib_resources import files as ir_files
+    import inspect
+
     stack = inspect.stack()
-    parentframe = stack[1][0]    
+    parentframe = stack[1][0]
     module = inspect.getmodule(parentframe)
-    my_resources = ir_files(module) / "deployment_files" 
+    if module.__name__ == "__main__":   # Caller is a script file, not an installed module
+        my_resources = mungePath(__main__.__file__).dir / "deployment_files"
+    else:                               # Caller is an installed module
+        my_resources = ir_files(module) / "deployment_files" 
 
     for item in files_list:
-        source_file = my_resources / item[0]
-        if source_file.is_file():
-            _targ = item[1]
-            base_path = ""
+        source = mungePath(item["source"], my_resources)
+        if source.is_file:
+            target_dir = resolve_target(item["target_dir"], mkdir=True)
+            if "dir_stat" in item:
+                os.chmod(target_dir.dir, item["dir_stat"])
 
-            for remap in mapping:
-                if remap[0] in _targ:
-                    _targ = _targ.replace(remap[0], "")
-                    # if _targ[0] == '/':
-                    if len(_targ) > 0:
-                        _targ = _targ[1:]   # TODO This is weak.  Drops leading '/' after remap removed.
-                    base_path = remap[1]
-                    break
-            try:
-                _target_dir = mungePath(_targ, base_path, mkdir=True) #, is_dir=True)
-            except Exception as e:
-                print (f"Can't make target directory.  Aborting.\n  {e}")
-                sys.exit(1)
-            # print (f"\n_targ {_targ},  base_path {base_path}, _target_dir.dir {_target_dir.dir}")
-            # target_dir = mungePath("dummy", item[1], mkdir=True).parent
-            # _target_dir = mungePath(item[1], mkdir=True)
-            if not _target_dir.is_dir:
-                print (f"Can't deploy {source_file}.  Target directory <{_target_dir.in_path}> is not a valid directory.  Aborting.")
+            if not target_dir.is_dir:
+                print (f"Can't deploy {source.name}.  Cannot access target_dir <{target_dir.dir}>.  Aborting.")
                 sys.exit(1) # TODO raise
 
-            target_dir = _target_dir.dir # mungePath(item[1], mkdir=True).dir
-            # print (mungePath(source_file).in_path)
-            # print (target_dir)
-            # wildcard_files = False
-            # if ['*', '?'] in item[0]:
-            #     wildcard_files = True
-            shutil.copy(source_file, target_dir)
-            print (f"Deployed  {item[0]:20} to  {target_dir}")
+            if not mungePath(source.name, target_dir.dir).exists  or  overwrite:
+                try:
+                    shutil.copy(source.full_path, target_dir.dir)
+                    if "file_stat" in item:
+                        os.chmod(mungePath(source.name, target_dir.dir).full_path, item["file_stat"])
+                except Exception as e:
+                    print (f"File copy of <{source.name}> to <{target_dir.dir}> failed.  Aborting.\n  {e}")
+                    sys.exit(1)
+                print (f"Deployed  {source.name:20} to  {target_dir.dir}")
+            else:
+                print (f"File <{source.name}> already exists at <{target_dir.dir}>.  Skipped.")
+
+        elif source.is_dir:
+                if not resolve_target(item["target_dir"]).exists  or  overwrite:
+                    target_dir = resolve_target(item["target_dir"], mkdir=True)
+                    try:
+                        if "dir_stat" in item:
+                            os.chmod(target_dir.dir, item["dir_stat"])
+                        copytree(source.dir, target_dir.full_path, file_stat=item.get("file_stat", None), dir_stat=item.get("dir_stat", None))
+                    except Exception as e:
+                        print (f"Failed copying tree <{source.name}> to <{target_dir.full_path}>.  target_dir can't already exist.  Aborting.\n  {e}")
+                        sys.exit(1)
+                    print (f"Deployed  {source.name:20} to  {target_dir.dir}")
+                else:
+                    print (f"Directory <{target_dir.dir}> already exists.  Copytree skipped.")
         else:
-            print (f"Can't deploy {source_file}.  File not found.  Aborting.")
-            sys.exit(1)     # TODO raise file error
+            print (f"Can't deploy {source.name}.  Item not found.  Aborting.")
+            sys.exit(1)
+        
 
 
 #=====================================================================================
