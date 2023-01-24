@@ -36,7 +36,7 @@ parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
 
 args = parser.parse_args()
 
-toolname = set_toolname("envtest")
+toolname = set_toolname("cjnfuncs_testenv")
 toolname.dump()
 
 if toolname.env_defined == False:
@@ -45,7 +45,8 @@ if toolname.env_defined == False:
 
 if args.config_file == "newuserconfig":
     deploy_files([
-        { "source": CONFIG_FILE, "target_dir": "USER_CONFIG_DIR",                   "file_stat": 0o644, "dir_stat": 0o777},
+        { "source": CONFIG_FILE, "target_dir": "USER_CONFIG_DIR",                   "file_stat": 0o644, "dir_stat": 0o770},
+        { "source": CONFIG_FILE, "target_dir": "USER_CONFIG_DIR/subdir",            "file_stat": 0o644, "dir_stat": 0o777},
         { "source": "creds_test", "target_dir": "$HOME/.config/junk2",              "file_stat": 0o600, "dir_stat": 0o707},
         { "source": "creds_test", "target_dir": "USER_CONFIG_DIR"},
         { "source": "test_dir", "target_dir": "USER_DATA_DIR/mydirs",               "file_stat": 0o633, "dir_stat": 0o770},
@@ -57,7 +58,17 @@ if args.config_file == "newuserconfig":
 
 if args.config_file == "newsiteconfig":
     deploy_files([
-        { "source": CONFIG_FILE, "target_dir": "SITE_CONFIG_DIR", "stat": 0o644 },
-        { "source": "creds_test", "target_dir": "$HOME/.config", "stat": 0o600 },
-        ])# , overwrite=True)
+        { "source": CONFIG_FILE, "target_dir": "SITE_CONFIG_DIR",                   "file_stat": 0o644, "dir_stat": 0o777},
+        { "source": "creds_test", "target_dir": "$HOME/.config/junk2",              "file_stat": 0o600, "dir_stat": 0o707},
+        { "source": "creds_test", "target_dir": "SITE_CONFIG_DIR"},
+        { "source": "test_dir", "target_dir": "SITE_DATA_DIR/mydirs",               "file_stat": 0o633, "dir_stat": 0o770},
+        { "source": "test_dir/subdir/x4", "target_dir": "SITE_CONFIG_DIR/mydirs",   "file_stat": 0o633, "dir_stat": 0o770},
+        # { "source": "doesnotexist", "target_dir": "SITE_CONFIG_DIR",              "file_stat": 0o633, "dir_stat": 0o770},
+        # { "source": "creds_test", "target_dir": "/no_perm/junkdir",               "file_stat": 0o633, "dir_stat": 0o770},
+        ] , overwrite=True)
+
+
+        # { "source": CONFIG_FILE, "target_dir": "SITE_CONFIG_DIR", "stat": 0o644 },
+        # { "source": "creds_test", "target_dir": "$HOME/.config", "stat": 0o600 },
+        # ])# , overwrite=True)
     sys.exit()

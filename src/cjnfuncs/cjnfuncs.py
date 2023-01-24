@@ -163,9 +163,9 @@ class set_toolname():
         if self.user_config_dir.exists()  or  self.user_data_dir.exists():
             self.config_dir = self.user_config_dir
             self.data_dir   = self.user_data_dir
-            self.state_dir  = self.user_data_dir  # Path(appdirs.user_state_dir (tname))
-            self.cache_dir  = self.user_data_dir  # Path(appdirs.user_cache_dir (tname)) / tname
-            self.log_dir    = self.state_dir    # Defaults here.  Will be changed in config class if a config exists.
+            self.state_dir  = self.user_data_dir    # Path(appdirs.user_state_dir (tname))
+            self.cache_dir  = self.user_data_dir    # Path(appdirs.user_cache_dir (tname)) / tname
+            self.log_dir    = self.state_dir        # Defaults here.  Will be changed in config class if a config exists.
             self.env_defined= "user"
         elif self.site_config_dir.exists()  or  self.site_data_dir.exists():
             self.config_dir = self.site_data_dir
@@ -182,10 +182,12 @@ class set_toolname():
             self.log_dir    = None
             self.env_defined= False
 
-        self.log_file       = tname + ".log"
-        self.log_full_path  = None
-        if self.log_dir is not None:
-            self.log_full_path = self.log_dir / self.log_file
+        self.log_file = self.log_full_path = None
+
+        # self.log_file       = tname + ".log"
+        # self.log_full_path  = None
+        # if self.log_dir is not None:
+        #     self.log_full_path = self.log_dir / self.log_file
 
     def dump(self):
         print (f"\nWorking directories for toolname <{self.toolname}>:")
@@ -417,42 +419,55 @@ class config_item():
     def __init__(self, configname, top_level=True):
 
         global _toolname
-        self.config_dir = self.config_file = self.config_full_path = None
+        # self.config_dir = self.config_file = self.config_full_path = None
+
 
         # print ("\nGiven: ", configname)
+        config = mungePath(configname, _toolname.config_dir)
 
-        _configname = mungePath(configname) # Expands any '~' or env vars
-        # PP_configname = PurePath(configname)
+        if config.is_file:
+            self.config_file        = config.name
+            self.config_dir         = config.parent
+            self.config_full_path   = config.full_path
+            self.config_timestamp   = 0
+        else:
+            _msg = f"Config file <{configname}> not found."
+            raise ConfigError (_msg)
 
-        # Check if configname is an absolute path, then use it after expanding user, env var, and symlinks
-        if _configname.is_absolute:
-            # if Path(PP_configname.parent).is_dir():
-            #     config_dir = Path(PP_configname.parent).resolve()
-            if _configname.is_file:
-                self.config_file = _configname.name
-                self.config_dir = _configname.parent
-                self.config_full_path = _configname.full_path
-                # _toolname.log_dir = _configname.parent
-            # TODO - error if not a file
+        # if top_level:
+        #     _toolname.log_dir = self.config_dir
+        #     _toolname.log_full_path = _toolname.log_dir / _toolname.log_file
 
-        else:   # Name only or relative path case.  Search relative to std config dirs
-            for try_path in [appdirs.user_config_dir(_toolname.toolname), appdirs.site_config_dir(_toolname.toolname)]:
-                try_full_path = mungePath(configname, try_path)  # Path(try_path) / configname
-                # print ("try ", try_full_path.full_path)
-                if try_full_path.is_file:
-                    self.config_file = try_full_path.name #configname
-                    self.config_dir = try_full_path.parent #Path(try_path)
-                    self.config_full_path = try_full_path.full_path
-                    break
-            if self.config_dir == None:
-                _msg = f"Config file <{configname}> not found."
-                raise ConfigError (_msg)
 
-        self.config_timestamp = 0
+        # # print ("\nGiven: ", configname)
 
-        if top_level:
-            _toolname.log_dir = self.config_dir
-            _toolname.log_full_path = _toolname.log_dir / _toolname.log_file
+        # _configname = mungePath(configname) # Expands any '~' or env vars
+
+        # # Check if configname is an absolute path, then use it after expanding user, env var, and symlinks
+        # if _configname.is_absolute:
+        #     if _configname.is_file:
+        #         self.config_file = _configname.name
+        #         self.config_dir = _configname.parent
+        #         self.config_full_path = _configname.full_path
+        #     # TODO - error if not a file
+
+        # else:   # Relative path case.  Search relative to std config dirs
+        #     for try_path in [appdirs.user_config_dir(_toolname.toolname), appdirs.site_config_dir(_toolname.toolname)]:
+        #         try_full_path = mungePath(configname, try_path)
+        #         if try_full_path.is_file:
+        #             self.config_file = try_full_path.name 
+        #             self.config_dir = try_full_path.parent
+        #             self.config_full_path = try_full_path.full_path
+        #             break
+        #     if self.config_dir == None:
+        #         _msg = f"Config file <{configname}> not found."
+        #         raise ConfigError (_msg)
+
+        # self.config_timestamp = 0
+
+        # if top_level:
+        #     _toolname.log_dir = self.config_dir
+        #     _toolname.log_full_path = _toolname.log_dir / _toolname.log_file
 
 
 
