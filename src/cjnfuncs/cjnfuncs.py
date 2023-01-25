@@ -144,6 +144,7 @@ class set_toolname():
 
     Initial condition is no config file is known, but the directories to eventually look 
     for one are defined.
+    TODO
     Logging defaults to the site_state_directory / toolname / toolname.log for root user.
     Logging defaults to the user_state_directory / toolname / toolname.log for non-root user.
     See the config_item class regarding selection of user or site dirs and redirecting the log_dir.
@@ -416,13 +417,11 @@ _current_logfile  = None
 
 
 class config_item():
-    def __init__(self, configname, top_level=True):
+    def __init__(self, configname): #, top_level=True):
 
         global _toolname
         # self.config_dir = self.config_file = self.config_full_path = None
 
-
-        # print ("\nGiven: ", configname)
         config = mungePath(configname, _toolname.config_dir)
 
         if config.is_file:
@@ -433,42 +432,6 @@ class config_item():
         else:
             _msg = f"Config file <{configname}> not found."
             raise ConfigError (_msg)
-
-        # if top_level:
-        #     _toolname.log_dir = self.config_dir
-        #     _toolname.log_full_path = _toolname.log_dir / _toolname.log_file
-
-
-        # # print ("\nGiven: ", configname)
-
-        # _configname = mungePath(configname) # Expands any '~' or env vars
-
-        # # Check if configname is an absolute path, then use it after expanding user, env var, and symlinks
-        # if _configname.is_absolute:
-        #     if _configname.is_file:
-        #         self.config_file = _configname.name
-        #         self.config_dir = _configname.parent
-        #         self.config_full_path = _configname.full_path
-        #     # TODO - error if not a file
-
-        # else:   # Relative path case.  Search relative to std config dirs
-        #     for try_path in [appdirs.user_config_dir(_toolname.toolname), appdirs.site_config_dir(_toolname.toolname)]:
-        #         try_full_path = mungePath(configname, try_path)
-        #         if try_full_path.is_file:
-        #             self.config_file = try_full_path.name 
-        #             self.config_dir = try_full_path.parent
-        #             self.config_full_path = try_full_path.full_path
-        #             break
-        #     if self.config_dir == None:
-        #         _msg = f"Config file <{configname}> not found."
-        #         raise ConfigError (_msg)
-
-        # self.config_timestamp = 0
-
-        # if top_level:
-        #     _toolname.log_dir = self.config_dir
-        #     _toolname.log_full_path = _toolname.log_dir / _toolname.log_file
-
 
 
     def loadconfig(self, #cfgfile      = 'config.cfg',
@@ -503,13 +466,12 @@ class config_item():
 
         A ConfigError is raised if there are file access or parsing issues.
         """
-        # global _config_timestamp
+
         global cfg
         global _current_loglevel
         global _current_logfile
 
         this_config_has_LogFile = False
-        # print (1, _toolname.log_full_path)
         
         # Initial logging will go to the console if no cfglogfile is specified on the initial loadconfig call.
         if _current_loglevel is None:
@@ -549,38 +511,26 @@ class config_item():
                     cfg.clear()
                     logging.debug (f"cfg dictionary flushed and reloaded due to changed config file (flush_on_reload)")
 
-            # print (4, _toolname.log_full_path)
             logging.info (f"Loading {config}")
             cfgline = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
             with io.open(config, encoding='utf8') as ifile:
                 for line in ifile:
                     if line.strip().lower().startswith("import"):           # Is an import line
-                        # print (3, _toolname.log_full_path)
                         line = line.split("#", maxsplit=1)[0].strip()
                         target = mungePath(line.split()[1], self.config_dir)
                         if target.is_file:
-                            _xx = config_item(target.full_path, top_level=False)
-                            # print (3.5, _toolname.log_full_path)
-
+                            _xx = config_item(target.full_path) #, top_level=False)
                             _xx.loadconfig(cfgloglevel, isimport=True)
                         else:
                             _msg = f"Could not find and import <{target.full_path}>"
                             raise ConfigError (_msg)
-
-                        # target = os.path.expanduser(line.split()[1])
-                        # if os.path.exists(target):
-                        #     _xx = config_item(target)
-                        #     _xx.loadconfig(cfgloglevel, isimport=True)
-                        # else:
-                        #     _msg = f"Could not find and import <{target}>"
-                        #     raise ConfigError (_msg)
                     else:                                                   # Is a param/key line
                         _line = line.split("#", maxsplit=1)[0].strip()
                         if len(_line) > 0:
                             out = cfgline.match(_line)
                             if out:
                                 key = out.group(1)
-                                rol = out.group(2)  # rest of line
+                                rol = out.group(2)              # rest of line
                                 if key == "LogFile":
                                     this_config_has_LogFile = True
                                 isint = False
@@ -598,24 +548,20 @@ class config_item():
                                         cfg[key] = rol          # add string to dict
                                 logging.debug (f"Loaded {key} = <{cfg[key]}>  ({type(cfg[key])})")
                             else: logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
-                    # print (5, _toolname.log_full_path)
-
 
         except Exception as e:
-            _msg = f"Failed while attempting to open/read config file <{config}>.\n  {e}"
+            _msg = f"Failed while attempting to open/process config file <{config}>.\n  {e}"
             raise ConfigError (_msg) from None
 
 
         # Operations only for finishing a top-level call
         if not isimport:
             if this_config_has_LogFile: #  and  not cfglogfile_wins:   # TODO rename to calllogfile
-                # print ("got here")
                 # When running in interactive / non-service mode, cfglogfile == None and 
                 # cfglogfile_wins ==True, which forces logging to the console, overriding
                 # and LogFile in the config file.
                 config_logfile  = getcfg("LogFile", None)
-                # _lf_dir = mungePath(config_logfile).dir
-                _lf = mungePath(config_logfile, self.config_dir) #, mkdir=True)
+                _lf = mungePath(config_logfile, self.config_dir)
                 mungePath(_lf.parent, mkdir=True)
                 _toolname.log_dir = _lf.parent
                 _toolname.log_file = _lf.name
@@ -627,77 +573,14 @@ class config_item():
             #     sys.exit()
 
 
-        # # Operations only for finishing a top-level call
-        # if not isimport:
-        #     if this_config_has_LogFile  and  not cfglogfile_wins:
-        #         config_logfile  = getcfg("LogFile", None)
-        #         if config_logfile is not None:
-        #             config_logfile = os.path.expanduser(os.path.expandvars(config_logfile))
-        #             PP_config_logfile = PurePath(config_logfile)
-        #             # print (PP_config_logfile)
-        #             if PP_config_logfile.is_absolute():
-        #                 Path(config_logfile).mkdir(parents=True, exist_ok=True)
-        #                 _toolname.log_dir = Path(config_logfile).parent
-        #                 _toolname.log_file = Path(config_logfile).name
-        #                 _toolname.log_full_path = Path(config_logfile)
-        #             else:
-        #                 _temp = PurePath(self.config_dir) / config_logfile
-        #                 _temp_parent = PurePath(_temp).parent
-        #                 Path(_temp_parent).mkdir(parents=True, exist_ok=True)
-        #                 _toolname.log_full_path = Path(_temp)
-        #                 _toolname.log_dir = _toolname.log_full_path.parent
-        #                 _toolname.log_file = _toolname.log_full_path.name
-
-
-
-        #                 # _logdir = (PurePath(_toolname.config_dir) / config_logfile).parent
-        #                 # Path(_logdir).mkdir()
-        #                 # _toolname.log_dir = Path(_logdir)
-        #                 # _toolname.log_full_path = self.log_dir / config_logfile
-        #                 # _toolname.log_file = _toolname.log_full_path.name
-        #             if not _toolname.log_dir.is_dir():
-        #                 logging.error(f"Specified logging directory <{_toolname.log_dir}> does not exist.  Aborting.")
-        #                 sys.exit()
-
-
-            # configname = os.path.expanduser(os.path.expandvars(configname))
-            # print (configname)
-            # PP_configname = PurePath(configname)
-
-            # # Check if configname is an absolute path, then use it after expanding user, env var, and symlinks
-            # if PP_configname.is_absolute():
-            #     # if Path(PP_configname.parent).is_dir():
-            #     #     config_dir = Path(PP_configname.parent).resolve()
-            #     if Path(PP_configname).is_file():
-            #         self.config_file = configname
-            #         self.config_dir = Path(PP_configname.parent).resolve()
-            #         self.config_full_path = Path(PP_configname).resolve()
-
-            # else:   # Name only or relative path case.  Search relative to std config dirs
-            #     for try_path in [appdirs.user_config_dir(_toolname.toolname), appdirs.site_config_dir(_toolname.toolname)]:
-            #         try_full_path = Path(try_path) / configname
-            #         print ("try ", try_full_path)
-            #         if try_full_path.is_file():
-            #             self.config_file = configname
-            #             self.config_dir = Path(try_path)
-            #             self.config_full_path = try_full_path
-            #             break
-            #     if self.config_dir == None:
-            #         print ("config not found")
-
-
-
-
-
-                    # if not os.path.isabs(config_logfile):
-                        # config_logfile = os.path.join(PROGDIR, config_logfile)
             logger = logging.getLogger()
             # if _toolname.log_full_path != _current_logfile:
             if not cfglogfile_wins  and  (_toolname.log_full_path != _current_logfile):
-                # print ("got here too")
-                if _toolname.log_full_path is None:  # TODO test this.  comment out LogFile
-                    logging.error("Changing the LogFile from a real file to None (console) is not supported.  Aborting.")
-                    sys.exit()
+                # This code only runs if the LogFile in the config is changed.
+                # If LogFile is commented out/deleted then the pre-existing _current_logfile remains in use.
+                # if _toolname.log_full_path is None:  # TODO test this.  comment out LogFile
+                #     logging.error("Changing the LogFile from a real file to None (console) is not supported.  Aborting.")
+                #     sys.exit()
                 logger.handlers.clear()
                 try:
                     log_format = __main__.FILE_LOGGING_FORMAT
@@ -726,7 +609,6 @@ class config_item():
                     logging.getLogger().setLevel(external_loglevel)     # Restore loglevel from that set by cfgloglevel
                     _current_loglevel = external_loglevel
 
-        # print (2, _toolname.log_full_path)
         return True
 
 

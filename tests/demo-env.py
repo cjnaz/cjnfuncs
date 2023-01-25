@@ -6,10 +6,6 @@
 #
 #  Chris Nelson, 2018-2023
 #
-#  2.0  220109  Restructured as a formal package
-#
-# Changes pending
-#   
 #==========================================================
 
 __version__ = "1.0"
