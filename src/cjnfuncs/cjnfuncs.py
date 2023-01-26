@@ -30,7 +30,7 @@ VERSION = "2.0"
 #
 #  Chris Nelson, 2018-2023
 #
-# V2.0  230122  Converted to installed package
+# V2.0  230122  Converted to installed package.  Renamed funcs3 to cjnfuncs.
 # V1.1  220412  Added timevalue and retime
 # V1.0  220203  V1.0 baseline
 # ...
@@ -59,6 +59,10 @@ import __main__
 FILE_LOGGING_FORMAT    = '{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}'
 CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message}'
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
+
+LOCKFILE_DEFAULT = "cjnfuncs_LOCK"
+LOCK_TIMEOUT     = 5                # seconds
+
 
 # Project globals
 cfg = {}
@@ -124,12 +128,36 @@ def setuplogging (loglevel, logfile=None):
         except:
             log_format = FILE_LOGGING_FORMAT
 
-        _lp = mungePath(logfile, _toolname.log_dir, mkdir=True)     # TODO shouldn't include the filename
-        _toolname.log_dir = _lp.parent
-        _toolname.log_file = _lp.name
-        _toolname.log_full_path = _lp.full_path
+        # if _toolname.log_dir == None:           # If called from loadconfig then _toolname.log_dir will have a value
+        #     _lfp = mungePath(logfile, _toolname.user_data_dir)
+        # else:
+        #     _lfp = mungePath(logfile, _toolname.log_dir)
+        _lfp = mungePath(logfile, _toolname.log_dir_base)
+        mungePath(_lfp.parent, mkdir=True)        # make the log_dir if not existing
+        _toolname.log_dir = _lfp.parent
+        _toolname.log_file = _lfp.name
+        _toolname.log_full_path = _lfp.full_path
+
+            # _toolname.log_file = _lf.name
+            # _toolname.log_full_path = _lf.full_path
+ 
+ 
+            # _toolname.log_dir = _toolname.user_data_dir
+            # mungePath(_toolname.log_dir, mkdir=True)
+
+        # _lfp = mungePath(logfile, _toolname.log_dir)
+        # _toolname.log_dir       = _lfp.parent
+        # _toolname.log_file      = _lfp.name
+        # _toolname.log_full_path = _lfp.full_path
 
         logging.basicConfig(level=loglevel, filename=_toolname.log_full_path, format=log_format, style='{')
+
+
+                # _lf = mungePath(config_logfile, self.config_dir)
+                # mungePath(_lf.parent, mkdir=True)
+                # _toolname.log_dir = _lf.parent
+                # _toolname.log_file = _lf.name
+                # _toolname.log_full_path = _lf.full_path
 
 
 #=====================================================================================
@@ -161,29 +189,50 @@ class set_toolname():
         self.site_config_dir    = Path(appdirs.site_config_dir(tname))  # /
         self.site_data_dir      = Path("/usr/share") / tname
 
-        if self.user_config_dir.exists()  or  self.user_data_dir.exists():
-            self.config_dir = self.user_config_dir
-            self.data_dir   = self.user_data_dir
-            self.state_dir  = self.user_data_dir    # Path(appdirs.user_state_dir (tname))
-            self.cache_dir  = self.user_data_dir    # Path(appdirs.user_cache_dir (tname)) / tname
-            self.log_dir    = self.state_dir        # Defaults here.  Will be changed in config class if a config exists.
-            self.env_defined= "user"
-        elif self.site_config_dir.exists()  or  self.site_data_dir.exists():
+        if self.site_config_dir.exists()  or  self.site_data_dir.exists():
             self.config_dir = self.site_data_dir
             self.data_dir   = self.site_data_dir
             self.state_dir  = self.site_data_dir
             self.cache_dir  = self.site_data_dir
-            self.log_dir    = self.site_data_dir    # Defaults here.  Will be changed in config class if a config exists.
+            self.log_dir_base = self.site_data_dir
+            # self.log_dir    = self.site_data_dir    # Defaults here.  Will be changed in config class if a config exists.
             self.env_defined= "site"
         else:
-            self.config_dir = None
-            self.data_dir   = None
-            self.state_dir  = None
-            self.cache_dir  = None
-            self.log_dir    = None
-            self.env_defined= False
+            self.config_dir = self.user_config_dir
+            self.data_dir   = self.user_data_dir
+            self.state_dir  = self.user_data_dir    # Path(appdirs.user_state_dir (tname))
+            self.cache_dir  = self.user_data_dir    # Path(appdirs.user_cache_dir (tname)) / tname
+            self.log_dir_base = self.user_data_dir
+            # self.log_dir    = self.state_dir        # Defaults here.  Will be changed in config class if a config exists.
+            self.env_defined= "user"
 
-        self.log_file = self.log_full_path = None
+
+        # if self.user_config_dir.exists()  or  self.user_data_dir.exists():
+        #     self.config_dir = self.user_config_dir
+        #     self.data_dir   = self.user_data_dir
+        #     self.state_dir  = self.user_data_dir    # Path(appdirs.user_state_dir (tname))
+        #     self.cache_dir  = self.user_data_dir    # Path(appdirs.user_cache_dir (tname)) / tname
+        #     self.log_dir_base = self.user_data_dir
+        #     # self.log_dir    = self.state_dir        # Defaults here.  Will be changed in config class if a config exists.
+        #     self.env_defined= "user"
+        # elif self.site_config_dir.exists()  or  self.site_data_dir.exists():
+        #     self.config_dir = self.site_data_dir
+        #     self.data_dir   = self.site_data_dir
+        #     self.state_dir  = self.site_data_dir
+        #     self.cache_dir  = self.site_data_dir
+        #     self.log_dir_base = self.site_data_dir
+        #     self.log_dir    = self.site_data_dir    # Defaults here.  Will be changed in config class if a config exists.
+        #     self.env_defined= "site"
+        # else:
+        #     self.config_dir = None
+        #     self.data_dir   = None
+        #     self.state_dir  = None
+        #     self.cache_dir  = None
+        #     self.log_dir_base = self.user_data_dir
+        #     self.log_dir    = None
+        #     self.env_defined= False
+
+        self.log_file = self.log_dir = self.log_full_path = None
 
         # self.log_file       = tname + ".log"
         # self.log_full_path  = None
@@ -203,6 +252,7 @@ class set_toolname():
         print ("data_dir:         ", self.data_dir)
         print ("state_dir:        ", self.state_dir)
         print ("cache_dir:        ", self.cache_dir)
+        print ("log_dir_base:     ", self.log_dir_base)
         print ("log_dir:          ", self.log_dir)
         print ("log_file:         ", self.log_file)
         print ("log_full_path:    ", self.log_full_path)
@@ -433,6 +483,8 @@ class config_item():
             self.config_dir         = config.parent
             self.config_full_path   = config.full_path
             self.config_timestamp   = 0
+            if _toolname.env_defined == "user":
+                _toolname.log_dir_base  = _toolname.config_dir
         else:
             _msg = f"Config file <{configname}> not found."
             raise ConfigError (_msg)
@@ -551,7 +603,9 @@ class config_item():
                                     else:
                                         cfg[key] = rol          # add string to dict
                                 logging.debug (f"Loaded {key} = <{cfg[key]}>  ({type(cfg[key])})")
-                            else: logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
+                            else: 
+                                line = line.replace('\n','')
+                                logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
 
         except Exception as e:
             _msg = f"Failed while attempting to open/process config file <{config}>.\n  {e}"
@@ -565,11 +619,12 @@ class config_item():
                 # cfglogfile_wins ==True, which forces logging to the console, overriding
                 # and LogFile in the config file.
                 config_logfile  = getcfg("LogFile", None)
-                _lf = mungePath(config_logfile, self.config_dir)
-                mungePath(_lf.parent, mkdir=True)
-                _toolname.log_dir = _lf.parent
-                _toolname.log_file = _lf.name
-                _toolname.log_full_path = _lf.full_path
+                # _lfp = mungePath(config_logfile, self.config_dir)
+                _lfp = mungePath(config_logfile, _toolname.log_dir_base)
+                mungePath(_lfp.parent, mkdir=True)
+                _toolname.log_dir = _lfp.parent
+                _toolname.log_file = _lfp.name
+                _toolname.log_full_path = _lfp.full_path
                 logging.debug (f"Log file set to  <{_toolname.log_full_path}>")
 
             # if not _toolname.log_dir.is_dir():      # TODO ???
@@ -722,8 +777,7 @@ def retime(time_sec, unitC):
 #=====================================================================================
 #=====================================================================================
 
-LOCKFILE_DEFAULT = "funcs3_LOCK"
-LOCK_TIMEOUT     = 5                # seconds
+# TODO support timevalues for timeout
 
 def requestlock(caller, lockfile=LOCKFILE_DEFAULT, timeout=LOCK_TIMEOUT):
     """Lock file request.

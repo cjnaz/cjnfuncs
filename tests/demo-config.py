@@ -9,7 +9,7 @@
 #==========================================================
 
 __version__ = "1.0"
-TOOLNAME =    "cjnfuncs_testcfg"
+TOOLNAME    = "cjnfuncs_testcfg"
 CONFIG_FILE = "demo_config.cfg"
 
 import argparse
@@ -21,6 +21,8 @@ parser.add_argument('Mode',
                     help="Test modes (1, 2, ...)")
 parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
                     help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory.")
+parser.add_argument('--cleanup', action='store_true',
+                    help="Remove test dirs/files.")
 args = parser.parse_args()
 
 
@@ -35,27 +37,26 @@ if args.config_file == "newuserconfig":
         ], overwrite=True )
     sys.exit()
 
-
-if args.config_file == "cleanup":
-    if os.path.exists(tool.user_config_dir):
-        print (f"Removing 1  {tool.user_config_dir}")
-        shutil.rmtree(tool.user_config_dir)
-    sys.exit()
-
-
-if tool.env_defined == False:
-    print ("No user or site setup found.  Run with <--config-file = newuserconfig> to set up the environment.")
+if args.cleanup:
+    if os.path.exists(tool.config_dir):
+        print (f"Removing 1  {tool.config_dir}")
+        shutil.rmtree(tool.config_dir)
     sys.exit()
 
 
 # Initial load
-config = config_item(CONFIG_FILE)
-print (f"\nLoad config {config.config_full_path}")
 try:
+    config = config_item(CONFIG_FILE)
+    print (f"\nLoad config {config.config_full_path}")
     config.loadconfig(cfgloglevel=10)
 except Exception as e:
-    print (f"loadconfig raised exception: \n  {e}")
+    print (f"No user or site setup found.  Run with <--config-file = newuserconfig> to set up the environment.\n  {e}")
     sys.exit()
+
+
+if args.Mode == '0':
+    print ("\n***** Show tool.log_* values (if LogFile in config) *****")
+    tool.dump()
 
 
 if args.Mode == '1':

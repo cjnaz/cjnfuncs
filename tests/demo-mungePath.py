@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-
+"""Demo/test for mungePath
+"""
 #==========================================================
 #
 #  Chris Nelson, 2018-2023
 #
-#   NOTE:  This demp file leaves a remnant dir /tmp/mungepath
+#   NOTE:  This demo file leaves a remnant dir: /tmp/mungepath
 #    
 #==========================================================
 
