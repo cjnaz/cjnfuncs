@@ -4,21 +4,16 @@
 #
 #  Chris Nelson, 2018-2023
 #
-#  2.0  220109  Restructured as a formal package
-#
-# Changes pending
-#   
+#   NOTE:  This demp file leaves a remnant dir /tmp/mungepath
+#    
 #==========================================================
 
 from cjnfuncs.cjnfuncs import *
 import shutil
 import os
 
-# import pathlib, __main__
-
 def touch (file_path):
     file_path.open('w').close()
-    # io.open(file_path, 'w').close()
 
 def remove_file (file_path):
     os.remove(file_path)

@@ -270,7 +270,7 @@ class mungePath():
         self.is_file = self.full_path.is_file()
 
 
-def deploy_files(files_list, overwrite=False):
+def deploy_files(files_list, overwrite=False, missing_ok= False):
     """
     Install setup directories and files from the module to the user/site config and data directories.
     Distribution files and directory trees are hosted in package_root/src/module_name/deployment_files/.
@@ -299,6 +299,8 @@ def deploy_files(files_list, overwrite=False):
 
     If overwrite == False (default) then only missing files will be copied.  If overwrite == True then all files will be overwritten 
     if they exist - data may be lost!
+
+    If missing_ok == True then a missing file or directory to copy is tolerated (non-fatal).  This feature is used for testing.
 
     If deployment fails then execution aborts.  This functions is intended for interactive use.
     """
@@ -400,6 +402,8 @@ def deploy_files(files_list, overwrite=False):
                     print (f"Deployed  {source.name:20} to  {target_dir.dir}")
                 else:
                     print (f"Directory <{target_dir.dir}> already exists.  Copytree skipped.")
+        elif missing_ok:
+            print (f"Can't deploy {source.name}.  Item not found.  Skipping.")
         else:
             print (f"Can't deploy {source.name}.  Item not found.  Aborting.")
             sys.exit(1)

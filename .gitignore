@@ -3,3 +3,4 @@
 build/
 log*.txt
 *.egg-info/
+cjn_demo_smtp.cfg
