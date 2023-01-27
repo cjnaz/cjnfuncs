@@ -9,7 +9,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /mnt/share/dev/packages/cjnfuncs/tests/xyz/file.txt
 parent       :  /mnt/share/dev/packages/cjnfuncs/tests/xyz
-dir          :  /mnt/share/dev/packages/cjnfuncs/tests/xyz
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -24,7 +23,6 @@ Given:
  mkdir     :  <False>
 full_path    :  .
 parent       :  .
-dir          :  .
 name         :  
 is_absolute  :  False
 is_relative  :  True
@@ -39,7 +37,6 @@ Given:
  mkdir     :  <False>
 full_path    :  file.txt
 parent       :  .
-dir          :  .
 name         :  file.txt
 is_absolute  :  False
 is_relative  :  True
@@ -54,7 +51,6 @@ Given:
  mkdir     :  <False>
 full_path    :  xyz/file.txt
 parent       :  xyz
-dir          :  xyz
 name         :  file.txt
 is_absolute  :  False
 is_relative  :  True
@@ -69,7 +65,6 @@ Given:
  mkdir     :  <False>
 full_path    :  ../file.txt
 parent       :  ..
-dir          :  ..
 name         :  file.txt
 is_absolute  :  False
 is_relative  :  True
@@ -84,7 +79,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /mnt/share/dev/packages/cjnfuncs/tests
 parent       :  /mnt/share/dev/packages/cjnfuncs
-dir          :  /mnt/share/dev/packages/cjnfuncs/tests
 name         :  tests
 is_absolute  :  True
 is_relative  :  False
@@ -99,7 +93,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /home/cjn
 parent       :  /home
-dir          :  /home/cjn
 name         :  cjn
 is_absolute  :  True
 is_relative  :  False
@@ -114,7 +107,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /home/cjn/xyz/file.txt
 parent       :  /home/cjn/xyz
-dir          :  /home/cjn/xyz
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -129,7 +121,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /home/cjn/xyz/file.txt
 parent       :  /home/cjn/xyz
-dir          :  /home/cjn/xyz
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -147,7 +138,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath
 parent       :  /tmp
-dir          :  /tmp/mungePath
 name         :  mungePath
 is_absolute  :  True
 is_relative  :  False
@@ -163,7 +153,6 @@ Given:
  mkdir     :  <True>
 full_path    :  /tmp/mungePath
 parent       :  /tmp
-dir          :  /tmp/mungePath
 name         :  mungePath
 is_absolute  :  True
 is_relative  :  False
@@ -178,7 +167,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath
 parent       :  /tmp
-dir          :  /tmp/mungePath
 name         :  mungePath
 is_absolute  :  True
 is_relative  :  False
@@ -193,7 +181,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/file.txt
 parent       :  /tmp/mungePath
-dir          :  /tmp/mungePath
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -208,7 +195,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/../mungePath/file.txt
 parent       :  /tmp/mungePath/../mungePath
-dir          :  /tmp/mungePath/../mungePath
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -223,7 +209,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/subdir/../file.txt
 parent       :  /tmp/mungePath/subdir/..
-dir          :  /tmp/mungePath/subdir/..
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -238,7 +223,6 @@ Given:
  mkdir     :  <True>
 full_path    :  /tmp/mungePath/subdir
 parent       :  /tmp/mungePath
-dir          :  /tmp/mungePath/subdir
 name         :  subdir
 is_absolute  :  True
 is_relative  :  False
@@ -253,7 +237,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/subdir/../file.txt
 parent       :  /tmp/mungePath/subdir/..
-dir          :  /tmp/mungePath/subdir/..
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -268,7 +251,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/subdir/../file.txt
 parent       :  /tmp/mungePath/subdir/..
-dir          :  /tmp/mungePath/subdir/..
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -286,7 +268,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/file.txt
 parent       :  /tmp/mungePath
-dir          :  /tmp/mungePath
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -301,7 +282,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/file.txt
 parent       :  /tmp/mungePath
-dir          :  /tmp/mungePath
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -316,7 +296,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/file.txt
 parent       :  /tmp/mungePath
-dir          :  /tmp/mungePath
 name         :  file.txt
 is_absolute  :  True
 is_relative  :  False
@@ -334,7 +313,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/subdir/symlink.txt
 parent       :  /tmp/mungePath/subdir
-dir          :  /tmp/mungePath/subdir
 name         :  symlink.txt
 is_absolute  :  True
 is_relative  :  False
@@ -349,7 +327,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/subdir/symlink.txt
 parent       :  /tmp/mungePath/subdir
-dir          :  /tmp/mungePath/subdir
 name         :  symlink.txt
 is_absolute  :  True
 is_relative  :  False
@@ -364,7 +341,6 @@ Given:
  mkdir     :  <False>
 full_path    :  /tmp/mungePath/symlinkdir
 parent       :  /tmp/mungePath
-dir          :  /tmp/mungePath/symlinkdir
 name         :  symlinkdir
 is_absolute  :  True
 is_relative  :  False
@@ -382,7 +358,6 @@ Given:
  mkdir     :  <True>
 full_path    :  /tmp/mungePath/subdir/testxxxx.txt
 parent       :  /tmp/mungePath/subdir
-dir          :  /tmp/mungePath/subdir/testxxxx.txt
 name         :  testxxxx.txt
 is_absolute  :  True
 is_relative  :  False

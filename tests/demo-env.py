@@ -26,22 +26,22 @@ tool = set_toolname(TOOLNAME)
 tool.dump()
 
 
-if args.config_file == "newuserconfig":
+if args.config_file == "pushuser":
     deploy_files([
-        { "source": CONFIG_FILE, "target_dir": "USER_CONFIG_DIR",                   "file_stat": 0o644, "dir_stat": 0o770},
-        { "source": CONFIG_FILE, "target_dir": "USER_CONFIG_DIR/subdir",            "file_stat": 0o644, "dir_stat": 0o777},
-        { "source": "testfile.txt", "target_dir": "$HOME/.config/junk2",            "file_stat": 0o600, "dir_stat": 0o707},
-        { "source": "testfile.txt", "target_dir": "USER_CONFIG_DIR"},
-        { "source": "test_dir", "target_dir": "USER_DATA_DIR/mydirs",               "file_stat": 0o633, "dir_stat": 0o770},
-        { "source": "test_dir/subdir/x4", "target_dir": "USER_CONFIG_DIR/mydirs",   "file_stat": 0o633, "dir_stat": 0o770},
+        { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o770},
+        { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR/subdir",     "file_stat": 0o641, "dir_stat": 0o777},
+        { "source": "testfile.txt",         "target_dir": "$HOME/.config/junk2",        "file_stat": 0o600, "dir_stat": 0o707},
+        { "source": "testfile.txt",         "target_dir": "USER_CONFIG_DIR"},
+        { "source": "test_dir",             "target_dir": "USER_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o720},
+        { "source": "test_dir/subdir/x4",   "target_dir": "USER_CONFIG_DIR/mydirs",     "file_stat": 0o612, "dir_stat": 0o711},
         # Uncomment these to force error traps
-        # { "source": "doesnotexist", "target_dir": "USER_CONFIG_DIR",                "file_stat": 0o633, "dir_stat": 0o770},
-        # { "source": "testfile.txt", "target_dir": "/no_perm/junkdir",               "file_stat": 0o633, "dir_stat": 0o770},
+        # { "source": "doesnotexist",       "target_dir": "USER_CONFIG_DIR",            "file_stat": 0o633, "dir_stat": 0o770},
+        # { "source": "testfile.txt",       "target_dir": "/no_perm/junkdir",           "file_stat": 0o633, "dir_stat": 0o770},
         ] , overwrite=True)
     print ("Inspect these created directories/files for proper content and permissions per the deploy_files call.")
     sys.exit()
 
-if args.config_file == "newsiteconfig":
+if args.config_file == "pushsite":
     deploy_files([
         { "source": CONFIG_FILE, "target_dir": "SITE_CONFIG_DIR",                   "file_stat": 0o644, "dir_stat": 0o777},
         { "source": "testfile.txt", "target_dir": "$HOME/.config/junk2",            "file_stat": 0o600, "dir_stat": 0o707},
@@ -77,5 +77,5 @@ if args.cleanup:
 
 
 if not mungePath(CONFIG_FILE, tool.config_dir).exists: # tool.env_defined == False:
-    print ("No user or site setup found.  Run with <--config-file = newuserconfig (or newsiteconfig)> to set up the environment.")
+    print ("No user or site setup found.  Run with <--config-file = pushuser (or pushsite)> to set up the environment.")
     sys.exit()

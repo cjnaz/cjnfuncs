@@ -29,7 +29,7 @@ args = parser.parse_args()
 tool = set_toolname(TOOLNAME)
 tool.dump()
 
-if args.config_file == "newuserconfig":
+if args.config_file == "pushuser":
     deploy_files([
         { "source": CONFIG_FILE,       "target_dir": "USER_CONFIG_DIR"},
         { "source": "additional.cfg",  "target_dir": "USER_CONFIG_DIR"},
@@ -50,13 +50,14 @@ try:
     print (f"\nLoad config {config.config_full_path}")
     config.loadconfig(cfgloglevel=10)
 except Exception as e:
-    print (f"No user or site setup found.  Run with <--config-file = newuserconfig> to set up the environment.\n  {e}")
+    print (f"No user or site setup found.  Run with <--config-file = pushuser> to set up the environment.\n  {e}")
     sys.exit()
 
 
 if args.Mode == '0':
     print ("\n***** Show tool.log_* values (if LogFile in config) *****")
     tool.dump()
+    config.dump()
 
 
 if args.Mode == '1':
@@ -97,10 +98,13 @@ if args.Mode == '3':
 
 if args.Mode == '4':
     print ("\n***** Co-loading an additional config *****")
+    config.dump()
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
     additional_config = config_item("additional.cfg")
+    additional_config.dump()
     additional_config.loadconfig(cfgloglevel=10)
+    additional_config.dump()
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
 

@@ -26,7 +26,7 @@ args = parser.parse_args()
 tool = set_toolname(TOOLNAME)
 tool.dump()
 
-if args.config_file == "newuserconfig":
+if args.config_file == "pushuser":
     deploy_files([
         { "source": CONFIG_FILE,        "target_dir": "USER_CONFIG_DIR" },
         { "source": "testfile.txt",     "target_dir": "USER_CONFIG_DIR" },
@@ -49,9 +49,9 @@ try:
     print (f"\nLoad config {config.config_full_path}")
     config.loadconfig(cfgloglevel=10)
 except Exception as e:
-    print ("No user or site setup found.  Run with <--config-file = newuserconfig> to set up the environment.")
+    print ("No user or site setup found.  Run with <--config-file = pushuser> to set up the environment.")
     print (f"Then customize mail params in {CONFIG_FILE} and creds_SMTP as needed.")
-    print ("To reload any individual file, delete the one then rerun with <--config-file = newuserconfig>")
+    print ("To reload any individual file, delete the one then rerun with <--config-file = pushuser>")
     print (f"  {e}")
     sys.exit()
 
@@ -69,6 +69,7 @@ snd_email (subj="2: body to EmailTo - not logged", body="To be, or not to be..."
 
 print ()
 snd_email (subj="3:  filename to EmailTo - not logged", filename=mungePath("testfile.txt", tool.config_dir).full_path, to="EmailTo")
+# snd_email (subj="3:  filename to EmailTo - not logged", filename="testfile.txt", to="EmailTo")
 
 print ()
 snd_email (subj="4:  htmlfile to EmailTo", htmlfile=mungePath("testfile.html", tool.config_dir).full_path, to="EmailTo", log=True)

@@ -41,14 +41,27 @@ print ()
 stat = requestlock ("try1")
 print (f"got back from 1st requestLock.  stat = {stat}")
 
-print ()
 stat = requestlock ("try2")
 print (f"got back from 2nd requestLock.  stat = {stat}")
 
-print ()
 stat = releaselock ()
 print (f"got back from 1st releaseLock.  stat = {stat}")
 
-print ()
 stat = releaselock ()
 print (f"got back from 2nd releaseLock.  stat = {stat}")
+
+
+print ()
+stat = requestlock ("abs path", lockfile= tool.data_dir / "myuserlock")
+print (f"got back from abs path requestLock.  stat = {stat}")
+
+stat = releaselock (lockfile= tool.data_dir / "myuserlock")
+print (f"got back from abs path releaseLock.  stat = {stat}")
+
+
+print ()
+stat = requestlock ("rel path", "myuserlock")
+print (f"got back from rel path requestLock.  stat = {stat}")
+
+stat = releaselock ("myuserlock")
+print (f"got back from rel path releaseLock.  stat = {stat}")

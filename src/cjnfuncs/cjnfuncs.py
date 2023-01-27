@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Funcs (gen 3)
-A collection of support functions for simplifying writing tool scripts.
+"""cjnfuncs - A collection of support functions for simplifying writing tool scripts.
 
 Functions:
     setuplogging             - Set up default logger (use if not using loadconfig)
-    set_toolname
+    mungePath                - Paths made easy and functional
+    set_toolname             - Set up base paths for site or user installations
     config class
         loadconfig
-    appdirs
-    mungePath
-    getcfg       - Config file handlers
+        getcfg               - Config file handlers
     timevalue, retime        - Handling time values used in config files
     requestlock, releaselock - Cross-tool/process safety handshake
     snd_notif, snd_email     - Send text and email messages
@@ -19,9 +17,6 @@ Functions:
             loadconfig, getcfg, cfg, timevalue, retime, setuplogging, logging, funcs3_min_version_check, funcs3_version, snd_notif, snd_email, requestlock, releaselock, ConfigError, SndEmailError
 Globals:
     cfg - Dictionary that contains the info read from the config file
-    PROGDIR - A string var that contains the full path to the main
-        program directory.  Useful for file IO when running the script
-        from a different pwd, such as when running from cron.
 """
 
 VERSION = "2.0"
@@ -42,26 +37,48 @@ VERSION = "2.0"
 
 import sys
 import time
-import os.path      # TODO converted to Path.open
+import os.path
 import io
 import smtplib
 from email.mime.text import MIMEText
 import logging
 import tempfile
+import inspect
+try:
+    from importlib.resources import files as ir_files
+except ImportError:
+    from importlib_resources import files as ir_files
 import re
-import appdirs
 from pathlib import Path, PurePath
 import shutil
 import __main__
+import appdirs
 
 # Configs / Constants
 # FILE_LOGGING_FORMAT    = '{asctime}/{module}/{funcName}/{levelname}:  {message}'    # Classic format
 FILE_LOGGING_FORMAT    = '{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}'
 CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message}'
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
+MAIN_MODULE_STEM       = Path(__main__.__file__).stem
+# print ("Main module: ", MAIN_MODULE_STEM)
+# print (MAIN_MODULE)
 
-LOCKFILE_DEFAULT = "cjnfuncs_LOCK"
-LOCK_TIMEOUT     = 5                # seconds
+# # from traceback import extract_stack
+# # print(extract_stack()[0])
+# # sys.exit()
+
+# stack = inspect.stack()
+# print (stack)
+# parentframe = stack[-1] #[0]
+# print (parentframe)
+# module = inspect.getmodule(parentframe)
+# print ("\n module.__name__:", module.__name__)
+
+
+# if module.__name__ == "__main__":   # Caller is a script file, not an installed module
+#     my_resources = mungePath(__main__.__file__).dir / "deployment_files"
+# else:                               # Caller is an installed module
+#     my_resources = ir_files(module) / "deployment_files" 
 
 
 # Project globals
@@ -114,11 +131,11 @@ def setuplogging (loglevel, logfile=None):
     
     Returns nothing
     """
-    global _toolname
+    global tool
 
     if logfile == None:
         try:
-            log_format = __main__.CONSOLE_LOGGING_FORMAT        # TODO is __main__ the correct way?
+            log_format = __main__.CONSOLE_LOGGING_FORMAT        # TODO is __main__ the correct way?  Check for module case
         except:
             log_format = CONSOLE_LOGGING_FORMAT
         logging.basicConfig(level=loglevel, format=log_format, style='{')
@@ -128,36 +145,13 @@ def setuplogging (loglevel, logfile=None):
         except:
             log_format = FILE_LOGGING_FORMAT
 
-        # if _toolname.log_dir == None:           # If called from loadconfig then _toolname.log_dir will have a value
-        #     _lfp = mungePath(logfile, _toolname.user_data_dir)
-        # else:
-        #     _lfp = mungePath(logfile, _toolname.log_dir)
-        _lfp = mungePath(logfile, _toolname.log_dir_base)
+        _lfp = mungePath(logfile, tool.log_dir_base)
         mungePath(_lfp.parent, mkdir=True)        # make the log_dir if not existing
-        _toolname.log_dir = _lfp.parent
-        _toolname.log_file = _lfp.name
-        _toolname.log_full_path = _lfp.full_path
+        tool.log_dir = _lfp.parent
+        tool.log_file = _lfp.name
+        tool.log_full_path = _lfp.full_path
 
-            # _toolname.log_file = _lf.name
-            # _toolname.log_full_path = _lf.full_path
- 
- 
-            # _toolname.log_dir = _toolname.user_data_dir
-            # mungePath(_toolname.log_dir, mkdir=True)
-
-        # _lfp = mungePath(logfile, _toolname.log_dir)
-        # _toolname.log_dir       = _lfp.parent
-        # _toolname.log_file      = _lfp.name
-        # _toolname.log_full_path = _lfp.full_path
-
-        logging.basicConfig(level=loglevel, filename=_toolname.log_full_path, format=log_format, style='{')
-
-
-                # _lf = mungePath(config_logfile, self.config_dir)
-                # mungePath(_lf.parent, mkdir=True)
-                # _toolname.log_dir = _lf.parent
-                # _toolname.log_file = _lf.name
-                # _toolname.log_full_path = _lf.full_path
+        logging.basicConfig(level=loglevel, filename=tool.log_full_path, format=log_format, style='{')
 
 
 #=====================================================================================
@@ -176,13 +170,12 @@ class set_toolname():
     Logging defaults to the site_state_directory / toolname / toolname.log for root user.
     Logging defaults to the user_state_directory / toolname / toolname.log for non-root user.
     See the config_item class regarding selection of user or site dirs and redirecting the log_dir.
-
-
     """
+
     def __init__(self, tname):
-        global _toolname        # handle used elsewhere in this module
-        _toolname = self
-        # print (os.geteuid())
+        global tool             # handle used elsewhere in this module
+        tool = self
+
         self.toolname  = tname
         self.user_config_dir    = Path(appdirs.user_config_dir(tname))
         self.user_data_dir      = Path(appdirs.user_data_dir(tname))
@@ -190,72 +183,41 @@ class set_toolname():
         self.site_data_dir      = Path("/usr/share") / tname
 
         if self.site_config_dir.exists()  or  self.site_data_dir.exists():
-            self.config_dir = self.site_data_dir
-            self.data_dir   = self.site_data_dir
-            self.state_dir  = self.site_data_dir
-            self.cache_dir  = self.site_data_dir
-            self.log_dir_base = self.site_data_dir
-            # self.log_dir    = self.site_data_dir    # Defaults here.  Will be changed in config class if a config exists.
+            self.config_dir     = self.site_data_dir
+            self.data_dir       = self.site_data_dir
+            self.state_dir      = self.site_data_dir
+            self.cache_dir      = self.site_data_dir
+            self.log_dir_base   = self.site_data_dir
             self.env_defined= "site"
         else:
-            self.config_dir = self.user_config_dir
-            self.data_dir   = self.user_data_dir
-            self.state_dir  = self.user_data_dir    # Path(appdirs.user_state_dir (tname))
-            self.cache_dir  = self.user_data_dir    # Path(appdirs.user_cache_dir (tname)) / tname
-            self.log_dir_base = self.user_data_dir
-            # self.log_dir    = self.state_dir        # Defaults here.  Will be changed in config class if a config exists.
+            self.config_dir     = self.user_config_dir
+            self.data_dir       = self.user_data_dir
+            self.state_dir      = self.user_data_dir    # Overriding Path(appdirs.user_state_dir (tname))
+            self.cache_dir      = self.user_data_dir    # Overriding Path(appdirs.user_cache_dir (tname)) / tname
+            self.log_dir_base   = self.user_data_dir
             self.env_defined= "user"
-
-
-        # if self.user_config_dir.exists()  or  self.user_data_dir.exists():
-        #     self.config_dir = self.user_config_dir
-        #     self.data_dir   = self.user_data_dir
-        #     self.state_dir  = self.user_data_dir    # Path(appdirs.user_state_dir (tname))
-        #     self.cache_dir  = self.user_data_dir    # Path(appdirs.user_cache_dir (tname)) / tname
-        #     self.log_dir_base = self.user_data_dir
-        #     # self.log_dir    = self.state_dir        # Defaults here.  Will be changed in config class if a config exists.
-        #     self.env_defined= "user"
-        # elif self.site_config_dir.exists()  or  self.site_data_dir.exists():
-        #     self.config_dir = self.site_data_dir
-        #     self.data_dir   = self.site_data_dir
-        #     self.state_dir  = self.site_data_dir
-        #     self.cache_dir  = self.site_data_dir
-        #     self.log_dir_base = self.site_data_dir
-        #     self.log_dir    = self.site_data_dir    # Defaults here.  Will be changed in config class if a config exists.
-        #     self.env_defined= "site"
-        # else:
-        #     self.config_dir = None
-        #     self.data_dir   = None
-        #     self.state_dir  = None
-        #     self.cache_dir  = None
-        #     self.log_dir_base = self.user_data_dir
-        #     self.log_dir    = None
-        #     self.env_defined= False
 
         self.log_file = self.log_dir = self.log_full_path = None
 
-        # self.log_file       = tname + ".log"
-        # self.log_full_path  = None
-        # if self.log_dir is not None:
-        #     self.log_full_path = self.log_dir / self.log_file
 
     def dump(self):
-        print (f"\nWorking directories for toolname <{self.toolname}>:")
-        print ("user_config_dir:  ", self.user_config_dir)
-        print ("user_data_dir:    ", self.user_data_dir)
-        print ("site_config_dir:  ", self.site_config_dir)
-        print ("site_data_dir:    ", self.site_data_dir)
-        print ("env_defined:      ", self.env_defined)
+        print (f"\nStats for set_toolname <{self.toolname}>:")
+        print (".toolname          ", self.toolname)
+        print (".user_config_dir   ", self.user_config_dir)
+        print (".user_data_dir     ", self.user_data_dir)
+        print (".site_config_dir   ", self.site_config_dir)
+        print (".site_data_dir     ", self.site_data_dir)
+        print (".env_defined       ", self.env_defined)
 
         print (f"Based on found user or site dirs:")
-        print ("config_dir:       ", self.config_dir)
-        print ("data_dir:         ", self.data_dir)
-        print ("state_dir:        ", self.state_dir)
-        print ("cache_dir:        ", self.cache_dir)
-        print ("log_dir_base:     ", self.log_dir_base)
-        print ("log_dir:          ", self.log_dir)
-        print ("log_file:         ", self.log_file)
-        print ("log_full_path:    ", self.log_full_path)
+        print (".config_dir        ", self.config_dir)
+        print (".data_dir          ", self.data_dir)
+        print (".state_dir         ", self.state_dir)
+        print (".cache_dir         ", self.cache_dir)
+        print (".log_dir_base      ", self.log_dir_base)
+        print (".log_dir           ", self.log_dir)
+        print (".log_file          ", self.log_file)
+        print (".log_full_path     ", self.log_full_path)
 
 
 
@@ -274,8 +236,6 @@ class mungePath():
         Attributes
             .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
             .parent         Path        The directory above the .full_path
-            .dir            Path        If a file, the directory containing the .file (same as parent)
-                                        If a directory, same as .full_path
             .name           str         Just the name.suffix of the .full_path
             .is_absolute    Boolean     True if the .full_path starts from the filesystem root (isn't a relative path) 
             .is_relative    Boolean     Not .is_absolute
@@ -302,22 +262,38 @@ class mungePath():
                 Path(PP_in_path).mkdir(parents=True, exist_ok=True)
             except Exception as e:
                 raise FileExistsError (e)
-            self.parent = Path(PP_in_path.parent)
-            self.full_path = Path(PP_in_path)
-            self.dir =    self.full_path
-        else:
-            self.full_path = Path(PP_in_path)
-            self.dir =    Path(PP_in_path.parent)
-            self.parent = self.dir
+        #     self.parent = Path(PP_in_path.parent)
+        #     self.full_path = Path(PP_in_path)
+        #     self.dir =    self.full_path
+        # else:
+        #     self.full_path = Path(PP_in_path)
+        #     self.dir =    Path(PP_in_path.parent)
+        #     self.parent = self.dir
+
+        self.parent = Path(PP_in_path.parent)
+        self.full_path = Path(PP_in_path)
 
         self.name = self.full_path.name
         self.exists =  self.full_path.exists()
         self.is_absolute = self.full_path.is_absolute()
         self.is_relative = not self.is_absolute
         self.is_dir =  self.full_path.is_dir()
-        if self.is_dir:
-            self.dir = self.full_path
+        # if self.is_dir:
+        #     self.dir = self.full_path
         self.is_file = self.full_path.is_file()
+
+
+    def dump(self):
+        print (f"{'full_path'}    :  {self.full_path}")
+        print (f"{'parent'}       :  {self.parent}")
+        # print (f"{'dir'}          :  {self.dir}")
+        print (f"{'name'}         :  {self.name}")
+        print (f"{'is_absolute'}  :  {self.is_absolute}")
+        print (f"{'is_relative'}  :  {self.is_relative}")
+        print (f"{'exists'}       :  {self.exists}")
+        print (f"{'is_dir'}       :  {self.is_dir}")
+        print (f"{'is_file'}      :  {self.is_file}")
+
 
 
 def deploy_files(files_list, overwrite=False, missing_ok= False):
@@ -346,6 +322,8 @@ def deploy_files(files_list, overwrite=False, missing_ok= False):
 		USER_CONFIG_DIR, SITE_CONFIG_DIR
         USER_DATA_DIR, SITE_DATA_DIR
 		Also absolute paths
+        TODO - dir permissions only set at target_dir level and below.  Not set on parent dirs that were created.
+            Be careful setting the dir_stat on the config and data root dir
 
     If overwrite == False (default) then only missing files will be copied.  If overwrite == True then all files will be overwritten 
     if they exist - data may be lost!
@@ -355,14 +333,16 @@ def deploy_files(files_list, overwrite=False, missing_ok= False):
     If deployment fails then execution aborts.  This functions is intended for interactive use.
     """
 
+    global tool
+
     mapping = [
-        ["USER_CONFIG_DIR", _toolname.user_config_dir],
-        ["USER_DATA_DIR",   _toolname.user_data_dir],
-        ["SITE_CONFIG_DIR", _toolname.site_config_dir],
-        ["SITE_DATA_DIR",   _toolname.site_data_dir],
-        # ["DATA_DIR",        _toolname.data_dir],      No need to push files to these dirs, correct?
-        # ["STATE_DIR",       _toolname.state_dir],
-        # ["CACHE_DIR",       _toolname.cache_dir],
+        ["USER_CONFIG_DIR", tool.user_config_dir],
+        ["USER_DATA_DIR",   tool.user_data_dir],
+        ["SITE_CONFIG_DIR", tool.site_config_dir],
+        ["SITE_DATA_DIR",   tool.site_data_dir],
+        # ["DATA_DIR",        tool.data_dir],      No need to push files to these dirs, correct?
+        # ["STATE_DIR",       tool.state_dir],
+        # ["CACHE_DIR",       tool.cache_dir],
         ]
 
     def resolve_target(_targ, mkdir=False):
@@ -395,24 +375,18 @@ def deploy_files(files_list, overwrite=False, missing_ok= False):
                     os.makedirs(d)
                     if dir_stat:
                         os.chmod(d, dir_stat)
-                copytree(s, d)
+                copytree(s, d, file_stat=file_stat, dir_stat=dir_stat)
             else:
                 shutil.copy2(s, d)
                 if file_stat:
                     os.chmod(d, file_stat)
 
 
-    try:
-        from importlib.resources import files as ir_files
-    except ImportError:
-        from importlib_resources import files as ir_files
-    import inspect
-
     stack = inspect.stack()
     parentframe = stack[1][0]
     module = inspect.getmodule(parentframe)
     if module.__name__ == "__main__":   # Caller is a script file, not an installed module
-        my_resources = mungePath(__main__.__file__).dir / "deployment_files"
+        my_resources = mungePath(__main__.__file__).parent / "deployment_files"
     else:                               # Caller is an installed module
         my_resources = ir_files(module) / "deployment_files" 
 
@@ -421,37 +395,37 @@ def deploy_files(files_list, overwrite=False, missing_ok= False):
         if source.is_file:
             target_dir = resolve_target(item["target_dir"], mkdir=True)
             if "dir_stat" in item:
-                os.chmod(target_dir.dir, item["dir_stat"])
+                os.chmod(target_dir.full_path, item["dir_stat"])
 
             if not target_dir.is_dir:
-                print (f"Can't deploy {source.name}.  Cannot access target_dir <{target_dir.dir}>.  Aborting.")
-                sys.exit(1) # TODO raise
+                print (f"Can't deploy {source.name}.  Cannot access target_dir <{target_dir.parent}>.  Aborting.")
+                sys.exit(1)
 
-            if not mungePath(source.name, target_dir.dir).exists  or  overwrite:
+            if not mungePath(source.name, target_dir.full_path).exists  or  overwrite:
                 try:
-                    shutil.copy(source.full_path, target_dir.dir)
+                    shutil.copy(source.full_path, target_dir.full_path)
                     if "file_stat" in item:
-                        os.chmod(mungePath(source.name, target_dir.dir).full_path, item["file_stat"])
+                        os.chmod(mungePath(source.name, target_dir.full_path).full_path, item["file_stat"])
                 except Exception as e:
-                    print (f"File copy of <{source.name}> to <{target_dir.dir}> failed.  Aborting.\n  {e}")
+                    print (f"File copy of <{source.name}> to <{target_dir.full_path}> failed.  Aborting.\n  {e}")
                     sys.exit(1)
-                print (f"Deployed  {source.name:20} to  {target_dir.dir}")
+                print (f"Deployed  {source.name:20} to  {target_dir.full_path}")
             else:
-                print (f"File <{source.name}> already exists at <{target_dir.dir}>.  Skipped.")
+                print (f"File <{source.name}> already exists at <{target_dir.full_path}>.  Skipped.")
 
         elif source.is_dir:
                 if not resolve_target(item["target_dir"]).exists  or  overwrite:
                     target_dir = resolve_target(item["target_dir"], mkdir=True)
                     try:
                         if "dir_stat" in item:
-                            os.chmod(target_dir.dir, item["dir_stat"])
-                        copytree(source.dir, target_dir.full_path, file_stat=item.get("file_stat", None), dir_stat=item.get("dir_stat", None))
+                            os.chmod(target_dir.full_path, item["dir_stat"])
+                        copytree(source.full_path, target_dir.full_path, file_stat=item.get("file_stat", None), dir_stat=item.get("dir_stat", None))
                     except Exception as e:
                         print (f"Failed copying tree <{source.name}> to <{target_dir.full_path}>.  target_dir can't already exist.  Aborting.\n  {e}")
                         sys.exit(1)
-                    print (f"Deployed  {source.name:20} to  {target_dir.dir}")
+                    print (f"Deployed  {source.name:20} to  {target_dir.full_path}")
                 else:
-                    print (f"Directory <{target_dir.dir}> already exists.  Copytree skipped.")
+                    print (f"Directory <{target_dir.full_path}> already exists.  Copytree skipped.")
         elif missing_ok:
             print (f"Can't deploy {source.name}.  Item not found.  Skipping.")
         else:
@@ -472,25 +446,31 @@ _current_logfile  = None
 
 class config_item():
     def __init__(self, configname): #, top_level=True):
+        global tool
 
-        global _toolname
-        # self.config_dir = self.config_file = self.config_full_path = None
-
-        config = mungePath(configname, _toolname.config_dir)
-
+        config = mungePath(configname, tool.config_dir)
         if config.is_file:
             self.config_file        = config.name
             self.config_dir         = config.parent
             self.config_full_path   = config.full_path
             self.config_timestamp   = 0
-            if _toolname.env_defined == "user":
-                _toolname.log_dir_base  = _toolname.config_dir
+            if tool.env_defined == "user":
+                tool.log_dir_base  = tool.config_dir
         else:
             _msg = f"Config file <{configname}> not found."
             raise ConfigError (_msg)
 
 
-    def loadconfig(self, #cfgfile      = 'config.cfg',
+    def dump(self):
+        print (f"\nStats for config file <{self.config_file}>:")
+        print (".config_file         ", self.config_file)
+        print (".config_dir          ", self.config_dir)
+        print (".config_full_path    ", self.config_full_path)
+        print (".config_timestamp    ", self.config_timestamp)
+        print ("tool.log_base_dir    ", tool.log_dir_base)
+
+
+    def loadconfig(self,
             cfgloglevel         = DEFAULT_LOGGING_LEVEL,
             cfglogfile          = None,
             cfglogfile_wins     = False,
@@ -545,16 +525,9 @@ class config_item():
             self.config_timestamp = 0
 
         config = self.config_full_path
-        # if not os.path.isabs(config):
-        #     config = os.path.join(PROGDIR, config)
-
-        # if not os.path.exists(config):
-        #     _msg = f"Config file <{config}> not found."
-        #     raise ConfigError (_msg)
-
         try:
             if not isimport:        # Top level config file
-                current_timestamp = os.path.getmtime(self.config_full_path)
+                current_timestamp = self.config_full_path.stat().st_mtime
                 if self.config_timestamp == current_timestamp:
                     return False
 
@@ -619,37 +592,27 @@ class config_item():
                 # cfglogfile_wins ==True, which forces logging to the console, overriding
                 # and LogFile in the config file.
                 config_logfile  = getcfg("LogFile", None)
-                # _lfp = mungePath(config_logfile, self.config_dir)
-                _lfp = mungePath(config_logfile, _toolname.log_dir_base)
+                _lfp = mungePath(config_logfile, tool.log_dir_base)
                 mungePath(_lfp.parent, mkdir=True)
-                _toolname.log_dir = _lfp.parent
-                _toolname.log_file = _lfp.name
-                _toolname.log_full_path = _lfp.full_path
-                logging.debug (f"Log file set to  <{_toolname.log_full_path}>")
-
-            # if not _toolname.log_dir.is_dir():      # TODO ???
-            #     logging.error(f"Specified logging directory <{_toolname.log_dir}> does not exist.  Aborting.")
-            #     sys.exit()
-
+                tool.log_dir = _lfp.parent
+                tool.log_file = _lfp.name
+                tool.log_full_path = _lfp.full_path
+                logging.debug (f"Log file set to  <{tool.log_full_path}>")
 
             logger = logging.getLogger()
-            # if _toolname.log_full_path != _current_logfile:
-            if not cfglogfile_wins  and  (_toolname.log_full_path != _current_logfile):
-                # This code only runs if the LogFile in the config is changed.
+            if not cfglogfile_wins  and  (tool.log_full_path != _current_logfile):
+                # This code only runs if the LogFile in the config has changed.
                 # If LogFile is commented out/deleted then the pre-existing _current_logfile remains in use.
-                # if _toolname.log_full_path is None:  # TODO test this.  comment out LogFile
-                #     logging.error("Changing the LogFile from a real file to None (console) is not supported.  Aborting.")
-                #     sys.exit()
                 logger.handlers.clear()
                 try:
                     log_format = __main__.FILE_LOGGING_FORMAT
                 except:
                     log_format = FILE_LOGGING_FORMAT
-                handler = logging.FileHandler(_toolname.log_full_path, "a")
+                handler = logging.FileHandler(tool.log_full_path, "a")
                 handler.setFormatter(logging.Formatter(fmt=log_format, style='{'))
                 logger.addHandler(handler)
-                _current_logfile = _toolname.log_full_path
-                logging.info (f"Logging file changed to <{_toolname.log_full_path}>")
+                _current_logfile = tool.log_full_path
+                logging.info (f"Logging file changed to <{tool.log_full_path}>")
 
             if getcfg("DontEmail", False):
                 logging.info ('DontEmail is set - Emails and Notifications will NOT be sent')
@@ -777,14 +740,12 @@ def retime(time_sec, unitC):
 #=====================================================================================
 #=====================================================================================
 
-# TODO support timevalues for timeout
-
-def requestlock(caller, lockfile=LOCKFILE_DEFAULT, timeout=LOCK_TIMEOUT):
+def requestlock(caller, lockfile=MAIN_MODULE_STEM, timeout=5):
     """Lock file request.
 
     caller
         Info written to the lock file and displayed in any error messages
-    lockfile
+    lockfile  TODO relative to tempfile or abs.  lock filename defaults to the main module name
         Lock file name.  Various lock files may be used simultaneously
     timeout
         Default 5s
@@ -793,34 +754,35 @@ def requestlock(caller, lockfile=LOCKFILE_DEFAULT, timeout=LOCK_TIMEOUT):
         0:  Lock request successful
        -1:  Lock request failed.  Warning level log messages are generated.
     """
-    lock_file = os.path.join(tempfile.gettempdir(), lockfile)
+    lock_file = mungePath(lockfile, tempfile.gettempdir())
 
-    xx = time.time() + timeout
+    fail_time = time.time() + timeout
     while True:
-        if not os.path.exists(lock_file):
+        if not lock_file.exists:
             try:
-                with io.open(lock_file, 'w', encoding='utf8') as ofile:
+                mungePath(lock_file.parent, mkdir=True)     # Ensure directory path exists
+                with lock_file.full_path.open('w') as ofile:
                     ofile.write(f"Locked by <{caller}> at {time.asctime(time.localtime())}.")
-                    logging.debug (f"LOCKed by <{caller}> at {time.asctime(time.localtime())}.")
+                    logging.debug (f"<{lock_file.full_path}> locked by <{caller}> at {time.asctime(time.localtime())}.")
                 return 0
             except Exception as e:
-                logging.warning(f"Unable to create lock file <{lock_file}>\n  {e}")
+                logging.warning(f"Unable to create lock file <{lock_file.full_path}>\n  {e}")
                 return -1
         else:
-            if time.time() > xx:
+            if time.time() > fail_time:
                 break
         time.sleep(0.1)
 
     try:
-        with io.open(lock_file, encoding='utf8') as ifile:
+        with lock_file.full_path.open() as ifile:
             lockedBy = ifile.read()
-        logging.warning (f"Timed out waiting for lock file <{lock_file}> to be cleared.  {lockedBy}")
+        logging.warning (f"Timed out waiting for lock file <{lock_file.full_path}> to be cleared.  {lockedBy}")
     except Exception as e:
-        logging.warning (f"Timed out and unable to read existing lock file <{lock_file}>\n  {e}.")
+        logging.warning (f"Timed out and unable to read existing lock file <{lock_file.full_path}>\n  {e}.")
     return -1
 
 
-def releaselock(lockfile=LOCKFILE_DEFAULT):
+def releaselock(lockfile=MAIN_MODULE_STEM):
     """Lock file release.
 
     Any code can release a lock, even if that code didn't request the lock.
@@ -833,17 +795,17 @@ def releaselock(lockfile=LOCKFILE_DEFAULT):
         0:  Lock release successful (lock file deleted)
        -1:  Lock release failed.  Warning level log messages are generated.
     """
-    lock_file = os.path.join(tempfile.gettempdir(), lockfile)
-    if os.path.exists(lock_file):
+    lock_file = mungePath(lockfile, tempfile.gettempdir())
+    if lock_file.exists:
         try:
-            os.remove(lock_file)
+            lock_file.full_path.unlink()
         except Exception as e:
-            logging.warning (f"Unable to remove lock file <{lock_file}>\n  {e}.")
+            logging.warning (f"Unable to remove lock file <{lock_file.full_path}>\n  {e}.")
             return -1
-        logging.debug(f"Lock file removed: <{lock_file}>")
+        logging.debug(f"Lock file removed: <{lock_file.full_path}>")
         return 0
     else:
-        logging.warning(f"Attempted to remove lock file <{lock_file}> but the file does not exist.")
+        logging.warning(f"Attempted to remove lock file <{lock_file.full_path}> but the file does not exist.")
         return -1
 
 
@@ -899,10 +861,10 @@ def snd_email(subj='', body='', filename='', htmlfile='', to='', log=False):
         Email subject text
     body
         A string message to be sent
-    filename
+    filename    TODO no basepath.  Caller must be absolute.  Error trap is not absolute?
         A string full path to the file to be sent.  Default path is the PROGDIR.
         Absolute and relative paths from PROGDIR accepted.
-    htmlfile
+    htmlfile    TODO no basepath
         A string full path to an html formatted file to be sent.  Default path is the PROGDIR.
         Absolute and relative paths from PROGDIR accepted.
     to
@@ -929,12 +891,12 @@ def snd_email(subj='', body='', filename='', htmlfile='', to='', log=False):
     Raises SndEmailError on call errors and sendmail errors
     """
 
-    if getcfg('DontEmail', default=False):
-        if log:
-            logging.warning (f"Email NOT sent <{subj}>")
-        else:
-            logging.debug (f"Email NOT sent <{subj}>")
-        return
+    # if getcfg('DontEmail', default=False):
+    #     if log:
+    #         logging.warning (f"Email NOT sent <{subj}>")
+    #     else:
+    #         logging.debug (f"Email NOT sent <{subj}>")
+    #     return
 
     # Deal with what to send
     if body != '':
@@ -979,6 +941,13 @@ def snd_email(subj='', body='', filename='', htmlfile='', to='', log=False):
             raise SndEmailError (_msg)
 
     # Send the message
+    if getcfg('DontEmail', default=False):
+        if log:
+            logging.warning (f"Email NOT sent <{subj}>")
+        else:
+            logging.debug (f"Email NOT sent <{subj}>")
+        return
+
     try:
         msg = MIMEText(m_text, msg_type)
         msg['Subject'] = subj
