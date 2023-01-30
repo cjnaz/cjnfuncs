@@ -18,6 +18,8 @@ from cjnfuncs.cjnfuncs import *
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
                     help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory.")
+parser.add_argument('--setup-user', action='store_true',
+                    help=f"Install starter files in user space.")
 parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 args = parser.parse_args()
@@ -26,7 +28,7 @@ args = parser.parse_args()
 tool = set_toolname(TOOLNAME)
 tool.dump()
 
-if args.config_file == "pushuser":
+if args.setup_user: #config_file == "pushuser":
     deploy_files([
         { "source": CONFIG_FILE,        "target_dir": "USER_CONFIG_DIR" },
         { "source": "testfile.txt",     "target_dir": "USER_CONFIG_DIR" },
@@ -47,11 +49,11 @@ if args.cleanup:
 try:
     config = config_item(CONFIG_FILE)
     print (f"\nLoad config {config.config_full_path}")
-    config.loadconfig(cfgloglevel=10)
+    config.loadconfig(ldcfg_ll=10)
 except Exception as e:
-    print ("No user or site setup found.  Run with <--config-file = pushuser> to set up the environment.")
+    print ("No user or site setup found.  Run with <--setup-user> to set up the environment.")
     print (f"Then customize mail params in {CONFIG_FILE} and creds_SMTP as needed.")
-    print ("To reload any individual file, delete the one then rerun with <--config-file = pushuser>")
+    print ("To reload any individual file, delete the one then rerun with <--setup-user>")
     print (f"  {e}")
     sys.exit()
 

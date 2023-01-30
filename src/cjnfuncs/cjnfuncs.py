@@ -60,8 +60,7 @@ FILE_LOGGING_FORMAT    = '{asctime} {module:>15}.{funcName:20} {levelname:>8}:  
 CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message}'
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 MAIN_MODULE_STEM       = Path(__main__.__file__).stem
-# print ("Main module: ", MAIN_MODULE_STEM)
-# print (MAIN_MODULE)
+
 
 # # from traceback import extract_stack
 # # print(extract_stack()[0])
@@ -120,38 +119,52 @@ class SndEmailError(Error):
 #  Logging setup
 #=====================================================================================
 #=====================================================================================
-def setuplogging (loglevel, logfile=None):
-    """Set up logging.
 
-    loglevel
-        10(DEBUG), 20(INFO), 30(WARNING), 40(ERROR), 50(CRITICAL)
-    logfile
-        Default None logs to console.  Absolute path or relative path from the
-        main program directory may be specified.
-    
-    Returns nothing
-    """
-    global tool
+def setuplogging(call_logfile_wins=False, call_logfile=None, config_logfile=None):
+        # When running in interactive / non-service mode, call_logfile == None and 
+        # call_logfile_wins ==True, which forces logging to the console, overriding
+        # and LogFile in the config file.
 
-    if logfile == None:
-        try:
-            log_format = __main__.CONSOLE_LOGGING_FORMAT        # TODO is __main__ the correct way?  Check for module case
-        except:
-            log_format = CONSOLE_LOGGING_FORMAT
-        logging.basicConfig(level=loglevel, format=log_format, style='{')
-    else:
-        try:
-            log_format = __main__.FILE_LOGGING_FORMAT
-        except:
-            log_format = FILE_LOGGING_FORMAT
+    _lfp = "__console__" #None
+    if call_logfile_wins == False  and  config_logfile:
+        _lfp = mungePath(config_logfile, tool.log_dir_base)
 
-        _lfp = mungePath(logfile, tool.log_dir_base)
-        mungePath(_lfp.parent, mkdir=True)        # make the log_dir if not existing
-        tool.log_dir = _lfp.parent
-        tool.log_file = _lfp.name
-        tool.log_full_path = _lfp.full_path
+    if call_logfile_wins == True   and  call_logfile:
+        _lfp = mungePath(call_logfile, tool.log_dir_base)
+        
+    if _lfp != tool.log_full_path:
+        logger = logging.getLogger()
+        logger.handlers.clear()
 
-        logging.basicConfig(level=loglevel, filename=tool.log_full_path, format=log_format, style='{')
+        if _lfp == "__console__":
+            try:
+                log_format = logging.Formatter(__main__.CONSOLE_LOGGING_FORMAT, style='{')
+            except:
+                log_format = logging.Formatter(CONSOLE_LOGGING_FORMAT, style='{')
+            handler = logging.StreamHandler(sys.stdout)                             
+            handler.setLevel(logging.DEBUG) #loglevel)
+            handler.setFormatter(log_format)
+            logger.addHandler(handler)
+
+            tool.log_dir = None
+            tool.log_file = None
+            tool.log_full_path = "__console__"
+
+        else:
+            mungePath(_lfp.parent, mkdir=True)  # Force make the target dir
+            try:
+                log_format = logging.Formatter(__main__.FILE_LOGGING_FORMAT, style='{')
+            except:
+                log_format = logging.Formatter(FILE_LOGGING_FORMAT, style='{')
+            handler = logging.FileHandler(_lfp.full_path, "a") #, sys.stdout)                             
+            handler.setLevel(logging.DEBUG) # loglevel)
+            handler.setFormatter(log_format)
+            logger.addHandler(handler)
+        
+            tool.log_dir = _lfp.parent
+            tool.log_file = _lfp.name
+            tool.log_full_path = _lfp.full_path
+
 
 
 #=====================================================================================
@@ -183,7 +196,7 @@ class set_toolname():
         self.site_data_dir      = Path("/usr/share") / tname
 
         if self.site_config_dir.exists()  or  self.site_data_dir.exists():
-            self.config_dir     = self.site_data_dir
+            self.config_dir     = self.site_config_dir
             self.data_dir       = self.site_data_dir
             self.state_dir      = self.site_data_dir
             self.cache_dir      = self.site_data_dir
@@ -262,13 +275,6 @@ class mungePath():
                 Path(PP_in_path).mkdir(parents=True, exist_ok=True)
             except Exception as e:
                 raise FileExistsError (e)
-        #     self.parent = Path(PP_in_path.parent)
-        #     self.full_path = Path(PP_in_path)
-        #     self.dir =    self.full_path
-        # else:
-        #     self.full_path = Path(PP_in_path)
-        #     self.dir =    Path(PP_in_path.parent)
-        #     self.parent = self.dir
 
         self.parent = Path(PP_in_path.parent)
         self.full_path = Path(PP_in_path)
@@ -278,8 +284,6 @@ class mungePath():
         self.is_absolute = self.full_path.is_absolute()
         self.is_relative = not self.is_absolute
         self.is_dir =  self.full_path.is_dir()
-        # if self.is_dir:
-        #     self.dir = self.full_path
         self.is_file = self.full_path.is_file()
 
 
@@ -468,12 +472,13 @@ class config_item():
         print (".config_full_path    ", self.config_full_path)
         print (".config_timestamp    ", self.config_timestamp)
         print ("tool.log_base_dir    ", tool.log_dir_base)
+        print ("tool.log_full_path   ", tool.log_full_path)
 
 
     def loadconfig(self,
-            cfgloglevel         = DEFAULT_LOGGING_LEVEL,
-            cfglogfile          = None,
-            cfglogfile_wins     = False,
+            ldcfg_ll         = DEFAULT_LOGGING_LEVEL,
+            call_logfile        = None,
+            call_logfile_wins   = False,
             flush_on_reload     = False,
             force_flush_reload  = False,
             isimport            = False):
@@ -484,12 +489,12 @@ class config_item():
         cfgfile
             Default is 'config.cfg' in the program directory.  Absolute path or relative path from
             the main program directory may be specified.
-        cfgloglevel
+        ldcfg_ll
             Sets logging level during config file loading. Default is 30(WARNING).
-        cfglogfile
+        call_logfile
             Log file to open - optional
-        cfglogfile_wins
-            cfglogfile overrides any LogFile specified in the config file
+        call_logfile_wins
+            call_logfile overrides any LogFile specified in the config file
         flush_on_reload
             If the config file will be reloaded (due to being changed) then clean out cfg first
         force_flush_reload
@@ -508,18 +513,18 @@ class config_item():
         global _current_logfile
 
         this_config_has_LogFile = False
-        
-        # Initial logging will go to the console if no cfglogfile is specified on the initial loadconfig call.
+
+        # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
         if _current_loglevel is None:
-            setuplogging(cfgloglevel, logfile=cfglogfile)
-            _current_loglevel = cfgloglevel
-            _current_logfile  = cfglogfile
+            setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins)
+            _current_loglevel = ldcfg_ll
+            _current_logfile  = call_logfile
         
         external_loglevel = logging.getLogger().level           # Save externally set log level for later restore
 
         if force_flush_reload:
-            logging.getLogger().setLevel(cfgloglevel)           # logging within loadconfig is always done at cfgloglevel
-            _current_loglevel = cfgloglevel
+            logging.getLogger().setLevel(ldcfg_ll)           # logging within loadconfig is always done at ldcfg_ll
+            _current_loglevel = ldcfg_ll
             logging.debug("cfg dictionary flushed and forced reloaded (force_flush_reload)")
             cfg.clear()
             self.config_timestamp = 0
@@ -533,8 +538,8 @@ class config_item():
 
                 # Initial load call, or config file has changed.  Do (re)load.
                 self.config_timestamp = current_timestamp
-                logging.getLogger().setLevel(cfgloglevel)   # Set logging level for remainder of loadconfig call
-                _current_loglevel = cfgloglevel
+                logging.getLogger().setLevel(ldcfg_ll)   # Set logging level for remainder of loadconfig call
+                _current_loglevel = ldcfg_ll
 
                 if flush_on_reload:
                     cfg.clear()
@@ -549,7 +554,7 @@ class config_item():
                         target = mungePath(line.split()[1], self.config_dir)
                         if target.is_file:
                             _xx = config_item(target.full_path) #, top_level=False)
-                            _xx.loadconfig(cfgloglevel, isimport=True)
+                            _xx.loadconfig(ldcfg_ll, isimport=True)
                         else:
                             _msg = f"Could not find and import <{target.full_path}>"
                             raise ConfigError (_msg)
@@ -587,32 +592,7 @@ class config_item():
 
         # Operations only for finishing a top-level call
         if not isimport:
-            if this_config_has_LogFile: #  and  not cfglogfile_wins:   # TODO rename to calllogfile
-                # When running in interactive / non-service mode, cfglogfile == None and 
-                # cfglogfile_wins ==True, which forces logging to the console, overriding
-                # and LogFile in the config file.
-                config_logfile  = getcfg("LogFile", None)
-                _lfp = mungePath(config_logfile, tool.log_dir_base)
-                mungePath(_lfp.parent, mkdir=True)
-                tool.log_dir = _lfp.parent
-                tool.log_file = _lfp.name
-                tool.log_full_path = _lfp.full_path
-                logging.debug (f"Log file set to  <{tool.log_full_path}>")
-
-            logger = logging.getLogger()
-            if not cfglogfile_wins  and  (tool.log_full_path != _current_logfile):
-                # This code only runs if the LogFile in the config has changed.
-                # If LogFile is commented out/deleted then the pre-existing _current_logfile remains in use.
-                logger.handlers.clear()
-                try:
-                    log_format = __main__.FILE_LOGGING_FORMAT
-                except:
-                    log_format = FILE_LOGGING_FORMAT
-                handler = logging.FileHandler(tool.log_full_path, "a")
-                handler.setFormatter(logging.Formatter(fmt=log_format, style='{'))
-                logger.addHandler(handler)
-                _current_logfile = tool.log_full_path
-                logging.info (f"Logging file changed to <{tool.log_full_path}>")
+            setuplogging(config_logfile=getcfg("LogFile", None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins)
 
             if getcfg("DontEmail", False):
                 logging.info ('DontEmail is set - Emails and Notifications will NOT be sent')
@@ -623,13 +603,19 @@ class config_item():
             if config_loglevel is not None:
                 if config_loglevel != _current_loglevel:
                     logging.info (f"Logging level changed to <{config_loglevel}> from config file")
-                    logging.getLogger().setLevel(config_loglevel)       # Restore loglevel from that set by cfgloglevel
+                    logging.getLogger().setLevel(config_loglevel)       # Restore loglevel from that set by ldcfg_ll
                     _current_loglevel = config_loglevel
+
+            elif external_loglevel != _current_loglevel:
+                logging.info (f"Logging level changed to <{external_loglevel}> from main script")
+                logging.getLogger().setLevel(external_loglevel)     # Restore loglevel from that set by ldcfg_ll
+                _current_loglevel = external_loglevel
+
             else:
-                if external_loglevel != _current_loglevel:
-                    logging.info (f"Logging level changed to <{external_loglevel}> from main script")
-                    logging.getLogger().setLevel(external_loglevel)     # Restore loglevel from that set by cfgloglevel
-                    _current_loglevel = external_loglevel
+                logging.info (f"Logging level changed to <{DEFAULT_LOGGING_LEVEL}>")
+                logging.getLogger().setLevel(DEFAULT_LOGGING_LEVEL)     # Restore loglevel from that set by ldcfg_ll
+                _current_loglevel = DEFAULT_LOGGING_LEVEL
+                
 
         return True
 

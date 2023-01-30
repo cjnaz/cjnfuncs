@@ -9,9 +9,9 @@
 #    
 #==========================================================
 
-from cjnfuncs.cjnfuncs import *
 import shutil
 import os
+from cjnfuncs.cjnfuncs import *
 
 def touch (file_path):
     file_path.open('w').close()

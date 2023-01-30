@@ -15,6 +15,7 @@ LOGFILE     = None  #"testlock.log"
 import argparse
 from cjnfuncs.cjnfuncs import *
 
+
 tool = set_toolname(TOOLNAME)
 tool.dump()
 
@@ -33,7 +34,7 @@ if args.cleanup:
 
 
 print ("\nShows logfile captured in tool class after setuplogging")
-setuplogging(loglevel=10, logfile=args.log_file)
+setuplogging()
 tool.dump()
 
 

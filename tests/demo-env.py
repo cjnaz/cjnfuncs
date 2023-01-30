@@ -15,9 +15,14 @@ CONFIG_FILE = "demo_env.cfg"
 import argparse
 from cjnfuncs.cjnfuncs import *
 
+
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
                     help=f"Path to the config file (Default <{CONFIG_FILE})> in user/site config directory.")
+parser.add_argument('--setup-user', action='store_true',
+                    help=f"Install starter files in user space.")
+parser.add_argument('--setup-site', action='store_true',
+                    help=f"Install starter files in site space.")
 parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 args = parser.parse_args()
@@ -26,7 +31,7 @@ tool = set_toolname(TOOLNAME)
 tool.dump()
 
 
-if args.config_file == "pushuser":
+if args.setup_user: #config_file == "pushuser":
     deploy_files([
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o770},
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR/subdir",     "file_stat": 0o641, "dir_stat": 0o777},
@@ -41,7 +46,7 @@ if args.config_file == "pushuser":
     print ("Inspect these created directories/files for proper content and permissions per the deploy_files call.")
     sys.exit()
 
-if args.config_file == "pushsite":
+if args.setup_site: #config_file == "pushsite":
     deploy_files([
         { "source": CONFIG_FILE, "target_dir": "SITE_CONFIG_DIR",                   "file_stat": 0o644, "dir_stat": 0o777},
         { "source": "testfile.txt", "target_dir": "$HOME/.config/junk2",            "file_stat": 0o600, "dir_stat": 0o707},
