@@ -485,7 +485,8 @@ class config_item():
             call_logfile_wins   = False,
             flush_on_reload     = False,
             force_flush_reload  = False,
-            isimport            = False):
+            isimport            = False,
+            tolerate_missing    = False):
         """Read config file into dictionary cfg, and set up logging.
         
         See README.md loadconfig documentation for important usage details.  Don't call setuplogging if using loadconfig.
@@ -505,18 +506,23 @@ class config_item():
             Forces cfg to be cleaned out and the config file to be reloaded
         isimport
             Internally set True when handling imports.  Not used by top-level scripts.
+        tolerate_missing
+            Used in service loop, don't raise ConfigError if the config file is inaccessible
 
-        Returns True if cfg has been (re)loaded, and False if not reloaded, so that the
-        caller can do processing only if the cfg is freshly loaded.
-
-        A ConfigError is raised if there are file access or parsing issues.
+        Returns 1 if the config files WAS reloaded
+        Returns 0 if the config file was NOT reloaded
+        If the config file cannot be accessed
+            if tolerate_missing == False (default), then raises ConfigError
+            if tolerate_missing == True, then returns -1
+        A ConfigError is raised if there are parsing issues
+        A ConfigError is also raised if an imported config file cannot be loaded (non-existent)
         """
 
         global cfg
         global _current_loglevel
         global _current_logfile
 
-        # this_config_has_LogFile = False Hello
+        CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
 
         # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
         if _current_loglevel is None:
@@ -524,22 +530,46 @@ class config_item():
             _current_loglevel = ldcfg_ll
             _current_logfile  = call_logfile
         
-        external_loglevel = logging.getLogger().level           # Save externally set log level for later restore
-        # print (f"Incoming logging level: {external_loglevel}")
+        config = self.config_full_path
+
+        # Save externally set log level for later restore
+        external_loglevel = logging.getLogger().level
+        # print (f"ld cfg {config}")
+        # if not config.exists():
+        #     if tolerate_missing:
+        #         logging.getLogger().setLevel(ldcfg_ll)           # logging within loadconfig is always done at ldcfg_ll
+        #         _current_loglevel = ldcfg_ll
+        #         logging.info (f"Config file {config} is not currently accessible.  Skipping (re)load.")
+        #         return -1
+        #     else:
+        #         _msg = f"Could not find <{config}>."
+        #         raise ConfigError (_msg)
 
         if force_flush_reload:
             logging.getLogger().setLevel(ldcfg_ll)           # logging within loadconfig is always done at ldcfg_ll
             _current_loglevel = ldcfg_ll
-            logging.debug("cfg dictionary flushed and forced reloaded (force_flush_reload)")
+            logging.debug("cfg dictionary force flushed (force_flush_reload)")
             cfg.clear()
             self.config_timestamp = 0
 
-        config = self.config_full_path
         try:
-            if not isimport:        # Top level config file
+            if not isimport:        # Operations only on top level config file
+
+                if not config.exists():
+                    if tolerate_missing:
+                        logging.getLogger().setLevel(ldcfg_ll)           # logging within loadconfig is always done at ldcfg_ll
+                        _current_loglevel = ldcfg_ll
+                        logging.info (f"Config file  <{config}>  is not currently accessible.  Skipping (re)load.")
+                        return -1
+                    else:
+                        _msg = f"Could not find  <{config}>"
+                        raise ConfigError (_msg)
+
+                # Check if config file has changed.  If not then return 0
                 current_timestamp = self.config_full_path.stat().st_mtime
                 if self.config_timestamp == current_timestamp:
-                    return False
+                    return 0
+                    # return False
 
                 # Initial load call, or config file has changed.  Do (re)load.
                 self.config_timestamp = current_timestamp
@@ -547,31 +577,51 @@ class config_item():
                 _current_loglevel = ldcfg_ll
 
                 if flush_on_reload:
+                    logging.debug (f"cfg dictionary flushed due to changed config file (flush_on_reload)")
                     cfg.clear()
-                    logging.debug (f"cfg dictionary flushed and reloaded due to changed config file (flush_on_reload)")
 
-            logging.info (f"Loading {config}")
-            cfgline = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
-            with io.open(config, encoding='utf8') as ifile:
+            logging.info (f"Loading <{config}>")
+
+
+            # cfgline = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
+            # with io.open(config, encoding='utf8') as ifile:
+            with config.open() as ifile:
                 for line in ifile:
-                    if line.strip().lower().startswith("import"):           # Is an import line
+
+                    # Is an import line
+                    if line.strip().lower().startswith("import"):
                         line = line.split("#", maxsplit=1)[0].strip()
                         target = mungePath(line.split()[1], self.config_dir)
-                        if target.is_file:
-                            _xx = config_item(target.full_path) #, top_level=False)
-                            _xx.loadconfig(ldcfg_ll, isimport=True)
-                        else:
-                            _msg = f"Could not find and import <{target.full_path}>"
+                        try:
+                            imported_config = config_item(target.full_path)
+                            imported_config.loadconfig(ldcfg_ll, isimport=True)
+                        except Exception as e:
+                            _msg = f"Failed importing/processing config file  <{target.full_path}>"
+                            # print (_msg)
                             raise ConfigError (_msg)
-                    else:                                                   # Is a param/key line
+                            
+
+                        # if target.is_file:
+                        #     imported_config = config_item(target.full_path)
+                        #     rtn = imported_config.loadconfig(ldcfg_ll, isimport=True)
+                        #     if rtn == -1:                       # import of target failed
+                        #         return -1
+                        # else:
+                        #     if tolerate_missing:
+                        #         print (f"Could not find and import <{target.full_path}>")
+                        #         return -1
+                        #     else:
+                        #         _msg = f"Could not find and import <{target.full_path}>"
+                        #         raise ConfigError (_msg)
+                    
+                    # Regular, param/value line
+                    else:
                         _line = line.split("#", maxsplit=1)[0].strip()
                         if len(_line) > 0:
-                            out = cfgline.match(_line)
+                            out = CFGLINE.match(_line)
                             if out:
                                 key = out.group(1)
                                 rol = out.group(2)              # rest of line
-                                # if key == "LogFile":
-                                #     this_config_has_LogFile = True
                                 isint = False
                                 try:
                                     cfg[key] = int(rol)         # add int to dict
@@ -591,7 +641,7 @@ class config_item():
                                 logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
 
         except Exception as e:
-            _msg = f"Failed while attempting to open/process config file <{config}>.\n  {e}"
+            _msg = f"Failed opening/processing config file  <{config}>\n  {e}"
             raise ConfigError (_msg) from None
 
 
@@ -621,8 +671,8 @@ class config_item():
             #     logging.getLogger().setLevel(DEFAULT_LOGGING_LEVEL)     # Restore loglevel from that set by ldcfg_ll
             #     _current_loglevel = DEFAULT_LOGGING_LEVEL
                 
-
-        return True
+        return 1
+        # return True
 
 
 def getcfg(param, default="_nodefault"):

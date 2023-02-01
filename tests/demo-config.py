@@ -32,21 +32,23 @@ args = parser.parse_args()
 tool = set_toolname(TOOLNAME)
 print(tool.dump())
 
-if args.setup_user:
-    deploy_files([
-        { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
-        { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
-        { "source": "demo_config_T2.cfg",   "target_dir": "USER_CONFIG_DIR"},
-        { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
-        { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
-        ], overwrite=True )
-    sys.exit()
+# if args.setup_user:
+#     deploy_files([
+#         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
+#         { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
+#         { "source": "demo_config_T2.cfg",   "target_dir": "USER_CONFIG_DIR"},
+#         { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
+#         { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
+#         ], overwrite=True )
+#     sys.exit()
 
 if args.cleanup:
     if os.path.exists(tool.config_dir):
         print (f"Removing 1  {tool.config_dir}")
         shutil.rmtree(tool.config_dir)
     sys.exit()
+
+
 
 def remove_file (file_path):
     if os.path.exists(file_path):
@@ -79,6 +81,16 @@ def modify_configfile (cfg, key, value="", remove=False):
         cfgfile.write(cfg_temp)
 
     time.sleep(.1)  # Seems to be needed to ensure diff timestamps.  ???
+
+# if args.setup_user:
+# deploy_files([
+#     { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
+#     { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
+#     { "source": "demo_config_T2.cfg",   "target_dir": "USER_CONFIG_DIR"},
+#     { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
+#     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
+#     ], overwrite=True )
+#     # sys.exit()
 
 
 if args.Mode == '1':
@@ -203,7 +215,7 @@ if args.Mode == '2':
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
-    print ("\n----- T2.7:  No changes >>>>  Reloaded == False")
+    print ("\n----- T2.7:  No changes >>>>  NOT Reloaded")
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
@@ -252,6 +264,13 @@ if args.Mode == '2':
 
 
 # Initial load for following tests
+deploy_files([
+    { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
+    { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
+    { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
+    ], overwrite=True )
+    # sys.exit()
+
 try:
     config = config_item(CONFIG_FILE)
     print (f"\nLoad config {config.config_full_path}")
@@ -262,7 +281,7 @@ except Exception as e:
 
 
 if args.Mode == '3':
-    print ("\n***** Show tool.log_* values (if LogFile in config) *****")
+    print ("\n***** Show tool.log_* values (LogFile NOT in config) *****")
     print(tool.dump())
     print(config.dump())
 
@@ -294,6 +313,7 @@ if args.Mode == '6':
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
     print (f"Current logging level:      {logging.getLogger().level}")
+
 
 if args.Mode == '7':
     print ("\n***** Test unknown getcfg param with/without defaults *****")
@@ -366,3 +386,42 @@ if args.Mode == '12':
     print ("\n***** Test untrapped retime with invalid unitC *****")
     retime (12345, "y")     # ValueError raised
 
+
+if args.Mode == '13':
+    print ("\n***** Test missing config *****")
+
+    print (f"\n----- T13.1:  Missing config, tolerate_missing=False (default) >>>>  Exception")
+    remove_file(config.config_full_path)
+    try:
+        config.loadconfig(ldcfg_ll=10)
+    except Exception as e:
+        print (f"Config loading exception:\n  {e}")
+
+    print (f"\n----- T13.2:  Missing config, tolerate_missing=True >>>>  Returned -1")
+    print (f"Returned:  <{config.loadconfig(ldcfg_ll=10, tolerate_missing=True)}>")
+
+    print (f"\n----- T13.3:  Working nested import")
+    deploy_files([
+        { "source": "import_nest_top.cfg",  "target_dir": "USER_CONFIG_DIR"},
+        { "source": "import_nest_1.cfg",    "target_dir": "USER_CONFIG_DIR"},
+        { "source": "import_nest_2.cfg",    "target_dir": "USER_CONFIG_DIR"},
+        ], overwrite=True )
+    nest_cfg = mungePath("import_nest_top.cfg", tool.config_dir).full_path
+    xx = config_item(nest_cfg)
+    xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
+    
+    print (f"\n----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.")
+    remove_file(mungePath("import_nest_2.cfg", tool.config_dir).full_path)
+    try:
+        xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
+    except Exception as e:
+        print (f"Exception due to missing imported config file:\n  {e}")
+        # NOTE:  Failed importing/processing config file  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+        # rather than saying can't import/process nest_2
+    
+    print (f"\n----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.")
+    remove_file(mungePath("import_nest_1.cfg", tool.config_dir).full_path)
+    try:
+        xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
+    except Exception as e:
+        print (f"Exception due to missing imported config file:\n  {e}")
