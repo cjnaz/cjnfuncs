@@ -1,0 +1,211 @@
+
+Stats for set_toolname <cjnfuncs_testcfg>:
+.toolname         :  cjnfuncs_testcfg
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
+.site_data_dir    :  /usr/share/cjnfuncs_testcfg
+.env_defined      :  user
+Based on found user or site dirs:
+.config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/share/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.local/share/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.local/share/cjnfuncs_testcfg
+.log_dir          :  None
+.log_file         :  None
+.log_full_path    :  None
+
+
+***** Tests for ldcfg_ll, config LogLevel, flush_on_reload, force_flush_reload *****
+Deployed  demo_config_T2.cfg   to  /home/cjn/.config/cjnfuncs_testcfg
+
+----- T2.1:  Initial load.  Default logging level 30
+(Re)loaded             :  True
+Config file timestamp  :  1675230943.205197
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.2:  No config change >>>>  Not reloaded
+(Re)loaded             :  False
+Config file timestamp  :  1675230943.205197
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.3:  LogLevel=10, ldcfg_ll=10 to Debug >>>>  Logging DEBUG, INFO, and WARNING messages
+       cjnfuncs.loadconfig           -    DEBUG:  cfg dictionary flushed and reloaded due to changed config file (flush_on_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading /home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <10>  (<class 'int'>)
+(Re)loaded             :  True
+Config file timestamp  :  1675230943.219197
+Config LogLevel        :  10
+Current Logging level  :  10
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+    demo-config.print_stats          -    DEBUG:  Debug   level message
+
+----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No logging from loadconfig
+(Re)loaded             :  True
+Config file timestamp  :  1675230943.321197
+Config LogLevel        :  10
+Current Logging level  :  10
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+    demo-config.print_stats          -    DEBUG:  Debug   level message
+
+----- T2.5:  Config LogLevel = 30,  ldcfg_ll = 30 >>>>  Log only WARNING
+(Re)loaded             :  True
+Config file timestamp  :  1675230943.423197
+Config LogLevel        :  30
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.6:  Default 30 logging level, testvar changed >>>>  testvar new value
+(Re)loaded             :  True
+Config file timestamp  :  1675230943.6241968
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.7:  No changes >>>>  Reloaded == False
+(Re)loaded             :  False
+Config file timestamp  :  1675230943.6241968
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.8:  ldcfg_ll=10, flush_on_reload >>>>  No loadconfig logging
+(Re)loaded             :  False
+Config file timestamp  :  1675230943.6241968
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.9:  ldcfg_ll=10, force_flush_reload >>>>  Loadconfig logging
+       cjnfuncs.loadconfig           -    DEBUG:  cfg dictionary flushed and forced reloaded (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading /home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <30>
+(Re)loaded             :  True
+Config file timestamp  :  1675230943.6241968
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.10:  ldcfg_ll=Default(30), LogLevel=20, var2 added >>>>  Reloaded
+       cjnfuncs.loadconfig           -    DEBUG:  cfg dictionary flushed and forced reloaded (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading /home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded var2 = <Hello>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
+(Re)loaded             :  True
+Config file timestamp  :  1675230943.8291965
+Config LogLevel        :  20
+Current Logging level  :  20
+testvar                :  True  <class 'bool'>
+var2                   :  Hello
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+
+----- T2.11: LogLevel=40, force_flush_reload=False, var2 removed from config >>>>  var2 still defined, no logging
+       cjnfuncs.loadconfig           -     INFO:  Loading /home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <40>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <40>
+(Re)loaded             :  True
+Config file timestamp  :  1675230944.0331964
+Config LogLevel        :  40
+Current Logging level  :  40
+testvar                :  True  <class 'bool'>
+var2                   :  Hello
+Current log file       :  __console__
+
+----- T2.12: LogLevel=30, force_flush_reload=True >>>>  var2 gone
+       cjnfuncs.loadconfig           -    DEBUG:  cfg dictionary flushed and forced reloaded (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading /home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
+(Re)loaded             :  True
+Config file timestamp  :  1675230944.1351962
+Config LogLevel        :  30
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.13: Externally set log level = 20 (no config LogLevel)
+       cjnfuncs.loadconfig           -    DEBUG:  cfg dictionary flushed and forced reloaded (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading /home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <20>
+(Re)loaded             :  True
+Config file timestamp  :  1675230944.2371962
+Config LogLevel        :  None
+Current Logging level  :  20
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+
+----- T2.14: Externally set log level = 10
+       cjnfuncs.loadconfig           -    DEBUG:  cfg dictionary flushed and forced reloaded (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading /home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <10>
+(Re)loaded             :  True
+Config file timestamp  :  1675230944.2371962
+Config LogLevel        :  None
+Current Logging level  :  10
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+    demo-config.print_stats          -    DEBUG:  Debug   level message
+
+----- T2.15: Externally set log level = 10 with ldcfg_ll = default 30
+(Re)loaded             :  True
+Config file timestamp  :  1675230944.2371962
+Config LogLevel        :  None
+Current Logging level  :  10
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+    demo-config.print_stats          -    DEBUG:  Debug   level message

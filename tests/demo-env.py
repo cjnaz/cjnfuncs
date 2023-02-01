@@ -28,10 +28,10 @@ parser.add_argument('--cleanup', action='store_true',
 args = parser.parse_args()
 
 tool = set_toolname(TOOLNAME)
-tool.dump()
+print(tool.dump())
 
 
-if args.setup_user: #config_file == "pushuser":
+if args.setup_user:
     deploy_files([
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o770},
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR/subdir",     "file_stat": 0o641, "dir_stat": 0o777},
@@ -46,7 +46,7 @@ if args.setup_user: #config_file == "pushuser":
     print ("Inspect these created directories/files for proper content and permissions per the deploy_files call.")
     sys.exit()
 
-if args.setup_site: #config_file == "pushsite":
+if args.setup_site:
     deploy_files([
         { "source": CONFIG_FILE, "target_dir": "SITE_CONFIG_DIR",                   "file_stat": 0o644, "dir_stat": 0o777},
         { "source": "testfile.txt", "target_dir": "$HOME/.config/junk2",            "file_stat": 0o600, "dir_stat": 0o707},
@@ -81,6 +81,6 @@ if args.cleanup:
     sys.exit()
 
 
-if not mungePath(CONFIG_FILE, tool.config_dir).exists: # tool.env_defined == False:
-    print ("No user or site setup found.  Run with <--config-file = pushuser (or pushsite)> to set up the environment.")
+if not mungePath(CONFIG_FILE, tool.config_dir).exists:
+    print (f"No user or site setup found.  Run with <--setup-user> or <--setup-site> to set up the environment.")
     sys.exit()

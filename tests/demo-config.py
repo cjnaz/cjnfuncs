@@ -30,7 +30,7 @@ args = parser.parse_args()
 
 
 tool = set_toolname(TOOLNAME)
-tool.dump()
+print(tool.dump())
 
 if args.setup_user:
     deploy_files([
@@ -133,11 +133,13 @@ if args.Mode == '1':
     print ("\n----- T1.8:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (again)")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
+    print (tool.dump())
     logging.warning (f"T1.8 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.9:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
+    print (tool.dump())
     logging.warning (f"T1.9 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.10: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__")
@@ -153,13 +155,13 @@ if args.Mode == '2':
     print ("\n***** Tests for ldcfg_ll, config LogLevel, flush_on_reload, force_flush_reload *****")
 
     def print_stats ():
-        print (f"(Re)loaded:            {reloaded}")
-        print (f"Config file timestamp: {config_T2.config_timestamp}")
-        print (f"Config LogLevel:       {getcfg('LogLevel', 'None')}")
-        print (f"Current Logging level: {logging.getLogger().level}")
-        print (f"testvar:               {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
-        print (f"var2:                  {getcfg('var2', None)}")
-        print (f"Current log file:      {tool.log_full_path}")
+        print (f"(Re)loaded             :  {reloaded}")
+        print (f"Config file timestamp  :  {config_T2.config_timestamp}")
+        print (f"Config LogLevel        :  {getcfg('LogLevel', 'None')}")
+        print (f"Current Logging level  :  {logging.getLogger().level}")
+        print (f"testvar                :  {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
+        print (f"var2                   :  {getcfg('var2', None)}")
+        print (f"Current log file       :  {tool.log_full_path}")
         logging.warning ("Warning level message")
         logging.info    ("Info    level message")
         logging.debug   ("Debug   level message")
@@ -230,6 +232,22 @@ if args.Mode == '2':
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
+    print ("\n----- T2.13: Externally set log level = 20 (no config LogLevel)")
+    modify_configfile (config_T2, "LogLevel",   remove=True)
+    logging.getLogger().setLevel(20)
+    reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
+    print_stats()
+
+    print ("\n----- T2.14: Externally set log level = 10")
+    logging.getLogger().setLevel(10)
+    reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
+    print_stats()
+
+    print ("\n----- T2.15: Externally set log level = 10 with ldcfg_ll = default 30")
+    logging.getLogger().setLevel(10)
+    reloaded = config_T2.loadconfig(force_flush_reload=True)
+    print_stats()
+
     sys.exit()
 
 
@@ -245,8 +263,8 @@ except Exception as e:
 
 if args.Mode == '3':
     print ("\n***** Show tool.log_* values (if LogFile in config) *****")
-    tool.dump()
-    config.dump()
+    print(tool.dump())
+    print(config.dump())
 
 
 if args.Mode == '4':
@@ -266,16 +284,16 @@ if args.Mode == '5':
 
 if args.Mode == '6':
     print ("\n***** Co-loading an additional config *****")
-    config.dump()
+    print(config.dump())
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
     additional_config = config_item("additional.cfg")
-    additional_config.dump()
+    print(additional_config.dump())
     additional_config.loadconfig(ldcfg_ll=10)
-    additional_config.dump()
+    print(additional_config.dump())
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
-
+    print (f"Current logging level:      {logging.getLogger().level}")
 
 if args.Mode == '7':
     print ("\n***** Test unknown getcfg param with/without defaults *****")
@@ -292,24 +310,26 @@ if args.Mode == '8':
 
 
 if args.Mode == '9':
-    print ("\n***** Test flush_on_reload, force_flush_reload cases *****")
+    print ("\n***** Test flush_on_reload  and  force_flush_reload cases *****")
     cfg["dummy"] = True
-    print (f"var dummy in cfg: {getcfg('dummy', False)} (should be True)")
+    print (f"\n----- T9.1:  var dummy in cfg:  {getcfg('dummy', False)}  (should be True - Initial state)\n")
 
     config.loadconfig(flush_on_reload=True, ldcfg_ll=10)
-    print (f"var dummy in cfg: {getcfg('dummy', False)} (should be True because not reloaded)")
+    print (f"----- T9.2:  var dummy in cfg:  {getcfg('dummy', False)}  (should be True because not reloaded)\n")
 
     config.config_full_path.touch()
+    time.sleep(.1)  # Seems to be needed to ensure diff timestamps.  ???
     config.loadconfig(ldcfg_ll=10)
-    print (f"var dummy in cfg: {getcfg('dummy', False)} (should be True because not flushed on reload)")
+    print (f"----- T9.3:  var dummy in cfg:  {getcfg('dummy', False)}  (should be True because flush_on_reload == False)\n")
 
     config.config_full_path.touch()
+    time.sleep(.1)
     config.loadconfig(flush_on_reload=True, ldcfg_ll=10)
-    print (f"var dummy in cfg: {getcfg('dummy', False)} (should be False because flush_on_reload)")
+    print (f"----- T9.4:  var dummy in cfg:  {getcfg('dummy', False)}  (should be False because flush_on_reload == True)\n")
 
     cfg["dummy"] = True
     config.loadconfig(force_flush_reload=True, ldcfg_ll=10)
-    print (f"var dummy in cfg: {getcfg('dummy', False)} (should be False because force_flush_reload)")
+    print (f"----- T9.5:  var dummy in cfg:  {getcfg('dummy', False)}  (should be False because force_flush_reload == True)\n")
 
 
 def dump(xx):

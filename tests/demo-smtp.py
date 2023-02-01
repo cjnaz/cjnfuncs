@@ -26,7 +26,7 @@ args = parser.parse_args()
 
 
 tool = set_toolname(TOOLNAME)
-tool.dump()
+print(tool.dump())
 
 if args.setup_user: #config_file == "pushuser":
     deploy_files([

@@ -17,7 +17,7 @@ from cjnfuncs.cjnfuncs import *
 
 
 tool = set_toolname(TOOLNAME)
-tool.dump()
+print(tool.dump())
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--log-file', '-l', default=LOGFILE,
@@ -35,7 +35,7 @@ if args.cleanup:
 
 print ("\nShows logfile captured in tool class after setuplogging")
 setuplogging()
-tool.dump()
+print(tool.dump())
 
 
 print ()

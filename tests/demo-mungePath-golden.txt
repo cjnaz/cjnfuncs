@@ -16,6 +16,7 @@ exists       :  False
 is_dir       :  False
 is_file      :  False
 
+
 NOTE:  02 - Returns relative '.' (current directory)
 Given:
  in_path   :  <>
@@ -29,6 +30,7 @@ is_relative  :  True
 exists       :  True
 is_dir       :  True
 is_file      :  False
+
 
 NOTE:  03 - No base_path - returns relative to script dir - same dir
 Given:
@@ -44,6 +46,7 @@ exists       :  False
 is_dir       :  False
 is_file      :  False
 
+
 NOTE:  04 - No base_path - returns relative to script dir - below
 Given:
  in_path   :  <xyz/file.txt>
@@ -57,6 +60,7 @@ is_relative  :  True
 exists       :  False
 is_dir       :  False
 is_file      :  False
+
 
 NOTE:  05 - No base_path - returns relative to script dir - above
 Given:
@@ -72,6 +76,7 @@ exists       :  False
 is_dir       :  False
 is_file      :  False
 
+
 NOTE:  06 - Returns absolute full path to calling script dir
 Given:
  in_path   :  <>
@@ -85,6 +90,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  True
 is_file      :  False
+
 
 NOTE:  07 - User expanded
 Given:
@@ -100,6 +106,7 @@ exists       :  True
 is_dir       :  True
 is_file      :  False
 
+
 NOTE:  08 - Env vars expanded
 Given:
  in_path   :  <xyz/file.txt>
@@ -114,6 +121,7 @@ exists       :  False
 is_dir       :  False
 is_file      :  False
 
+
 NOTE:  09 - User expanded, An absolute in_path overrides the base_path (base_path not used)
 Given:
  in_path   :  <~/xyz/file.txt>
@@ -127,6 +135,7 @@ is_relative  :  False
 exists       :  False
 is_dir       :  False
 is_file      :  False
+
 
 
 ***** Using the base_path
@@ -144,6 +153,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  True
 is_file      :  False
+
 Exists, removed.
 
 NOTE:  11 - Make a work space, then create /tmp/mungePath/file.txt
@@ -160,6 +170,7 @@ exists       :  True
 is_dir       :  True
 is_file      :  False
 
+
 NOTE:  12 - /tmp/mungePath exists
 Given:
  in_path   :  <>
@@ -173,6 +184,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  True
 is_file      :  False
+
 
 NOTE:  13 - file.txt exists
 Given:
@@ -188,6 +200,7 @@ exists       :  True
 is_dir       :  False
 is_file      :  True
 
+
 NOTE:  14 - file.txt exists
 Given:
  in_path   :  <../mungePath/file.txt>
@@ -201,6 +214,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  False
 is_file      :  True
+
 
 NOTE:  15 - file.txt does NOT exist since referenced thru non-existent subdir
 Given:
@@ -216,6 +230,7 @@ exists       :  False
 is_dir       :  False
 is_file      :  False
 
+
 NOTE:  16 - Make subdir (trailing '/' doesn't matter)
 Given:
  in_path   :  <subdir/>
@@ -229,6 +244,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  True
 is_file      :  False
+
 
 NOTE:  17 - Now file.txt exists - referenced thru subdir
 Given:
@@ -244,6 +260,7 @@ exists       :  True
 is_dir       :  False
 is_file      :  True
 
+
 NOTE:  18 - Referenced thru different base_path
 Given:
  in_path   :  <../file.txt>
@@ -257,6 +274,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  False
 is_file      :  True
+
 
 
 ***** str, Path, and PurePath arguments types accepted
@@ -275,6 +293,7 @@ exists       :  True
 is_dir       :  False
 is_file      :  True
 
+
 NOTE:  20 - Accepts Path types
 Given:
  in_path   :  <file.txt>
@@ -289,6 +308,7 @@ exists       :  True
 is_dir       :  False
 is_file      :  True
 
+
 NOTE:  21 - Accepts PurePath types
 Given:
  in_path   :  <file.txt>
@@ -302,6 +322,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  False
 is_file      :  True
+
 
 
 ***** symlinks followed (not resolved)
@@ -320,6 +341,7 @@ exists       :  True
 is_dir       :  False
 is_file      :  True
 
+
 NOTE:  23 - symlink target file was removed
 Given:
  in_path   :  <subdir/symlink.txt>
@@ -334,6 +356,7 @@ exists       :  False
 is_dir       :  False
 is_file      :  False
 
+
 NOTE:  24 - symlink dir honored (symlink created earlier)
 Given:
  in_path   :  <symlinkdir>
@@ -347,6 +370,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  True
 is_file      :  False
+
 
 
 ***** mkdir=True makes the full path.  Don't inadvertently include a file part.
@@ -364,6 +388,7 @@ is_relative  :  False
 exists       :  True
 is_dir       :  True
 is_file      :  False
+
 
 NOTE:  26 - Exception raised due to trying to make a directory on top of an existing file
 Given:

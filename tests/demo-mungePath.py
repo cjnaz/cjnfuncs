@@ -32,7 +32,7 @@ def wrapper (in_path="", base_path="", mkdir=False, note=None):
         print ("NOTE: ", note)
     print (f"Given:\n in_path   :  <{in_path}>\n base_path :  <{base_path}>\n mkdir     :  <{mkdir}>")
     xx = mungePath(in_path=in_path, base_path=base_path, mkdir=mkdir)
-    xx.dump()
+    print(xx.dump())
     return xx
 
 print ("\n\n***** File paths relative to a base path")

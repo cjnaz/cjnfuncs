@@ -19,7 +19,7 @@ Globals:
     cfg - Dictionary that contains the info read from the config file
 """
 
-VERSION = "2.0"
+# VERSION = "2.0.2 X"
 
 #==========================================================
 #
@@ -214,24 +214,25 @@ class set_toolname():
 
 
     def dump(self):
-        print (f"\nStats for set_toolname <{self.toolname}>:")
-        print (".toolname          ", self.toolname)
-        print (".user_config_dir   ", self.user_config_dir)
-        print (".user_data_dir     ", self.user_data_dir)
-        print (".site_config_dir   ", self.site_config_dir)
-        print (".site_data_dir     ", self.site_data_dir)
-        print (".env_defined       ", self.env_defined)
+        stats = ""
+        stats +=  f"\nStats for set_toolname <{self.toolname}>:\n"
+        stats +=  f".toolname         :  {self.toolname}\n"
+        stats +=  f".user_config_dir  :  {self.user_config_dir}\n"
+        stats +=  f".user_data_dir    :  {self.user_data_dir}\n"
+        stats +=  f".site_config_dir  :  {self.site_config_dir}\n"
+        stats +=  f".site_data_dir    :  {self.site_data_dir}\n"
+        stats +=  f".env_defined      :  {self.env_defined}\n"
 
-        print (f"Based on found user or site dirs:")
-        print (".config_dir        ", self.config_dir)
-        print (".data_dir          ", self.data_dir)
-        print (".state_dir         ", self.state_dir)
-        print (".cache_dir         ", self.cache_dir)
-        print (".log_dir_base      ", self.log_dir_base)
-        print (".log_dir           ", self.log_dir)
-        print (".log_file          ", self.log_file)
-        print (".log_full_path     ", self.log_full_path)
-
+        stats +=  f"Based on found user or site dirs:\n"
+        stats +=  f".config_dir       :  {self.config_dir}\n"
+        stats +=  f".data_dir         :  {self.data_dir}\n"
+        stats +=  f".state_dir        :  {self.state_dir}\n"
+        stats +=  f".cache_dir        :  {self.cache_dir}\n"
+        stats +=  f".log_dir_base     :  {self.log_dir_base}\n"
+        stats +=  f".log_dir          :  {self.log_dir}\n"
+        stats +=  f".log_file         :  {self.log_file}\n"
+        stats +=  f".log_full_path    :  {self.log_full_path}\n"
+        return stats
 
 
 class mungePath():
@@ -288,16 +289,17 @@ class mungePath():
 
 
     def dump(self):
-        print (f"{'full_path'}    :  {self.full_path}")
-        print (f"{'parent'}       :  {self.parent}")
-        # print (f"{'dir'}          :  {self.dir}")
-        print (f"{'name'}         :  {self.name}")
-        print (f"{'is_absolute'}  :  {self.is_absolute}")
-        print (f"{'is_relative'}  :  {self.is_relative}")
-        print (f"{'exists'}       :  {self.exists}")
-        print (f"{'is_dir'}       :  {self.is_dir}")
-        print (f"{'is_file'}      :  {self.is_file}")
-
+        stats = ""
+        stats +=  f"{'full_path'}    :  {self.full_path}\n"
+        stats +=  f"{'parent'}       :  {self.parent}\n"
+        # stats +=  f"{'dir'}          :  {self.dir}\n"
+        stats +=  f"{'name'}         :  {self.name}\n"
+        stats +=  f"{'is_absolute'}  :  {self.is_absolute}\n"
+        stats +=  f"{'is_relative'}  :  {self.is_relative}\n"
+        stats +=  f"{'exists'}       :  {self.exists}\n"
+        stats +=  f"{'is_dir'}       :  {self.is_dir}\n"
+        stats +=  f"{'is_file'}      :  {self.is_file}\n"
+        return stats
 
 
 def deploy_files(files_list, overwrite=False, missing_ok= False):
@@ -466,13 +468,15 @@ class config_item():
 
 
     def dump(self):
-        print (f"\nStats for config file <{self.config_file}>:")
-        print (".config_file         ", self.config_file)
-        print (".config_dir          ", self.config_dir)
-        print (".config_full_path    ", self.config_full_path)
-        print (".config_timestamp    ", self.config_timestamp)
-        print ("tool.log_base_dir    ", tool.log_dir_base)
-        print ("tool.log_full_path   ", tool.log_full_path)
+        stats = ""
+        stats += f"\nStats for config file <{self.config_file}>:\n"
+        stats += f".config_file        :  {self.config_file}\n"
+        stats += f".config_dir         :  {self.config_dir}\n"
+        stats += f".config_full_path   :  {self.config_full_path}\n"
+        stats += f".config_timestamp   :  {self.config_timestamp}\n"
+        stats += f"tool.log_base_dir   :  {tool.log_dir_base}\n"
+        stats += f"tool.log_full_path  :  {tool.log_full_path}\n"
+        return stats
 
 
     def loadconfig(self,
@@ -512,7 +516,7 @@ class config_item():
         global _current_loglevel
         global _current_logfile
 
-        this_config_has_LogFile = False
+        # this_config_has_LogFile = False Hello
 
         # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
         if _current_loglevel is None:
@@ -521,6 +525,7 @@ class config_item():
             _current_logfile  = call_logfile
         
         external_loglevel = logging.getLogger().level           # Save externally set log level for later restore
+        # print (f"Incoming logging level: {external_loglevel}")
 
         if force_flush_reload:
             logging.getLogger().setLevel(ldcfg_ll)           # logging within loadconfig is always done at ldcfg_ll
@@ -565,8 +570,8 @@ class config_item():
                             if out:
                                 key = out.group(1)
                                 rol = out.group(2)              # rest of line
-                                if key == "LogFile":
-                                    this_config_has_LogFile = True
+                                # if key == "LogFile":
+                                #     this_config_has_LogFile = True
                                 isint = False
                                 try:
                                     cfg[key] = int(rol)         # add int to dict
@@ -602,19 +607,19 @@ class config_item():
             config_loglevel = getcfg("LogLevel", None)
             if config_loglevel is not None:
                 if config_loglevel != _current_loglevel:
-                    logging.info (f"Logging level changed to <{config_loglevel}> from config file")
+                    logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
                     logging.getLogger().setLevel(config_loglevel)       # Restore loglevel from that set by ldcfg_ll
                     _current_loglevel = config_loglevel
 
-            elif external_loglevel != _current_loglevel:
-                logging.info (f"Logging level changed to <{external_loglevel}> from main script")
+            else: # external_loglevel != _current_loglevel:
+                logging.info (f"Logging level set to preexisting level <{external_loglevel}>")
                 logging.getLogger().setLevel(external_loglevel)     # Restore loglevel from that set by ldcfg_ll
                 _current_loglevel = external_loglevel
 
-            else:
-                logging.info (f"Logging level changed to <{DEFAULT_LOGGING_LEVEL}>")
-                logging.getLogger().setLevel(DEFAULT_LOGGING_LEVEL)     # Restore loglevel from that set by ldcfg_ll
-                _current_loglevel = DEFAULT_LOGGING_LEVEL
+            # else:
+            #     logging.info (f"Logging level changed to <{DEFAULT_LOGGING_LEVEL}>")
+            #     logging.getLogger().setLevel(DEFAULT_LOGGING_LEVEL)     # Restore loglevel from that set by ldcfg_ll
+            #     _current_loglevel = DEFAULT_LOGGING_LEVEL
                 
 
         return True
