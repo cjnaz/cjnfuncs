@@ -194,32 +194,32 @@ if args.Mode == '2':
     reloaded = config_T2.loadconfig(flush_on_reload=True) 
     print_stats()
 
-    print ("\n----- T2.3:  LogLevel=10, ldcfg_ll=10 to Debug >>>>  Logging DEBUG, INFO, and WARNING messages")
+    print ("\n----- T2.3:  LogLevel=10, ldcfg_ll=10 >>>>  loadconfig logging, Logging DEBUG, INFO, and WARNING messages")
     modify_configfile (config_T2, "LogLevel",   "10")
     reloaded = config_T2.loadconfig(ldcfg_ll=10, flush_on_reload=True)
     print_stats()
 
-    print ("\n----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No logging from loadconfig")
+    print ("\n----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No loadconfig logging, Logging DEBUG, INFO, and WARNING messages")
     modify_configfile (config_T2, "LogLevel",   "10")
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
-    print ("\n----- T2.5:  Config LogLevel = 30,  ldcfg_ll = 30 >>>>  Log only WARNING")
+    print ("\n----- T2.5:  LogLevel=30, ldcfg_ll=30 (default),  >>>>  Log only WARNING")
     modify_configfile (config_T2, "LogLevel",   "30")
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
-    print ("\n----- T2.6:  Default 30 logging level, testvar changed >>>>  testvar new value")
-    modify_configfile (config_T2, "LogLevel",   remove=True)
+    print ("\n----- T2.6:  ldcfg_ll=10, No LogLevel >>>>  Restore preexisting level (30)")
+    modify_configfile (config_T2, "LogLevel",  remove=True)
     modify_configfile (config_T2, "testvar",   True)
+    reloaded = config_T2.loadconfig(ldcfg_ll=10, flush_on_reload=True)
+    print_stats()
+
+    print ("\n----- T2.7:  ldcfg_ll=30 (default), No changes >>>>  NOT Reloaded")
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
-    print ("\n----- T2.7:  No changes >>>>  NOT Reloaded")
-    reloaded = config_T2.loadconfig(flush_on_reload=True)
-    print_stats()
-
-    print ("\n----- T2.8:  ldcfg_ll=10, flush_on_reload >>>>  No loadconfig logging")
+    print ("\n----- T2.8:  ldcfg_ll=10, flush_on_reload >>>>  NOT Reloaded")
     reloaded = config_T2.loadconfig(ldcfg_ll=10, flush_on_reload=True)
     print_stats()
 
@@ -227,24 +227,24 @@ if args.Mode == '2':
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
-    print ("\n----- T2.10:  ldcfg_ll=Default(30), LogLevel=20, var2 added >>>>  Reloaded")
+    print ("\n----- T2.10:  ldcfg_ll=10, LogLevel=20, var2 added >>>>  Reloaded")
     modify_configfile (config_T2, "LogLevel",   "20")
     modify_configfile (config_T2, "var2",   "Hello")
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
-    print ("\n----- T2.11: LogLevel=40, force_flush_reload=False, var2 removed from config >>>>  var2 still defined, no logging")
+    print ("\n----- T2.11: ldcfg_ll=10, LogLevel=40, var2 removed from config >>>>  var2 still defined, no logging")
     modify_configfile (config_T2, "LogLevel",   "40")
     modify_configfile (config_T2, "var2",   remove=True)
     reloaded = config_T2.loadconfig(ldcfg_ll=10)
     print_stats()
 
-    print ("\n----- T2.12: LogLevel=30, force_flush_reload=True >>>>  var2 gone")
+    print ("\n----- T2.12: ldcfg_ll=10, LogLevel=30, force_flush_reload=True >>>>  var2 gone")
     modify_configfile (config_T2, "LogLevel",   "30")
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
-    print ("\n----- T2.13: Externally set log level = 20 (no config LogLevel)")
+    print ("\n----- T2.13: Externally set log level = 20")
     modify_configfile (config_T2, "LogLevel",   remove=True)
     logging.getLogger().setLevel(20)
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
@@ -255,7 +255,7 @@ if args.Mode == '2':
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
-    print ("\n----- T2.15: Externally set log level = 10 with ldcfg_ll = default 30")
+    print ("\n----- T2.15: Externally set log level = 10 with ldcfg_ll=30 (default)")
     logging.getLogger().setLevel(10)
     reloaded = config_T2.loadconfig(force_flush_reload=True)
     print_stats()
@@ -392,13 +392,16 @@ if args.Mode == '13':
 
     print (f"\n----- T13.1:  Missing config, tolerate_missing=False (default) >>>>  Exception")
     remove_file(config.config_full_path)
+    logging.getLogger().setLevel(7)
     try:
         config.loadconfig(ldcfg_ll=10)
     except Exception as e:
         print (f"Config loading exception:\n  {e}")
+        print (f"Logging level back in the main code:  {logging.getLogger().level}")
 
     print (f"\n----- T13.2:  Missing config, tolerate_missing=True >>>>  Returned -1")
     print (f"Returned:  <{config.loadconfig(ldcfg_ll=10, tolerate_missing=True)}>")
+    print (f"Logging level back in the main code:  {logging.getLogger().level}")
 
     print (f"\n----- T13.3:  Working nested import")
     deploy_files([
@@ -409,15 +412,17 @@ if args.Mode == '13':
     nest_cfg = mungePath("import_nest_top.cfg", tool.config_dir).full_path
     xx = config_item(nest_cfg)
     xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
+    print (f"Logging level back in the main code:  {logging.getLogger().level}")
     
     print (f"\n----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.")
     remove_file(mungePath("import_nest_2.cfg", tool.config_dir).full_path)
     try:
-        xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
+        xx.loadconfig(ldcfg_ll=9, tolerate_missing=True, force_flush_reload=True)
     except Exception as e:
         print (f"Exception due to missing imported config file:\n  {e}")
         # NOTE:  Failed importing/processing config file  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
         # rather than saying can't import/process nest_2
+        print (f"Logging level back in the main code:  {logging.getLogger().level}")
     
     print (f"\n----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.")
     remove_file(mungePath("import_nest_1.cfg", tool.config_dir).full_path)
@@ -425,3 +430,4 @@ if args.Mode == '13':
         xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
     except Exception as e:
         print (f"Exception due to missing imported config file:\n  {e}")
+        print (f"Logging level back in the main code:  {logging.getLogger().level}")

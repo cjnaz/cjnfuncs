@@ -36,7 +36,7 @@ if args.setup_user:
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o770},
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR/subdir",     "file_stat": 0o641, "dir_stat": 0o777},
         { "source": "testfile.txt",         "target_dir": "$HOME/.config/junk2",        "file_stat": 0o600, "dir_stat": 0o707},
-        { "source": "testfile.txt",         "target_dir": "USER_CONFIG_DIR"},
+        { "source": "testfile.txt",         "target_dir": "USER_CONFIG_DIR"},       # defaults to file_stat 0o764
         { "source": "test_dir",             "target_dir": "USER_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o720},
         { "source": "test_dir/subdir/x4",   "target_dir": "USER_CONFIG_DIR/mydirs",     "file_stat": 0o612, "dir_stat": 0o711},
         # Uncomment these to force error traps
@@ -84,3 +84,5 @@ if args.cleanup:
 if not mungePath(CONFIG_FILE, tool.config_dir).exists:
     print (f"No user or site setup found.  Run with <--setup-user> or <--setup-site> to set up the environment.")
     sys.exit()
+
+print ("Inspect the created directories/files for proper content and permissions per the deploy_files call.")

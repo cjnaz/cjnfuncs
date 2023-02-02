@@ -446,9 +446,8 @@ def deploy_files(files_list, overwrite=False, missing_ok= False):
 #=====================================================================================
 #=====================================================================================
 
-_current_loglevel = None
-_current_logfile  = None
-
+initial_logging_setup = False   # Global since more than one config can be loaded
+CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
 
 class config_item():
     def __init__(self, configname): #, top_level=True):
@@ -477,6 +476,7 @@ class config_item():
         stats += f"tool.log_base_dir   :  {tool.log_dir_base}\n"
         stats += f"tool.log_full_path  :  {tool.log_full_path}\n"
         return stats
+
 
 
     def loadconfig(self,
@@ -519,49 +519,48 @@ class config_item():
         """
 
         global cfg
-        global _current_loglevel
-        global _current_logfile
+        global initial_logging_setup
+        global preexisting_loglevel
 
-        CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
+        # CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
 
-        # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
-        if _current_loglevel is None:
+        if not initial_logging_setup:   # Do only once, globally
+            # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
+            # The logging level defaults to WARNING / 30.
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins)
-            _current_loglevel = ldcfg_ll
-            _current_logfile  = call_logfile
+            initial_logging_setup = True
         
         config = self.config_full_path
 
-        # Save externally set log level for later restore
-        external_loglevel = logging.getLogger().level
-        # print (f"ld cfg {config}")
-        # if not config.exists():
-        #     if tolerate_missing:
-        #         logging.getLogger().setLevel(ldcfg_ll)           # logging within loadconfig is always done at ldcfg_ll
-        #         _current_loglevel = ldcfg_ll
-        #         logging.info (f"Config file {config} is not currently accessible.  Skipping (re)load.")
-        #         return -1
-        #     else:
-        #         _msg = f"Could not find <{config}>."
-        #         raise ConfigError (_msg)
+        # # Save externally set / prior log level for later restore
+        # preexisting_loglevel = logging.getLogger().level
 
-        if force_flush_reload:
-            logging.getLogger().setLevel(ldcfg_ll)           # logging within loadconfig is always done at ldcfg_ll
-            _current_loglevel = ldcfg_ll
-            logging.debug("cfg dictionary force flushed (force_flush_reload)")
-            cfg.clear()
-            self.config_timestamp = 0
+        # if force_flush_reload:
+        #     logging.getLogger().setLevel(ldcfg_ll)   # logging within loadconfig is always done at ldcfg_ll
+        #     logging.info("cfg dictionary force flushed (force_flush_reload)")
+        #     cfg.clear()
+        #     self.config_timestamp = 0       # Force reload of the config file
 
         try:
-            if not isimport:        # Operations only on top level config file
+            if not isimport:                # Operations only on top level config file
+
+                # Save externally set / prior log level for later restore
+                preexisting_loglevel = logging.getLogger().level
+
+                if force_flush_reload:
+                    logging.getLogger().setLevel(ldcfg_ll)   # logging within loadconfig is always done at ldcfg_ll
+                    logging.info("cfg dictionary force flushed (force_flush_reload)")
+                    cfg.clear()
+                    self.config_timestamp = 0       # Force reload of the config file
 
                 if not config.exists():
                     if tolerate_missing:
-                        logging.getLogger().setLevel(ldcfg_ll)           # logging within loadconfig is always done at ldcfg_ll
-                        _current_loglevel = ldcfg_ll
+                        logging.getLogger().setLevel(ldcfg_ll)
                         logging.info (f"Config file  <{config}>  is not currently accessible.  Skipping (re)load.")
+                        logging.getLogger().setLevel(preexisting_loglevel)
                         return -1
                     else:
+                        logging.getLogger().setLevel(preexisting_loglevel)
                         _msg = f"Could not find  <{config}>"
                         raise ConfigError (_msg)
 
@@ -569,22 +568,18 @@ class config_item():
                 current_timestamp = self.config_full_path.stat().st_mtime
                 if self.config_timestamp == current_timestamp:
                     return 0
-                    # return False
 
                 # Initial load call, or config file has changed.  Do (re)load.
                 self.config_timestamp = current_timestamp
                 logging.getLogger().setLevel(ldcfg_ll)   # Set logging level for remainder of loadconfig call
-                _current_loglevel = ldcfg_ll
 
                 if flush_on_reload:
-                    logging.debug (f"cfg dictionary flushed due to changed config file (flush_on_reload)")
+                    logging.info (f"cfg dictionary flushed due to changed config file (flush_on_reload)")
                     cfg.clear()
 
-            logging.info (f"Loading <{config}>")
+            logging.info (f"Loading  <{config}>")
 
 
-            # cfgline = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
-            # with io.open(config, encoding='utf8') as ifile:
             with config.open() as ifile:
                 for line in ifile:
 
@@ -596,24 +591,10 @@ class config_item():
                             imported_config = config_item(target.full_path)
                             imported_config.loadconfig(ldcfg_ll, isimport=True)
                         except Exception as e:
+                            logging.getLogger().setLevel(preexisting_loglevel)
                             _msg = f"Failed importing/processing config file  <{target.full_path}>"
-                            # print (_msg)
                             raise ConfigError (_msg)
                             
-
-                        # if target.is_file:
-                        #     imported_config = config_item(target.full_path)
-                        #     rtn = imported_config.loadconfig(ldcfg_ll, isimport=True)
-                        #     if rtn == -1:                       # import of target failed
-                        #         return -1
-                        # else:
-                        #     if tolerate_missing:
-                        #         print (f"Could not find and import <{target.full_path}>")
-                        #         return -1
-                        #     else:
-                        #         _msg = f"Could not find and import <{target.full_path}>"
-                        #         raise ConfigError (_msg)
-                    
                     # Regular, param/value line
                     else:
                         _line = line.split("#", maxsplit=1)[0].strip()
@@ -656,23 +637,13 @@ class config_item():
 
             config_loglevel = getcfg("LogLevel", None)
             if config_loglevel is not None:
-                if config_loglevel != _current_loglevel:
-                    logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
-                    logging.getLogger().setLevel(config_loglevel)       # Restore loglevel from that set by ldcfg_ll
-                    _current_loglevel = config_loglevel
-
-            else: # external_loglevel != _current_loglevel:
-                logging.info (f"Logging level set to preexisting level <{external_loglevel}>")
-                logging.getLogger().setLevel(external_loglevel)     # Restore loglevel from that set by ldcfg_ll
-                _current_loglevel = external_loglevel
-
-            # else:
-            #     logging.info (f"Logging level changed to <{DEFAULT_LOGGING_LEVEL}>")
-            #     logging.getLogger().setLevel(DEFAULT_LOGGING_LEVEL)     # Restore loglevel from that set by ldcfg_ll
-            #     _current_loglevel = DEFAULT_LOGGING_LEVEL
+                logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
+                logging.getLogger().setLevel(config_loglevel)
+            else:
+                logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
+                logging.getLogger().setLevel(preexisting_loglevel)
                 
-        return 1
-        # return True
+        return 1    # 1 indicates that the config file was (re)loaded
 
 
 def getcfg(param, default="_nodefault"):
