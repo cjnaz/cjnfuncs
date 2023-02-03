@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cjnfuncs - A collection of support functions for simplifying writing tool scripts.
+"""cjnfuncs - A collection of support functions for writing clean and effective tool scripts.
 
 Functions:
     setuplogging             - Set up default logger (use if not using loadconfig)
@@ -26,8 +26,6 @@ Globals:
 #  Chris Nelson, 2018-2023
 #
 # V2.0  230122  Converted to installed package.  Renamed funcs3 to cjnfuncs.
-# V1.1  220412  Added timevalue and retime
-# V1.0  220203  V1.0 baseline
 # ...
 # V0.1  180520  New
 #
@@ -54,30 +52,13 @@ import shutil
 import __main__
 import appdirs
 
+
 # Configs / Constants
 # FILE_LOGGING_FORMAT    = '{asctime}/{module}/{funcName}/{levelname}:  {message}'    # Classic format
 FILE_LOGGING_FORMAT    = '{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}'
 CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message}'
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 MAIN_MODULE_STEM       = Path(__main__.__file__).stem
-
-
-# # from traceback import extract_stack
-# # print(extract_stack()[0])
-# # sys.exit()
-
-# stack = inspect.stack()
-# print (stack)
-# parentframe = stack[-1] #[0]
-# print (parentframe)
-# module = inspect.getmodule(parentframe)
-# print ("\n module.__name__:", module.__name__)
-
-
-# if module.__name__ == "__main__":   # Caller is a script file, not an installed module
-#     my_resources = mungePath(__main__.__file__).dir / "deployment_files"
-# else:                               # Caller is an installed module
-#     my_resources = ir_files(module) / "deployment_files" 
 
 
 # Project globals
@@ -116,23 +97,51 @@ class SndEmailError(Error):
 
 #=====================================================================================
 #=====================================================================================
-#  Logging setup
+#  Setup Logging
 #=====================================================================================
 #=====================================================================================
 
-def setuplogging(call_logfile_wins=False, call_logfile=None, config_logfile=None):
-        # When running in interactive / non-service mode, call_logfile == None and 
-        # call_logfile_wins ==True, which forces logging to the console, overriding
-        # and LogFile in the config file.
+def setuplogging(call_logfile=None, call_logfile_wins=False, config_logfile=None):
+    """
+## setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None) - Set up the root logger
 
-    _lfp = "__console__" #None
+Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
+is called the current/active log file (or console) may be reassigned.
+
+setuplogging() works standalone (without a config file) or in conjunction with loadconfig().
+If a loaded config file has a `LogFile` parameter then loadconfig() passes it thru
+`config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
+that were passed to loadconfig() from the main script.  This mechanism allows the main script
+to override any config `LogFile`, such as for directing output to the console for a tool's 
+interactive use, eg:
+    `setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')`
+
+### Parameters
+`call_logfile`
+- Potential log file passed from the main script.  Selected by `call_logfile_wins = True`.
+call_logfile may be an absolute path or relative to the tool.log_dir_base directory.  
+`None` specifies the console.
+
+`call_logfile_wins`
+- If True, the `call_logfile` is selected.  If False, the `config_logfile` is selected.
+
+`config_logfile`
+- Potential log file passed from loadconfig() if there is a `LogFile` param in the 
+loaded config.  Selected by `call_logfile_wins = False`.
+config_logfile may be absolute path or relative to the tool.log_dir_base directory.  
+`None` specifies the console.
+
+Returns None
+    """
+
+    _lfp = "__console__"
     if call_logfile_wins == False  and  config_logfile:
         _lfp = mungePath(config_logfile, tool.log_dir_base)
 
     if call_logfile_wins == True   and  call_logfile:
         _lfp = mungePath(call_logfile, tool.log_dir_base)
         
-    if _lfp != tool.log_full_path:
+    if _lfp != tool.log_full_path:      # TODO comparing a mungePath to a .full_path
         logger = logging.getLogger()
         logger.handlers.clear()
 
@@ -174,56 +183,142 @@ def setuplogging(call_logfile_wins=False, call_logfile=None, config_logfile=None
 #=====================================================================================
 
 class set_toolname():
-    """ Establish target directories for config and data storage per XDG spec (roughly) 
-    using the appdirs module.
+    """
+## Class set_toolname (toolname) - Set target directories for config and data storage
 
-    Initial condition is no config file is known, but the directories to eventually look 
-    for one are defined.
-    TODO
-    Logging defaults to the site_state_directory / toolname / toolname.log for root user.
-    Logging defaults to the user_state_directory / toolname / toolname.log for non-root user.
-    See the config_item class regarding selection of user or site dirs and redirecting the log_dir.
+set_toolname() centralizes and establishes a set of base directory path variables for use in
+the script.  It looks for existing directories, based on the specified toolname, in
+the site-wide and then user-specific locations.  Specifically, site-wide 
+config and/or data directories are looked for at (eg) `/etc/xdg/cjnfuncs_testenv` and/or 
+`/usr/share/cjnfuncs_testenv`.  If site-wide directories are not 
+found then user-specific is assumed.  No directories are created.
+
+Member function stats() returns a str() listing of the available attributes of the
+set_toolname() class.
+
+Given:
+```
+tool = set_toolname("cjnfuncs_testenv")
+print (tool.stats())
+```
+
+Example stats() for a user-specific setup:
+```
+    Stats for set_toolname <cjnfuncs_testenv>:
+    .toolname         :  cjnfuncs_testenv
+    .user_config_dir  :  /home/me/.config/cjnfuncs_testenv
+    .user_data_dir    :  /home/me/.local/share/cjnfuncs_testenv
+    .user_state_dir   :  /home/me/.local/state/cjnfuncs_testenv
+    .user_cache_dir   :  /home/me/.cache/cjnfuncs_testenv
+    .user_log_dir     :  /home/me/.cache/cjnfuncs_testenv/log
+    .site_config_dir  :  /etc/xdg/cjnfuncs_testenv
+    .site_data_dir    :  /usr/share/cjnfuncs_testenv
+    Based on found user or site dirs:
+    .env_defined      :  user
+    .config_dir       :  /home/me/.config/cjnfuncs_testenv
+    .data_dir         :  /home/me/.local/share/cjnfuncs_testenv
+    .state_dir        :  /home/me/.local/state/cjnfuncs_testenv
+    .cache_dir        :  /home/me/.cache/cjnfuncs_testenv
+    .log_dir_base     :  /home/me/.local/share/cjnfuncs_testenv
+    .log_dir          :  None
+    .log_file         :  None
+    .log_full_path    :  None
+```
+    
+Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
+```
+    Stats for set_toolname <cjnfuncs_testenv>:
+    .toolname         :  cjnfuncs_testenv
+    .user_config_dir  :  /home/me/.config/cjnfuncs_testenv
+    .user_data_dir    :  /home/me/.local/share/cjnfuncs_testenv
+    .user_state_dir   :  /home/me/.local/state/cjnfuncs_testenv
+    .user_cache_dir   :  /home/me/.cache/cjnfuncs_testenv
+    .user_log_dir     :  /home/me/.cache/cjnfuncs_testenv/log
+    .site_config_dir  :  /etc/xdg/cjnfuncs_testenv
+    .site_data_dir    :  /usr/share/cjnfuncs_testenv
+    Based on found user or site dirs:
+    .env_defined      :  site
+    .config_dir       :  /etc/xdg/cjnfuncs_testenv
+    .data_dir         :  /usr/share/cjnfuncs_testenv
+    .state_dir        :  /usr/share/cjnfuncs_testenv
+    .cache_dir        :  /usr/share/cjnfuncs_testenv
+    .log_dir_base     :  /usr/share/cjnfuncs_testenv
+    .log_dir          :  None
+    .log_file         :  None
+    .log_full_path    :  None
+```
+
+### Important notes and variances from the XDG spec and/or the appdirs package:
+
+- set_toolname() uses the [appdirs package](https://pypi.org/project/appdirs/), which is a 
+close implementation of the
+[XDG basedir specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
+
+- The `user` and `site`-prefixed attributes are as defined by the XDG spec and/or the appdirs package.  The 
+non-such-prefixed attributes are resolved based on the existing user or site environment, and are the attributes
+that generally should be used within tool scripts.
+
+- For a `user` setup, the `.log_dir_base` is initially set to the `.user_data_dir` (variance from XDG spec).
+If a config file is subsequently
+loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
+Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
+style variance, and can be reset in the script by reassigning: `tool.log_dir_base = tool.user_log_dir` (or any
+other directory) before calling loadconfig() or setuplogging().
+(The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
+
+- The `.log_dir`, `log_file`, and `.log_full_path` attributes are set by calls to setuplogging() or loadconfig(),
+and are initially set to `None` by set_toolname().
+
+- For a `site` setup, the `.site_data_dir` is set to `/usr/share/toolname`.  The XDG spec states that 
+the `.cache_dir` and `.state_dir` should be in the root user tree; however, set_toolname() sets these two 
+to the `.site_data_dir`.
     """
 
-    def __init__(self, tname):
+    def __init__(self, toolname):
         global tool             # handle used elsewhere in this module
         tool = self
 
-        self.toolname  = tname
-        self.user_config_dir    = Path(appdirs.user_config_dir(tname))
-        self.user_data_dir      = Path(appdirs.user_data_dir(tname))
-        self.site_config_dir    = Path(appdirs.site_config_dir(tname))  # /
-        self.site_data_dir      = Path("/usr/share") / tname
+        self.toolname  = toolname
+        self.user_config_dir    = Path(appdirs.user_config_dir(toolname))
+        self.user_data_dir      = Path(appdirs.user_data_dir(toolname))
+        self.user_state_dir     = Path(appdirs.user_state_dir(toolname))
+        self.user_cache_dir     = Path(appdirs.user_cache_dir(toolname))
+        self.user_log_dir       = Path(appdirs.user_log_dir(toolname))
+        self.site_config_dir    = Path(appdirs.site_config_dir(toolname))
+        self.site_data_dir      = Path("/usr/share") / toolname
 
         if self.site_config_dir.exists()  or  self.site_data_dir.exists():
+            self.env_defined= "site"
             self.config_dir     = self.site_config_dir
             self.data_dir       = self.site_data_dir
             self.state_dir      = self.site_data_dir
             self.cache_dir      = self.site_data_dir
             self.log_dir_base   = self.site_data_dir
-            self.env_defined= "site"
         else:
+            self.env_defined= "user"
             self.config_dir     = self.user_config_dir
             self.data_dir       = self.user_data_dir
-            self.state_dir      = self.user_data_dir    # Overriding Path(appdirs.user_state_dir (tname))
-            self.cache_dir      = self.user_data_dir    # Overriding Path(appdirs.user_cache_dir (tname)) / tname
+            self.state_dir      = self.user_state_dir
+            self.cache_dir      = self.user_cache_dir
             self.log_dir_base   = self.user_data_dir
-            self.env_defined= "user"
 
         self.log_file = self.log_dir = self.log_full_path = None
 
 
-    def dump(self):
+    def stats(self):
         stats = ""
         stats +=  f"\nStats for set_toolname <{self.toolname}>:\n"
         stats +=  f".toolname         :  {self.toolname}\n"
         stats +=  f".user_config_dir  :  {self.user_config_dir}\n"
         stats +=  f".user_data_dir    :  {self.user_data_dir}\n"
+        stats +=  f".user_state_dir   :  {self.user_state_dir}\n"
+        stats +=  f".user_cache_dir   :  {self.user_cache_dir}\n"
+        stats +=  f".user_log_dir     :  {self.user_log_dir}\n"
         stats +=  f".site_config_dir  :  {self.site_config_dir}\n"
         stats +=  f".site_data_dir    :  {self.site_data_dir}\n"
-        stats +=  f".env_defined      :  {self.env_defined}\n"
 
         stats +=  f"Based on found user or site dirs:\n"
+        stats +=  f".env_defined      :  {self.env_defined}\n"
         stats +=  f".config_dir       :  {self.config_dir}\n"
         stats +=  f".data_dir         :  {self.data_dir}\n"
         stats +=  f".state_dir        :  {self.state_dir}\n"
@@ -238,25 +333,81 @@ class set_toolname():
 class mungePath():
     def __init__(self, in_path="", base_path="", mkdir=False):
         """
-        mungePath provides a clean interface for dealing with filesystem paths
-            - Enables a base_path to be defined so that code need to manage building full paths
-                If in_path is not absolute then base_path is prepended.  Absolute in_path overrides base_path.
-            - User (~user) and environment vars ($HOME) supported
-                Must be at beginning of in_path or base_path
-            - Hides Path vs. PurePath methods/attributes, providing a consistent interface
-                in_path and base_path accept str, Path, or PurePath
-            - Symlinks are not resolved
+## Class mungePath (in_path="", base_path="", mkdir=False) - A clean interface for dealing with filesystem paths
 
-        Attributes
-            .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
-            .parent         Path        The directory above the .full_path
-            .name           str         Just the name.suffix of the .full_path
-            .is_absolute    Boolean     True if the .full_path starts from the filesystem root (isn't a relative path) 
-            .is_relative    Boolean     Not .is_absolute
-            .exists         Boolean     True if the .full_path item (file or dir) actually exists
-            .is_file        Boolean     True if the .full_path item exists and is a file
-		    .is_dir         Boolean     True if the .full_path item exists and is a directory
+### Features and benefits:
+- Based on pathlib, yielding Path type `.full_path` and `.parent` attributes, which may be used with all
+pathlib.Path methods, such as .open().
+- Enables paths to be handled as a two parts - an application-specific portion (`in_path`) and a `base_path`.
+- The returned object's attributes may cleanly be used in script code.  
+- User (~user/) and environment vars ($HOME/) are supported and expanded
+- Hides Path vs. PurePath methods/attributes, providing a consistent interface
 
+### Parameters
+`in_path`
+- An absolute or relative path to a file or directory, such as `mydir/myfile.txt`.  
+
+`base_path`
+- An absolute or relative path to a file or directory, such as `~/.config/mytool`, prepended to `in_path` if
+`in_path` is a relative path.
+
+`mkdir`
+- Force-make a full directory path.  `in_path` / `base_path` is understood to be to a directory.
+
+### Behaviors and rules:
+- If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
+- If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
+the script directory (generally not useful).
+- If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
+- `in_path` and `base_path` may be type str(), Path(), or PurePath().
+- Symlinks are followed (not resolved).
+- User and environment vars are expanded, eg `~/.config` >> `/home/me/.config`, as does `$HOME/.config`.
+- The `.parent` is the directory containing (above) the `.full_path`.  If the object `.is_file` then `.parent` is the
+directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
+`.parent` is the directory above the end-point directory.
+- When using `mkdir=True` the combined `in_path` / `base_path` is understood to be a directory path (not
+to a file), and will be created if it does not already exist. (Uses pathlib.Path.mkdir()).  A FileExistsError 
+is raised if you attempt to mkdir on top of an existing file.
+- See [GitHub repo](https://github.com/cjnaz/cjnfuncs) /tests/demo-mungePath.py for numerous application examples.
+
+### Class attributes
+```
+    .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
+    .parent         Path        The directory above the .full_path
+    .name           str         Just the name.suffix of the .full_path
+    .is_absolute    Boolean     True if the .full_path starts from the filesystem root (isn't a relative path) 
+    .is_relative    Boolean     Not .is_absolute
+    .exists         Boolean     True if the .full_path item (file or dir) actually exists
+    .is_file        Boolean     True if the .full_path item exists and is a file
+    .is_dir         Boolean     True if the .full_path item exists and is a directory
+```
+
+### Member functions
+- mungePath.stats() - Return a str() listing all stats for the object
+- mungePath.refresh_stats() - Update the boolean state attributes for the object. Returns the object
+so that it may be used directly/immediately in the code.
+
+### Example
+```
+Given:
+    tool = set_toolname("mytool")
+    xx = mungePath ("mysubdir/file.txt", tool.data_dir)
+    mungePath (xx.parent, mkdir=True)
+    if not xx.exists:
+        with xx.full_path.open('w') as outfile:
+            file_contents = outfile.write("Hello")
+    print (xx.refresh_stats().stats())      # Refresh needed else prints stats from when xx was created (before file.txt was created)
+
+What gets printed:
+    .full_path    :  /home/me/.local/share/mytool/mysubdir/file.txt
+    .parent       :  /home/me/.local/share/mytool/mysubdir
+    .name         :  file.txt
+    .is_absolute  :  True
+    .is_relative  :  False
+    .exists       :  True
+    .is_dir       :  False
+    .is_file      :  True
+```
         """
         
         self.in_path = str(in_path)
@@ -287,56 +438,74 @@ class mungePath():
         self.is_dir =  self.full_path.is_dir()
         self.is_file = self.full_path.is_file()
 
+    def refresh_stats(self):
+        self.exists =  self.full_path.exists()
+        self.is_absolute = self.full_path.is_absolute()
+        self.is_relative = not self.is_absolute
+        self.is_dir =  self.full_path.is_dir()
+        self.is_file = self.full_path.is_file()
+        return self
 
-    def dump(self):
+    def stats(self):
         stats = ""
-        stats +=  f"{'full_path'}    :  {self.full_path}\n"
-        stats +=  f"{'parent'}       :  {self.parent}\n"
-        # stats +=  f"{'dir'}          :  {self.dir}\n"
-        stats +=  f"{'name'}         :  {self.name}\n"
-        stats +=  f"{'is_absolute'}  :  {self.is_absolute}\n"
-        stats +=  f"{'is_relative'}  :  {self.is_relative}\n"
-        stats +=  f"{'exists'}       :  {self.exists}\n"
-        stats +=  f"{'is_dir'}       :  {self.is_dir}\n"
-        stats +=  f"{'is_file'}      :  {self.is_file}\n"
+        stats +=  f".full_path    :  {self.full_path}\n"
+        stats +=  f".parent       :  {self.parent}\n"
+        stats +=  f".name         :  {self.name}\n"
+        stats +=  f".is_absolute  :  {self.is_absolute}\n"
+        stats +=  f".is_relative  :  {self.is_relative}\n"
+        stats +=  f".exists       :  {self.exists}\n"
+        stats +=  f".is_dir       :  {self.is_dir}\n"
+        stats +=  f".is_file      :  {self.is_file}\n"
         return stats
 
 
-def deploy_files(files_list, overwrite=False, missing_ok= False):
+def deploy_files(files_list, overwrite=False, missing_ok=False):
     """
-    Install setup directories and files from the module to the user/site config and data directories.
-    Distribution files and directory trees are hosted in package_root/src/module_name/deployment_files/.
-	
-    deploy_files() accepts a list of directories, eg:
-        deploy_files( [
-            { "source": "creds_test", "target_dir": "USER_CONFIG_DIR/example", "file_stat": 0o600, "dir_stat": 0o707},
-            { "source": "test_dir",   "target_dir": "USER_DATA_DIR",           "file_stat": 0o633, "dir_stat": 0o770},
-            ...
-            ], overwrite=True )
-    
-    The first example will push the package_root/src/module_name/deployment_files/creds_test file to ~/.config/<toolname>/example/creds_test.
-    <toolname> is set by the set_toolname() call, 'mytool' in this example.
-    The directories ~/.config/mytool/ and ~/.config/mytool/example will have permissions 0o707 and files will have permission 0o600.
-    Directory and file owner:group settings will be user:user, or root:root if called under sudo.
+## deploy_files (files_list, overwrite=False, missing_ok=False) - Install initial tool files in user or site space
 
-    The second example pushes a directory (with possible subdirectories) to ~/.local/share/mytool/.  The target_dir may specify a 
-    subdirectory, such as "target_dir": "USER_DATA_DIR/mydirs"
+`deploy_files()` is used to install initial setup files (and directory trees) from the module to the user 
+or site config and data directories. Suggested usage is with the CLI `--setup-user` or `--setup-site` switches.
+Distribution files and directory trees are hosted in `<module_root>/deployment_files/`.
 
-    "source" is either an individual file or directory tree within and relative to module_name/deployment_files/.  No wildcard support.
+`deploy_files()` accepts a list of dictionaries to be pushed to user or site space. 
+If deployment fails then execution aborts.  This functions is intended for interactive use.
 
-    "target_dir" is expanded for user and environment vars, and supports these substitutions (per set_toolname()):
-		USER_CONFIG_DIR, SITE_CONFIG_DIR
-        USER_DATA_DIR, SITE_DATA_DIR
-		Also absolute paths
-        TODO - dir permissions only set at target_dir level and below.  Not set on parent dirs that were created.
-            Be careful setting the dir_stat on the config and data root dir
+### Example call
+```
+    deploy_files( [
+        { "source": "creds_test", "target_dir": "USER_CONFIG_DIR/example", "file_stat": 0o600, "dir_stat": 0o707},
+        { "source": "test_dir",   "target_dir": "USER_DATA_DIR",           "file_stat": 0o633, "dir_stat": 0o770},
+        ...
+        ], overwrite=True )
+```
 
-    If overwrite == False (default) then only missing files will be copied.  If overwrite == True then all files will be overwritten 
-    if they exist - data may be lost!
+The first line will push the `<module_root>/deployment_files/creds_test` file to `~/.config/mytool/example/creds_test`.
+The toolname `mytool` was set by a prior call to `set_toolname("mytool")`, in this example.
+The directories `~/.config/mytool/` and `~/.config/mytool/example` will have permissions 0o707 and files will have
+permission 0o600.
+Directory and file owner:group settings will be user:user, or root:root if called under sudo.
 
-    If missing_ok == True then a missing file or directory to copy is tolerated (non-fatal).  This feature is used for testing.
+The second line pushes a directory (with possible subdirectories) to `~/.local/share/mytool/`.
+The target_dir may specify a subdirectory, such as `"target_dir": "USER_DATA_DIR/mydirs"`.  Any _new directories_ in the  `target_dir` path will be created with the `dir_stat` permissions, and files will be created with the `file_stat` permissions.
 
-    If deployment fails then execution aborts.  This functions is intended for interactive use.
+### Parameters
+`source`
+- Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
+No wildcard support.
+
+`target_dir`
+- A directory target for the pushed `source`.  It is expanded for user and environment vars, and supports these 
+substitutions (per set_toolname()):
+  - USER_CONFIG_DIR, SITE_CONFIG_DIR
+  - USER_DATA_DIR, SITE_DATA_DIR
+  - Also absolute paths
+
+`overwrite`
+- If overwrite=False (default) then only missing files will be copied.  If overwrite=True then all files will be overwritten 
+if they exist - data may be lost!
+
+`missing_ok`
+- If missing_ok=True then a missing source file or directory is tolerated (non-fatal).  This feature is used for testing.
     """
 
     global tool
@@ -450,7 +619,16 @@ initial_logging_setup = False   # Global since more than one config can be loade
 CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
 
 class config_item():
-    def __init__(self, configname): #, top_level=True):
+    """
+More than one config can exist, all load to the cfg dict
+.log_dir_base gets remapped for user mode
+
+ConfigError raised
+
+member function stats
+
+    """
+    def __init__(self, configname):
         global tool
 
         config = mungePath(configname, tool.config_dir)
@@ -459,21 +637,22 @@ class config_item():
             self.config_dir         = config.parent
             self.config_full_path   = config.full_path
             self.config_timestamp   = 0
-            if tool.env_defined == "user":
-                tool.log_dir_base  = tool.config_dir
+            # if tool.env_defined == "user":
+            if tool.log_dir_base == tool.user_data_dir:
+                tool.log_dir_base = tool.user_config_dir
         else:
             _msg = f"Config file <{configname}> not found."
             raise ConfigError (_msg)
 
 
-    def dump(self):
+    def stats(self):
         stats = ""
         stats += f"\nStats for config file <{self.config_file}>:\n"
         stats += f".config_file        :  {self.config_file}\n"
         stats += f".config_dir         :  {self.config_dir}\n"
         stats += f".config_full_path   :  {self.config_full_path}\n"
         stats += f".config_timestamp   :  {self.config_timestamp}\n"
-        stats += f"tool.log_base_dir   :  {tool.log_dir_base}\n"
+        stats += f"tool.log_dir_base   :  {tool.log_dir_base}\n"
         stats += f"tool.log_full_path  :  {tool.log_full_path}\n"
         return stats
 

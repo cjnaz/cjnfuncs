@@ -28,7 +28,7 @@ parser.add_argument('--cleanup', action='store_true',
 args = parser.parse_args()
 
 tool = set_toolname(TOOLNAME)
-print(tool.dump())
+print(tool.stats())
 
 
 if args.setup_user:

@@ -1,33 +1,283 @@
-# funcs3 with gmailnudge and wanipcheck demo scripts
+# cjnfuncs - A collection of core functions for script writing
 
-funcs gen3 is a collection of functions for building Python tools and scripts.  This code is supported only on Python 3.
+Classes and functions
+- setuplogging()
+- set_toolname() class
+- mungePath() class
+- deploy_files()
+- config_item() class, including loadconfig()
+- getcfg()
+- timevalue(), retime()
+- requestlock() and releaselock()
+- snd_notif() and snd_email()
+
+TODO links above, and intro text
 
 A companion template script file is provided, along with template.cfg and template.service files.  I use these as the 
 starter files for new tools.
 
 ` `
-# gmailnudge demo code
-This tool simply sends an email to a target address.  It demos the loadconfig, error logging, and email sending features in funcs3.
 
-I run gmailnudge as a CRON job every 5 minutes to send an email to my domain's mail server.  I have GMail configured to fetch new
-messages from my domain mail server so that I can get all of my email in one place, GMail.  The problem is that GMail checks the
-remote mail server for new messages at a frequency based on how often there is new mail.  If you get a few messages a day then GMail
-may not check for new messages but once an hour.  This is a serious problem if you are trying to reset a password on a web site and 
-that site sends a reset message to your domain email account, but you can't get the message for a long time.  Within GMail I have a
-filter rule set up to just delete new messages with a subject matching what is in `gmailnudge` in the config file.  
+---
 
-An exercise for the user:  Define a new `JunkSubject` var in the config file and change the snd_email call to use this new var.
+## setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None) - Set up the root logger
+
+Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
+is called the current/active log file (or console) may be reassigned.
+
+setuplogging() works standalone (without a config file) or in conjunction with loadconfig().
+If a loaded config file has a `LogFile` parameter then loadconfig() passes it thru
+`config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
+that were passed to loadconfig() from the main script.  This mechanism allows the main script
+to override any config `LogFile`, such as for directing output to the console for a tool's 
+interactive use, eg:
+    `setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')`
+
+### Parameters
+`call_logfile`
+- Potential log file passed from the main script.  Selected by `call_logfile_wins = True`.
+call_logfile may be an absolute path or relative to the tool.log_dir_base directory.  
+`None` specifies the console.
+
+`call_logfile_wins`
+- If True, the `call_logfile` is selected.  If False, the `config_logfile` is selected.
+
+`config_logfile`
+- Potential log file passed from loadconfig() if there is a `LogFile` param in the 
+loaded config.  Selected by `call_logfile_wins = False`.
+config_logfile may be absolute path or relative to the tool.log_dir_base directory.  
+`None` specifies the console.
+
+Returns None
 
 ` `
-# wanipcheck demo code
-(See [wanstatus](https://github.com/cjnaz/wanstatus) which includes monitoring internet access as well as WAN IP changes.)
 
-This tool gets the WAN IP address and checks if it has changed.  If so, it sends email and text notification messages with the new 
-WAN info.  NOTE that the minimum Python version is 3.7 due to use of 
-subprocess.run with capture_output.
+---
 
-I use to not have a DDNS service for my domain, so if my home WAN address should change I would need to manually adjust my bookmarks for my web server. The wanipcheck script checks if the WAN IP address has changed, and if so sends the new info to both my 
-email (using snd_email) and mobile text (using snd_notif). I run wanstatus as a CRON job hourly.
+## Class set_toolname (toolname) - Set target directories for config and data storage
+
+set_toolname() centralizes and establishes a set of base directory path variables for use in
+the script.  It looks for existing directories, based on the specified toolname, in
+the site-wide and then user-specific locations.  Specifically, site-wide 
+config and/or data directories are looked for at (eg) `/etc/xdg/cjnfuncs_testenv` and/or 
+`/usr/share/cjnfuncs_testenv`.  If site-wide directories are not 
+found then user-specific is assumed.  No directories are created.
+
+Member function stats() returns a str() listing of the available attributes of the
+set_toolname() class.
+
+Given:
+```
+tool = set_toolname("cjnfuncs_testenv")
+print (tool.stats())
+```
+
+Example stats() for a user-specific setup:
+```
+    Stats for set_toolname <cjnfuncs_testenv>:
+    .toolname         :  cjnfuncs_testenv
+    .user_config_dir  :  /home/me/.config/cjnfuncs_testenv
+    .user_data_dir    :  /home/me/.local/share/cjnfuncs_testenv
+    .user_state_dir   :  /home/me/.local/state/cjnfuncs_testenv
+    .user_cache_dir   :  /home/me/.cache/cjnfuncs_testenv
+    .user_log_dir     :  /home/me/.cache/cjnfuncs_testenv/log
+    .site_config_dir  :  /etc/xdg/cjnfuncs_testenv
+    .site_data_dir    :  /usr/share/cjnfuncs_testenv
+    Based on found user or site dirs:
+    .env_defined      :  user
+    .config_dir       :  /home/me/.config/cjnfuncs_testenv
+    .data_dir         :  /home/me/.local/share/cjnfuncs_testenv
+    .state_dir        :  /home/me/.local/state/cjnfuncs_testenv
+    .cache_dir        :  /home/me/.cache/cjnfuncs_testenv
+    .log_dir_base     :  /home/me/.local/share/cjnfuncs_testenv
+    .log_dir          :  None
+    .log_file         :  None
+    .log_full_path    :  None
+```
+    
+Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
+```
+    Stats for set_toolname <cjnfuncs_testenv>:
+    .toolname         :  cjnfuncs_testenv
+    .user_config_dir  :  /home/me/.config/cjnfuncs_testenv
+    .user_data_dir    :  /home/me/.local/share/cjnfuncs_testenv
+    .user_state_dir   :  /home/me/.local/state/cjnfuncs_testenv
+    .user_cache_dir   :  /home/me/.cache/cjnfuncs_testenv
+    .user_log_dir     :  /home/me/.cache/cjnfuncs_testenv/log
+    .site_config_dir  :  /etc/xdg/cjnfuncs_testenv
+    .site_data_dir    :  /usr/share/cjnfuncs_testenv
+    Based on found user or site dirs:
+    .env_defined      :  site
+    .config_dir       :  /etc/xdg/cjnfuncs_testenv
+    .data_dir         :  /usr/share/cjnfuncs_testenv
+    .state_dir        :  /usr/share/cjnfuncs_testenv
+    .cache_dir        :  /usr/share/cjnfuncs_testenv
+    .log_dir_base     :  /usr/share/cjnfuncs_testenv
+    .log_dir          :  None
+    .log_file         :  None
+    .log_full_path    :  None
+```
+
+### Important notes and variances from the XDG spec and/or the appdirs package:
+
+- set_toolname() uses the [appdirs package](https://pypi.org/project/appdirs/), which is a 
+close implementation of the
+[XDG basedir specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
+
+- The `user` and `site`-prefixed attributes are as defined by the XDG spec and/or the appdirs package.  The 
+non-such-prefixed attributes are resolved based on the existing user or site environment, and are the attributes
+that generally should be used within tool scripts.
+
+- For a `user` setup, the `.log_dir_base` is initially set to the `.user_data_dir` (variance from XDG spec).
+If a config file is subsequently
+loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
+Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
+style variance, and can be reset in the script by reassigning: `tool.log_dir_base = tool.user_log_dir` (or any
+other directory) before calling loadconfig() or setuplogging().
+(The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
+
+- The `.log_dir`, `log_file`, and `.log_full_path` attributes are set by calls to setuplogging() or loadconfig(),
+and are initially set to `None` by set_toolname().
+
+- For a `site` setup, the `.site_data_dir` is set to `/usr/share/toolname`.  The XDG spec states that 
+the `.cache_dir` and `.state_dir` should be in the root user tree; however, set_toolname() sets these two 
+to the `.site_data_dir`.
+
+` `
+
+---
+
+## Class mungePath (in_path="", base_path="", mkdir=False) - A clean interface for dealing with filesystem paths
+
+### Features and benefits:
+- Based on pathlib, yielding Path type `.full_path` and `.parent` attributes, which may be used with all
+pathlib.Path methods, such as .open().
+- Enables paths to be handled as a two parts - an application-specific portion (`in_path`) and a `base_path`.
+- The returned object's attributes may cleanly be used in script code.  
+- User (~user/) and environment vars ($HOME/) are supported and expanded
+- Hides Path vs. PurePath methods/attributes, providing a consistent interface
+
+### Parameters
+`in_path`
+- An absolute or relative path to a file or directory, such as `mydir/myfile.txt`.  
+
+`base_path`
+- An absolute or relative path to a file or directory, such as `~/.config/mytool`, prepended to `in_path` if
+`in_path` is a relative path.
+
+`mkdir`
+- Force-make a full directory path.  `in_path` / `base_path` is understood to be to a directory.
+
+### Behaviors and rules:
+- If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
+- If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
+the script directory (generally not useful).
+- If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
+- `in_path` and `base_path` may be type str(), Path(), or PurePath().
+- Symlinks are followed (not resolved).
+- User and environment vars are expanded, eg `~/.config` >> `/home/me/.config`, as does `$HOME/.config`.
+- The `.parent` is the directory containing (above) the `.full_path`.  If the object `.is_file` then `.parent` is the
+directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
+`.parent` is the directory above the end-point directory.
+- When using `mkdir=True` the combined `in_path` / `base_path` is understood to be a directory path (not
+to a file), and will be created if it does not already exist. (Uses pathlib.Path.mkdir()).  A FileExistsError 
+is raised if you attempt to mkdir on top of an existing file.
+- See [GitHub repo](https://github.com/cjnaz/cjnfuncs) /tests/demo-mungePath.py for numerous application examples.
+
+### Class attributes
+```
+    .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
+    .parent         Path        The directory above the .full_path
+    .name           str         Just the name.suffix of the .full_path
+    .is_absolute    Boolean     True if the .full_path starts from the filesystem root (isn't a relative path) 
+    .is_relative    Boolean     Not .is_absolute
+    .exists         Boolean     True if the .full_path item (file or dir) actually exists
+    .is_file        Boolean     True if the .full_path item exists and is a file
+    .is_dir         Boolean     True if the .full_path item exists and is a directory
+```
+
+### Member functions
+- mungePath.stats() - Return a str() listing all stats for the object
+- mungePath.refresh_stats() - Update the boolean state attributes for the object. Returns the object
+so that it may be used directly/immediately in the code.
+
+### Example
+```
+Given:
+    tool = set_toolname("mytool")
+    xx = mungePath ("mysubdir/file.txt", tool.data_dir)
+    mungePath (xx.parent, mkdir=True)
+    if not xx.exists:
+        with xx.full_path.open('w') as outfile:
+            file_contents = outfile.write("Hello")
+    print (xx.refresh_stats().stats())      # Refresh needed else prints stats from when xx was created (before file.txt was created)
+
+What gets printed:
+    .full_path    :  /home/me/.local/share/mytool/mysubdir/file.txt
+    .parent       :  /home/me/.local/share/mytool/mysubdir
+    .name         :  file.txt
+    .is_absolute  :  True
+    .is_relative  :  False
+    .exists       :  True
+    .is_dir       :  False
+    .is_file      :  True
+```
+
+` `
+
+---
+
+## deploy_files (files_list, overwrite=False, missing_ok=False) - Install initial tool files in user or site space
+
+`deploy_files()` is used to install initial setup files (and directory trees) from the module to the user 
+or site config and data directories. Suggested usage is with the CLI `--setup-user` or `--setup-site` switches.
+Distribution files and directory trees are hosted in `<module_root>/deployment_files/`.
+
+`deploy_files()` accepts a list of dictionaries to be pushed to user or site space. 
+If deployment fails then execution aborts.  This functions is intended for interactive use.
+
+### Example call
+```
+    deploy_files( [
+        { "source": "creds_test", "target_dir": "USER_CONFIG_DIR/example", "file_stat": 0o600, "dir_stat": 0o707},
+        { "source": "test_dir",   "target_dir": "USER_DATA_DIR",           "file_stat": 0o633, "dir_stat": 0o770},
+        ...
+        ], overwrite=True )
+```
+
+The first line will push the `<module_root>/deployment_files/creds_test` file to `~/.config/mytool/example/creds_test`.
+The toolname `mytool` was set by a prior call to `set_toolname("mytool")`, in this example.
+The directories `~/.config/mytool/` and `~/.config/mytool/example` will have permissions 0o707 and files will have
+permission 0o600.
+Directory and file owner:group settings will be user:user, or root:root if called under sudo.
+
+The second line pushes a directory (with possible subdirectories) to `~/.local/share/mytool/`.
+The target_dir may specify a subdirectory, such as `"target_dir": "USER_DATA_DIR/mydirs"`.  Any _new directories_ in the  `target_dir` path will be created with the `dir_stat` permissions, and files will be created with the `file_stat` permissions.
+
+### Parameters
+`source`
+- Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
+No wildcard support.
+
+`target_dir`
+- A directory target for the pushed `source`.  It is expanded for user and environment vars, and supports these 
+substitutions (per set_toolname()):
+  - USER_CONFIG_DIR, SITE_CONFIG_DIR
+  - USER_DATA_DIR, SITE_DATA_DIR
+  - Also absolute paths
+
+`overwrite`
+- If overwrite=False (default) then only missing files will be copied.  If overwrite=True then all files will be overwritten 
+if they exist - data may be lost!
+
+`missing_ok`
+- If missing_ok=True then a missing source file or directory is tolerated (non-fatal).  This feature is used for testing.
+
+
+
+
+# -------------------------------------------
+
 
 ` `
 # funcs3 Features
