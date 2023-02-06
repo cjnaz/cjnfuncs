@@ -30,7 +30,7 @@ args = parser.parse_args()
 
 
 tool = set_toolname(TOOLNAME)
-print(tool.dump())
+print(tool.stats())
 
 # if args.setup_user:
 #     deploy_files([
@@ -145,13 +145,13 @@ if args.Mode == '1':
     print ("\n----- T1.8:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (again)")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
-    print (tool.dump())
+    print (tool.stats())
     logging.warning (f"T1.8 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.9:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
-    print (tool.dump())
+    print (tool.stats())
     logging.warning (f"T1.9 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.10: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__")
@@ -282,8 +282,8 @@ except Exception as e:
 
 if args.Mode == '3':
     print ("\n***** Show tool.log_* values (LogFile NOT in config) *****")
-    print(tool.dump())
-    print(config.dump())
+    print(tool.stats())
+    print(config.stats())
 
 
 if args.Mode == '4':
@@ -303,13 +303,13 @@ if args.Mode == '5':
 
 if args.Mode == '6':
     print ("\n***** Co-loading an additional config *****")
-    print(config.dump())
+    print(config.stats())
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
     additional_config = config_item("additional.cfg")
-    print(additional_config.dump())
+    print(additional_config.stats())
     additional_config.loadconfig(ldcfg_ll=10)
-    print(additional_config.dump())
+    print(additional_config.stats())
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
     print (f"Current logging level:      {logging.getLogger().level}")
@@ -353,13 +353,10 @@ if args.Mode == '9':
 
 
 def dump(xx):
-    print (f"Given <{xx}> (type {type(xx)}):")
+    print (f"\nGiven <{xx}>     {type(xx)}:")
     yy = timevalue(xx)
-    print (f"    Original:   <{yy.original}>")
-    print (f"    Seconds:    <{yy.seconds}>")
-    print (f"    Unit char:  <{yy.unit_char}>")
-    print (f"    Unit str:   <{yy.unit_str}>")
-    print (f"    retimed:    <{retime(yy.seconds, yy.unit_char)}> {yy.unit_str}")
+    print (yy.stats())
+    print (f"   retimed  :  <{retime(yy.seconds, yy.unit_char)}> {yy.unit_str}")
 
 if args.Mode == '10':
     print ("\n***** Test timevalue, retime *****")

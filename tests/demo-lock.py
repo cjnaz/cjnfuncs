@@ -17,7 +17,6 @@ from cjnfuncs.cjnfuncs import *
 
 
 tool = set_toolname(TOOLNAME)
-print(tool.dump())
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--log-file', '-l', default=LOGFILE,
@@ -33,12 +32,12 @@ if args.cleanup:
     sys.exit()
 
 
-print ("\nShows logfile captured in tool class after setuplogging")
-setuplogging()
-print(tool.dump())
+# Shows logfile captured in tool class after setuplogging()
+setuplogging(args.log_file, call_logfile_wins=True)
+print(tool.stats())
 
 
-print ()
+print (f"\nUsing default lock file")
 stat = requestlock ("try1")
 print (f"got back from 1st requestLock.  stat = {stat}")
 
@@ -52,17 +51,21 @@ stat = releaselock ()
 print (f"got back from 2nd releaseLock.  stat = {stat}")
 
 
-print ()
+print (f"\nUsing absolute lockfile path")
 stat = requestlock ("abs path", lockfile= tool.data_dir / "myuserlock")
 print (f"got back from abs path requestLock.  stat = {stat}")
+stat = requestlock ("abs path", lockfile= tool.data_dir / "myuserlock", timeout="1s")
+print (f"got back from second abs path requestLock.  stat = {stat}")
 
 stat = releaselock (lockfile= tool.data_dir / "myuserlock")
 print (f"got back from abs path releaseLock.  stat = {stat}")
 
 
-print ()
+print (f"\nUsing relative lockfile path")
 stat = requestlock ("rel path", "myuserlock")
 print (f"got back from rel path requestLock.  stat = {stat}")
+stat = requestlock ("rel path", "myuserlock", timeout="0m")
+print (f"got back from second rel path requestLock.  stat = {stat}")
 
 stat = releaselock ("myuserlock")
 print (f"got back from rel path releaseLock.  stat = {stat}")

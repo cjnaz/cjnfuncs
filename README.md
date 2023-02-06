@@ -273,6 +273,135 @@ if they exist - data may be lost!
 `missing_ok`
 - If missing_ok=True then a missing source file or directory is tolerated (non-fatal).  This feature is used for testing.
 
+` `
+
+---
+
+## getcfg(param, default="_nodefault") - Get a param from the cfg dictionary.
+
+Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
+but with handling if the item does not exist.
+
+### Parameters
+`param`
+- String name of param (key) to be fetched from cfg
+
+`default` (default "_nodefault")
+- if provided, is returned if the param does not exist in cfg
+
+### Returns
+- param value (cfg[param]), if param is in cfg
+- `default` value if param not in cfg
+- raises ConfigError if param does not exist in cfg and no default provided.
+
+## Class timevalue (original) - Convert time value strings of various resolutions to seconds
+
+`timevalue()` provides a convenience mechanism for working with time values and time/datetime calculations.
+timevalues are generally an integer value with an attached single character time resolution, such as "5m".
+Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks, and are case insensitive.  
+`timevalue()` also accepts integer and float values, which are interpreted as seconds resolution.
+
+### Parameters
+
+`original`
+- The original value of type str, int, or float
+
+### Returns
+- Handle to instance
+- Raises ValueError if given an unsupported time unit suffix.
+
+### Instance attributes
+- `.original` - original value passed in, type str (converted to str if int or float passed in)
+- `.seconds` - time value in seconds resolution, type float
+- `unit_char` - the single character suffix units of the `original` value.  's' for int and float original values.
+- `unit_str` - the long-form units of the `original` value used for printing/logging ("secs", "mins", "hours", "days", or "weeks")
+
+### Member functions
+- timevalue.stats() - Return a str() listing all attributes of the instance
+
+### Example
+```
+Given
+    xx = timevalue("1m")
+    print (xx.stats())
+    print (f"Sleep <{xx.seconds}> seconds")
+    time.sleep(xx.seconds)
+
+Output:
+    .original   :  1m       <class 'str'>
+    .seconds    :  60.0     <class 'float'>
+    .unit char  :  m        <class 'str'>
+    .unit_str   :  mins     <class 'str'>
+    Sleep <60.0> seconds
+```
+
+## retime (time_sec, unitC) - Convert time value in seconds to unitC resolution, return type float
+
+`retime()` translates a value is resolution seconds into a new time resolution
+
+### Parameters
+`time_sec`
+- Time value in resolution seconds, type int or float.
+
+`unitC`
+- Target time resolution: "s", "m", "h", "d", or "w" (case insensitive)
+
+### Returns
+- `time_sec` value scaled for the specified `unitC`, type float
+- Raises ValueError if not given an int or float value for `time_sec`, or given an unsupported 
+  unitC time unit suffix.
+
+### Example
+```
+Given
+    xx = timevalue("210H")
+    print (f"{xx.original} is {retime(xx.seconds, 'W')} weeks")
+
+Output
+    210H is 1.25 weeks
+```
+---
+## requestlock (caller, lockfile, timeout=5) - Lock file request
+
+Place a file to indicate that the current process is busy.  Other processes attempt to `requestlock()`
+the same `lockfile` before doing an operation that would conflict with the process that set the lock.
+A common use is with a tool that runs periodically by CRON, but may take a long time to complete.  Using 
+file locks ensures that the tool does not run if the prior run has not completed.
+
+The `lockfile` is written with `caller` information that indicates which tool set the lock, and when.
+Multiple lock files may be used simultaneously by specifying unique `lockfile` names.
+
+### Parameters
+`caller`
+- Info written to the lock file and displayed in any error messages
+
+`lockfile` (default /tmp/\<toolname>_LOCK)
+- Lock file name, relative to the system tempfile.gettempdir(), or absolute path
+
+`timeout` (default 5s)
+- Time in seconds to wait for the lockfile to be removed by another process before returning with a `-1` result.
+  `timeout` may be an int, float or timevalue string (eg, '5s').
+
+### Returns
+- `0` on successfully creating the `lockfile`
+- `-1` if failed to create the `lockfile` (either file already exists or no write access).
+  A WARNING level message is also logged.
+
+---
+## releaselock (lockfile) - Release a lock file
+
+Any code can release a lock, even if that code didn't request the lock.
+Generally, only the requester should issue the releaselock.
+
+### Parameters
+
+`lockfile` (default /tmp/\<toolname>_LOCK)
+- Lock file name, relative to the system tempfile.gettempdir(), or absolute path
+
+### Returns
+- `0` on successfully `lockfile` release (lock file deleted)
+- `-1` if failed to delete the `lockfile`, or the `lockfile` does not exist
+  A WARNING level message is also logged.
 
 
 

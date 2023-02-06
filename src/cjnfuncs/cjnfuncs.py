@@ -60,7 +60,6 @@ CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 MAIN_MODULE_STEM       = Path(__main__.__file__).stem
 
-
 # Project globals
 cfg = {}
 
@@ -620,28 +619,85 @@ CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
 
 class config_item():
     """
-More than one config can exist, all load to the cfg dict
-.log_dir_base gets remapped for user mode
+## Class config_item (config_file, remap_logdirbase=True) - Create a configuration instance for use with loadconfig()
 
-ConfigError raised
+Several attributes are kept for use by the main script, including the name, path, and the timestamp
+of the config file (timestamp once loaded).  
 
-member function stats
+The config file may be loaded and reloaded with successive calls to loadconfig().
 
+### Parameters
+`config_file`
+- Path to the configuration file, relative to the `tool.config_dir` directory, or an absolute path.
+
+`remap_logdirbase` (default True)
+- If `remap_logdirbase=True` and the tool is running in user mode (not site mode) 
+then the `tool.log_dir_base` will be remapped to `tool.user_config_dir`.
+
+### Returns
+- Handle to the `config_item()` instance
+- Raises a `ConfigError` if the specified config file is not found
+
+### Member functions
+- config_item.stats() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
+- load_config() - Load the config file to the `cfg` dictionary.  See below.
+
+### Behaviors and rules:
+- More than one `config_item()` may be created and loaded.  This allows for configuration data to be partitioned 
+as desired.  All configs are loaded to the `cfg` dictionary.  Also see the loadconfig `import` feature.
+- Initially in _user_ mode, after the `set_toolname()` call, `tool.log_dir_base` 
+(the log directory) is set to the `tool.user_data_dir`.
+Once `config_item()` is called the `tool.log_dir_base` is _remapped_ to 
+`tool.user_config_dir`.  This is the author's style preference (centralize user files, and 
+reduce spreading files around the file system).
+To disable this remap, in the `config_item()` call set `remap_logdirbase=False`.
+This remapping is not done in site mode.
+- A different log base directory may be set by user code by setting `tool.log_dir_base` to a different path after 
+the `set_toolname()` call and before the `loadconfig()` call, for example `tool.log_dir_base = "/var/log"` may 
+be desireable in site mode.
+
+### Exmaple
+```
+Given
+    tool = set_toolname("testcfg")
+    print (f"tool.log_dir_base : {tool.log_dir_base}")
+    config = config_item("demo_config.cfg", remap_logdirbase=True)
+    print (config.stats())
+    config.loadconfig()
+    print (config.stats())
+
+Output
+    tool.log_dir_base : /home/me/.local/share/testcfg
+
+    Stats for config file <demo_config.cfg>:
+    .config_file        :  demo_config.cfg
+    .config_dir         :  /home/me/.config/testcfg
+    .config_full_path   :  /home/me/.config/testcfg/demo_config.cfg
+    .config_timestamp   :  0
+    tool.log_dir_base   :  /home/me/.config/testcfg
+
+    Stats for config file <demo_config.cfg>:
+    .config_file        :  demo_config.cfg
+    .config_dir         :  /home/me/.config/testcfg
+    .config_full_path   :  /home/me/.config/testcfg/demo_config.cfg
+    .config_timestamp   :  1675529660.7154639
+    tool.log_dir_base   :  /home/me/.config/testcfg
+```
     """
-    def __init__(self, configname):
+    def __init__(self, config_file, remap_logdirbase=True):
         global tool
 
-        config = mungePath(configname, tool.config_dir)
+        config = mungePath(config_file, tool.config_dir)
         if config.is_file:
             self.config_file        = config.name
             self.config_dir         = config.parent
             self.config_full_path   = config.full_path
             self.config_timestamp   = 0
             # if tool.env_defined == "user":
-            if tool.log_dir_base == tool.user_data_dir:
+            if remap_logdirbase  and  tool.log_dir_base == tool.user_data_dir:
                 tool.log_dir_base = tool.user_config_dir
         else:
-            _msg = f"Config file <{configname}> not found."
+            _msg = f"Config file <{config_file}> not found."
             raise ConfigError (_msg)
 
 
@@ -653,49 +709,158 @@ member function stats
         stats += f".config_full_path   :  {self.config_full_path}\n"
         stats += f".config_timestamp   :  {self.config_timestamp}\n"
         stats += f"tool.log_dir_base   :  {tool.log_dir_base}\n"
-        stats += f"tool.log_full_path  :  {tool.log_full_path}\n"
+        # stats += f"tool.log_full_path  :  {tool.log_full_path}\n"
         return stats
 
 
 
     def loadconfig(self,
-            ldcfg_ll         = DEFAULT_LOGGING_LEVEL,
+            ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
             call_logfile        = None,
             call_logfile_wins   = False,
             flush_on_reload     = False,
             force_flush_reload  = False,
             isimport            = False,
             tolerate_missing    = False):
-        """Read config file into dictionary cfg, and set up logging.
-        
-        See README.md loadconfig documentation for important usage details.  Don't call setuplogging if using loadconfig.
-
-        cfgfile
-            Default is 'config.cfg' in the program directory.  Absolute path or relative path from
-            the main program directory may be specified.
-        ldcfg_ll
-            Sets logging level during config file loading. Default is 30(WARNING).
-        call_logfile
-            Log file to open - optional
-        call_logfile_wins
-            call_logfile overrides any LogFile specified in the config file
-        flush_on_reload
-            If the config file will be reloaded (due to being changed) then clean out cfg first
-        force_flush_reload
-            Forces cfg to be cleaned out and the config file to be reloaded
-        isimport
-            Internally set True when handling imports.  Not used by top-level scripts.
-        tolerate_missing
-            Used in service loop, don't raise ConfigError if the config file is inaccessible
-
-        Returns 1 if the config files WAS reloaded
-        Returns 0 if the config file was NOT reloaded
-        If the config file cannot be accessed
-            if tolerate_missing == False (default), then raises ConfigError
-            if tolerate_missing == True, then returns -1
-        A ConfigError is raised if there are parsing issues
-        A ConfigError is also raised if an imported config file cannot be loaded (non-existent)
         """
+## loadconfig() (config_item() class member function) - Load a configuration file into the cfg dictionary
+```
+loadconfig(
+    ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
+    call_logfile        = None,
+    call_logfile_wins   = False,
+    flush_on_reload     = False,
+    force_flush_reload  = False,
+    isimport            = False,
+    tolerate_missing    = False)        
+```
+loadconfig() is a member function of the `config_item()` class.  Create a `config_item()` instance
+and then invoke `loadconfig()` on that instance. Config file parameters are loaded to the `cfg` 
+dictionary, and can be accessed directly or via `getcfg()`.
+
+`loadconfig()` initializes the root logger for logging either to 1) the `LogFile` specified in
+the loaded config file, 2) the `call_logfile` in the `loadconfig()` call, or 3) the console.
+`loadconfig()` supports dynamic reloading of config files, hierarchy of config data via the `import`
+feature, and intermittent loss of access to the config file.
+    
+
+### Parameters
+`ldcfg_ll` (default 30/WARNING)
+- Logging level used within `loadconfig()` code for debugging loadconfig() itself
+
+`call_logfile` (default None)
+- A relative or absolute path to a log file
+
+`call_logfile_wins` (default False)
+- If True, the `call_logfile` overrides any `LogFile` in the config file
+
+`flush_on_reload` (default False)
+- If the config file will be reloaded (due to a changed timestamp) then clean out `cfg` first
+
+`force_flush_reload` (default False)
+- Forces cfg to be cleaned out and the config file to be reloaded, regardless of whether the
+config file timestamp has changed
+
+`isimport` (default False)
+- Internally set True when handling imports.  Not used by top-level scripts.
+
+`tolerate_missing` (default False)
+- Used in a tool service loop, return `-1` rather than raising `ConfigError` if the config file is inaccessible
+
+### Returns
+- `1` if the config files WAS reloaded
+- `0` if the config file was NOT reloaded
+- If the config file cannot be accessed
+  - If tolerate_missing == False (default), then raises `ConfigError`
+  - If tolerate_missing == True, then returns `-1`
+- A ConfigError is raised if there are parsing issues
+- A ConfigError is also raised if an imported config file cannot be loaded (non-existent)
+
+### Behaviors and rules:
+
+- See `getcfg()`, below, for accessing loaded config data. `cfg` is a global dictionary which may be
+  directly accessed as well.
+- The format of a config file is param=value pairs (with no section or default as in the Python 
+  configparser module).  Separating the param and value may be whitespace, `=` or `:`.
+- **Native int, bool, and str support** - Integer values in the config file are stored as integers in 
+  the cfg dictionary, True and False values (case insensitive) are stored as booleans, and 
+  all other entries are stored as strings.  This avoids most explicit type casting clutter in the script.
+- **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
+  import by other modules (`from cjnfuncs.cjnfuncs import logging`).  By default, logging will go to the
+  console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
+- **Logging level control** - Optional `LogLevel` in the config file will set the logging level after
+  the config file has been loaded.  If LogLevel is not specified in the config file, then 
+  the logging level is set to the Python default logging level, 30/WARNING.
+  The script code may also manually/explicitly set the logging level - _after_ the initial `loadconifig()` call -
+  and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
+  switch feature.  Note that logging done _within_ loadconfig() code is always done at the `ldcfg_ll` level.
+- **Log file options** - Where to log has two separate fields:  `call_logifle` in the call to loadconfig(), and 
+  `LogFile` in the loaded config file, with `call_logfile_wins` selecting which is used.  This mechanism allows for
+  a command line `--log-file` switch to override a _default_ log file defined in the config file.  If the selected 
+  logging location is `None` then output goes to the console (stdout).
+
+  call_logfile_wins | call_logfile | Config LogFile | Results
+  --|--|--|--
+  False (default) | ignored | None (default) | Console
+  False (default) | ignored | file_path | To the config LogFile
+  True | None (default) | ignored | Console
+  True | file_path | ignored | To the call_logfile
+
+- **Logging format** - cjnfuncs has built-in format strings for console and file logging.
+  These defaults may be overridden by defining `CONSOLE_LOGGING_FORMAT` and/or `FILE_LOGGING_FORMAT`
+  constants in the main script file.
+
+- **Import nested config files** - loadconfig() supports `Import` (case insensitive). The imported file path
+is relative to the `tool.config_dir` if not an absolute path.
+The specified file is imported as if the params were in the main config file.  Nested imports are allowed. 
+A prime usage of `import` is to place email server credentials in your home directory with user-only readability,
+then import them in the tool config file as such: `import ~/creds_SMTP`.  
+
+- **Config reload if changed, `flush_on_reload`, and `force_flush_reload`** - loadconfig() may be called 
+periodically by the main script, such as in a service loop.
+If the config file timestamp is unchanged then loadconfig() immediately returns `0`. 
+If the timestamp has changed then the config file will be reloaded, and `1` is returned to indicate to 
+the main script to do any post-config-load operations. 
+  - If `flush_on_reload=True` (default False) then the `cfg`
+  dictionary will be cleaned/purged before the config file is reloaded. If `flush_on_reload=False` then the config
+  file will be reloaded on top of the existing `cfg` dictionary contents (if a param was deleted in the config
+  file it will still exist in `cfg` after the reload). [lanmonitor](https://github.com/cjnaz/lanmonitor) uses these
+  features.
+  - `force_flush_reload=True` (default False) forces both a clear/flush of the `cfg` dictionary and then a fresh
+  reload of the config file. 
+  - **Note** that if using threading then a thread should be paused while the config file 
+  is being reloaded with `flush_on_reload=True` or `force_flush_reload=True` since the params will disappear briefly.
+  - Changes to imported files are not tracked for changes.
+
+- **Tolerating intermittent config file access** - When implementing a service loop, if `tolerate_missing=True` 
+(default False) then loadconfig() will return `-1` if the config file cannot be accessed, informing the 
+main script of the problem for appropriate handling. If `tolerate_missing=False` then loadconfig() will raise
+a ConfigError if the config file cannot be accessed.
+
+- **Comparison to Python's configparser module** - configparser contains many customizable features. 
+Here are a few key comparisons:
+
+  Feature | loadconfig | Python configparser
+  ---|---|---
+  Native types | int, bool (true/false case insensitive), str | str only, requires explicit type casting via getter functions
+  Reload on config file change | built-in | not built-in
+  Import sub-config files | Yes | No
+  Section support | No | Yes
+  Default support | No | Yes
+  Fallback support | Yes (getcfg default) | Yes
+  Whitespace in params | No | Yes
+  Case sensitive params | Yes (always) | Default No, customizable
+  Param/value delimiter | whitespace, ':', or '=' | ':' or '=', customizable
+  Param only (no value) | No | Yes
+  Multi-line values | No | Yes
+  Comment prefix | '#' fixed, thus can't be part of the param or value | '#' or ';', customizable
+  Interpolation | No | Yes
+  Mapping Protocol Access | No | Yes
+  Save to file | No | Yes
+        """
+
+        # TODO check config test cases for True or False expected return
+        # TODO User-set external log level
 
         global cfg
         global initial_logging_setup
@@ -708,6 +873,8 @@ member function stats
             # The logging level defaults to WARNING / 30.
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins)
             initial_logging_setup = True
+
+            # TODO - How to set external logging level befor first call to loadconfig?
         
         config = self.config_full_path
 
@@ -826,17 +993,23 @@ member function stats
 
 
 def getcfg(param, default="_nodefault"):
-    """Get a param from the cfg dictionary.
+    """
+## getcfg (param, default="_nodefault") - Get a param from the cfg dictionary.
 
-    Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
-    but with handling if the item does not exist.
-    
-    param
-        String name of param/key to be fetched from cfg
-    default
-        if provided, is returned if the param doesn't exist in cfg
+Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
+but with handling if the item does not exist.
 
-    Raises ConfigError if param does not exist in cfg and no default provided.
+### Parameters
+`param`
+- String name of param (key) to be fetched from cfg
+
+`default` (default "_nodefault")
+- if provided, is returned if the param does not exist in cfg
+
+### Returns
+- param value (cfg[param]), if param is in cfg
+- `default` value if param not in cfg and `default` value provided
+- raises ConfigError if param does not exist in cfg and no `default` provided.
     """
     
     try:
@@ -850,25 +1023,47 @@ def getcfg(param, default="_nodefault"):
 
 class timevalue():
     def __init__(self, original):
-        """Convert short time value string/int/float in resolution seconds, minutes, hours, days,
-        or weeks to seconds.
-            EG:  20, 30s, 5m, 3D, 2w, 3.1415m.  
-        Time unit suffix is case insensitive, and optional (defaults to seconds).
+        """
+## Class timevalue (original) - Convert time value strings of various resolutions to seconds
 
-        Instance-specific vars:
+`timevalue()` provides a convenience mechanism for working with time values and time/datetime calculations.
+timevalues are generally an integer value with an attached single character time resolution, such as "5m".
+Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks, and are case insensitive. 
+`timevalue()` also accepts integer and float values, which are interpreted as seconds resolution. Also see retime().
 
-        original
-            The original passed-in value (type str)
-        seconds
-            Time value in seconds (type float or int)
-        unit_char
-            Unit character of the passed-in value ("s", "m", "h", "d", or "w")
-        unit_str
-            Unit string of the passed-in value ("secs", "mins", "hours", "days", or "weeks")
-        
-        Months (and longer) are not supported, since months start with 'm', as does minutes, and no practical use.
+### Parameters
 
-        Raises ValueError if given an unsupported time unit suffix.
+`original`
+- The original value of type str, int, or float
+
+### Returns
+- Handle to instance
+- Raises ValueError if given an unsupported time unit suffix.
+
+### Instance attributes
+- `.original` - original value passed in, type str (converted to str if int or float passed in)
+- `.seconds` - time value in seconds resolution, type float, useful for time calculations
+- `unit_char` - the single character suffix unit of the `original` value.  's' for int and float original values.
+- `unit_str` - the long-form units of the `original` value useful for printing/logging ("secs", "mins", "hours", "days", or "weeks")
+
+### Member functions
+- timevalue.stats() - Return a str() listing all attributes of the instance
+
+### Example
+```
+Given
+    xx = timevalue("1m")
+    print (xx.stats())
+    print (f"Sleep <{xx.seconds}> seconds")
+    time.sleep(xx.seconds)
+
+Output:
+    .original   :  1m       <class 'str'>
+    .seconds    :  60.0     <class 'float'>
+    .unit char  :  m        <class 'str'>
+    .unit_str   :  mins     <class 'str'>
+    Sleep <60.0> seconds
+```
         """
         self.original = str(original)
 
@@ -903,17 +1098,44 @@ class timevalue():
             else:
                 raise ValueError(f"Illegal time units <{self.unit_char}> in time string <{original}>")
 
+    def stats(self):
+        stats = ""
+        stats +=  f".original   :  {self.original:8} {type(self.original)}\n"
+        stats +=  f".seconds    :  {self.seconds:<8} {type(self.seconds)}\n"
+        stats +=  f".unit char  :  {self.unit_char:8} {type(self.unit_char)}\n"
+        stats +=  f".unit_str   :  {self.unit_str:8} {type(self.unit_str)}"
+        return stats
+
 
 def retime(time_sec, unitC):
-    """ Convert time value in seconds to unitC resolution, return type float
-
-    time_sec
-        Time value in resolution seconds, type int or float.
-    unitC
-        Target time resolution ("s", "m", "h", "d", or "w")
-    
-    Raises ValueError if not given an int or float seconds value or given an unsupported unitC time unit suffix.
     """
+## retime (time_sec, unitC) - Convert time value in seconds to unitC resolution
+
+`retime()` translates a value is resolution seconds into a new target resolution
+
+### Parameters
+`time_sec`
+- Time value in resolution seconds, type int or float.
+
+`unitC`
+- Target time resolution: "s", "m", "h", "d", or "w" (case insensitive)
+
+### Returns
+- `time_sec` value scaled for the specified `unitC`, type float
+- Raises ValueError if not given an int or float value for `time_sec`, or given an unsupported 
+  unitC time unit suffix.
+
+### Example
+```
+Given
+    xx = timevalue("210H")
+    print (f"{xx.original} = {xx.seconds} seconds = {retime(xx.seconds, 'W')} weeks")
+
+Output
+    210H = 756000.0 seconds = 1.25 weeks
+```
+    """
+    unitC = unitC.lower()
     if type(time_sec) in [int, float]:
         if unitC == "s":  return time_sec
         if unitC == "m":  return time_sec /60
@@ -931,23 +1153,38 @@ def retime(time_sec, unitC):
 #=====================================================================================
 #=====================================================================================
 
-def requestlock(caller, lockfile=MAIN_MODULE_STEM, timeout=5):
-    """Lock file request.
-
-    caller
-        Info written to the lock file and displayed in any error messages
-    lockfile  TODO relative to tempfile or abs.  lock filename defaults to the main module name
-        Lock file name.  Various lock files may be used simultaneously
-    timeout
-        Default 5s
-
-    Returns
-        0:  Lock request successful
-       -1:  Lock request failed.  Warning level log messages are generated.
+def requestlock(caller, lockfile=None, timeout=5):
     """
+## requestlock (caller, lockfile, timeout=5) - Lock file request
+
+Place a file to indicate that the current process is busy.  Other processes attempt to `requestlock()`
+the same `lockfile` before doing an operation that would conflict with the process that set the lock.
+
+The `lockfile` is written with `caller` information that indicates which tool set the lock, and when.
+Multiple lock files may be used simultaneously by specifying unique `lockfile` names.
+
+### Parameters
+`caller`
+- Info written to the lock file and displayed in any error messages
+
+`lockfile` (default /tmp/\<toolname>_LOCK)
+- Lock file name, relative to the system tempfile.gettempdir(), or absolute path
+
+`timeout` (default 5s)
+- Time in seconds to wait for the lockfile to be removed by another process before returning with a `-1` result.
+  `timeout` may be an int, float or timevalue string (eg, '5s').
+
+### Returns
+- `0` on successfully creating the `lockfile`
+- `-1` if failed to create the `lockfile` (either file already exists or no write access).
+  A WARNING level message is also logged.
+    """
+
+    if lockfile == None:
+        lockfile = tool.toolname + "_LOCK"
     lock_file = mungePath(lockfile, tempfile.gettempdir())
 
-    fail_time = time.time() + timeout
+    fail_time = time.time() + timevalue(timeout).seconds
     while True:
         if not lock_file.exists:
             try:
@@ -973,19 +1210,25 @@ def requestlock(caller, lockfile=MAIN_MODULE_STEM, timeout=5):
     return -1
 
 
-def releaselock(lockfile=MAIN_MODULE_STEM):
-    """Lock file release.
-
-    Any code can release a lock, even if that code didn't request the lock.
-    Generally, only the requester should issue the releaselock.
-
-    lockfile
-        Lock file to remove/release
-
-    Returns
-        0:  Lock release successful (lock file deleted)
-       -1:  Lock release failed.  Warning level log messages are generated.
+def releaselock(lockfile=None):
     """
+## releaselock (lockfile) - Release a lock file
+
+Any code can release a lock, even if that code didn't request the lock.
+Generally, only the requester should issue the releaselock.
+A common use is with a tool that runs periodically by CRON, but may take a long time to complete.  Using 
+file locks ensures that the tool does not run if the prior run has not completed.
+
+### Parameters
+`lockfile` (default /tmp/\<toolname>_LOCK)
+- Lock file name, relative to the system tempfile.gettempdir(), or absolute path
+
+### Returns
+- `0` on successfully `lockfile` release (lock file deleted)
+- `-1` if failed to delete the `lockfile`, or the `lockfile` does not exist.  A WARNING level message is also logged.
+    """
+    if lockfile == None:
+        lockfile = tool.toolname + "_LOCK"
     lock_file = mungePath(lockfile, tempfile.gettempdir())
     if lock_file.exists:
         try:
