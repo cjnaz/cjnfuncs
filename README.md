@@ -1,15 +1,20 @@
 # cjnfuncs - A collection of core functions for script writing
 
 Classes and functions
-- setuplogging()
-- set_toolname() class
-- mungePath() class
-- deploy_files()
-- config_item() class, including loadconfig()
-- getcfg()
-- timevalue(), retime()
-- requestlock() and releaselock()
-- snd_notif() and snd_email()
+-- [setuplogging](#setuplogging-call_logfilenone-call_logfile_winsfalse-config_logfilenone---set-up-the-root-logger)
+- [set_toolname](#class-set_toolname-toolname---set-target-directories-for-config-and-data-storage)
+- [mungePath](#class-mungepath-in_path-base_path-mkdirfalse---a-clean-interface-for-dealing-with-filesystem-paths)
+- [deploy_files](#deploy_files-files_list-overwritefalse-missing_okfalse---install-initial-tool-files-in-user-or-site-space)
+- [config_item](#class-config_item-config_file-remap_logdirbasetrue---create-a-configuration-instance-for-use-with-loadconfig)
+- [loadconfig()](#loadconfig-config_item-class-member-function---load-a-configuration-file-into-the-cfg-dictionary)
+- [getcfg](#getcfg-param-default_nodefault---get-a-param-from-the-cfg-dictionary)
+- [timevalue](#class-timevalue-orig_val---convert-time-value-strings-of-various-resolutions-to-seconds)
+- [retime](#retime-time_sec-unitc---convert-time-value-in-seconds-to-unitc-resolution)
+- [requestlock](#requestlock-caller-lockfile-timeout5---lock-file-request)
+- [releaselock](#releaselock-lockfile---release-a-lock-file)
+- [snd_notif](#snd_notif-subjnotification-message-msg-tonotiflist-logfalse---send-a-text-message-using-info-from-the-config-file)
+- [snd_email](#snd_email-subj-body-filename-htmlfile-to-logfalse---send-an-email-message-using-info-from-the-config-file)
+
 
 TODO links above, and intro text
 
@@ -403,6 +408,134 @@ Generally, only the requester should issue the releaselock.
 - `-1` if failed to delete the `lockfile`, or the `lockfile` does not exist
   A WARNING level message is also logged.
 
+---
+## snd_notif (subj="Notification message, msg="", to="NotifList", log=False) - Send a text message using info from the config file
+
+Intended for use of your mobile provider's email-to-text bridge email address, eg, 
+5405551212@vzwpix.com for Verizon, but any eamil address will work.
+
+The `to` string may be the name of a confg param (who's value is one or more email addresses, default 
+"NotifList"), or a string with one or more email addresses. Using a config param name allows for customizing the
+`to` addresses without having to edit the code.
+
+The messages to send is passed in the `msg` parameter as a text string.
+
+    
+### Parameters
+`subj` (default "Notification message")
+- Text message subject field
+
+`msg` (default "")
+- Text message body
+
+`to` (default "NotifList")
+- To whom to send the message. `to` may be either an explicit string list of email addresses
+(whitespace or comma separated) or a config param name (also listing one
+or more whitespace or comma separated email addresses).  If the `to` parameter does not
+contain an '@' it is assumed to be a config param.
+
+`log` (default False)
+- If True, logs that the message was sent at the WARNING level. If False, logs 
+at the DEBUG level. Useful for eliminating separate logging messages in the script code.
+The `subj` field is part of the log message.
+
+### cfg dictionary params
+`NotifList` (optional)
+- string list of email addresses (whitespace or comma separated) or the name of a config
+file keyword (also listing one or more whitespace or comma separated email addresses).  
+Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
+default `to` parameter value.
+
+`DontNotif` (default False)
+- If True, notification messages are not sent. Useful for debug. All email and notification
+messages are also blocked if `DontEmail` is True.
+
+### Returns
+- NoneType
+- Raises SndEmailError on error
+
+### Behaviors and rules
+- `snd_notif` uses `snd_email` to send the message. See `snd_email` for related setup.
+
+
+---
+## snd_email (subj="", body="", filename="", htmlfile="", to="", log=False) - Send an email message using info from the config file
+
+The `to` string may be the name of a confg param (who's value is one or more email addresses),
+or a string with one or more email addresses. Using a cfg param name allows for customizing the
+`to` addresses without having to edit the code.
+
+What to send may be a `body` string, the text contents of `filename`, or the HTML-formatted contents
+of `htmlfile`, in this order of precendent.
+
+    
+### Parameters
+`subj` (default "")
+- Email subject text
+
+`body` (default "")
+- A string message to be sent
+
+`filename` (default "")
+- A str or Path to the file to be sent, relative to the script install directory 
+(probably not useful).  Recommended to be an absolte path.
+
+`htmlfile` (default "")
+- A str or Path to an html formatted file to be sent, relative to the script install directory 
+(probably not useful).  Recommended to be an absolte path.
+
+`to`
+- To whom to send the message. 'to' may be either an explicit string list of email addresses
+(whitespace or comma separated) or a config param name (also listing one
+or more whitespace/comma separated email addresses).  If the `to` parameter does not
+contain an '@' it is assumed to be a config param.  Required (no default)
+
+`log` (default False)
+- If True, logs that the message was sent at the WARNING level. If False, logs 
+at the DEBUG level. Useful for eliminating separate logging messages in the script code.
+The `subj` field is part of the log message.
+
+### cfg dictionary params
+`EmailFrom`
+- An email address, such as `me@myserver.com`
+
+`EmailServer`
+- The outgoing email server name, such as `mail.myserver.com`
+
+`EmailServerPort`
+- The outgoing email server port (one of `P25`, `P465`, `P587`, or `P587TLS`)
+
+`EmailUser`
+- User name for EmailServer login, if required by the server
+
+`EmailPass`
+- Password for EmailServer login, if required by the server
+
+`DontEmail` (default False)
+- If True, messages are not sent. Useful for debug. Also blocks `snd_notif()` messages.
+
+`EmailVerbose` (default False)
+- If True, detailed transactions with the SMTP server are sent to stdout. Useful for debug.
+
+
+### Returns
+- No retrun value
+- Raises SndEmailError on error
+
+### Behaviors and rules
+- One of `body`, `filename`, or `htmlfile` must be specified. Looked for in this order, and the first 
+found is used.
+- EmailServerPort must be one of the following:
+  - P25:  SMTP to port 25 without any encryption
+  - P465: SMTP_SSL to port 465
+  - P587: SMTP to port 587 without any encryption
+  - P587TLS:  SMTP to port 587 and with TLS encryption
+- It is recommneded (not required) that the email server params be placed in a user-read-only
+file in the user's home directory, such as `~/creds_SMTP`, and imported by the main config file.
+Some email servers require that the `EmailFrom` address be of the same domain as the server, 
+so it may be practical to bundle `EmailFrom` with the server specifics.
+  - `EmailFrom`, `EmailServer`, `EmailServerPort`, `EmailUser`, and `EmailPass`
+- `snd_email()` does not support multi-part MIME (an html send wont have a plain text part).
 
 
 # -------------------------------------------

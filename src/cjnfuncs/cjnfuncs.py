@@ -1,22 +1,5 @@
 #!/usr/bin/env python3
-"""cjnfuncs - A collection of support functions for writing clean and effective tool scripts.
-
-Functions:
-    setuplogging             - Set up default logger (use if not using loadconfig)
-    mungePath                - Paths made easy and functional
-    set_toolname             - Set up base paths for site or user installations
-    config class
-        loadconfig
-        getcfg               - Config file handlers
-    timevalue, retime        - Handling time values used in config files
-    requestlock, releaselock - Cross-tool/process safety handshake
-    snd_notif, snd_email     - Send text and email messages
-
-    Import this module from the main script as follows:
-        from cjnfuncs.cjnfuncs import ...
-            loadconfig, getcfg, cfg, timevalue, retime, setuplogging, logging, funcs3_min_version_check, funcs3_version, snd_notif, snd_email, requestlock, releaselock, ConfigError, SndEmailError
-Globals:
-    cfg - Dictionary that contains the info read from the config file
+"""cjnfuncs - A collection of support functions for writing clean and effective tool scripts
 """
 
 # VERSION = "2.0.2 X"
@@ -656,7 +639,7 @@ This remapping is not done in site mode.
 the `set_toolname()` call and before the `loadconfig()` call, for example `tool.log_dir_base = "/var/log"` may 
 be desireable in site mode.
 
-### Exmaple
+### Example
 ```
 Given
     tool = set_toolname("testcfg")
@@ -777,7 +760,6 @@ config file timestamp has changed
 - A ConfigError is also raised if an imported config file cannot be loaded (non-existent)
 
 ### Behaviors and rules:
-
 - See `getcfg()`, below, for accessing loaded config data. `cfg` is a global dictionary which may be
   directly accessed as well.
 - The format of a config file is param=value pairs (with no section or default as in the Python 
@@ -1022,9 +1004,9 @@ but with handling if the item does not exist.
 
 
 class timevalue():
-    def __init__(self, original):
+    def __init__(self, orig_val):
         """
-## Class timevalue (original) - Convert time value strings of various resolutions to seconds
+## Class timevalue (orig_val) - Convert time value strings of various resolutions to seconds
 
 `timevalue()` provides a convenience mechanism for working with time values and time/datetime calculations.
 timevalues are generally an integer value with an attached single character time resolution, such as "5m".
@@ -1032,19 +1014,18 @@ Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks
 `timevalue()` also accepts integer and float values, which are interpreted as seconds resolution. Also see retime().
 
 ### Parameters
-
-`original`
-- The original value of type str, int, or float
+`orig_val`
+- The original, passed-in value of type str, int, or float
 
 ### Returns
 - Handle to instance
 - Raises ValueError if given an unsupported time unit suffix.
 
 ### Instance attributes
-- `.original` - original value passed in, type str (converted to str if int or float passed in)
+- `.orig_val` - orig_val value passed in, type str (converted to str if int or float passed in)
 - `.seconds` - time value in seconds resolution, type float, useful for time calculations
-- `unit_char` - the single character suffix unit of the `original` value.  's' for int and float original values.
-- `unit_str` - the long-form units of the `original` value useful for printing/logging ("secs", "mins", "hours", "days", or "weeks")
+- `.unit_char` - the single character suffix unit of the `orig_val` value.  's' for int and float orig_val values.
+- `.unit_str` - the long-form units of the `orig_val` value useful for printing/logging ("secs", "mins", "hours", "days", or "weeks")
 
 ### Member functions
 - timevalue.stats() - Return a str() listing all attributes of the instance
@@ -1058,49 +1039,49 @@ Given
     time.sleep(xx.seconds)
 
 Output:
-    .original   :  1m       <class 'str'>
+    .orig_val   :  1m       <class 'str'>
     .seconds    :  60.0     <class 'float'>
     .unit char  :  m        <class 'str'>
     .unit_str   :  mins     <class 'str'>
     Sleep <60.0> seconds
 ```
         """
-        self.original = str(original)
+        self.orig_val = str(orig_val)
 
-        if type(original) in [int, float]:              # Case int or float
-            self.seconds =  float(original)
+        if type(orig_val) in [int, float]:              # Case int or float
+            self.seconds =  float(orig_val)
             self.unit_char = "s"
             self.unit_str =  "secs"
         else:
             try:
-                self.seconds = float(original)          # Case str without units
+                self.seconds = float(orig_val)          # Case str without units
                 self.unit_char = "s"
                 self.unit_str = "secs"
                 return
             except:
                 pass
-            self.unit_char =  original[-1:].lower()     # Case str with units
+            self.unit_char =  orig_val[-1:].lower()     # Case str with units
             if self.unit_char == "s":
-                self.seconds =  float(original[:-1])
+                self.seconds =  float(orig_val[:-1])
                 self.unit_str = "secs"
             elif self.unit_char == "m":
-                self.seconds =  float(original[:-1]) * 60
+                self.seconds =  float(orig_val[:-1]) * 60
                 self.unit_str = "mins"
             elif self.unit_char == "h":
-                self.seconds =  float(original[:-1]) * 60*60
+                self.seconds =  float(orig_val[:-1]) * 60*60
                 self.unit_str = "hours"
             elif self.unit_char == "d":
-                self.seconds =  float(original[:-1]) * 60*60*24
+                self.seconds =  float(orig_val[:-1]) * 60*60*24
                 self.unit_str = "days"
             elif self.unit_char == "w":
-                self.seconds =  float(original[:-1]) * 60*60*24*7
+                self.seconds =  float(orig_val[:-1]) * 60*60*24*7
                 self.unit_str = "weeks"
             else:
-                raise ValueError(f"Illegal time units <{self.unit_char}> in time string <{original}>")
+                raise ValueError(f"Illegal time units <{self.unit_char}> in time string <{orig_val}>")
 
     def stats(self):
         stats = ""
-        stats +=  f".original   :  {self.original:8} {type(self.original)}\n"
+        stats +=  f".orig_val   :  {self.orig_val:8} {type(self.orig_val)}\n"
         stats +=  f".seconds    :  {self.seconds:<8} {type(self.seconds)}\n"
         stats +=  f".unit char  :  {self.unit_char:8} {type(self.unit_char)}\n"
         stats +=  f".unit_str   :  {self.unit_str:8} {type(self.unit_str)}"
@@ -1129,7 +1110,7 @@ def retime(time_sec, unitC):
 ```
 Given
     xx = timevalue("210H")
-    print (f"{xx.original} = {xx.seconds} seconds = {retime(xx.seconds, 'W')} weeks")
+    print (f"{xx.orig_val} = {xx.seconds} seconds = {retime(xx.seconds, 'W')} weeks")
 
 Output
     210H = 756000.0 seconds = 1.25 weeks
@@ -1249,25 +1230,54 @@ file locks ensures that the tool does not run if the prior run has not completed
 #=====================================================================================
 #=====================================================================================
 
-def snd_notif(subj='Notification message', msg='', to='NotifList', log=False):
-    """Send a text message using the cfg NotifList.
+def snd_notif(subj="Notification message", msg="", to="NotifList", log=False):
+    """
+## snd_notif (subj="Notification message, msg="", to="NotifList", log=False) - Send a text message using info from the config file
 
-    subj
-        Subject text string
-    msg
-        Message text string
-    to
-        To whom to send the message.  'to' may be either an explicit string list of email addresses
-        (whitespace or comma separated) or the name of a config file keyword (also listing one
-        or more whitespace/comma separated email addresses).  If the 'to' parameter does not
-        contain an '@' it is assumed to be a config keyword - default 'NotifList'.
-    log
-        If True, elevates log level from DEBUG to WARNING to force logging
+Intended for use of your mobile provider's email-to-text bridge email address, eg, 
+5405551212@vzwtxt.com for Verizon, but any eamil address will work.
 
-    cfg NotifList is required in the config file (unless 'to' is always explicitly passed)
-    cfg DontNotif and DontEmail are optional, and if == True no text message is sent. Useful for debug.
+The `to` string may be the name of a confg param (who's value is one or more email addresses, default 
+"NotifList"), or a string with one or more email addresses. Using a config param name allows for customizing the
+`to` addresses without having to edit the code.
 
-    Raises SndEmailError on call errors and sendmail errors
+The messages to send is passed in the `msg` parameter as a text string.
+
+    
+### Parameters
+`subj` (default "Notification message")
+- Text message subject field
+
+`msg` (default "")
+- Text message body
+
+`to` (default "NotifList")
+- To whom to send the message. `to` may be either an explicit string list of email addresses
+(whitespace or comma separated) or a config param name (also listing one
+or more whitespace or comma separated email addresses).  If the `to` parameter does not
+contain an '@' it is assumed to be a config param.
+
+`log` (default False)
+- If True, logs that the message was sent at the WARNING level. If False, logs 
+at the DEBUG level. Useful for eliminating separate logging messages in the script code.
+The `subj` field is part of the log message.
+
+### cfg dictionary params
+`NotifList` (optional)
+- string list of email addresses (whitespace or comma separated).  
+Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
+default `to` parameter value.
+
+`DontNotif` (default False)
+- If True, notification messages are not sent. Useful for debug. All email and notification
+messages are also blocked if `DontEmail` is True.
+
+### Returns
+- NoneType
+- Raises SndEmailError on error
+
+### Behaviors and rules
+- `snd_notif` uses `snd_email` to send the message. See `snd_email` for related setup.
     """
 
     if getcfg('DontNotif', default=False)  or  getcfg('DontEmail', default=False):
@@ -1284,45 +1294,85 @@ def snd_notif(subj='Notification message', msg='', to='NotifList', log=False):
         logging.debug (f"Notification sent <{subj}> <{msg}>")
 
 
-def snd_email(subj='', body='', filename='', htmlfile='', to='', log=False):
-    """Send an email message using email account info from the config file.
+def snd_email(subj="", body="", filename="", htmlfile="", to="", log=False):
+    """
+## snd_email (subj="", body="", filename="", htmlfile="", to="", log=False) - Send an email message using info from the config file
 
-    Either body, filename, or htmlfile must be passed.  Call with only one of body, filename, 
-    or htmlfile, or results may be bogus.  snd_email does not support multi-part MIME (an 
-    html send wont have a plain text part).
+The `to` string may be the name of a confg param (who's value is one or more email addresses),
+or a string with one or more email addresses. Using a config param name allows for customizing the
+`to` addresses without having to edit the code.
 
-    subj
-        Email subject text
-    body
-        A string message to be sent
-    filename    TODO no basepath.  Caller must be absolute.  Error trap is not absolute?
-        A string full path to the file to be sent.  Default path is the PROGDIR.
-        Absolute and relative paths from PROGDIR accepted.
-    htmlfile    TODO no basepath
-        A string full path to an html formatted file to be sent.  Default path is the PROGDIR.
-        Absolute and relative paths from PROGDIR accepted.
-    to
-        To whom to send the message.  'to' may be either an explicit string list of email addresses
-        (whitespace or comma separated) or the name of a config file keyword (also listing one
-        or more whitespace/comma separated email addresses).  If the 'to' parameter does not
-        contain an '@' it is assumed to be a config keyword - no default.
-    log
-        If True, elevates log level from DEBUG to WARNING to force logging of the email subj
+What to send may be a `body` string, the text contents of `filename`, or the HTML-formatted contents
+of `htmlfile`, in this order of precendent.
 
-    cfg EmailFrom, EmailServer, and EmailServerPort are required in the config file.
-        EmailServerPort must be one of the following:
-            P25:  SMTP to port 25 without any encryption
-            P465: SMTP_SSL to port 465
-            P587: SMTP to port 587 without any encryption
-            P587TLS:  SMTP to port 587 and with TLS encryption
-    cfg EmailUser and EmailPass are optional in the config file.
-        Needed if the server requires credentials.  Recommend that these params be in a secure file in 
-        one's home dir and import the file via the config file.
-    cfg DontEmail is optional, and if == True no email is sent.
-        Also blocks snd_notifs.  Useful for debug.
-    cfg EmailVerbose = True enables the emailer debug level.
+    
+### Parameters
+`subj` (default "")
+- Email subject text
 
-    Raises SndEmailError on call errors and sendmail errors
+`body` (default "")
+- A string message to be sent
+
+`filename` (default "")
+- A str or Path to the file to be sent, relative to the script install directory 
+(probably not useful).  Recommended to be an absolute path.
+
+`htmlfile` (default "")
+- A str or Path to an html formatted file to be sent, relative to the script install directory 
+(probably not useful).  Recommended to be an absolute path.
+
+`to`
+- To whom to send the message. `to` may be either an explicit string list of email addresses
+(whitespace or comma separated) or a config param name (also listing one
+or more whitespace or comma separated email addresses).  If the `to` parameter does not
+contain an '@' it is assumed to be a config param.
+
+`log` (default False)
+- If True, logs that the message was sent at the WARNING level. If False, logs 
+at the DEBUG level. Useful for eliminating separate logging messages in the script code.
+The `subj` field is part of the log message.
+
+### cfg dictionary params
+`EmailFrom`
+- An email address, such as `me@myserver.com`
+
+`EmailServer`
+- The SMTP server name, such as `mail.myserver.com`
+
+`EmailServerPort`
+- The SMTP server port (one of `P25`, `P465`, `P587`, or `P587TLS`)
+
+`EmailUser`
+- Username for `EmailServer` login, if required by the server
+
+`EmailPass`
+- Password for `EmailServer` login, if required by the server
+
+`DontEmail` (default False)
+- If True, messages are not sent. Useful for debug. Also blocks `snd_notif()` messages.
+
+`EmailVerbose` (default False)
+- If True, detailed transactions with the SMTP server are sent to stdout. Useful for debug.
+
+
+### Returns
+- NoneType
+- Raises SndEmailError on error
+
+### Behaviors and rules
+- One of `body`, `filename`, or `htmlfile` must be specified. Looked for in this order, and the first 
+found is used.
+- EmailServerPort must be one of the following:
+  - P25:  SMTP to port 25 without any encryption
+  - P465: SMTP_SSL to port 465
+  - P587: SMTP to port 587 without any encryption
+  - P587TLS:  SMTP to port 587 and with TLS encryption
+- It is recommneded (not required) that the email server params be placed in a user-read-only
+file in the user's home directory, such as `~/creds_SMTP`, and imported by the main config file.
+Some email servers require that the `EmailFrom` address be of the same domain as the server, 
+so it may be practical to bundle `EmailFrom` with the server specifics.
+  - `EmailFrom`, `EmailServer`, `EmailServerPort`, `EmailUser`, and `EmailPass`
+- `snd_email()` does not support multi-part MIME (an html send wont have a plain text part).
     """
 
     # if getcfg('DontEmail', default=False):
