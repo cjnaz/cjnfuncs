@@ -1,3 +1,9 @@
 # cjnfuncs - A collection of core functions for script writing
 
-Classes and functions
+- Developed on Python 3.6.8, and supported on all higher Python versions
+- In this documentation, "tool script" refers to a Python project that imports and uses cjnfuncs.  
+Some may be simple scripts, and others may themselves be installed packages.
+- Developed on Linux, supported also on Windows (tested on Windows 10)
+- Windows?
+
+## Classes and functions

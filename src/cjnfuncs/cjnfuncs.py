@@ -90,14 +90,15 @@ def setuplogging(call_logfile=None, call_logfile_wins=False, config_logfile=None
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
 is called the current/active log file (or console) may be reassigned.
 
-setuplogging() works standalone (without a config file) or in conjunction with loadconfig().
+setuplogging() works standalone or in conjunction with loadconfig().
 If a loaded config file has a `LogFile` parameter then loadconfig() passes it thru
 `config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
 that were passed to loadconfig() from the main script.  This mechanism allows the main script
-to override any config `LogFile`, such as for directing output to the console for a tool's 
+to override any config `LogFile`, such as for directing output to the console for a tool script's 
 interactive use, eg:
     `setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')`
 
+    
 ### Parameters
 `call_logfile`
 - Potential log file passed from the main script.  Selected by `call_logfile_wins = True`.
@@ -113,7 +114,9 @@ loaded config.  Selected by `call_logfile_wins = False`.
 config_logfile may be absolute path or relative to the tool.log_dir_base directory.  
 `None` specifies the console.
 
-Returns None
+
+### Returns
+- NoneType
     """
 
     _lfp = "__console__"
@@ -170,14 +173,52 @@ class set_toolname():
 
 set_toolname() centralizes and establishes a set of base directory path variables for use in
 the script.  It looks for existing directories, based on the specified toolname, in
-the site-wide and then user-specific locations.  Specifically, site-wide 
+the site-wide (system-wide) and then user-specific locations.  Specifically, site-wide 
 config and/or data directories are looked for at (eg) `/etc/xdg/cjnfuncs_testenv` and/or 
 `/usr/share/cjnfuncs_testenv`.  If site-wide directories are not 
 found then user-specific is assumed.  No directories are created.
 
-Member function stats() returns a str() listing of the available attributes of the
-set_toolname() class.
 
+### Parameter
+`toolname`
+- Name of the tool, type str()
+
+
+### Returns
+- Handle to the `set_toolname()` instance
+
+
+### Member function
+`stats()`
+- Returns a str() listing of the available attributes of the instance
+
+
+### Behaviors, rules, and __variances from the XDG spec and/or the appdirs package__
+- set_toolname() uses the 
+[appdirs package](https://pypi.org/project/appdirs/), which is a close implementation of the
+[XDG basedir specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
+
+- The `user` and `site`-prefixed attributes are as defined by the XDG spec and/or the appdirs package.  The 
+non-such-prefixed attributes are resolved based on the existing user or site environment, and are the attributes
+that generally should be used within tool scripts.
+
+- For a `user` setup, the `.log_dir_base` is initially set to the `.user_data_dir` (variance from XDG spec).
+If a config file is subsequently
+loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
+Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
+style variance, and can be reset in the script by reassigning: `tool.log_dir_base = tool.user_log_dir` (or any
+other directory) before calling loadconfig() or setuplogging().
+(The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
+
+- The `.log_dir`, `.log_file`, and `.log_full_path` attributes are set by calls to setuplogging() or loadconfig(),
+and are initially set to `None` by set_toolname().
+
+- For a `site` setup, the `.site_data_dir` is set to `/usr/share/toolname`.  The XDG spec states that 
+the `.cache_dir` and `.state_dir` should be in the root user tree; however, set_toolname() sets these two 
+also to the `.site_data_dir`.
+
+
+### Examples
 Given:
 ```
 tool = set_toolname("cjnfuncs_testenv")
@@ -229,31 +270,6 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
     .log_file         :  None
     .log_full_path    :  None
 ```
-
-### Important notes and variances from the XDG spec and/or the appdirs package:
-
-- set_toolname() uses the [appdirs package](https://pypi.org/project/appdirs/), which is a 
-close implementation of the
-[XDG basedir specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
-
-- The `user` and `site`-prefixed attributes are as defined by the XDG spec and/or the appdirs package.  The 
-non-such-prefixed attributes are resolved based on the existing user or site environment, and are the attributes
-that generally should be used within tool scripts.
-
-- For a `user` setup, the `.log_dir_base` is initially set to the `.user_data_dir` (variance from XDG spec).
-If a config file is subsequently
-loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
-Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
-style variance, and can be reset in the script by reassigning: `tool.log_dir_base = tool.user_log_dir` (or any
-other directory) before calling loadconfig() or setuplogging().
-(The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
-
-- The `.log_dir`, `log_file`, and `.log_full_path` attributes are set by calls to setuplogging() or loadconfig(),
-and are initially set to `None` by set_toolname().
-
-- For a `site` setup, the `.site_data_dir` is set to `/usr/share/toolname`.  The XDG spec states that 
-the `.cache_dir` and `.state_dir` should be in the root user tree; however, set_toolname() sets these two 
-to the `.site_data_dir`.
     """
 
     def __init__(self, toolname):
@@ -317,13 +333,12 @@ class mungePath():
         """
 ## Class mungePath (in_path="", base_path="", mkdir=False) - A clean interface for dealing with filesystem paths
 
-### Features and benefits:
-- Based on pathlib, yielding Path type `.full_path` and `.parent` attributes, which may be used with all
-pathlib.Path methods, such as .open().
-- Enables paths to be handled as a two parts - an application-specific portion (`in_path`) and a `base_path`.
-- The returned object's attributes may cleanly be used in script code.  
-- User (~user/) and environment vars ($HOME/) are supported and expanded
-- Hides Path vs. PurePath methods/attributes, providing a consistent interface
+`mungePath()` is based on pathlib, producing Path type attributes and status booleans which may be used with all
+pathlib.Path methods, such as .open().  `mungePath()` accepts paths in two parts - the tool script specific
+portion `in_path` and a `base_path` (prepended if `in_path` is relative), and returns an instance that may 
+be cleanly used in the tool script code.
+User (~user/) and environment vars ($HOME/) are supported and expanded.
+
 
 ### Parameters
 `in_path`
@@ -336,23 +351,12 @@ pathlib.Path methods, such as .open().
 `mkdir`
 - Force-make a full directory path.  `in_path` / `base_path` is understood to be to a directory.
 
-### Behaviors and rules:
-- If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
-- If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
-the script directory (generally not useful).
-- If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
-- `in_path` and `base_path` may be type str(), Path(), or PurePath().
-- Symlinks are followed (not resolved).
-- User and environment vars are expanded, eg `~/.config` >> `/home/me/.config`, as does `$HOME/.config`.
-- The `.parent` is the directory containing (above) the `.full_path`.  If the object `.is_file` then `.parent` is the
-directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
-`.parent` is the directory above the end-point directory.
-- When using `mkdir=True` the combined `in_path` / `base_path` is understood to be a directory path (not
-to a file), and will be created if it does not already exist. (Uses pathlib.Path.mkdir()).  A FileExistsError 
-is raised if you attempt to mkdir on top of an existing file.
-- See [GitHub repo](https://github.com/cjnaz/cjnfuncs) /tests/demo-mungePath.py for numerous application examples.
 
-### Class attributes
+### Returns
+- Handle to `mungePath()` instance
+
+
+### Instance attributes
 ```
     .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
     .parent         Path        The directory above the .full_path
@@ -368,6 +372,24 @@ is raised if you attempt to mkdir on top of an existing file.
 - mungePath.stats() - Return a str() listing all stats for the object
 - mungePath.refresh_stats() - Update the boolean state attributes for the object. Returns the object
 so that it may be used directly/immediately in the code.
+
+
+### Behaviors and rules
+- If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
+- If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
+the script directory (generally not useful).
+- If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
+- `in_path` and `base_path` may be type str(), Path(), or PurePath().
+- Symlinks are followed (not resolved).
+- User and environment vars are expanded, eg `~/.config` >> `/home/me/.config`, as does `$HOME/.config`.
+- The `.parent` is the directory containing (above) the `.full_path`.  If the object `.is_file` then `.parent` is the
+directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
+`.parent` is the directory above the end-point directory.
+- When using `mkdir=True` the combined `in_path` / `base_path` is understood to be a directory path (not
+to a file), and will be created if it does not already exist. (Uses pathlib.Path.mkdir()).  A FileExistsError 
+is raised if you attempt to mkdir on top of an existing file.
+- See [GitHub repo](https://github.com/cjnaz/cjnfuncs) /tests/demo-mungePath.py for numerous application examples.
+
 
 ### Example
 ```
@@ -443,7 +465,7 @@ What gets printed:
 
 def deploy_files(files_list, overwrite=False, missing_ok=False):
     """
-## deploy_files (files_list, overwrite=False, missing_ok=False) - Install initial tool files in user or site space
+## deploy_files (files_list, overwrite=False, missing_ok=False) - Install initial tool script files in user or site space
 
 `deploy_files()` is used to install initial setup files (and directory trees) from the module to the user 
 or site config and data directories. Suggested usage is with the CLI `--setup-user` or `--setup-site` switches.
@@ -452,23 +474,6 @@ Distribution files and directory trees are hosted in `<module_root>/deployment_f
 `deploy_files()` accepts a list of dictionaries to be pushed to user or site space. 
 If deployment fails then execution aborts.  This functions is intended for interactive use.
 
-### Example call
-```
-    deploy_files( [
-        { "source": "creds_test", "target_dir": "USER_CONFIG_DIR/example", "file_stat": 0o600, "dir_stat": 0o707},
-        { "source": "test_dir",   "target_dir": "USER_DATA_DIR",           "file_stat": 0o633, "dir_stat": 0o770},
-        ...
-        ], overwrite=True )
-```
-
-The first line will push the `<module_root>/deployment_files/creds_test` file to `~/.config/mytool/example/creds_test`.
-The toolname `mytool` was set by a prior call to `set_toolname("mytool")`, in this example.
-The directories `~/.config/mytool/` and `~/.config/mytool/example` will have permissions 0o707 and files will have
-permission 0o600.
-Directory and file owner:group settings will be user:user, or root:root if called under sudo.
-
-The second line pushes a directory (with possible subdirectories) to `~/.local/share/mytool/`.
-The target_dir may specify a subdirectory, such as `"target_dir": "USER_DATA_DIR/mydirs"`.  Any _new directories_ in the  `target_dir` path will be created with the `dir_stat` permissions, and files will be created with the `file_stat` permissions.
 
 ### Parameters
 `source`
@@ -488,6 +493,31 @@ if they exist - data may be lost!
 
 `missing_ok`
 - If missing_ok=True then a missing source file or directory is tolerated (non-fatal).  This feature is used for testing.
+
+
+### Returns
+- NoneType
+
+
+### Example
+```
+    deploy_files( [
+        { "source": "creds_test", "target_dir": "USER_CONFIG_DIR/example", "file_stat": 0o600, "dir_stat": 0o707},
+        { "source": "test_dir",   "target_dir": "USER_DATA_DIR",           "file_stat": 0o633, "dir_stat": 0o770},
+        ...
+        ], overwrite=True )
+```
+
+The first line will push the `<module_root>/deployment_files/creds_test` file to `~/.config/mytool/example/creds_test`.
+The toolname `mytool` was set by a prior call to `set_toolname("mytool")`, in this example.
+The directories `~/.config/mytool/` and `~/.config/mytool/example` will have permissions 0o707 and files will have
+permission 0o600.
+Directory and file owner:group settings will be user:user, or root:root if called under sudo.
+
+The second line pushes a directory (with possible subdirectories) to `~/.local/share/mytool/`.
+The target_dir may specify a subdirectory, such as `"target_dir": "USER_DATA_DIR/mydirs"`.
+Any _new directories_ in the  `target_dir` path will be created with the `dir_stat` permissions,
+and files will be created with the `file_stat` permissions.
     """
 
     global tool
@@ -609,23 +639,27 @@ of the config file (timestamp once loaded).
 
 The config file may be loaded and reloaded with successive calls to loadconfig().
 
+
 ### Parameters
 `config_file`
 - Path to the configuration file, relative to the `tool.config_dir` directory, or an absolute path.
 
 `remap_logdirbase` (default True)
-- If `remap_logdirbase=True` and the tool is running in user mode (not site mode) 
+- If `remap_logdirbase=True` and the tool script is running in user mode (not site mode) 
 then the `tool.log_dir_base` will be remapped to `tool.user_config_dir`.
+
 
 ### Returns
 - Handle to the `config_item()` instance
 - Raises a `ConfigError` if the specified config file is not found
 
+
 ### Member functions
 - config_item.stats() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
 - load_config() - Load the config file to the `cfg` dictionary.  See below.
 
-### Behaviors and rules:
+
+### Behaviors and rules
 - More than one `config_item()` may be created and loaded.  This allows for configuration data to be partitioned 
 as desired.  All configs are loaded to the `cfg` dictionary.  Also see the loadconfig `import` feature.
 - Initially in _user_ mode, after the `set_toolname()` call, `tool.log_dir_base` 
@@ -638,6 +672,7 @@ This remapping is not done in site mode.
 - A different log base directory may be set by user code by setting `tool.log_dir_base` to a different path after 
 the `set_toolname()` call and before the `loadconfig()` call, for example `tool.log_dir_base = "/var/log"` may 
 be desireable in site mode.
+
 
 ### Example
 ```
@@ -748,7 +783,8 @@ config file timestamp has changed
 - Internally set True when handling imports.  Not used by top-level scripts.
 
 `tolerate_missing` (default False)
-- Used in a tool service loop, return `-1` rather than raising `ConfigError` if the config file is inaccessible
+- Used in a tool script service loop, return `-1` rather than raising `ConfigError` if the config file is inaccessible
+
 
 ### Returns
 - `1` if the config files WAS reloaded
@@ -759,7 +795,8 @@ config file timestamp has changed
 - A ConfigError is raised if there are parsing issues
 - A ConfigError is also raised if an imported config file cannot be loaded (non-existent)
 
-### Behaviors and rules:
+
+### Behaviors and rules
 - See `getcfg()`, below, for accessing loaded config data. `cfg` is a global dictionary which may be
   directly accessed as well.
 - The format of a config file is param=value pairs (with no section or default as in the Python 
@@ -796,7 +833,7 @@ config file timestamp has changed
 is relative to the `tool.config_dir` if not an absolute path.
 The specified file is imported as if the params were in the main config file.  Nested imports are allowed. 
 A prime usage of `import` is to place email server credentials in your home directory with user-only readability,
-then import them in the tool config file as such: `import ~/creds_SMTP`.  
+then import them in the tool script config file as such: `import ~/creds_SMTP`.  
 
 - **Config reload if changed, `flush_on_reload`, and `force_flush_reload`** - loadconfig() may be called 
 periodically by the main script, such as in a service loop.
@@ -976,17 +1013,19 @@ Here are a few key comparisons:
 
 def getcfg(param, default="_nodefault"):
     """
-## getcfg (param, default="_nodefault") - Get a param from the cfg dictionary.
+## getcfg (param, default=None) - Get a param from the cfg dictionary.
 
 Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
 but with handling if the item does not exist.
+
 
 ### Parameters
 `param`
 - String name of param (key) to be fetched from cfg
 
-`default` (default "_nodefault")
-- if provided, is returned if the param does not exist in cfg
+`default` (default None)
+- if provided, is returned if `param` does not exist in cfg
+
 
 ### Returns
 - param value (cfg[param]), if param is in cfg
@@ -1013,13 +1052,16 @@ timevalues are generally an integer value with an attached single character time
 Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks, and are case insensitive. 
 `timevalue()` also accepts integer and float values, which are interpreted as seconds resolution. Also see retime().
 
+
 ### Parameters
 `orig_val`
 - The original, passed-in value of type str, int, or float
 
+
 ### Returns
 - Handle to instance
 - Raises ValueError if given an unsupported time unit suffix.
+
 
 ### Instance attributes
 - `.orig_val` - orig_val value passed in, type str (converted to str if int or float passed in)
@@ -1027,8 +1069,10 @@ Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks
 - `.unit_char` - the single character suffix unit of the `orig_val` value.  's' for int and float orig_val values.
 - `.unit_str` - the long-form units of the `orig_val` value useful for printing/logging ("secs", "mins", "hours", "days", or "weeks")
 
+
 ### Member functions
 - timevalue.stats() - Return a str() listing all attributes of the instance
+
 
 ### Example
 ```
@@ -1094,18 +1138,21 @@ def retime(time_sec, unitC):
 
 `retime()` translates a value is resolution seconds into a new target resolution
 
+
 ### Parameters
 `time_sec`
 - Time value in resolution seconds, type int or float.
 
 `unitC`
-- Target time resolution: "s", "m", "h", "d", or "w" (case insensitive)
+- Target ti
+me resolution: "s", "m", "h", "d", or "w" (case insensitive)
 
 ### Returns
 - `time_sec` value scaled for the specified `unitC`, type float
 - Raises ValueError if not given an int or float value for `time_sec`, or given an unsupported 
   unitC time unit suffix.
 
+  
 ### Example
 ```
 Given
@@ -1138,11 +1185,17 @@ def requestlock(caller, lockfile=None, timeout=5):
     """
 ## requestlock (caller, lockfile, timeout=5) - Lock file request
 
-Place a file to indicate that the current process is busy.  Other processes attempt to `requestlock()`
-the same `lockfile` before doing an operation that would conflict with the process that set the lock.
+For tool scripts that may take a long time to run and are run by CRON, the possibility exists that 
+a job is still running when CRON wants to run it again, which may create a real mess.
+This lock file mechanism is used in https://github.com/cjnaz/rclonesync-V2, as an example.
 
-The `lockfile` is written with `caller` information that indicates which tool set the lock, and when.
+`requestlock()` places a file to indicate that the current process is busy.
+Other processes then attempt to `requestlock()` the same `lockfile` before doing an operation
+that would conflict with the process that set the lock.
+
+The `lockfile` is written with `caller` information that indicates which tool script set the lock, and when.
 Multiple lock files may be used simultaneously by specifying unique `lockfile` names.
+
 
 ### Parameters
 `caller`
@@ -1154,6 +1207,7 @@ Multiple lock files may be used simultaneously by specifying unique `lockfile` n
 `timeout` (default 5s)
 - Time in seconds to wait for the lockfile to be removed by another process before returning with a `-1` result.
   `timeout` may be an int, float or timevalue string (eg, '5s').
+
 
 ### Returns
 - `0` on successfully creating the `lockfile`
@@ -1197,12 +1251,14 @@ def releaselock(lockfile=None):
 
 Any code can release a lock, even if that code didn't request the lock.
 Generally, only the requester should issue the releaselock.
-A common use is with a tool that runs periodically by CRON, but may take a long time to complete.  Using 
-file locks ensures that the tool does not run if the prior run has not completed.
+A common use is with a tool script that runs periodically by CRON, but may take a long time to complete.  Using 
+file locks ensures that the tool script does not run if the prior run has not completed.
+
 
 ### Parameters
 `lockfile` (default /tmp/\<toolname>_LOCK)
 - Lock file name, relative to the system tempfile.gettempdir(), or absolute path
+
 
 ### Returns
 - `0` on successfully `lockfile` release (lock file deleted)
@@ -1262,6 +1318,7 @@ contain an '@' it is assumed to be a config param.
 at the DEBUG level. Useful for eliminating separate logging messages in the script code.
 The `subj` field is part of the log message.
 
+
 ### cfg dictionary params
 `NotifList` (optional)
 - string list of email addresses (whitespace or comma separated).  
@@ -1272,12 +1329,14 @@ default `to` parameter value.
 - If True, notification messages are not sent. Useful for debug. All email and notification
 messages are also blocked if `DontEmail` is True.
 
+
 ### Returns
 - NoneType
 - Raises SndEmailError on error
 
+
 ### Behaviors and rules
-- `snd_notif` uses `snd_email` to send the message. See `snd_email` for related setup.
+- `snd_notif()` uses `snd_email()` to send the message. See `snd_email()` for related setup.
     """
 
     if getcfg('DontNotif', default=False)  or  getcfg('DontEmail', default=False):
@@ -1332,6 +1391,7 @@ contain an '@' it is assumed to be a config param.
 at the DEBUG level. Useful for eliminating separate logging messages in the script code.
 The `subj` field is part of the log message.
 
+
 ### cfg dictionary params
 `EmailFrom`
 - An email address, such as `me@myserver.com`
@@ -1359,6 +1419,7 @@ The `subj` field is part of the log message.
 - NoneType
 - Raises SndEmailError on error
 
+
 ### Behaviors and rules
 - One of `body`, `filename`, or `htmlfile` must be specified. Looked for in this order, and the first 
 found is used.
@@ -1370,7 +1431,8 @@ found is used.
 - It is recommneded (not required) that the email server params be placed in a user-read-only
 file in the user's home directory, such as `~/creds_SMTP`, and imported by the main config file.
 Some email servers require that the `EmailFrom` address be of the same domain as the server, 
-so it may be practical to bundle `EmailFrom` with the server specifics.
+so it may be practical to bundle `EmailFrom` with the server specifics.  Place all of these in 
+`~/creds_SMTP`:
   - `EmailFrom`, `EmailServer`, `EmailServerPort`, `EmailUser`, and `EmailPass`
 - `snd_email()` does not support multi-part MIME (an html send wont have a plain text part).
     """
