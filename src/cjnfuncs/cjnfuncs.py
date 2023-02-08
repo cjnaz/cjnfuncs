@@ -2,24 +2,19 @@
 """cjnfuncs - A collection of support functions for writing clean and effective tool scripts
 """
 
-# VERSION = "2.0.2 X"
-
 #==========================================================
 #
 #  Chris Nelson, 2018-2023
 #
-# V2.0  230122  Converted to installed package.  Renamed funcs3 to cjnfuncs.
+# V2.0  230208  Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 # ...
 # V0.1  180520  New
 #
-# Changes pending
-#   
-#==========================================================
+# #==========================================================
 
 import sys
 import time
 import os.path
-import io
 import smtplib
 from email.mime.text import MIMEText
 import logging

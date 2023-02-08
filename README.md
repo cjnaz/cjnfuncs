@@ -1,10 +1,18 @@
 # cjnfuncs - A collection of core functions for script writing
 
-- Developed on Python 3.6.8, and supported on all higher Python versions
+Logging, Configuration files, Email, Lock files, Deploying tool script template files, ...  
+
+- A package template using cjnfuncs is available at https://github.com/cjnaz/tool_template, which 
+is the basis of PyPI posted tools such as:
+  - [lanmonitor](https://pypi.org/project/lanmonitor/)
+  - [wanstatus](https://pypi.org/project/wanstatus/)
+  - [routermonitor](https://pypi.org/project/routermonitor/)
+
+- Developed and tested on Python 3.6.8, and supported on all higher Python versions
 - In this documentation, "tool script" refers to a Python project that imports and uses cjnfuncs.  
 Some may be simple scripts, and others may themselves be installed packages.
 - Developed on Linux, supported also on Windows (tested on Windows 10)
-- Windows?
+
 
 ## Classes and functions
 - [setuplogging](#setuplogging-call_logfilenone-call_logfile_winsfalse-config_logfilenone---set-up-the-root-logger)
@@ -814,7 +822,6 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     ` `
 ---
 # Revision history
-- V1.1 220412 - Added timevalue and retime
-- V1.0 220131 - V1.0 baseline
+- 2.0 230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 - ...
-- V0.1 180524 - New.  First github posting
+- 0.1 180524 - New.  First github posting
