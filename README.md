@@ -12,14 +12,14 @@ Some may be simple scripts, and others may themselves be installed packages.
 - [mungePath](#class-mungepath-in_path-base_path-mkdirfalse---a-clean-interface-for-dealing-with-filesystem-paths)
 - [deploy_files](#deploy_files-files_list-overwritefalse-missing_okfalse---install-initial-tool-script-files-in-user-or-site-space)
 - [config_item](#class-config_item-config_file-remap_logdirbasetrue---create-a-configuration-instance-for-use-with-loadconfig)
-- [loadconfig()](#loadconfig-config_item-class-member-function---load-a-configuration-file-into-the-cfg-dictionary)
+- [loadconfig](#loadconfig--config_item-class-member-function---load-a-configuration-file-into-the-cfg-dictionary)
 - [getcfg](#getcfg-param-defaultnone---get-a-param-from-the-cfg-dictionary)
 - [timevalue](#class-timevalue-orig_val---convert-time-value-strings-of-various-resolutions-to-seconds)
 - [retime](#retime-time_sec-unitc---convert-time-value-in-seconds-to-unitc-resolution)
 - [requestlock](#requestlock-caller-lockfile-timeout5---lock-file-request)
 - [releaselock](#releaselock-lockfile---release-a-lock-file)
 - [snd_notif](#snd_notif-subjnotification-message-msg-tonotiflist-logfalse---send-a-text-message-using-info-from-the-config-file)
-- [snd_email](#snd_email-subj-body-filename-htmlfile-to-logfalse---send-an-email-message-using-info-from-the-config-file)
+- [snd_email](#snd_email-subj-to-bodynone-filenamenone-htmlfilenone-logfalse---send-an-email-message-using-info-from-the-config-file)
 
 ` `
 ---
@@ -32,7 +32,7 @@ is called the current/active log file (or console) may be reassigned.
 setuplogging() works standalone or in conjunction with loadconfig().
 If a loaded config file has a `LogFile` parameter then loadconfig() passes it thru
 `config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
-that were passed to loadconfig() from the main script.  This mechanism allows the main script
+that were passed to loadconfig() from the tool script.  This mechanism allows the tool script
 to override any config `LogFile`, such as for directing output to the console for a tool script's 
 interactive use, eg:
     `setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')`
@@ -40,7 +40,7 @@ interactive use, eg:
     
 ### Parameters
 `call_logfile`
-- Potential log file passed from the main script.  Selected by `call_logfile_wins = True`.
+- Potential log file passed from the tool script.  Selected by `call_logfile_wins = True`.
 call_logfile may be an absolute path or relative to the tool.log_dir_base directory.  
 `None` specifies the console.
 
@@ -63,7 +63,7 @@ config_logfile may be absolute path or relative to the tool.log_dir_base directo
 # Class set_toolname (toolname) - Set target directories for config and data storage
 
 set_toolname() centralizes and establishes a set of base directory path variables for use in
-the script.  It looks for existing directories, based on the specified toolname, in
+the tool script.  It looks for existing directories, based on the specified toolname, in
 the site-wide (system-wide) and then user-specific locations.  Specifically, site-wide 
 config and/or data directories are looked for at (eg) `/etc/xdg/cjnfuncs_testenv` and/or 
 `/usr/share/cjnfuncs_testenv`.  If site-wide directories are not 
@@ -84,7 +84,7 @@ found then user-specific is assumed.  No directories are created.
 - Returns a str() listing of the available attributes of the instance
 
 
-### Behaviors, rules, and __variances from the XDG spec and/or the appdirs package__
+### Behaviors, rules, and _variances from the XDG spec and/or the appdirs package_
 - set_toolname() uses the 
 [appdirs package](https://pypi.org/project/appdirs/), which is a close implementation of the
 [XDG basedir specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
@@ -97,7 +97,7 @@ that generally should be used within tool scripts.
 If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
 Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
-style variance, and can be reset in the script by reassigning: `tool.log_dir_base = tool.user_log_dir` (or any
+style variance, and can be reset in the tool script by reassigning: `tool.log_dir_base = tool.user_log_dir` (or any
 other directory) before calling loadconfig() or setuplogging().
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
@@ -211,7 +211,7 @@ so that it may be used directly/immediately in the code.
 ### Behaviors and rules
 - If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
 - If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
-the script directory (generally not useful).
+the tool script directory (generally not useful).
 - If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
 - `in_path` and `base_path` may be type str(), Path(), or PurePath().
 - Symlinks are followed (not resolved).
@@ -309,7 +309,7 @@ and files will be created with the `file_stat` permissions.
 ---
 # Class config_item (config_file, remap_logdirbase=True) - Create a configuration instance for use with loadconfig()
 
-Several attributes are kept for use by the main script, including the name, path, and the timestamp
+Several attributes are kept for use by the tool script, including the name, path, and the timestamp
 of the config file (timestamp once loaded).  
 
 The config file may be loaded and reloaded with successive calls to loadconfig().
@@ -380,7 +380,7 @@ Output
 ` `
 ---
 ---
-# loadconfig() (config_item() class member function) - Load a configuration file into the cfg dictionary
+# loadconfig () (config_item() class member function) - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
     ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
@@ -419,7 +419,7 @@ feature, and intermittent loss of access to the config file.
 config file timestamp has changed
 
 `isimport` (default False)
-- Internally set True when handling imports.  Not used by top-level scripts.
+- Internally set True when handling imports.  Not used by tool script calls.
 
 `tolerate_missing` (default False)
 - Used in a tool script service loop, return `-1` rather than raising `ConfigError` if the config file is inaccessible
@@ -442,14 +442,14 @@ config file timestamp has changed
   configparser module).  Separating the param and value may be whitespace, `=` or `:`.
 - **Native int, bool, and str support** - Integer values in the config file are stored as integers in 
   the cfg dictionary, True and False values (case insensitive) are stored as booleans, and 
-  all other entries are stored as strings.  This avoids most explicit type casting clutter in the script.
+  all other entries are stored as strings.  This avoids most explicit type casting clutter in the tool script.
 - **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
   import by other modules (`from cjnfuncs.cjnfuncs import logging`).  By default, logging will go to the
   console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
 - **Logging level control** - Optional `LogLevel` in the config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the config file, then 
   the logging level is set to the Python default logging level, 30/WARNING.
-  The script code may also manually/explicitly set the logging level - _after_ the initial `loadconifig()` call -
+  The tool script code may also manually/explicitly set the logging level - _after_ the initial `loadconifig()` call -
   and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
   switch feature.  Note that logging done _within_ loadconfig() code is always done at the `ldcfg_ll` level.
 - **Log file options** - Where to log has two separate fields:  `call_logifle` in the call to loadconfig(), and 
@@ -466,7 +466,7 @@ config file timestamp has changed
 
 - **Logging format** - cjnfuncs has built-in format strings for console and file logging.
   These defaults may be overridden by defining `CONSOLE_LOGGING_FORMAT` and/or `FILE_LOGGING_FORMAT`
-  constants in the main script file.
+  constants in the tool script file.
 
 - **Import nested config files** - loadconfig() supports `Import` (case insensitive). The imported file path
 is relative to the `tool.config_dir` if not an absolute path.
@@ -475,10 +475,10 @@ A prime usage of `import` is to place email server credentials in your home dire
 then import them in the tool script config file as such: `import ~/creds_SMTP`.  
 
 - **Config reload if changed, `flush_on_reload`, and `force_flush_reload`** - loadconfig() may be called 
-periodically by the main script, such as in a service loop.
+periodically by the tool script, such as in a service loop.
 If the config file timestamp is unchanged then loadconfig() immediately returns `0`. 
 If the timestamp has changed then the config file will be reloaded, and `1` is returned to indicate to 
-the main script to do any post-config-load operations. 
+the tool script to do any post-config-load operations. 
   - If `flush_on_reload=True` (default False) then the `cfg`
   dictionary will be cleaned/purged before the config file is reloaded. If `flush_on_reload=False` then the config
   file will be reloaded on top of the existing `cfg` dictionary contents (if a param was deleted in the config
@@ -492,7 +492,7 @@ the main script to do any post-config-load operations.
 
 - **Tolerating intermittent config file access** - When implementing a service loop, if `tolerate_missing=True` 
 (default False) then loadconfig() will return `-1` if the config file cannot be accessed, informing the 
-main script of the problem for appropriate handling. If `tolerate_missing=False` then loadconfig() will raise
+tool script of the problem for appropriate handling. If `tolerate_missing=False` then loadconfig() will raise
 a ConfigError if the config file cannot be accessed.
 
 - **Comparison to Python's configparser module** - configparser contains many customizable features. 
@@ -524,10 +524,14 @@ Here are a few key comparisons:
 Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
 but with handling if the item does not exist.
 
+NOTE: `getcfg()` is almost equivalent to `cfg.get()`, except that `getcfg()` does not default to `None`.
+Rather, `getcfg()` raises a ConfigError if the param does not exist and no `default` is specified.
+This can lead to cleaner tool script code.  Either access method may be used, along with `x = cfg["param"]`.
+
 
 ### Parameters
 `param`
-- String name of param (key) to be fetched from cfg
+- String name of param to be fetched from cfg
 
 `default` (default None)
 - if provided, is returned if `param` does not exist in cfg
@@ -599,15 +603,15 @@ Output:
 - Time value in resolution seconds, type int or float.
 
 `unitC`
-- Target ti
-me resolution: "s", "m", "h", "d", or "w" (case insensitive)
+- Target time resolution: "s", "m", "h", "d", or "w" (case insensitive)
+
 
 ### Returns
 - `time_sec` value scaled for the specified `unitC`, type float
 - Raises ValueError if not given an int or float value for `time_sec`, or given an unsupported 
   unitC time unit suffix.
 
-  
+
 ### Example
 ```
 Given
@@ -702,7 +706,7 @@ contain an '@' it is assumed to be a config param.
 
 `log` (default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
-at the DEBUG level. Useful for eliminating separate logging messages in the script code.
+at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
 
@@ -728,7 +732,7 @@ messages are also blocked if `DontEmail` is True.
 ` `
 ---
 ---
-# snd_email (subj="", body="", filename="", htmlfile="", to="", log=False) - Send an email message using info from the config file
+# snd_email (subj, to, body=None, filename=None, htmlfile=None, log=False)) - Send an email message using info from the config file
 
 The `to` string may be the name of a confg param (who's value is one or more email addresses),
 or a string with one or more email addresses. Using a config param name allows for customizing the
@@ -739,19 +743,8 @@ of `htmlfile`, in this order of precendent.
 
     
 ### Parameters
-`subj` (default "")
+`subj`
 - Email subject text
-
-`body` (default "")
-- A string message to be sent
-
-`filename` (default "")
-- A str or Path to the file to be sent, relative to the script install directory 
-(probably not useful).  Recommended to be an absolute path.
-
-`htmlfile` (default "")
-- A str or Path to an html formatted file to be sent, relative to the script install directory 
-(probably not useful).  Recommended to be an absolute path.
 
 `to`
 - To whom to send the message. `to` may be either an explicit string list of email addresses
@@ -759,9 +752,18 @@ of `htmlfile`, in this order of precendent.
 or more whitespace or comma separated email addresses).  If the `to` parameter does not
 contain an '@' it is assumed to be a config param.
 
+`body` (default None)
+- A string message to be sent
+
+`filename` (default None)
+- A str or Path to the file to be sent, relative to the `tool.cache_dir`, or an absolute path.
+
+`htmlfile` (default None)
+- A str or Path to the html formatted file to be sent, relative to the `tool.cache_dir`, or an absolute path.
+
 `log` (default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
-at the DEBUG level. Useful for eliminating separate logging messages in the script code.
+at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
 
@@ -808,6 +810,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 `~/creds_SMTP`:
   - `EmailFrom`, `EmailServer`, `EmailServerPort`, `EmailUser`, and `EmailPass`
 - `snd_email()` does not support multi-part MIME (an html send wont have a plain text part).
+- Checking the validity of email addresses is very basic... an email address must contain an '@'.
     ` `
 ---
 # Revision history

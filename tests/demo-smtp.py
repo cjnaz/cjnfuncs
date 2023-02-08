@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2023
 #
 #==========================================================
 
@@ -26,13 +26,14 @@ args = parser.parse_args()
 
 
 tool = set_toolname(TOOLNAME)
-print(tool.dump())
+print(tool.stats())
 
 if args.setup_user: #config_file == "pushuser":
     deploy_files([
         { "source": CONFIG_FILE,        "target_dir": "USER_CONFIG_DIR" },
         { "source": "testfile.txt",     "target_dir": "USER_CONFIG_DIR" },
-        { "source": "testfile.html",    "target_dir": "USER_CONFIG_DIR" },
+        # { "source": "testfile.html",    "target_dir": "USER_CONFIG_DIR" },
+        { "source": "testfile.html",    "target_dir": "USER_CACHE_DIR" },
         { "source": "creds_SMTP",       "target_dir": "USER_CONFIG_DIR" },
         { "source": "cjn_demo_smtp.cfg","target_dir": "USER_CONFIG_DIR" },  # file not distributed to github
         ], overwrite=False, missing_ok=True )
@@ -42,12 +43,15 @@ if args.cleanup:
     if os.path.exists(tool.user_config_dir):
         print (f"Removing 1  {tool.user_config_dir}")
         shutil.rmtree(tool.user_config_dir)
+    if os.path.exists(tool.user_cache_dir):
+        print (f"Removing 2  {tool.user_cache_dir}")
+        shutil.rmtree(tool.user_cache_dir)
     sys.exit()
 
 
 # Initial load
 try:
-    config = config_item(CONFIG_FILE)
+    config = config_item(args.config_file)
     print (f"\nLoad config {config.config_full_path}")
     config.loadconfig(ldcfg_ll=10)
 except Exception as e:
@@ -57,24 +61,31 @@ except Exception as e:
     print (f"  {e}")
     sys.exit()
 
-
 print ()
 try:    # This first send will fail with <[Errno -2] Name or service not known> if smtp server params are not valid
-    snd_email (subj="1: body to EmailTo", body="To be, or not to be...", to="EmailTo", log=True)
+    snd_email (subj="1:  body to EmailTo", to="EmailTo", body="To be, or not to be...", log=True)
 except Exception as e:
     print (f"snd_email failed:  {e}")
     print ("The config files probably need to be customized.")
     sys.exit()
 
 print ()
-snd_email (subj="2: body to EmailTo - not logged", body="To be, or not to be...", to="EmailTo")
+try:
+    snd_email (subj="2:  body to EmailTo - not logged", to="EmailTo", body="To be, or not to be...")
+except SndEmailError as e:
+    print (f"snd_email failed:  {e}")
 
 print ()
-snd_email (subj="3:  filename to EmailTo - not logged", filename=mungePath("testfile.txt", tool.config_dir).full_path, to="EmailTo")
-# snd_email (subj="3:  filename to EmailTo - not logged", filename="testfile.txt", to="EmailTo")
+try:
+    snd_email (subj="3:  filename to EmailTo - not logged", to="EmailTo", filename=mungePath("testfile.txt", tool.config_dir).full_path)
+except SndEmailError as e:
+    print (f"snd_email failed:  {e}")
 
 print ()
-snd_email (subj="4:  htmlfile to EmailTo", htmlfile=mungePath("testfile.html", tool.config_dir).full_path, to="EmailTo", log=True)
+try:
+    snd_email (subj="4:  htmlfile to EmailTo", htmlfile="testfile.html", to="EmailTo", log=True)
+except SndEmailError as e:
+    print (f"snd_email failed:  {e}")
 
 print ()
 snd_email (subj="5:  body to EmailToMulti", body="To be, or not to be...", to="EmailToMulti", log=True)
@@ -88,7 +99,7 @@ except SndEmailError as e:
 print ()
 try:
     snd_email (subj="7:  No to=", body="Hello")
-except SndEmailError as e:
+except Exception as e:
     print (f"snd_email failed:  {e}")
 
 print ()
@@ -102,3 +113,18 @@ snd_notif (subj="9:  This is a test subject - not logged", msg='This is the mess
 
 print ()
 snd_notif (subj="10: This is another test subject", msg='This is another message body', log=True)
+
+print ()
+snd_notif (subj="11: snd_notif with to=", msg='This is another message body', to="EmailTo", log=True)
+
+print ()
+try:
+    snd_email (subj="12: No body, filename, or htmlfile", to="EmailTo", log=True)
+except SndEmailError as e:
+    print (f"snd_email failed:  {e}")
+
+print ()
+try:
+    snd_email (subj="13: Empty to=", to="", body="Hello", log=True)
+except SndEmailError as e:
+    print (f"snd_email failed:  {e}")

@@ -3,14 +3,17 @@ Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
 .site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
 .site_data_dir    :  /usr/share/cjnfuncs_testcfg
-.env_defined      :  user
 Based on found user or site dirs:
+.env_defined      :  user
 .config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
 .data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
-.state_dir        :  /home/cjn/.local/share/cjnfuncs_testcfg
-.cache_dir        :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
 .log_dir_base     :  /home/cjn/.local/share/cjnfuncs_testcfg
 .log_dir          :  None
 .log_file         :  None
@@ -64,21 +67,72 @@ Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
 .site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
 .site_data_dir    :  /usr/share/cjnfuncs_testcfg
-.env_defined      :  user
 Based on found user or site dirs:
+.env_defined      :  user
 .config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
 .data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
-.state_dir        :  /home/cjn/.local/share/cjnfuncs_testcfg
-.cache_dir        :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
 .log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg
 .log_dir          :  /home/cjn/.config/cjnfuncs_testcfg
 .log_file         :  call_logfile
 .log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/call_logfile
 
 
------ T1.9:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__
+----- T1.9:  Change tool.log_dir_base.  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  mylogdir/call_logfile
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
+
+Stats for set_toolname <cjnfuncs_testcfg>:
+.toolname         :  cjnfuncs_testcfg
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
+.site_data_dir    :  /usr/share/cjnfuncs_testcfg
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_dir          :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_file         :  call_logfile
+.log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
+
+
+----- T1.10:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/cfg_logfile2
+
+Stats for set_toolname <cjnfuncs_testcfg>:
+.toolname         :  cjnfuncs_testcfg
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
+.site_data_dir    :  /usr/share/cjnfuncs_testcfg
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_dir          :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_file         :  cfg_logfile2
+.log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir/cfg_logfile2
+
+
+----- T1.11:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 Current log file:              __console__
 
@@ -86,25 +140,28 @@ Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
 .site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
 .site_data_dir    :  /usr/share/cjnfuncs_testcfg
-.env_defined      :  user
 Based on found user or site dirs:
+.env_defined      :  user
 .config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
 .data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
-.state_dir        :  /home/cjn/.local/share/cjnfuncs_testcfg
-.cache_dir        :  /home/cjn/.local/share/cjnfuncs_testcfg
-.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 .log_dir          :  None
 .log_file         :  None
 .log_full_path    :  __console__
 
-    demo-config.<module>             -  WARNING:  T1.9 - Log to  <__console__>
+    demo-config.<module>             -  WARNING:  T1.11 - Log to  <__console__>
 
------ T1.10: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__
+----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__
        cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
        cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 Current log file:              __console__
-    demo-config.<module>             -  WARNING:  T1.10 - Log to  <__console__>
+    demo-config.<module>             -  WARNING:  T1.12 - Log to  <__console__>

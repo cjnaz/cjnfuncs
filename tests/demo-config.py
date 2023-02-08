@@ -4,14 +4,13 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2023
 #
 #==========================================================
 
 __version__ = "1.0"
 TOOLNAME    = "cjnfuncs_testcfg"
 CONFIG_FILE = "demo_config.cfg"
-# LOGFILE     = None
 
 import argparse
 from cjnfuncs.cjnfuncs import *
@@ -22,8 +21,6 @@ parser.add_argument('Mode',
                     help="Test modes (1, 2, ...)")
 parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
                     help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory.")
-parser.add_argument('--setup-user', action='store_true',
-                    help=f"Install starter files in user space.")
 parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 args = parser.parse_args()
@@ -32,22 +29,11 @@ args = parser.parse_args()
 tool = set_toolname(TOOLNAME)
 print(tool.stats())
 
-# if args.setup_user:
-#     deploy_files([
-#         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
-#         { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
-#         { "source": "demo_config_T2.cfg",   "target_dir": "USER_CONFIG_DIR"},
-#         { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
-#         { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
-#         ], overwrite=True )
-#     sys.exit()
-
 if args.cleanup:
     if os.path.exists(tool.config_dir):
         print (f"Removing 1  {tool.config_dir}")
         shutil.rmtree(tool.config_dir)
     sys.exit()
-
 
 
 def remove_file (file_path):
@@ -81,16 +67,6 @@ def modify_configfile (cfg, key, value="", remove=False):
         cfgfile.write(cfg_temp)
 
     time.sleep(.1)  # Seems to be needed to ensure diff timestamps.  ???
-
-# if args.setup_user:
-# deploy_files([
-#     { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
-#     { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
-#     { "source": "demo_config_T2.cfg",   "target_dir": "USER_CONFIG_DIR"},
-#     { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
-#     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
-#     ], overwrite=True )
-#     # sys.exit()
 
 
 if args.Mode == '1':
@@ -148,17 +124,30 @@ if args.Mode == '1':
     print (tool.stats())
     logging.warning (f"T1.8 - Log to  <{tool.log_full_path}>")
 
-    print ("\n----- T1.9:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__")
-    config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
+    print ("\n----- T1.9:  Change tool.log_dir_base.  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  mylogdir/call_logfile")
+    tool.log_dir_base = tool.config_dir / "mylogdir"
+    config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
     print (tool.stats())
     logging.warning (f"T1.9 - Log to  <{tool.log_full_path}>")
 
-    print ("\n----- T1.10: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__")
+    print ("\n----- T1.10:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile")
+    config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
+    print (f"Current log file:              {tool.log_full_path}")
+    print (tool.stats())
+    logging.warning (f"T1.10 - Log to  <{tool.log_full_path}>")
+
+    print ("\n----- T1.11:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__")
+    config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
+    print (f"Current log file:              {tool.log_full_path}")
+    print (tool.stats())
+    logging.warning (f"T1.11 - Log to  <{tool.log_full_path}>")
+
+    print ("\n----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__")
     modify_configfile (config_T1, "LogFile",   remove=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.10 - Log to  <{tool.log_full_path}>")
+    logging.warning (f"T1.12 - Log to  <{tool.log_full_path}>")
 
     sys.exit()
 
@@ -186,11 +175,9 @@ if args.Mode == '2':
 
     print ("\n----- T2.1:  Initial load.  Default logging level 30")
     reloaded = config_T2.loadconfig()
-        # loadconfig params:   ldcfg_ll=10, call_logfile=None, call_logfile_wins=True, flush_on_reload=True, force_flush_reload=True)
     print_stats()
 
     print ("\n----- T2.2:  No config change >>>>  Not reloaded")
-    # modify_configfile (config_T2, "testvar",   "George")
     reloaded = config_T2.loadconfig(flush_on_reload=True) 
     print_stats()
 
@@ -269,7 +256,6 @@ deploy_files([
     { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
     ], overwrite=True )
-    # sys.exit()
 
 try:
     config = config_item(CONFIG_FILE)
@@ -385,7 +371,7 @@ if args.Mode == '12':
 
 
 if args.Mode == '13':
-    print ("\n***** Test missing config *****")
+    print ("\n***** Test missing config and externally set logging level *****")
 
     print (f"\n----- T13.1:  Missing config, tolerate_missing=False (default) >>>>  Exception")
     remove_file(config.config_full_path)

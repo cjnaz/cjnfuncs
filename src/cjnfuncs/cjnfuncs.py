@@ -49,7 +49,7 @@ cfg = {}
 
 #=====================================================================================
 #=====================================================================================
-#  Module exceptions
+#  M o d u l e   e x c e p t i o n s
 #=====================================================================================
 #=====================================================================================
 class Error(Exception):
@@ -79,10 +79,9 @@ class SndEmailError(Error):
 
 #=====================================================================================
 #=====================================================================================
-#  Setup Logging
+#  s e t u p l o g g i n g
 #=====================================================================================
 #=====================================================================================
-
 def setuplogging(call_logfile=None, call_logfile_wins=False, config_logfile=None):
     """
 ## setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None) - Set up the root logger
@@ -93,7 +92,7 @@ is called the current/active log file (or console) may be reassigned.
 setuplogging() works standalone or in conjunction with loadconfig().
 If a loaded config file has a `LogFile` parameter then loadconfig() passes it thru
 `config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
-that were passed to loadconfig() from the main script.  This mechanism allows the main script
+that were passed to loadconfig() from the tool script.  This mechanism allows the tool script
 to override any config `LogFile`, such as for directing output to the console for a tool script's 
 interactive use, eg:
     `setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')`
@@ -101,7 +100,7 @@ interactive use, eg:
     
 ### Parameters
 `call_logfile`
-- Potential log file passed from the main script.  Selected by `call_logfile_wins = True`.
+- Potential log file passed from the tool script.  Selected by `call_logfile_wins = True`.
 call_logfile may be an absolute path or relative to the tool.log_dir_base directory.  
 `None` specifies the console.
 
@@ -126,7 +125,8 @@ config_logfile may be absolute path or relative to the tool.log_dir_base directo
     if call_logfile_wins == True   and  call_logfile:
         _lfp = mungePath(call_logfile, tool.log_dir_base)
         
-    if _lfp != tool.log_full_path:      # TODO comparing a mungePath to a .full_path
+    if _lfp != tool.log_full_path:
+        # Either may be a str() or Path().  If the log target is not changing then they will be the same
         logger = logging.getLogger()
         logger.handlers.clear()
 
@@ -160,19 +160,17 @@ config_logfile may be absolute path or relative to the tool.log_dir_base directo
             tool.log_full_path = _lfp.full_path
 
 
-
 #=====================================================================================
 #=====================================================================================
-#  Base environment and path functions: set_toolname, mungePath, deploy_files
+#  C l a s s   s e t _ t o o l n a m e
 #=====================================================================================
 #=====================================================================================
-
 class set_toolname():
     """
 ## Class set_toolname (toolname) - Set target directories for config and data storage
 
 set_toolname() centralizes and establishes a set of base directory path variables for use in
-the script.  It looks for existing directories, based on the specified toolname, in
+the tool script.  It looks for existing directories, based on the specified toolname, in
 the site-wide (system-wide) and then user-specific locations.  Specifically, site-wide 
 config and/or data directories are looked for at (eg) `/etc/xdg/cjnfuncs_testenv` and/or 
 `/usr/share/cjnfuncs_testenv`.  If site-wide directories are not 
@@ -193,7 +191,7 @@ found then user-specific is assumed.  No directories are created.
 - Returns a str() listing of the available attributes of the instance
 
 
-### Behaviors, rules, and __variances from the XDG spec and/or the appdirs package__
+### Behaviors, rules, and _variances from the XDG spec and/or the appdirs package_
 - set_toolname() uses the 
 [appdirs package](https://pypi.org/project/appdirs/), which is a close implementation of the
 [XDG basedir specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
@@ -206,7 +204,7 @@ that generally should be used within tool scripts.
 If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
 Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
-style variance, and can be reset in the script by reassigning: `tool.log_dir_base = tool.user_log_dir` (or any
+style variance, and can be reset in the tool script by reassigning: `tool.log_dir_base = tool.user_log_dir` (or any
 other directory) before calling loadconfig() or setuplogging().
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
@@ -328,6 +326,11 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
         return stats
 
 
+#=====================================================================================
+#=====================================================================================
+#  C l a s s   m u n g e P a t h
+#=====================================================================================
+#=====================================================================================
 class mungePath():
     def __init__(self, in_path="", base_path="", mkdir=False):
         """
@@ -377,7 +380,7 @@ so that it may be used directly/immediately in the code.
 ### Behaviors and rules
 - If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
 - If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
-the script directory (generally not useful).
+the tool script directory (generally not useful).
 - If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
 - `in_path` and `base_path` may be type str(), Path(), or PurePath().
 - Symlinks are followed (not resolved).
@@ -442,6 +445,7 @@ What gets printed:
         self.is_dir =  self.full_path.is_dir()
         self.is_file = self.full_path.is_file()
 
+
     def refresh_stats(self):
         self.exists =  self.full_path.exists()
         self.is_absolute = self.full_path.is_absolute()
@@ -449,6 +453,7 @@ What gets printed:
         self.is_dir =  self.full_path.is_dir()
         self.is_file = self.full_path.is_file()
         return self
+
 
     def stats(self):
         stats = ""
@@ -463,6 +468,11 @@ What gets printed:
         return stats
 
 
+#=====================================================================================
+#=====================================================================================
+#  d e p l o y _ f i l e s
+#=====================================================================================
+#=====================================================================================
 def deploy_files(files_list, overwrite=False, missing_ok=False):
     """
 ## deploy_files (files_list, overwrite=False, missing_ok=False) - Install initial tool script files in user or site space
@@ -525,11 +535,10 @@ and files will be created with the `file_stat` permissions.
     mapping = [
         ["USER_CONFIG_DIR", tool.user_config_dir],
         ["USER_DATA_DIR",   tool.user_data_dir],
+        ["USER_STATE_DIR",  tool.user_state_dir],
+        ["USER_CACHE_DIR",  tool.user_cache_dir],
         ["SITE_CONFIG_DIR", tool.site_config_dir],
         ["SITE_DATA_DIR",   tool.site_data_dir],
-        # ["DATA_DIR",        tool.data_dir],      No need to push files to these dirs, correct?
-        # ["STATE_DIR",       tool.state_dir],
-        # ["CACHE_DIR",       tool.cache_dir],
         ]
 
     def resolve_target(_targ, mkdir=False):
@@ -572,7 +581,7 @@ and files will be created with the `file_stat` permissions.
     stack = inspect.stack()
     parentframe = stack[1][0]
     module = inspect.getmodule(parentframe)
-    if module.__name__ == "__main__":   # Caller is a script file, not an installed module
+    if module.__name__ == "__main__":   # Caller is a tool script file, not an installed module
         my_resources = mungePath(__main__.__file__).parent / "deployment_files"
     else:                               # Caller is an installed module
         my_resources = ir_files(module) / "deployment_files" 
@@ -620,13 +629,11 @@ and files will be created with the `file_stat` permissions.
             sys.exit(1)
         
 
-
 #=====================================================================================
 #=====================================================================================
-#  Config file functions loadconfig, getcfg, timevalue, retime
+#  C l a s s   c o n f i g _ i t e m
 #=====================================================================================
 #=====================================================================================
-
 initial_logging_setup = False   # Global since more than one config can be loaded
 CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
 
@@ -634,7 +641,7 @@ class config_item():
     """
 ## Class config_item (config_file, remap_logdirbase=True) - Create a configuration instance for use with loadconfig()
 
-Several attributes are kept for use by the main script, including the name, path, and the timestamp
+Several attributes are kept for use by the tool script, including the name, path, and the timestamp
 of the config file (timestamp once loaded).  
 
 The config file may be loaded and reloaded with successive calls to loadconfig().
@@ -711,7 +718,6 @@ Output
             self.config_dir         = config.parent
             self.config_full_path   = config.full_path
             self.config_timestamp   = 0
-            # if tool.env_defined == "user":
             if remap_logdirbase  and  tool.log_dir_base == tool.user_data_dir:
                 tool.log_dir_base = tool.user_config_dir
         else:
@@ -731,7 +737,11 @@ Output
         return stats
 
 
-
+#=====================================================================================
+#=====================================================================================
+#  l o a d c o n f i g
+#=====================================================================================
+#=====================================================================================
     def loadconfig(self,
             ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
             call_logfile        = None,
@@ -741,7 +751,7 @@ Output
             isimport            = False,
             tolerate_missing    = False):
         """
-## loadconfig() (config_item() class member function) - Load a configuration file into the cfg dictionary
+## loadconfig () (config_item() class member function) - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
     ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
@@ -780,7 +790,7 @@ feature, and intermittent loss of access to the config file.
 config file timestamp has changed
 
 `isimport` (default False)
-- Internally set True when handling imports.  Not used by top-level scripts.
+- Internally set True when handling imports.  Not used by tool script calls.
 
 `tolerate_missing` (default False)
 - Used in a tool script service loop, return `-1` rather than raising `ConfigError` if the config file is inaccessible
@@ -803,14 +813,14 @@ config file timestamp has changed
   configparser module).  Separating the param and value may be whitespace, `=` or `:`.
 - **Native int, bool, and str support** - Integer values in the config file are stored as integers in 
   the cfg dictionary, True and False values (case insensitive) are stored as booleans, and 
-  all other entries are stored as strings.  This avoids most explicit type casting clutter in the script.
+  all other entries are stored as strings.  This avoids most explicit type casting clutter in the tool script.
 - **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
   import by other modules (`from cjnfuncs.cjnfuncs import logging`).  By default, logging will go to the
   console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
 - **Logging level control** - Optional `LogLevel` in the config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the config file, then 
   the logging level is set to the Python default logging level, 30/WARNING.
-  The script code may also manually/explicitly set the logging level - _after_ the initial `loadconifig()` call -
+  The tool script code may also manually/explicitly set the logging level - _after_ the initial `loadconifig()` call -
   and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
   switch feature.  Note that logging done _within_ loadconfig() code is always done at the `ldcfg_ll` level.
 - **Log file options** - Where to log has two separate fields:  `call_logifle` in the call to loadconfig(), and 
@@ -827,7 +837,7 @@ config file timestamp has changed
 
 - **Logging format** - cjnfuncs has built-in format strings for console and file logging.
   These defaults may be overridden by defining `CONSOLE_LOGGING_FORMAT` and/or `FILE_LOGGING_FORMAT`
-  constants in the main script file.
+  constants in the tool script file.
 
 - **Import nested config files** - loadconfig() supports `Import` (case insensitive). The imported file path
 is relative to the `tool.config_dir` if not an absolute path.
@@ -836,10 +846,10 @@ A prime usage of `import` is to place email server credentials in your home dire
 then import them in the tool script config file as such: `import ~/creds_SMTP`.  
 
 - **Config reload if changed, `flush_on_reload`, and `force_flush_reload`** - loadconfig() may be called 
-periodically by the main script, such as in a service loop.
+periodically by the tool script, such as in a service loop.
 If the config file timestamp is unchanged then loadconfig() immediately returns `0`. 
 If the timestamp has changed then the config file will be reloaded, and `1` is returned to indicate to 
-the main script to do any post-config-load operations. 
+the tool script to do any post-config-load operations. 
   - If `flush_on_reload=True` (default False) then the `cfg`
   dictionary will be cleaned/purged before the config file is reloaded. If `flush_on_reload=False` then the config
   file will be reloaded on top of the existing `cfg` dictionary contents (if a param was deleted in the config
@@ -853,7 +863,7 @@ the main script to do any post-config-load operations.
 
 - **Tolerating intermittent config file access** - When implementing a service loop, if `tolerate_missing=True` 
 (default False) then loadconfig() will return `-1` if the config file cannot be accessed, informing the 
-main script of the problem for appropriate handling. If `tolerate_missing=False` then loadconfig() will raise
+tool script of the problem for appropriate handling. If `tolerate_missing=False` then loadconfig() will raise
 a ConfigError if the config file cannot be accessed.
 
 - **Comparison to Python's configparser module** - configparser contains many customizable features. 
@@ -878,14 +888,9 @@ Here are a few key comparisons:
   Save to file | No | Yes
         """
 
-        # TODO check config test cases for True or False expected return
-        # TODO User-set external log level
-
         global cfg
         global initial_logging_setup
         global preexisting_loglevel
-
-        # CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
 
         if not initial_logging_setup:   # Do only once, globally
             # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
@@ -893,18 +898,7 @@ Here are a few key comparisons:
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins)
             initial_logging_setup = True
 
-            # TODO - How to set external logging level befor first call to loadconfig?
-        
         config = self.config_full_path
-
-        # # Save externally set / prior log level for later restore
-        # preexisting_loglevel = logging.getLogger().level
-
-        # if force_flush_reload:
-        #     logging.getLogger().setLevel(ldcfg_ll)   # logging within loadconfig is always done at ldcfg_ll
-        #     logging.info("cfg dictionary force flushed (force_flush_reload)")
-        #     cfg.clear()
-        #     self.config_timestamp = 0       # Force reload of the config file
 
         try:
             if not isimport:                # Operations only on top level config file
@@ -959,29 +953,29 @@ Here are a few key comparisons:
                             logging.getLogger().setLevel(preexisting_loglevel)
                             _msg = f"Failed importing/processing config file  <{target.full_path}>"
                             raise ConfigError (_msg)
-                            
+
                     # Regular, param/value line
                     else:
                         _line = line.split("#", maxsplit=1)[0].strip()
                         if len(_line) > 0:
                             out = CFGLINE.match(_line)
                             if out:
-                                key = out.group(1)
-                                rol = out.group(2)              # rest of line
+                                param = out.group(1)
+                                rol   = out.group(2)              # rest of line
                                 isint = False
                                 try:
-                                    cfg[key] = int(rol)         # add int to dict
+                                    cfg[param] = int(rol)         # add int to dict
                                     isint = True
                                 except:
                                     pass
                                 if not isint:
                                     if rol.lower() == "true":   # add bool to dict
-                                        cfg[key] = True
+                                        cfg[param] = True
                                     elif rol.lower() == "false":
-                                        cfg[key] = False
+                                        cfg[param] = False
                                     else:
-                                        cfg[key] = rol          # add string to dict
-                                logging.debug (f"Loaded {key} = <{cfg[key]}>  ({type(cfg[key])})")
+                                        cfg[param] = rol          # add string to dict
+                                logging.debug (f"Loaded {param} = <{cfg[param]}>  ({type(cfg[param])})")
                             else: 
                                 line = line.replace('\n','')
                                 logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
@@ -1007,10 +1001,15 @@ Here are a few key comparisons:
             else:
                 logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
                 logging.getLogger().setLevel(preexisting_loglevel)
-                
+
         return 1    # 1 indicates that the config file was (re)loaded
 
 
+#=====================================================================================
+#=====================================================================================
+#  g e t c f g
+#=====================================================================================
+#=====================================================================================
 def getcfg(param, default="_nodefault"):
     """
 ## getcfg (param, default=None) - Get a param from the cfg dictionary.
@@ -1018,10 +1017,14 @@ def getcfg(param, default="_nodefault"):
 Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
 but with handling if the item does not exist.
 
+NOTE: `getcfg()` is almost equivalent to `cfg.get()`, except that `getcfg()` does not default to `None`.
+Rather, `getcfg()` raises a ConfigError if the param does not exist and no `default` is specified.
+This can lead to cleaner tool script code.  Either access method may be used, along with `x = cfg["param"]`.
+
 
 ### Parameters
 `param`
-- String name of param (key) to be fetched from cfg
+- String name of param to be fetched from cfg
 
 `default` (default None)
 - if provided, is returned if `param` does not exist in cfg
@@ -1042,6 +1045,11 @@ but with handling if the item does not exist.
     raise ConfigError (_msg)
 
 
+#=====================================================================================
+#=====================================================================================
+#  C l a s s   t i m e v a l u e
+#=====================================================================================
+#=====================================================================================
 class timevalue():
     def __init__(self, orig_val):
         """
@@ -1132,6 +1140,11 @@ Output:
         return stats
 
 
+#=====================================================================================
+#=====================================================================================
+#  r e t i m e
+#=====================================================================================
+#=====================================================================================
 def retime(time_sec, unitC):
     """
 ## retime (time_sec, unitC) - Convert time value in seconds to unitC resolution
@@ -1144,15 +1157,15 @@ def retime(time_sec, unitC):
 - Time value in resolution seconds, type int or float.
 
 `unitC`
-- Target ti
-me resolution: "s", "m", "h", "d", or "w" (case insensitive)
+- Target time resolution: "s", "m", "h", "d", or "w" (case insensitive)
+
 
 ### Returns
 - `time_sec` value scaled for the specified `unitC`, type float
 - Raises ValueError if not given an int or float value for `time_sec`, or given an unsupported 
   unitC time unit suffix.
 
-  
+
 ### Example
 ```
 Given
@@ -1177,10 +1190,9 @@ Output
 
 #=====================================================================================
 #=====================================================================================
-#  Lock file management functions
+#  r e q u e s t l o c k
 #=====================================================================================
 #=====================================================================================
-
 def requestlock(caller, lockfile=None, timeout=5):
     """
 ## requestlock (caller, lockfile, timeout=5) - Lock file request
@@ -1245,6 +1257,11 @@ Multiple lock files may be used simultaneously by specifying unique `lockfile` n
     return -1
 
 
+#=====================================================================================
+#=====================================================================================
+#  r e l e a s e l o c k
+#=====================================================================================
+#=====================================================================================
 def releaselock(lockfile=None):
     """
 ## releaselock (lockfile) - Release a lock file
@@ -1264,6 +1281,7 @@ file locks ensures that the tool script does not run if the prior run has not co
 - `0` on successfully `lockfile` release (lock file deleted)
 - `-1` if failed to delete the `lockfile`, or the `lockfile` does not exist.  A WARNING level message is also logged.
     """
+
     if lockfile == None:
         lockfile = tool.toolname + "_LOCK"
     lock_file = mungePath(lockfile, tempfile.gettempdir())
@@ -1282,10 +1300,9 @@ file locks ensures that the tool script does not run if the prior run has not co
 
 #=====================================================================================
 #=====================================================================================
-#  Notification and email functions
+#  s n d _ n o t i f
 #=====================================================================================
 #=====================================================================================
-
 def snd_notif(subj="Notification message", msg="", to="NotifList", log=False):
     """
 ## snd_notif (subj="Notification message, msg="", to="NotifList", log=False) - Send a text message using info from the config file
@@ -1315,7 +1332,7 @@ contain an '@' it is assumed to be a config param.
 
 `log` (default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
-at the DEBUG level. Useful for eliminating separate logging messages in the script code.
+at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
 
@@ -1353,9 +1370,14 @@ messages are also blocked if `DontEmail` is True.
         logging.debug (f"Notification sent <{subj}> <{msg}>")
 
 
-def snd_email(subj="", body="", filename="", htmlfile="", to="", log=False):
+#=====================================================================================
+#=====================================================================================
+#  s n d _ e m a i l
+#=====================================================================================
+#=====================================================================================
+def snd_email(subj, to, body=None, filename=None, htmlfile=None, log=False):
     """
-## snd_email (subj="", body="", filename="", htmlfile="", to="", log=False) - Send an email message using info from the config file
+## snd_email (subj, to, body=None, filename=None, htmlfile=None, log=False)) - Send an email message using info from the config file
 
 The `to` string may be the name of a confg param (who's value is one or more email addresses),
 or a string with one or more email addresses. Using a config param name allows for customizing the
@@ -1366,19 +1388,8 @@ of `htmlfile`, in this order of precendent.
 
     
 ### Parameters
-`subj` (default "")
+`subj`
 - Email subject text
-
-`body` (default "")
-- A string message to be sent
-
-`filename` (default "")
-- A str or Path to the file to be sent, relative to the script install directory 
-(probably not useful).  Recommended to be an absolute path.
-
-`htmlfile` (default "")
-- A str or Path to an html formatted file to be sent, relative to the script install directory 
-(probably not useful).  Recommended to be an absolute path.
 
 `to`
 - To whom to send the message. `to` may be either an explicit string list of email addresses
@@ -1386,9 +1397,18 @@ of `htmlfile`, in this order of precendent.
 or more whitespace or comma separated email addresses).  If the `to` parameter does not
 contain an '@' it is assumed to be a config param.
 
+`body` (default None)
+- A string message to be sent
+
+`filename` (default None)
+- A str or Path to the file to be sent, relative to the `tool.cache_dir`, or an absolute path.
+
+`htmlfile` (default None)
+- A str or Path to the html formatted file to be sent, relative to the `tool.cache_dir`, or an absolute path.
+
 `log` (default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
-at the DEBUG level. Useful for eliminating separate logging messages in the script code.
+at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
 
@@ -1435,29 +1455,36 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 `~/creds_SMTP`:
   - `EmailFrom`, `EmailServer`, `EmailServerPort`, `EmailUser`, and `EmailPass`
 - `snd_email()` does not support multi-part MIME (an html send wont have a plain text part).
+- Checking the validity of email addresses is very basic... an email address must contain an '@'.
     """
 
-    # if getcfg('DontEmail', default=False):
-    #     if log:
-    #         logging.warning (f"Email NOT sent <{subj}>")
-    #     else:
-    #         logging.debug (f"Email NOT sent <{subj}>")
-    #     return
-
     # Deal with what to send
-    if body != '':
+    if body:
         msg_type = "plain"
         m_text = body
-    elif os.path.exists(filename):
-        msg_type = "plain"
-        with io.open(filename, encoding='utf8') as ifile:
-            m_text = ifile.read()
-    elif os.path.exists(htmlfile):
-        msg_type = "html"
-        with io.open(htmlfile, encoding='utf8') as ifile:
-            m_text = ifile.read()
+
+    elif filename:
+        xx = mungePath(filename, tool.cache_dir)
+        try:
+            msg_type = "plain"
+            with Path.open(xx.full_path) as ifile:
+                m_text = ifile.read()
+        except Exception as e:
+            _msg = f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}"
+            raise SndEmailError (_msg)
+
+    elif htmlfile:
+        xx = mungePath(htmlfile, tool.cache_dir)
+        try:
+            msg_type = "html"
+            with Path.open(xx.full_path) as ifile:
+                m_text = ifile.read()
+        except Exception as e:
+            _msg = f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}"
+            raise SndEmailError (_msg)
+
     else:
-        _msg = f"snd_email - Message subject <{subj}>:  No body and can't find filename <{filename}> or htmlfile <{htmlfile}>."
+        _msg = f"snd_email - Message subject <{subj}>:  No body, filename, or htmlfile specified."
         raise SndEmailError (_msg)
     m_text += f"\n(sent {time.asctime(time.localtime())})"
 
@@ -1486,7 +1513,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             _msg = f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>."
             raise SndEmailError (_msg)
 
-    # Send the message
+    # Send the message - After above to allow checking of input parameters
     if getcfg('DontEmail', default=False):
         if log:
             logging.warning (f"Email NOT sent <{subj}>")

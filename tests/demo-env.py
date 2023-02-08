@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2023
 #
 #==========================================================
 
@@ -17,8 +17,6 @@ from cjnfuncs.cjnfuncs import *
 
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
-                    help=f"Path to the config file (Default <{CONFIG_FILE})> in user/site config directory.")
 parser.add_argument('--setup-user', action='store_true',
                     help=f"Install starter files in user space.")
 parser.add_argument('--setup-site', action='store_true',
@@ -48,11 +46,11 @@ if args.setup_user:
 
 if args.setup_site:
     deploy_files([
-        { "source": CONFIG_FILE, "target_dir": "SITE_CONFIG_DIR",                   "file_stat": 0o644, "dir_stat": 0o777},
-        { "source": "testfile.txt", "target_dir": "$HOME/.config/junk2",            "file_stat": 0o600, "dir_stat": 0o707},
-        { "source": "testfile.txt", "target_dir": "SITE_CONFIG_DIR"},
-        { "source": "test_dir", "target_dir": "SITE_DATA_DIR/mydirs",               "file_stat": 0o633, "dir_stat": 0o770},
-        { "source": "test_dir/subdir/x4", "target_dir": "SITE_CONFIG_DIR/mydirs",   "file_stat": 0o633, "dir_stat": 0o770},
+        { "source": CONFIG_FILE,            "target_dir": "SITE_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o777},
+        { "source": "testfile.txt",         "target_dir": "$HOME/.config/junk2",        "file_stat": 0o600, "dir_stat": 0o707},
+        { "source": "testfile.txt",         "target_dir": "SITE_CONFIG_DIR"},
+        { "source": "test_dir",             "target_dir": "SITE_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o770},
+        { "source": "test_dir/subdir/x4",   "target_dir": "SITE_CONFIG_DIR/mydirs",     "file_stat": 0o633, "dir_stat": 0o770},
         # Uncomment this to force error traps
         # { "source": "doesnotexist", "target_dir": "SITE_CONFIG_DIR",                "file_stat": 0o633, "dir_stat": 0o770},
         ] , overwrite=True)
@@ -81,7 +79,7 @@ if args.cleanup:
     sys.exit()
 
 
-if not mungePath(CONFIG_FILE, tool.config_dir).exists:
+if not mungePath(CONFIG_FILE, tool.config_dir).exists  or  not mungePath(base_dir=tool.data_dir).exists:
     print (f"No user or site setup found.  Run with <--setup-user> or <--setup-site> to set up the environment.")
     sys.exit()
 
