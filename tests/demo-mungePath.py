@@ -3,7 +3,7 @@
 """
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2023
 #
 #   NOTE:  This demo file leaves a remnant dir: /tmp/mungepath
 #    
@@ -25,14 +25,14 @@ def remove_tree (path):
 
 def wrapper (in_path="", base_path="", mkdir=False, note=None):
     """
-    Operates exactly the same as mungePath, with the additional note field and results dump.
+    Operates exactly the same as mungePath, with the additional note field and results stats.
     """
     print()
     if note:
         print ("NOTE: ", note)
     print (f"Given:\n in_path   :  <{in_path}>\n base_path :  <{base_path}>\n mkdir     :  <{mkdir}>")
     xx = mungePath(in_path=in_path, base_path=base_path, mkdir=mkdir)
-    print(xx.dump())
+    print(xx.stats())
     return xx
 
 print ("\n\n***** File paths relative to a base path")
@@ -70,8 +70,6 @@ wrapper (Path("file.txt"), Path("/tmp/mungePath"),          note="20 - Accepts P
 wrapper (PurePath("file.txt"), PurePath("/tmp/mungePath"),  note="21 - Accepts PurePath types")
 
 print ("\n\n***** symlinks followed (not resolved)")
-# os.symlink(xx.full_path, xx.dir / "subdir" / "symlink.txt")
-# os.symlink(xx.dir, xx.dir / "symlinkdir")
 os.symlink(xx.full_path, xx.parent / "subdir" / "symlink.txt")
 os.symlink(xx.parent, xx.parent / "symlinkdir")
 wrapper ("subdir/symlink.txt", testpath,                    note="22 - symlink file honored (symlink created earlier)")

@@ -4,13 +4,13 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2023
 #
 #==========================================================
 
 __version__ = "1.0"
 TOOLNAME    = "cjnfuncs_testlock"
-LOGFILE     = None  #"testlock.log"
+LOGFILE     = None
 
 import argparse
 from cjnfuncs.cjnfuncs import *
