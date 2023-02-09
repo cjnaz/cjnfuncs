@@ -481,16 +481,17 @@ If deployment fails then execution aborts.  This functions is intended for inter
 
 
 ### Parameters
-`source`
-- Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
-No wildcard support.
-
-`target_dir`
-- A directory target for the pushed `source`.  It is expanded for user and environment vars, and supports these 
-substitutions (per set_toolname()):
-  - USER_CONFIG_DIR, SITE_CONFIG_DIR
-  - USER_DATA_DIR, SITE_DATA_DIR
-  - Also absolute paths
+`files_list`
+- A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
+  - `source` - Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
+    No wildcard support.
+  - `target_dir` - A directory target for the pushed `source`.  It is expanded for user and environment vars, 
+    and supports these substitutions (per set_toolname()):
+    - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR
+    - SITE_CONFIG_DIR, SITE_DATA_DIR
+    - Also absolute paths
+  - `file_stat` - Permissions set on each created file
+  - `dir_stat` - Permissions set on each created directory (if not already existing)
 
 `overwrite`
 - If overwrite=False (default) then only missing files will be copied.  If overwrite=True then all files will be overwritten 

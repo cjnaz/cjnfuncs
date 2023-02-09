@@ -15,23 +15,26 @@ Some may be simple scripts, and others may themselves be installed packages.
 
 
 ## Classes and functions
-- [setuplogging](#setuplogging-call_logfilenone-call_logfile_winsfalse-config_logfilenone---set-up-the-root-logger)
-- [set_toolname](#class-set_toolname-toolname---set-target-directories-for-config-and-data-storage)
-- [mungePath](#class-mungepath-in_path-base_path-mkdirfalse---a-clean-interface-for-dealing-with-filesystem-paths)
-- [deploy_files](#deploy_files-files_list-overwritefalse-missing_okfalse---install-initial-tool-script-files-in-user-or-site-space)
-- [config_item](#class-config_item-config_file-remap_logdirbasetrue---create-a-configuration-instance-for-use-with-loadconfig)
-- [loadconfig](#loadconfig--config_item-class-member-function---load-a-configuration-file-into-the-cfg-dictionary)
-- [getcfg](#getcfg-param-defaultnone---get-a-param-from-the-cfg-dictionary)
-- [timevalue](#class-timevalue-orig_val---convert-time-value-strings-of-various-resolutions-to-seconds)
-- [retime](#retime-time_sec-unitc---convert-time-value-in-seconds-to-unitc-resolution)
-- [requestlock](#requestlock-caller-lockfile-timeout5---lock-file-request)
-- [releaselock](#releaselock-lockfile---release-a-lock-file)
-- [snd_notif](#snd_notif-subjnotification-message-msg-tonotiflist-logfalse---send-a-text-message-using-info-from-the-config-file)
-- [snd_email](#snd_email-subj-to-bodynone-filenamenone-htmlfilenone-logfalse---send-an-email-message-using-info-from-the-config-file)
+- [setuplogging](#setuplogging)
+- [set_toolname](#set_toolname)
+- [mungePath](#mungePath)
+- [deploy_files](#deploy_files)
+- [config_item](#config_item)
+- [loadconfig](#loadconfig)
+- [getcfg](#getcfg)
+- [timevalue](#timevalue)
+- [retime](#retime)
+- [requestlock](#requestlock)
+- [releaselock](#releaselock)
+- [snd_notif](#snd_notif)
+- [snd_email](#snd_email)
 
-` `
+<br/>
+
+<a id="setuplogging"></a>
+
 ---
----
+
 # setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None) - Set up the root logger
 
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
@@ -65,9 +68,12 @@ config_logfile may be absolute path or relative to the tool.log_dir_base directo
 ### Returns
 - NoneType
     
-` `
+<br/>
+
+<a id="set_toolname"></a>
+
 ---
----
+
 # Class set_toolname (toolname) - Set target directories for config and data storage
 
 set_toolname() centralizes and establishes a set of base directory path variables for use in
@@ -170,9 +176,12 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
     .log_full_path    :  None
 ```
     
-` `
+<br/>
+
+<a id="mungePath"></a>
+
 ---
----
+
 # Class mungePath (in_path="", base_path="", mkdir=False) - A clean interface for dealing with filesystem paths
 
 `mungePath()` is based on pathlib, producing Path type attributes and status booleans which may be used with all
@@ -255,9 +264,12 @@ What gets printed:
     .is_file      :  True
 ```
         
-` `
+<br/>
+
+<a id="deploy_files"></a>
+
 ---
----
+
 # deploy_files (files_list, overwrite=False, missing_ok=False) - Install initial tool script files in user or site space
 
 `deploy_files()` is used to install initial setup files (and directory trees) from the module to the user 
@@ -269,16 +281,18 @@ If deployment fails then execution aborts.  This functions is intended for inter
 
 
 ### Parameters
-`source`
-- Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
-No wildcard support.
+`files_list`
+- A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
+  - `source` - Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
+    No wildcard support.
+  - `target_dir` - A directory target for the pushed `source`.  It is expanded for user and environment vars, 
+    and supports these substitutions (per set_toolname()):
+    - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR
+    - SITE_CONFIG_DIR, SITE_DATA_DIR
+    - Also absolute paths
+  - `file_stat` - Permissions set on each created file
+  - `dir_stat` - Permissions set on each created directory (if not already existing)
 
-`target_dir`
-- A directory target for the pushed `source`.  It is expanded for user and environment vars, and supports these 
-substitutions (per set_toolname()):
-  - USER_CONFIG_DIR, SITE_CONFIG_DIR
-  - USER_DATA_DIR, SITE_DATA_DIR
-  - Also absolute paths
 
 `overwrite`
 - If overwrite=False (default) then only missing files will be copied.  If overwrite=True then all files will be overwritten 
@@ -312,9 +326,12 @@ The target_dir may specify a subdirectory, such as `"target_dir": "USER_DATA_DIR
 Any _new directories_ in the  `target_dir` path will be created with the `dir_stat` permissions,
 and files will be created with the `file_stat` permissions.
     
-` `
+<br/>
+
+<a id="config_item"></a>
+
 ---
----
+
 # Class config_item (config_file, remap_logdirbase=True) - Create a configuration instance for use with loadconfig()
 
 Several attributes are kept for use by the tool script, including the name, path, and the timestamp
@@ -385,9 +402,12 @@ Output
     tool.log_dir_base   :  /home/me/.config/testcfg
 ```
     
-` `
+<br/>
+
+<a id="loadconfig"></a>
+
 ---
----
+
 # loadconfig () (config_item() class member function) - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
@@ -524,9 +544,12 @@ Here are a few key comparisons:
   Mapping Protocol Access | No | Yes
   Save to file | No | Yes
         
-` `
+<br/>
+
+<a id="getcfg"></a>
+
 ---
----
+
 # getcfg (param, default=None) - Get a param from the cfg dictionary.
 
 Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
@@ -550,9 +573,12 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 - `default` value if param not in cfg and `default` value provided
 - raises ConfigError if param does not exist in cfg and no `default` provided.
     
-` `
+<br/>
+
+<a id="timevalue"></a>
+
 ---
----
+
 # Class timevalue (orig_val) - Convert time value strings of various resolutions to seconds
 
 `timevalue()` provides a convenience mechanism for working with time values and time/datetime calculations.
@@ -598,9 +624,12 @@ Output:
     Sleep <60.0> seconds
 ```
         
-` `
+<br/>
+
+<a id="retime"></a>
+
 ---
----
+
 # retime (time_sec, unitC) - Convert time value in seconds to unitC resolution
 
 `retime()` translates a value is resolution seconds into a new target resolution
@@ -630,9 +659,12 @@ Output
     210H = 756000.0 seconds = 1.25 weeks
 ```
     
-` `
+<br/>
+
+<a id="requestlock"></a>
+
 ---
----
+
 # requestlock (caller, lockfile, timeout=5) - Lock file request
 
 For tool scripts that may take a long time to run and are run by CRON, the possibility exists that 
@@ -664,9 +696,12 @@ Multiple lock files may be used simultaneously by specifying unique `lockfile` n
 - `-1` if failed to create the `lockfile` (either file already exists or no write access).
   A WARNING level message is also logged.
     
-` `
+<br/>
+
+<a id="releaselock"></a>
+
 ---
----
+
 # releaselock (lockfile) - Release a lock file
 
 Any code can release a lock, even if that code didn't request the lock.
@@ -684,9 +719,12 @@ file locks ensures that the tool script does not run if the prior run has not co
 - `0` on successfully `lockfile` release (lock file deleted)
 - `-1` if failed to delete the `lockfile`, or the `lockfile` does not exist.  A WARNING level message is also logged.
     
-` `
+<br/>
+
+<a id="snd_notif"></a>
+
 ---
----
+
 # snd_notif (subj="Notification message, msg="", to="NotifList", log=False) - Send a text message using info from the config file
 
 Intended for use of your mobile provider's email-to-text bridge email address, eg, 
@@ -737,9 +775,12 @@ messages are also blocked if `DontEmail` is True.
 ### Behaviors and rules
 - `snd_notif()` uses `snd_email()` to send the message. See `snd_email()` for related setup.
     
-` `
+<br/>
+
+<a id="snd_email"></a>
+
 ---
----
+
 # snd_email (subj, to, body=None, filename=None, htmlfile=None, log=False)) - Send an email message using info from the config file
 
 The `to` string may be the name of a confg param (who's value is one or more email addresses),

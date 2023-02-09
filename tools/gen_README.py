@@ -25,6 +25,11 @@ def snd_notif(subj="Notification message", msg="", to="NotifList", log=False):
     """
 '''
 
+def get_linkname(block):
+    funcline = block.group(1).split('\n')[0]
+    return funcline.replace("Class ", "").split(maxsplit=1)[0]
+
+
 with pathlib.Path(CODEFILE).open() as infile:
     all = infile.read()
 
@@ -32,16 +37,15 @@ with pathlib.Path(CODEFILE).open() as infile:
 # Build the links list
 comment_block = re.compile(r'"""\s+##\s([\s\S]+?)(?:""")')
 links = ""
-for match in comment_block.finditer(all):
-    funcline = match.group(1).split('\n')[0]
-    link_name = funcline.replace("Class ", "").split(maxsplit=1)[0]
+for block in comment_block.finditer(all):
+    link_name = get_linkname(block)
+    links += f"- [{link_name}](#{link_name})\n"
 
-    link = funcline.replace(" ", "-").lower()
-    deleted = ":()\n,.=\"\'"
-    for char in deleted:
-        link = link.replace(char, "")
-
-    links += f"- [{link_name}](#{link})\n"
+    # link = funcline.replace(" ", "-").lower()
+    # deleted = ":()\n,.=\"\'"
+    # for char in deleted:
+    #     link = link.replace(char, "")
+    # links += f"- [{link_name}](#{link})\n"
 
 # Write the README.md file
 with pathlib.Path(README_OUT).open('w') as outfile:
@@ -50,12 +54,13 @@ with pathlib.Path(README_OUT).open('w') as outfile:
 
     outfile.write(links)
 
-    for match in comment_block.finditer(all):
-        outfile.write("\n` `\n")
-        outfile.write("---\n")
-        outfile.write("---\n")
+    for block in comment_block.finditer(all):
+        link_name = get_linkname(block)
+        outfile.write("\n<br/>\n\n")
+        outfile.write(f'<a id="{link_name}"></a>\n\n')
+        outfile.write("---\n\n")
         outfile.write("# ")
-        outfile.write(match.group(1))
+        outfile.write(block.group(1))
 
     with pathlib.Path(README_TAIL).open() as tail:
         outfile.write(tail.read())
