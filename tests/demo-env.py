@@ -34,7 +34,7 @@ if args.setup_user:
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o770},
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR/subdir",     "file_stat": 0o641, "dir_stat": 0o777},
         { "source": "testfile.txt",         "target_dir": "$HOME/.config/junk2",        "file_stat": 0o600, "dir_stat": 0o707},
-        { "source": "testfile.txt",         "target_dir": "USER_CONFIG_DIR"},       # defaults to file_stat 0o764
+        { "source": "testfile.txt",         "target_dir": "USER_CONFIG_DIR/dirxxx"},  # defaults file_stat 0o764, dir_stat 0o775
         { "source": "test_dir",             "target_dir": "USER_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o720},
         { "source": "test_dir/subdir/x4",   "target_dir": "USER_CONFIG_DIR/mydirs",     "file_stat": 0o612, "dir_stat": 0o711},
         # Uncomment these to force error traps
@@ -48,7 +48,7 @@ if args.setup_site:
     deploy_files([
         { "source": CONFIG_FILE,            "target_dir": "SITE_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o777},
         { "source": "testfile.txt",         "target_dir": "$HOME/.config/junk2",        "file_stat": 0o600, "dir_stat": 0o707},
-        { "source": "testfile.txt",         "target_dir": "SITE_CONFIG_DIR"},
+        { "source": "testfile.txt",         "target_dir": "SITE_CONFIG_DIR/dirxxx"},
         { "source": "test_dir",             "target_dir": "SITE_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o770},
         { "source": "test_dir/subdir/x4",   "target_dir": "SITE_CONFIG_DIR/mydirs",     "file_stat": 0o633, "dir_stat": 0o770},
         # Uncomment this to force error traps

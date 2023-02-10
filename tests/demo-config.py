@@ -66,7 +66,7 @@ def modify_configfile (cfg, key, value="", remove=False):
     with cfg.config_full_path.open('w') as cfgfile:
         cfgfile.write(cfg_temp)
 
-    time.sleep(.1)  # Seems to be needed to ensure diff timestamps.  ???
+    time.sleep(.1)  # Seems to be needed to ensure diff timestamps.  Not always sufficient sleep time!
 
 
 if args.Mode == '1':
@@ -148,6 +148,18 @@ if args.Mode == '1':
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
     logging.warning (f"T1.12 - Log to  <{tool.log_full_path}>")
+
+    print ("\n----- T1.13: Modified console logging format >>>>  Log file:  __console__")
+    modify_configfile (config_T1, "ConsoleLogFormat", "{levelname:>8}:  {message}")
+    config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
+    print (f"Current log file:              {tool.log_full_path}")
+    logging.warning (f"T1.13 - Log to  <{tool.log_full_path}>")
+
+    print ("\n----- T1.14: Modified file logging format >>>>  Log file:  call_logfile")
+    modify_configfile (config_T1, "FileLogFormat", "{levelname:>8}:  {message}")
+    config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
+    print (f"Current log file:              {tool.log_full_path}")
+    logging.warning (f"T1.14 - Log to  <{tool.log_full_path}>")
 
     sys.exit()
 

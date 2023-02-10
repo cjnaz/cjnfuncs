@@ -41,6 +41,58 @@ MAIN_MODULE_STEM       = Path(__main__.__file__).stem
 # Project globals
 cfg = {}
 
+# stack = inspect.stack()
+# print (stack)
+# print ("-----------------")
+# caller = ""
+# for item in stack:
+#     print ()
+#     print (item[0])
+#     print (item[1])
+#     print (item[2])
+#     print (item[3])
+#     print (item[4])
+#     code_context = item[4]
+#     if code_context is not None:
+#         if "from cjnfuncs.cjnfuncs import" in code_context[0]:
+#             print (item)
+#             caller = Path(item[1]).stem
+#             break
+
+# print ("caller:", caller)
+# from caller import CONSOLE_LOGGING_FORMAT as xxx
+# print (xxx)
+# # print (module(caller).CONSOLE_LOGGING_FORMAT)
+# exit()
+
+# # frm = inspect.stack()[1]
+# # mod = inspect.getmodule(frm[0])
+# # print ('[%s] %s' % (mod.__name__, msg))
+# # caller = inspect.currentframe().f_back
+# # print ("Called from module", caller.f_globals['__name__'])
+
+# exit()
+
+# stack = inspect.stack()
+# print (stack)
+# parentframe = stack[1][0]
+# print()
+# print (parentframe)
+# module = inspect.getmodule(parentframe)
+# print()
+# print (module)
+# print (f"module name: {module.__name__}")
+
+# exit()
+
+# import traceback
+# print ("--------------------")
+# for line in traceback.format_stack():
+#     print()
+#     print(line.strip())
+# exit()
+
+
 
 #=====================================================================================
 #=====================================================================================
@@ -113,46 +165,71 @@ config_logfile may be absolute path or relative to the tool.log_dir_base directo
 - NoneType
     """
 
+    # stack = inspect.stack()
+    # parentframe = stack[1][0]
+    # print (parentframe)
+    # module = inspect.getmodule(parentframe)
+    # print (module)
+    # print (f"module name: {module.__name__}")
+
+
+    # import sys
+    # mod_name = vars(sys.modules[__name__])['__package__']
+    # print('Code executed as a ' + ('module named %s' % mod_name if mod_name else 'script'))
+
+
+    # if module.__name__ == "__main__":   # Caller is a tool script file, not an installed module
+    #     my_resources = mungePath(__main__.__file__).parent / "deployment_files"
+    # else:                               # Caller is an installed module
+    #     my_resources = ir_files(module) / "deployment_files" 
+
+    # exit()
+
+
     _lfp = "__console__"
     if call_logfile_wins == False  and  config_logfile:
         _lfp = mungePath(config_logfile, tool.log_dir_base)
 
     if call_logfile_wins == True   and  call_logfile:
         _lfp = mungePath(call_logfile, tool.log_dir_base)
-        
-    if _lfp != tool.log_full_path:
-        # Either may be a str() or Path().  If the log target is not changing then they will be the same
-        logger = logging.getLogger()
-        logger.handlers.clear()
 
-        if _lfp == "__console__":
-            try:
-                log_format = logging.Formatter(__main__.CONSOLE_LOGGING_FORMAT, style='{')
-            except:
-                log_format = logging.Formatter(CONSOLE_LOGGING_FORMAT, style='{')
-            handler = logging.StreamHandler(sys.stdout)                             
-            handler.setLevel(logging.DEBUG) #loglevel)
-            handler.setFormatter(log_format)
-            logger.addHandler(handler)
+    # if _lfp != tool.log_full_path:
+    # Either may be a str() or Path().  If the log target is not changing then they will be the same
+    logger = logging.getLogger()
+    logger.handlers.clear()
 
-            tool.log_dir = None
-            tool.log_file = None
-            tool.log_full_path = "__console__"
+    if _lfp == "__console__":
+        # print (getcfg("ConsoleLogFormat","cant find"))
+        log_format = logging.Formatter(getcfg("ConsoleLogFormat", CONSOLE_LOGGING_FORMAT), style='{')
 
-        else:
-            mungePath(_lfp.parent, mkdir=True)  # Force make the target dir
-            try:
-                log_format = logging.Formatter(__main__.FILE_LOGGING_FORMAT, style='{')
-            except:
-                log_format = logging.Formatter(FILE_LOGGING_FORMAT, style='{')
-            handler = logging.FileHandler(_lfp.full_path, "a") #, sys.stdout)                             
-            handler.setLevel(logging.DEBUG) # loglevel)
-            handler.setFormatter(log_format)
-            logger.addHandler(handler)
-        
-            tool.log_dir = _lfp.parent
-            tool.log_file = _lfp.name
-            tool.log_full_path = _lfp.full_path
+        # try:
+        #     log_format = logging.Formatter(__main__.CONSOLE_LOGGING_FORMAT, style='{')
+        # except:
+        #     log_format = logging.Formatter(CONSOLE_LOGGING_FORMAT, style='{')
+        handler = logging.StreamHandler(sys.stdout)                             
+        handler.setLevel(logging.DEBUG) #loglevel)
+        handler.setFormatter(log_format)
+        logger.addHandler(handler)
+
+        tool.log_dir = None
+        tool.log_file = None
+        tool.log_full_path = "__console__"
+
+    else:
+        mungePath(_lfp.parent, mkdir=True)  # Force make the target dir
+        log_format = logging.Formatter(getcfg("FileLogFormat", FILE_LOGGING_FORMAT), style='{')
+        # try:
+        #     log_format = logging.Formatter(__main__.FILE_LOGGING_FORMAT, style='{')
+        # except:
+        #     log_format = logging.Formatter(FILE_LOGGING_FORMAT, style='{')
+        handler = logging.FileHandler(_lfp.full_path, "a") #, sys.stdout)                             
+        handler.setLevel(logging.DEBUG) # loglevel)
+        handler.setFormatter(log_format)
+        logger.addHandler(handler)
+    
+        tool.log_dir = _lfp.parent
+        tool.log_file = _lfp.name
+        tool.log_full_path = _lfp.full_path
 
 
 #=====================================================================================
@@ -490,8 +567,8 @@ If deployment fails then execution aborts.  This functions is intended for inter
     - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR
     - SITE_CONFIG_DIR, SITE_DATA_DIR
     - Also absolute paths
-  - `file_stat` - Permissions set on each created file
-  - `dir_stat` - Permissions set on each created directory (if not already existing)
+  - `file_stat` - Permissions set on each created file (default 0o764)
+  - `dir_stat` - Permissions set on each created directory (if not already existing, default 0o775)
 
 `overwrite`
 - If overwrite=False (default) then only missing files will be copied.  If overwrite=True then all files will be overwritten 
