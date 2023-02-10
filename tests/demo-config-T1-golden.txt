@@ -165,3 +165,20 @@ Based on found user or site dirs:
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 Current log file:              __console__
     demo-config.<module>             -  WARNING:  T1.12 - Log to  <__console__>
+
+----- T1.13: Modified console logging format >>>>  Log file:  __console__
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
+    INFO:  Logging level set to config LogLevel <30>
+Current log file:              __console__
+ WARNING:  T1.13 - Log to  <__console__>
+
+----- T1.14: Modified file logging format >>>>  Log file:  call_logfile
+    INFO:  cfg dictionary force flushed (force_flush_reload)
+    INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
+   DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+   DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
+   DEBUG:  Loaded FileLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile

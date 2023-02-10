@@ -79,7 +79,7 @@ if args.cleanup:
     sys.exit()
 
 
-if not mungePath(CONFIG_FILE, tool.config_dir).exists  or  not mungePath(base_dir=tool.data_dir).exists:
+if not mungePath(CONFIG_FILE, tool.config_dir).exists  or  not mungePath(base_path=tool.data_dir).exists:
     print (f"No user or site setup found.  Run with <--setup-user> or <--setup-site> to set up the environment.")
     sys.exit()
 

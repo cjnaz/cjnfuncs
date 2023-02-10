@@ -20,6 +20,8 @@ from email.mime.text import MIMEText
 import logging
 import tempfile
 import inspect
+import platform
+
 try:
     from importlib.resources import files as ir_files
 except ImportError:
@@ -40,58 +42,6 @@ MAIN_MODULE_STEM       = Path(__main__.__file__).stem
 
 # Project globals
 cfg = {}
-
-# stack = inspect.stack()
-# print (stack)
-# print ("-----------------")
-# caller = ""
-# for item in stack:
-#     print ()
-#     print (item[0])
-#     print (item[1])
-#     print (item[2])
-#     print (item[3])
-#     print (item[4])
-#     code_context = item[4]
-#     if code_context is not None:
-#         if "from cjnfuncs.cjnfuncs import" in code_context[0]:
-#             print (item)
-#             caller = Path(item[1]).stem
-#             break
-
-# print ("caller:", caller)
-# from caller import CONSOLE_LOGGING_FORMAT as xxx
-# print (xxx)
-# # print (module(caller).CONSOLE_LOGGING_FORMAT)
-# exit()
-
-# # frm = inspect.stack()[1]
-# # mod = inspect.getmodule(frm[0])
-# # print ('[%s] %s' % (mod.__name__, msg))
-# # caller = inspect.currentframe().f_back
-# # print ("Called from module", caller.f_globals['__name__'])
-
-# exit()
-
-# stack = inspect.stack()
-# print (stack)
-# parentframe = stack[1][0]
-# print()
-# print (parentframe)
-# module = inspect.getmodule(parentframe)
-# print()
-# print (module)
-# print (f"module name: {module.__name__}")
-
-# exit()
-
-# import traceback
-# print ("--------------------")
-# for line in traceback.format_stack():
-#     print()
-#     print(line.strip())
-# exit()
-
 
 
 #=====================================================================================
@@ -165,27 +115,6 @@ config_logfile may be absolute path or relative to the tool.log_dir_base directo
 - NoneType
     """
 
-    # stack = inspect.stack()
-    # parentframe = stack[1][0]
-    # print (parentframe)
-    # module = inspect.getmodule(parentframe)
-    # print (module)
-    # print (f"module name: {module.__name__}")
-
-
-    # import sys
-    # mod_name = vars(sys.modules[__name__])['__package__']
-    # print('Code executed as a ' + ('module named %s' % mod_name if mod_name else 'script'))
-
-
-    # if module.__name__ == "__main__":   # Caller is a tool script file, not an installed module
-    #     my_resources = mungePath(__main__.__file__).parent / "deployment_files"
-    # else:                               # Caller is an installed module
-    #     my_resources = ir_files(module) / "deployment_files" 
-
-    # exit()
-
-
     _lfp = "__console__"
     if call_logfile_wins == False  and  config_logfile:
         _lfp = mungePath(config_logfile, tool.log_dir_base)
@@ -193,21 +122,13 @@ config_logfile may be absolute path or relative to the tool.log_dir_base directo
     if call_logfile_wins == True   and  call_logfile:
         _lfp = mungePath(call_logfile, tool.log_dir_base)
 
-    # if _lfp != tool.log_full_path:
-    # Either may be a str() or Path().  If the log target is not changing then they will be the same
     logger = logging.getLogger()
     logger.handlers.clear()
 
     if _lfp == "__console__":
-        # print (getcfg("ConsoleLogFormat","cant find"))
         log_format = logging.Formatter(getcfg("ConsoleLogFormat", CONSOLE_LOGGING_FORMAT), style='{')
-
-        # try:
-        #     log_format = logging.Formatter(__main__.CONSOLE_LOGGING_FORMAT, style='{')
-        # except:
-        #     log_format = logging.Formatter(CONSOLE_LOGGING_FORMAT, style='{')
         handler = logging.StreamHandler(sys.stdout)                             
-        handler.setLevel(logging.DEBUG) #loglevel)
+        handler.setLevel(logging.DEBUG)
         handler.setFormatter(log_format)
         logger.addHandler(handler)
 
@@ -218,12 +139,8 @@ config_logfile may be absolute path or relative to the tool.log_dir_base directo
     else:
         mungePath(_lfp.parent, mkdir=True)  # Force make the target dir
         log_format = logging.Formatter(getcfg("FileLogFormat", FILE_LOGGING_FORMAT), style='{')
-        # try:
-        #     log_format = logging.Formatter(__main__.FILE_LOGGING_FORMAT, style='{')
-        # except:
-        #     log_format = logging.Formatter(FILE_LOGGING_FORMAT, style='{')
         handler = logging.FileHandler(_lfp.full_path, "a") #, sys.stdout)                             
-        handler.setLevel(logging.DEBUG) # loglevel)
+        handler.setLevel(logging.DEBUG)
         handler.setFormatter(log_format)
         logger.addHandler(handler)
     
@@ -341,19 +258,20 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
     .log_full_path    :  None
 ```
     """
-
     def __init__(self, toolname):
         global tool             # handle used elsewhere in this module
         tool = self
-
         self.toolname  = toolname
-        self.user_config_dir    = Path(appdirs.user_config_dir(toolname))
-        self.user_data_dir      = Path(appdirs.user_data_dir(toolname))
-        self.user_state_dir     = Path(appdirs.user_state_dir(toolname))
-        self.user_cache_dir     = Path(appdirs.user_cache_dir(toolname))
-        self.user_log_dir       = Path(appdirs.user_log_dir(toolname))
-        self.site_config_dir    = Path(appdirs.site_config_dir(toolname))
-        self.site_data_dir      = Path("/usr/share") / toolname
+        self.user_config_dir    = Path(appdirs.user_config_dir(toolname, appauthor=False))  # appauthor=False to avoid double toolname on Windows
+        self.user_data_dir      = Path(appdirs.user_data_dir  (toolname, appauthor=False))
+        self.user_state_dir     = Path(appdirs.user_state_dir (toolname, appauthor=False))
+        self.user_cache_dir     = Path(appdirs.user_cache_dir (toolname, appauthor=False))
+        self.user_log_dir       = Path(appdirs.user_log_dir   (toolname, appauthor=False))
+        self.site_config_dir    = Path(appdirs.site_config_dir(toolname, appauthor=False))
+        if platform.system() == "Windows":
+            self.site_data_dir  = Path(appdirs.site_data_dir  (toolname, appauthor=False))
+        else:   # Linux, ...
+            self.site_data_dir  = Path("/usr/share") / toolname
 
         if self.site_config_dir.exists()  or  self.site_data_dir.exists():
             self.env_defined= "site"
@@ -908,9 +826,9 @@ config file timestamp has changed
   True | None (default) | ignored | Console
   True | file_path | ignored | To the call_logfile
 
-- **Logging format** - cjnfuncs has built-in format strings for console and file logging.
-  These defaults may be overridden by defining `CONSOLE_LOGGING_FORMAT` and/or `FILE_LOGGING_FORMAT`
-  constants in the tool script file.
+- **Logging format** - cjnfuncs has default format strings for console and file logging.
+  These defaults may be overridden by defining `ConsoleLogFormat` and/or `FileLogFormat`
+  in the config file.
 
 - **Import nested config files** - loadconfig() supports `Import` (case insensitive). The imported file path
 is relative to the `tool.config_dir` if not an absolute path.

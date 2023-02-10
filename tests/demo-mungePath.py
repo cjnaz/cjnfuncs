@@ -72,6 +72,9 @@ wrapper (PurePath("file.txt"), PurePath("/tmp/mungePath"),  note="21 - Accepts P
 print ("\n\n***** symlinks followed (not resolved)")
 os.symlink(xx.full_path, xx.parent / "subdir" / "symlink.txt")
 os.symlink(xx.parent, xx.parent / "symlinkdir")
+# NOTE on Win10 symlinks do not appear to be valid - Properties Shortcut of symlinkdir = C:\tmp\mungePath\temp\mungePath)
+# however these tests seem to be retuning expected results.
+
 wrapper ("subdir/symlink.txt", testpath,                    note="22 - symlink file honored (symlink created earlier)")
 remove_file(xx.full_path)
 wrapper ("subdir/symlink.txt", testpath,                    note="23 - symlink target file was removed")
