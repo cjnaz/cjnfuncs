@@ -936,7 +936,7 @@ Here are a few key comparisons:
                     # Is an import line
                     if line.strip().lower().startswith("import"):
                         line = line.split("#", maxsplit=1)[0].strip()
-                        target = mungePath(line.split()[1], self.config_dir)
+                        target = mungePath(line.split(maxsplit=1)[1], self.config_dir)
                         try:
                             imported_config = config_item(target.full_path)
                             imported_config.loadconfig(ldcfg_ll, isimport=True)
