@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.0.5"
+version = "2.0"
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
 requires-python = ">=3.6"       # Centos 7 uses 3.6.8
@@ -23,13 +23,3 @@ classifiers = [                 # https://pypi.org/classifiers/
 
 [project.urls]
 repository = "https://github.com/cjnaz/cjnfuncs"
-
-
-#[tool.setuptools]
-# ...
-# By default, include-package-data is true in pyproject.toml, so you do
-# NOT have to specify this line.
-#include-package-data = true
-
-#[tool.setuptools.packages.find]
-#where = ["src"]
