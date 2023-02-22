@@ -6,9 +6,10 @@
 #
 #  Chris Nelson, 2018-2023
 #
-# V2.0  230208  Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
+# 2.0.1 230222 - deploy_files() fix for files from package
+# 2.0   230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 # ...
-# V0.1  180520  New
+# 0.1   180520 - New
 #
 # #==========================================================
 
@@ -21,16 +22,17 @@ import logging
 import tempfile
 import inspect
 import platform
-
-try:
-    from importlib.resources import files as ir_files
-except ImportError:
-    from importlib_resources import files as ir_files
 import re
 from pathlib import Path, PurePath
 import shutil
 import __main__
 import appdirs
+# if sys.version_info < (3, 9):
+#     from importlib_resources import files as ir_files
+# else:
+      # Errors on Py3.9:  TypeError: <module ...> is not a package.  The module __spec__.submodule_search_locations is None
+#     from importlib.resources import files as ir_files
+from importlib_resources import files as ir_files
 
 
 # Configs / Constants
@@ -42,6 +44,21 @@ MAIN_MODULE_STEM       = Path(__main__.__file__).stem
 
 # Project globals
 cfg = {}
+
+
+# Get the main / calling module info.  Made available by set_toolname.main_module
+stack = inspect.stack()
+calling_module = ""
+for item in stack:  # Look for the import cjnfuncs.cjnfuncs line
+    code_context = item[4]
+    if code_context is not None:
+        if "cjnfuncs.cjnfuncs" in code_context[0]:
+            calling_module = inspect.getmodule(item[0])
+            break
+# print (calling_module)
+# print (calling_module.__package__)
+# # print (calling_module.__path__)
+# print (calling_module.__spec__) #.submodule_search_locations)
 
 
 #=====================================================================================
@@ -214,22 +231,23 @@ print (tool.stats())
 
 Example stats() for a user-specific setup:
 ```
-    Stats for set_toolname <cjnfuncs_testenv>:
-    .toolname         :  cjnfuncs_testenv
-    .user_config_dir  :  /home/me/.config/cjnfuncs_testenv
-    .user_data_dir    :  /home/me/.local/share/cjnfuncs_testenv
-    .user_state_dir   :  /home/me/.local/state/cjnfuncs_testenv
-    .user_cache_dir   :  /home/me/.cache/cjnfuncs_testenv
-    .user_log_dir     :  /home/me/.cache/cjnfuncs_testenv/log
-    .site_config_dir  :  /etc/xdg/cjnfuncs_testenv
-    .site_data_dir    :  /usr/share/cjnfuncs_testenv
+    Stats for set_toolname <wanstatus>:
+    .toolname         :  wanstatus
+    .main_module      :  <module 'wanstatus.wanstatus' from '/<path-to-venv>/lib/python3.9/site-packages/wanstatus/wanstatus.py'>
+    .user_config_dir  :  /home/me/.config/wanstatus
+    .user_data_dir    :  /home/me/.local/share/wanstatus
+    .user_state_dir   :  /home/me/.local/state/wanstatus
+    .user_cache_dir   :  /home/me/.cache/wanstatus
+    .user_log_dir     :  /home/me/.cache/wanstatus/log
+    .site_config_dir  :  /etc/xdg/wanstatus
+    .site_data_dir    :  /usr/share/wanstatus
     Based on found user or site dirs:
     .env_defined      :  user
-    .config_dir       :  /home/me/.config/cjnfuncs_testenv
-    .data_dir         :  /home/me/.local/share/cjnfuncs_testenv
-    .state_dir        :  /home/me/.local/state/cjnfuncs_testenv
-    .cache_dir        :  /home/me/.cache/cjnfuncs_testenv
-    .log_dir_base     :  /home/me/.local/share/cjnfuncs_testenv
+    .config_dir       :  /home/me/.config/wanstatus
+    .data_dir         :  /home/me/.local/share/wanstatus
+    .state_dir        :  /home/me/.local/state/wanstatus
+    .cache_dir        :  /home/me/.cache/wanstatus
+    .log_dir_base     :  /home/me/.local/share/wanstatus
     .log_dir          :  None
     .log_file         :  None
     .log_full_path    :  None
@@ -237,22 +255,23 @@ Example stats() for a user-specific setup:
     
 Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
 ```
-    Stats for set_toolname <cjnfuncs_testenv>:
-    .toolname         :  cjnfuncs_testenv
-    .user_config_dir  :  /home/me/.config/cjnfuncs_testenv
-    .user_data_dir    :  /home/me/.local/share/cjnfuncs_testenv
-    .user_state_dir   :  /home/me/.local/state/cjnfuncs_testenv
-    .user_cache_dir   :  /home/me/.cache/cjnfuncs_testenv
-    .user_log_dir     :  /home/me/.cache/cjnfuncs_testenv/log
-    .site_config_dir  :  /etc/xdg/cjnfuncs_testenv
-    .site_data_dir    :  /usr/share/cjnfuncs_testenv
+    Stats for set_toolname <wanstatus>:
+    .toolname         :  wanstatus
+    .main_module      :  <module 'wanstatus.wanstatus' from '/<path-to-venv>/lib/python3.9/site-packages/wanstatus/wanstatus.py'>
+    .user_config_dir  :  /root/.config/wanstatus
+    .user_data_dir    :  /root/.local/share/wanstatus
+    .user_state_dir   :  /root/.local/state/wanstatus
+    .user_cache_dir   :  /root/.cache/wanstatus
+    .user_log_dir     :  /root/.cache/wanstatus/log
+    .site_config_dir  :  /etc/xdg/wanstatus
+    .site_data_dir    :  /usr/share/wanstatus
     Based on found user or site dirs:
     .env_defined      :  site
-    .config_dir       :  /etc/xdg/cjnfuncs_testenv
-    .data_dir         :  /usr/share/cjnfuncs_testenv
-    .state_dir        :  /usr/share/cjnfuncs_testenv
-    .cache_dir        :  /usr/share/cjnfuncs_testenv
-    .log_dir_base     :  /usr/share/cjnfuncs_testenv
+    .config_dir       :  /etc/xdg/wanstatus
+    .data_dir         :  /usr/share/wanstatus
+    .state_dir        :  /usr/share/wanstatus
+    .cache_dir        :  /usr/share/wanstatus
+    .log_dir_base     :  /usr/share/wanstatus
     .log_dir          :  None
     .log_file         :  None
     .log_full_path    :  None
@@ -262,6 +281,7 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
         global tool             # handle used elsewhere in this module
         tool = self
         self.toolname  = toolname
+        self.main_module        = calling_module
         self.user_config_dir    = Path(appdirs.user_config_dir(toolname, appauthor=False))  # appauthor=False to avoid double toolname on Windows
         self.user_data_dir      = Path(appdirs.user_data_dir  (toolname, appauthor=False))
         self.user_state_dir     = Path(appdirs.user_state_dir (toolname, appauthor=False))
@@ -290,11 +310,14 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
 
         self.log_file = self.log_dir = self.log_full_path = None
 
+        # print (self.stats())
+
 
     def stats(self):
         stats = ""
         stats +=  f"\nStats for set_toolname <{self.toolname}>:\n"
         stats +=  f".toolname         :  {self.toolname}\n"
+        stats +=  f".main_module      :  {self.main_module}\n"
         stats +=  f".user_config_dir  :  {self.user_config_dir}\n"
         stats +=  f".user_data_dir    :  {self.user_data_dir}\n"
         stats +=  f".user_state_dir   :  {self.user_state_dir}\n"
@@ -485,7 +508,7 @@ If deployment fails then execution aborts.  This functions is intended for inter
     - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR
     - SITE_CONFIG_DIR, SITE_DATA_DIR
     - Also absolute paths
-  - `file_stat` - Permissions set on each created file (default 0o764)
+  - `file_stat` - Permissions set on each created file (default 0o664)
   - `dir_stat` - Permissions set on each created directory (if not already existing, default 0o775)
 
 `overwrite`
@@ -568,18 +591,16 @@ and files will be created with the `file_stat` permissions.
                 if file_stat:
                     os.chmod(d, file_stat)
 
-
-    stack = inspect.stack()
-    parentframe = stack[1][0]
-    module = inspect.getmodule(parentframe)
-    if module.__name__ == "__main__":   # Caller is a tool script file, not an installed module
+    if calling_module.__name__ == "__main__":   # Caller is a tool script file, not an installed module
         my_resources = mungePath(__main__.__file__).parent / "deployment_files"
-    else:                               # Caller is an installed module
-        my_resources = ir_files(module) / "deployment_files" 
+        # print (f"Script case:  <{my_resources}>")
+    else:                                       # Caller is an installed module
+        my_resources = ir_files(calling_module).joinpath("deployment_files")
+        # print (f"Module case:  <{my_resources}>")
 
     for item in files_list:
-        source = mungePath(item["source"], my_resources)
-        if source.is_file:
+        source = my_resources.joinpath(item["source"])
+        if source.is_file():
             target_dir = resolve_target(item["target_dir"], mkdir=True)
             if "dir_stat" in item:
                 os.chmod(target_dir.full_path, item["dir_stat"])
@@ -588,25 +609,28 @@ and files will be created with the `file_stat` permissions.
                 print (f"Can't deploy {source.name}.  Cannot access target_dir <{target_dir.parent}>.  Aborting.")
                 sys.exit(1)
 
-            if not mungePath(source.name, target_dir.full_path).exists  or  overwrite:
+            outfile = target_dir.full_path / PurePath(item["source"]).name
+            if not outfile.exists()  or  overwrite:
                 try:
-                    shutil.copy(source.full_path, target_dir.full_path)
+                    with outfile.open('w') as ofile:
+                        ofile.write(source.read_text())
                     if "file_stat" in item:
-                        os.chmod(mungePath(source.name, target_dir.full_path).full_path, item["file_stat"])
+                        os.chmod(outfile, item["file_stat"])
                 except Exception as e:
-                    print (f"File copy of <{source.name}> to <{target_dir.full_path}> failed.  Aborting.\n  {e}")
+                    print (f"File copy of <{item['source']}> to <{target_dir.full_path}> failed.  Aborting.\n  {e}")
                     sys.exit(1)
-                print (f"Deployed  {source.name:20} to  {target_dir.full_path}")
+                print (f"Deployed  {item['source']:20} to  {target_dir.full_path}")
             else:
-                print (f"File <{source.name}> already exists at <{target_dir.full_path}>.  Skipped.")
+                print (f"File <{item['source']}> already exists at <{target_dir.full_path}>.  Skipped.")
 
-        elif source.is_dir:
+        elif source.is_dir():
+                # ONLY WORKS if the source dir is on the file system (eg, not in a package .zip)
                 if not resolve_target(item["target_dir"]).exists  or  overwrite:
                     target_dir = resolve_target(item["target_dir"], mkdir=True)
                     try:
                         if "dir_stat" in item:
                             os.chmod(target_dir.full_path, item["dir_stat"])
-                        copytree(source.full_path, target_dir.full_path, file_stat=item.get("file_stat", None), dir_stat=item.get("dir_stat", None))
+                        copytree(source, target_dir.full_path, file_stat=item.get("file_stat", None), dir_stat=item.get("dir_stat", None))
                     except Exception as e:
                         print (f"Failed copying tree <{source.name}> to <{target_dir.full_path}>.  target_dir can't already exist.  Aborting.\n  {e}")
                         sys.exit(1)
@@ -654,7 +678,7 @@ then the `tool.log_dir_base` will be remapped to `tool.user_config_dir`.
 
 ### Member functions
 - config_item.stats() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
-- load_config() - Load the config file to the `cfg` dictionary.  See below.
+- config_item.load_config() - Load the config file to the `cfg` dictionary.  See below.
 
 
 ### Behaviors and rules
@@ -742,7 +766,7 @@ Output
             isimport            = False,
             tolerate_missing    = False):
         """
-## loadconfig () (config_item() class member function) - Load a configuration file into the cfg dictionary
+## loadconfig () (config_item class member function) - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
     ldcfg_ll            = DEFAULT_LOGGING_LEVEL,

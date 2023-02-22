@@ -8,10 +8,10 @@ is the basis of PyPI posted tools such as:
   - [wanstatus](https://pypi.org/project/wanstatus/)
   - [routermonitor](https://pypi.org/project/routermonitor/)
 
-- Developed and tested on Python 3.6.8, and supported on all higher Python versions
+- Developed and tested on Python 3.6.8, and supported on all higher Python versions.
+- Developed on Linux, supported also on Windows (tested on Windows 10).
 - In this documentation, "tool script" refers to a Python project that imports and uses cjnfuncs.  
 Some may be simple scripts, and others may themselves be installed packages.
-- Developed on Linux, supported also on Windows (tested on Windows 10)
 
 
 ## Classes and functions
@@ -132,22 +132,23 @@ print (tool.stats())
 
 Example stats() for a user-specific setup:
 ```
-    Stats for set_toolname <cjnfuncs_testenv>:
-    .toolname         :  cjnfuncs_testenv
-    .user_config_dir  :  /home/me/.config/cjnfuncs_testenv
-    .user_data_dir    :  /home/me/.local/share/cjnfuncs_testenv
-    .user_state_dir   :  /home/me/.local/state/cjnfuncs_testenv
-    .user_cache_dir   :  /home/me/.cache/cjnfuncs_testenv
-    .user_log_dir     :  /home/me/.cache/cjnfuncs_testenv/log
-    .site_config_dir  :  /etc/xdg/cjnfuncs_testenv
-    .site_data_dir    :  /usr/share/cjnfuncs_testenv
+    Stats for set_toolname <wanstatus>:
+    .toolname         :  wanstatus
+    .main_module      :  <module 'wanstatus.wanstatus' from '/<path-to-venv>/lib/python3.9/site-packages/wanstatus/wanstatus.py'>
+    .user_config_dir  :  /home/me/.config/wanstatus
+    .user_data_dir    :  /home/me/.local/share/wanstatus
+    .user_state_dir   :  /home/me/.local/state/wanstatus
+    .user_cache_dir   :  /home/me/.cache/wanstatus
+    .user_log_dir     :  /home/me/.cache/wanstatus/log
+    .site_config_dir  :  /etc/xdg/wanstatus
+    .site_data_dir    :  /usr/share/wanstatus
     Based on found user or site dirs:
     .env_defined      :  user
-    .config_dir       :  /home/me/.config/cjnfuncs_testenv
-    .data_dir         :  /home/me/.local/share/cjnfuncs_testenv
-    .state_dir        :  /home/me/.local/state/cjnfuncs_testenv
-    .cache_dir        :  /home/me/.cache/cjnfuncs_testenv
-    .log_dir_base     :  /home/me/.local/share/cjnfuncs_testenv
+    .config_dir       :  /home/me/.config/wanstatus
+    .data_dir         :  /home/me/.local/share/wanstatus
+    .state_dir        :  /home/me/.local/state/wanstatus
+    .cache_dir        :  /home/me/.cache/wanstatus
+    .log_dir_base     :  /home/me/.local/share/wanstatus
     .log_dir          :  None
     .log_file         :  None
     .log_full_path    :  None
@@ -155,22 +156,23 @@ Example stats() for a user-specific setup:
     
 Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
 ```
-    Stats for set_toolname <cjnfuncs_testenv>:
-    .toolname         :  cjnfuncs_testenv
-    .user_config_dir  :  /home/me/.config/cjnfuncs_testenv
-    .user_data_dir    :  /home/me/.local/share/cjnfuncs_testenv
-    .user_state_dir   :  /home/me/.local/state/cjnfuncs_testenv
-    .user_cache_dir   :  /home/me/.cache/cjnfuncs_testenv
-    .user_log_dir     :  /home/me/.cache/cjnfuncs_testenv/log
-    .site_config_dir  :  /etc/xdg/cjnfuncs_testenv
-    .site_data_dir    :  /usr/share/cjnfuncs_testenv
+    Stats for set_toolname <wanstatus>:
+    .toolname         :  wanstatus
+    .main_module      :  <module 'wanstatus.wanstatus' from '/<path-to-venv>/lib/python3.9/site-packages/wanstatus/wanstatus.py'>
+    .user_config_dir  :  /root/.config/wanstatus
+    .user_data_dir    :  /root/.local/share/wanstatus
+    .user_state_dir   :  /root/.local/state/wanstatus
+    .user_cache_dir   :  /root/.cache/wanstatus
+    .user_log_dir     :  /root/.cache/wanstatus/log
+    .site_config_dir  :  /etc/xdg/wanstatus
+    .site_data_dir    :  /usr/share/wanstatus
     Based on found user or site dirs:
     .env_defined      :  site
-    .config_dir       :  /etc/xdg/cjnfuncs_testenv
-    .data_dir         :  /usr/share/cjnfuncs_testenv
-    .state_dir        :  /usr/share/cjnfuncs_testenv
-    .cache_dir        :  /usr/share/cjnfuncs_testenv
-    .log_dir_base     :  /usr/share/cjnfuncs_testenv
+    .config_dir       :  /etc/xdg/wanstatus
+    .data_dir         :  /usr/share/wanstatus
+    .state_dir        :  /usr/share/wanstatus
+    .cache_dir        :  /usr/share/wanstatus
+    .log_dir_base     :  /usr/share/wanstatus
     .log_dir          :  None
     .log_file         :  None
     .log_full_path    :  None
@@ -290,9 +292,8 @@ If deployment fails then execution aborts.  This functions is intended for inter
     - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR
     - SITE_CONFIG_DIR, SITE_DATA_DIR
     - Also absolute paths
-  - `file_stat` - Permissions set on each created file
-  - `dir_stat` - Permissions set on each created directory (if not already existing)
-
+  - `file_stat` - Permissions set on each created file (default 0o664)
+  - `dir_stat` - Permissions set on each created directory (if not already existing, default 0o775)
 
 `overwrite`
 - If overwrite=False (default) then only missing files will be copied.  If overwrite=True then all files will be overwritten 
@@ -356,7 +357,7 @@ then the `tool.log_dir_base` will be remapped to `tool.user_config_dir`.
 
 ### Member functions
 - config_item.stats() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
-- load_config() - Load the config file to the `cfg` dictionary.  See below.
+- config_item.load_config() - Load the config file to the `cfg` dictionary.  See below.
 
 
 ### Behaviors and rules
@@ -408,7 +409,7 @@ Output
 
 ---
 
-# loadconfig () (config_item() class member function) - Load a configuration file into the cfg dictionary
+# loadconfig () (config_item class member function) - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
     ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
@@ -492,9 +493,9 @@ config file timestamp has changed
   True | None (default) | ignored | Console
   True | file_path | ignored | To the call_logfile
 
-- **Logging format** - cjnfuncs has built-in format strings for console and file logging.
-  These defaults may be overridden by defining `CONSOLE_LOGGING_FORMAT` and/or `FILE_LOGGING_FORMAT`
-  constants in the tool script file.
+- **Logging format** - cjnfuncs has default format strings for console and file logging.
+  These defaults may be overridden by defining `ConsoleLogFormat` and/or `FileLogFormat`
+  in the config file.
 
 - **Import nested config files** - loadconfig() supports `Import` (case insensitive). The imported file path
 is relative to the `tool.config_dir` if not an absolute path.
@@ -863,6 +864,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     ` `
 ---
 # Revision history
+- 2.0.1 230222 - deploy_files() fix for files from package
 - 2.0 230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 - ...
 - 0.1 180524 - New.  First github posting

@@ -5,16 +5,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.0"
+version = "2.0.1"
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
 requires-python = ">=3.6"       # Centos 7 uses 3.6.8
 authors = [ {name = "Chris Nelson", email = "github@cjnaz.com"} ]
 license = {file = "LICENSE.txt"}
 dependencies = [
-    "requests",
-    "appdirs >= 1.4",
-    "importlib_resources",
+    'requests',
+    'appdirs >= 1.4',
+    'importlib_resources' #; python_version < "3.9"',  # in 2.0.1, used for all python versions
     ]
 classifiers = [                 # https://pypi.org/classifiers/
     "Topic :: Software Development :: Libraries :: Python Modules",

@@ -1,6 +1,7 @@
 ` `
 ---
 # Revision history
+- 2.0.1 230222 - deploy_files() fix for files from package
 - 2.0 230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 - ...
 - 0.1 180524 - New.  First github posting

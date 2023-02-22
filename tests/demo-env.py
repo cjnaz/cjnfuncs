@@ -34,15 +34,13 @@ if args.setup_user:
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o770},
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR/subdir",     "file_stat": 0o641, "dir_stat": 0o777},
         { "source": "testfile.txt",         "target_dir": "$HOME/.config/junk2",        "file_stat": 0o600, "dir_stat": 0o707},
-        { "source": "testfile.txt",         "target_dir": "USER_CONFIG_DIR/dirxxx"},  # defaults file_stat 0o764, dir_stat 0o775
+        { "source": "testfile.txt",         "target_dir": "USER_CONFIG_DIR/dirxxx"},  # defaults file_stat 0o664, dir_stat 0o775
         { "source": "test_dir",             "target_dir": "USER_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o720},
         { "source": "test_dir/subdir/x4",   "target_dir": "USER_CONFIG_DIR/mydirs",     "file_stat": 0o612, "dir_stat": 0o711},
         # Uncomment these to force error traps
         # { "source": "doesnotexist",       "target_dir": "USER_CONFIG_DIR",            "file_stat": 0o633, "dir_stat": 0o770},
         # { "source": "testfile.txt",       "target_dir": "/no_perm/junkdir",           "file_stat": 0o633, "dir_stat": 0o770},
         ] , overwrite=True)
-    print ("Inspect these created directories/files for proper content and permissions per the deploy_files call.")
-    sys.exit()
 
 if args.setup_site:
     deploy_files([
@@ -54,8 +52,6 @@ if args.setup_site:
         # Uncomment this to force error traps
         # { "source": "doesnotexist", "target_dir": "SITE_CONFIG_DIR",                "file_stat": 0o633, "dir_stat": 0o770},
         ] , overwrite=True)
-    print ("Inspect these created directories/files for proper content and permissions per the deploy_files call.")
-    sys.exit()
 
 if args.cleanup:
     if os.path.exists(tool.user_config_dir):
@@ -65,22 +61,26 @@ if args.cleanup:
         print (f"Removing 2  {tool.user_data_dir}")
         shutil.rmtree(tool.user_data_dir)
 
-    if os.path.exists(tool.site_config_dir):
-        print (f"Removing 3  {tool.site_config_dir}")
-        shutil.rmtree(tool.site_config_dir)
-    if os.path.exists(tool.site_data_dir):
-        print (f"Removing 4  {tool.site_data_dir}")
-        shutil.rmtree(tool.site_data_dir)
+    try:
+        if os.path.exists(tool.site_config_dir):
+            print (f"Removing 3  {tool.site_config_dir}")
+            shutil.rmtree(tool.site_config_dir)
+        if os.path.exists(tool.site_data_dir):
+            print (f"Removing 4  {tool.site_data_dir}")
+            shutil.rmtree(tool.site_data_dir)
+    except:
+        print ("NOTE:  Run as root/sudo to cleanup site dirs")
 
     junk2 = mungePath("$HOME/.config/junk2").full_path
     if os.path.exists(junk2):
         print (f"Removing 5  {junk2}")
         shutil.rmtree(junk2)
-    sys.exit()
+
+tool = set_toolname(TOOLNAME)
+print(tool.stats())
 
 
-if not mungePath(CONFIG_FILE, tool.config_dir).exists  or  not mungePath(base_path=tool.data_dir).exists:
+if not mungePath(CONFIG_FILE, tool.user_config_dir).exists  and  not mungePath(CONFIG_FILE, tool.site_config_dir).exists:
     print (f"No user or site setup found.  Run with <--setup-user> or <--setup-site> to set up the environment.")
-    sys.exit()
-
-print ("Inspect the created directories/files for proper content and permissions per the deploy_files call.")
+else:
+    print ("Inspect the created directories/files for proper content and permissions per the deploy_files call.")
