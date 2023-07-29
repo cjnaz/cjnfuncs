@@ -930,6 +930,8 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     ` `
 ---
 # Revision history
+- 2.0.2 230729 - Added modify_configfile.  Documentation touch for logging formats in config file. 
+Improved snd_notif failure logging.
 - 2.0.1 230222 - deploy_files() fix for files from package
 - 2.0 230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 - ...
