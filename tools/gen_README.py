@@ -27,7 +27,7 @@ def snd_notif(subj="Notification message", msg="", to="NotifList", log=False):
 
 def get_linkname(block):
     funcline = block.group(1).split('\n')[0]
-    return funcline.replace("Class ", "").split(maxsplit=1)[0]
+    return funcline.replace("Class ", "").split(maxsplit=1)[0].lower()
 
 
 with pathlib.Path(CODEFILE).open() as infile:

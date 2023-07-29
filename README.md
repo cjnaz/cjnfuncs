@@ -17,10 +17,11 @@ Some may be simple scripts, and others may themselves be installed packages.
 ## Classes and functions
 - [setuplogging](#setuplogging)
 - [set_toolname](#set_toolname)
-- [mungePath](#mungePath)
+- [mungepath](#mungepath)
 - [deploy_files](#deploy_files)
 - [config_item](#config_item)
 - [loadconfig](#loadconfig)
+- [modify_configfile](#modify_configfile)
 - [getcfg](#getcfg)
 - [timevalue](#timevalue)
 - [retime](#retime)
@@ -63,6 +64,16 @@ call_logfile may be an absolute path or relative to the tool.log_dir_base direct
 loaded config.  Selected by `call_logfile_wins = False`.
 config_logfile may be absolute path or relative to the tool.log_dir_base directory.  
 `None` specifies the console.
+
+
+### cfg dictionary params
+`ConsoleLogFormat` (optional)
+- Overrides the default console logging format: `{module:>15}.{funcName:20} - {levelname:>8}:  {message}`.
+
+`FileLogFormat` (optional)
+- Overrides the default file logging format: `{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}`.
+
+Also see `LogFile` and `LogLevel` info in loadconfig() documentation, below.
 
 
 ### Returns
@@ -180,7 +191,7 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
     
 <br/>
 
-<a id="mungePath"></a>
+<a id="mungepath"></a>
 
 ---
 
@@ -358,6 +369,7 @@ then the `tool.log_dir_base` will be remapped to `tool.user_config_dir`.
 ### Member functions
 - config_item.stats() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
 - config_item.load_config() - Load the config file to the `cfg` dictionary.  See below.
+- modify_configfile() - Modify, add, remove params from the config file.
 
 
 ### Behaviors and rules
@@ -547,11 +559,65 @@ Here are a few key comparisons:
         
 <br/>
 
+<a id="modify_configfile"></a>
+
+---
+
+# modify_configfile (param, value, remove=False, add_if_not_existing=False, save=False) - Make edits to the config file
+
+Params in the config file may have their values changed, be deleted, or new lines added.  All added lines
+are added at the bottom of the file.
+
+On the first call to modify_configfile() the content of the file is read into memory.  Successive
+calls to modify_configfile() may be made, with the changes applied to the in-memory copy.  When
+all changes have been applied the final call to modify_configfile() must have `save=True` to 
+cause the memory version to be written back to the config file.  If the script code checks for
+modifications of the config file, then the modified content will be reloaded into the cfg dictionary.
+
+
+### Parameters
+`param` (default "")
+- The param name, if modifing an existing param or adding a new param
+
+`value` (default "")
+- The new value to be applied to an existing param, or an added param
+
+`remove` (default False)
+- If True, the `param` config file line is removed from the config file
+
+`add_if_not_existing` (default False)
+- Add the `param` `value` line at the bottom of the config file
+- To add a blank line leave out both `param` and `value`, or set both the `""`
+- To add a comment line specify the comment in the `param` field (eg, `modify_configfile("# My comment")`)
+
+`save` (default False)
+- Write the modified config file content back to the file
+- `save=True` may be specified on the last modification call or an a standalone call.
+
+
+### Returns
+- No return value
+- Warning messages are logged for attempting to modify or remove a non-existing param.
+
+
+### Exmaple
+```
+config.modify_configfile("abc",                     remove=True)                # Removed
+config.modify_configfile("def", "123456789 123456789")                          # Mofified value
+config.modify_configfile("", "",                    add_if_not_existing=True)   # Blank line
+config.modify_configfile("George", "was here",      add_if_not_existing=True)   # New param
+config.modify_configfile("Snehal", "wasn't here")                               # Warning message
+config.modify_configfile(                           add_if_not_existing=True)   # Another blank line
+config.modify_configfile("# New comment line",      add_if_not_existing=True, save=True) # New comment and save
+```
+        
+<br/>
+
 <a id="getcfg"></a>
 
 ---
 
-# getcfg (param, default=None) - Get a param from the cfg dictionary.
+# getcfg (param, default=None) - Get a param from the cfg dictionary
 
 Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
 but with handling if the item does not exist.

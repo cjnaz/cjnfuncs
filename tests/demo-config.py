@@ -41,33 +41,6 @@ def remove_file (file_path):
         os.remove(file_path)
 
 
-def modify_configfile (cfg, key, value="", remove=False):
-    """
-    Relies on whitespace separation
-    """
-    cfg_temp = ""
-    with cfg.config_full_path.open() as cfgfile:
-        xx = cfgfile.read().split("\n")
-    found_key = False
-    for line in xx:
-        try:
-            if line.strip().split(maxsplit=1)[0] != key:    # Relies on whitespace separation
-                cfg_temp += line + "\n"
-            else:
-                found_key = True
-                if remove == False:
-                    cfg_temp += f"{key}    {value}\n"
-                # If remove == True, just don't write the line out
-        except:
-            cfg_temp += line # + "\n"
-    if found_key == False  and  remove == False:
-        cfg_temp += f"{key}    {value}\n"
-    
-    with cfg.config_full_path.open('w') as cfgfile:
-        cfgfile.write(cfg_temp)
-
-    time.sleep(.1)  # Seems to be needed to ensure diff timestamps.  Not always sufficient sleep time!
-
 
 if args.Mode == '1':
     print ("\n***** Tests for log file control *****")
@@ -92,7 +65,7 @@ if args.Mode == '1':
     logging.warning (f"T1.2 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.3:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__ (override cfg_logfile)")
-    modify_configfile (config_T1, "LogFile",   "cfg_logfile")
+    config_T1.modify_configfile ("LogFile",   "cfg_logfile", add_if_not_existing=True, save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
     logging.warning (f"T1.3 - Log to  <{tool.log_full_path}>")
@@ -113,7 +86,7 @@ if args.Mode == '1':
     logging.warning (f"T1.6 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.7:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  'cfg_logfile2'")
-    modify_configfile (config_T1, "LogFile",   "cfg_logfile2")
+    config_T1.modify_configfile ("LogFile",   "cfg_logfile2", save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
     logging.warning (f"T1.7 - Log to  <{tool.log_full_path}>")
@@ -131,7 +104,7 @@ if args.Mode == '1':
     print (tool.stats())
     logging.warning (f"T1.9 - Log to  <{tool.log_full_path}>")
 
-    print ("\n----- T1.10:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile")
+    print ("\n----- T1.10:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile2")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
     print (tool.stats())
@@ -144,19 +117,19 @@ if args.Mode == '1':
     logging.warning (f"T1.11 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__")
-    modify_configfile (config_T1, "LogFile",   remove=True)
+    config_T1.modify_configfile ("LogFile",   remove=True, save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
     logging.warning (f"T1.12 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.13: Modified console logging format >>>>  Log file:  __console__")
-    modify_configfile (config_T1, "ConsoleLogFormat", "{levelname:>8}:  {message}")
+    config_T1.modify_configfile ("ConsoleLogFormat", "{levelname:>8}:  {message}", add_if_not_existing=True, save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
     logging.warning (f"T1.13 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.14: Modified file logging format >>>>  Log file:  call_logfile")
-    modify_configfile (config_T1, "FileLogFormat", "{levelname:>8}:  {message}")
+    config_T1.modify_configfile ("FileLogFormat", "{levelname:>8}:  {message}", add_if_not_existing=True, save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
     logging.warning (f"T1.14 - Log to  <{tool.log_full_path}>")
@@ -194,23 +167,27 @@ if args.Mode == '2':
     print_stats()
 
     print ("\n----- T2.3:  LogLevel=10, ldcfg_ll=10 >>>>  loadconfig logging, Logging DEBUG, INFO, and WARNING messages")
-    modify_configfile (config_T2, "LogLevel",   "10")
+    config_T2.modify_configfile ("LogLevel",   "10", add_if_not_existing=True, save=True)
+    time.sleep(.1)  # Seems to be needed to ensure diff timestamps to trigger reloads.  Not always sufficient sleep time!
     reloaded = config_T2.loadconfig(ldcfg_ll=10, flush_on_reload=True)
     print_stats()
 
     print ("\n----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No loadconfig logging, Logging DEBUG, INFO, and WARNING messages")
-    modify_configfile (config_T2, "LogLevel",   "10")
+    config_T2.modify_configfile ( "LogLevel",   "10", save=True)
+    time.sleep(.1)
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
     print ("\n----- T2.5:  LogLevel=30, ldcfg_ll=30 (default),  >>>>  Log only WARNING")
-    modify_configfile (config_T2, "LogLevel",   "30")
+    config_T2.modify_configfile ("LogLevel",   "30", save=True)
+    time.sleep(.1)
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
     print ("\n----- T2.6:  ldcfg_ll=10, No LogLevel >>>>  Restore preexisting level (30)")
-    modify_configfile (config_T2, "LogLevel",  remove=True)
-    modify_configfile (config_T2, "testvar",   True)
+    config_T2.modify_configfile ("LogLevel",  remove=True)
+    config_T2.modify_configfile ("testvar",   "True", save=True)
+    time.sleep(.1)
     reloaded = config_T2.loadconfig(ldcfg_ll=10, flush_on_reload=True)
     print_stats()
 
@@ -227,25 +204,28 @@ if args.Mode == '2':
     print_stats()
 
     print ("\n----- T2.10:  ldcfg_ll=10, LogLevel=20, var2 added >>>>  Reloaded")
-    modify_configfile (config_T2, "LogLevel",   "20")
-    modify_configfile (config_T2, "var2",   "Hello")
+    config_T2.modify_configfile ("LogLevel",   "20", add_if_not_existing=True)
+    config_T2.modify_configfile ("var2",   "Hello", add_if_not_existing=True, save=True)
+    time.sleep(.1)
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
     print ("\n----- T2.11: ldcfg_ll=10, LogLevel=40, var2 removed from config >>>>  var2 still defined, no logging")
-    modify_configfile (config_T2, "LogLevel",   "40")
-    modify_configfile (config_T2, "var2",   remove=True)
+    config_T2.modify_configfile ("LogLevel",   "40")
+    config_T2.modify_configfile ("var2",   remove=True, save=True)
+    time.sleep(.1)
     reloaded = config_T2.loadconfig(ldcfg_ll=10)
     print_stats()
 
     print ("\n----- T2.12: ldcfg_ll=10, LogLevel=30, force_flush_reload=True >>>>  var2 gone")
-    modify_configfile (config_T2, "LogLevel",   "30")
+    config_T2.modify_configfile ("LogLevel",   "30", save=True)
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
     print ("\n----- T2.13: Externally set log level = 20")
-    modify_configfile (config_T2, "LogLevel",   remove=True)
+    config_T2.modify_configfile ("LogLevel",   remove=True, save=True)
     logging.getLogger().setLevel(20)
+    time.sleep(.1)
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
@@ -426,3 +406,32 @@ if args.Mode == '13':
     except Exception as e:
         print (f"Exception due to missing imported config file:\n  {e}")
         print (f"Logging level back in the main code:  {logging.getLogger().level}")
+
+if args.Mode == '14':
+    print ("\n***** Test modify_configfile *****")
+    try:
+        config = config_item(CONFIG_FILE)
+        config.modify_configfile(r"x_7893&(%$,.nasf||\a@",  "Goodbye!    # It was Hello")   # param match check
+        config.modify_configfile("x_removeX", remove=True)                                  # Warning message
+        config.modify_configfile("x_removed", remove=True)                                  # Removed
+
+        config.modify_configfile("x_shorter",               "12345")                        # Whitespace between value and comment tests
+        config.modify_configfile("x_longer",                "123456789 123456789")
+        config.modify_configfile("x_same",                  "54321 987654321")
+        config.modify_configfile("x_really_long",           "123456789 123456789 123456789 12345")
+        config.modify_configfile("x_no_trailing_whitespace","123456789 123456789")
+        config.modify_configfile("x_indented_param",        "False")
+        
+        config.modify_configfile("", "",                    add_if_not_existing=True)       # Blank line
+        config.modify_configfile("George", "was here",      add_if_not_existing=True)       # New param
+        config.modify_configfile("Snehal", "wasn't here")                                   # Warning message
+        config.modify_configfile(                           add_if_not_existing=True)       # Another blank line
+        config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # New comment
+        config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # Non-unique, and both get added
+        config.modify_configfile("Bjorn",  "was here too   # With a comment", add_if_not_existing=True) #, save=True) # New line
+        config.modify_configfile(save=True)
+    except Exception as e:
+        print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
+        sys.exit()
+
+

@@ -1,6 +1,7 @@
 
 Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
 .user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
@@ -25,7 +26,7 @@ Deployed  demo_config_T2.cfg   to  /home/cjn/.config/cjnfuncs_testcfg
 
 ----- T2.1:  Initial load.  Default logging level 30
 (Re)loaded             :  1
-Config file timestamp  :  1675795538.1641798
+Config file timestamp  :  1690662751.9740138
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -35,7 +36,7 @@ Current log file       :  __console__
 
 ----- T2.2:  No config change >>>>  Not reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1675795538.1641798
+Config file timestamp  :  1690662751.9740138
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -50,7 +51,7 @@ Current log file       :  __console__
        cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <10>  (<class 'int'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <10>
 (Re)loaded             :  1
-Config file timestamp  :  1675795538.1781797
+Config file timestamp  :  1690662751.9870138
 Config LogLevel        :  10
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -62,7 +63,7 @@ Current log file       :  __console__
 
 ----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No loadconfig logging, Logging DEBUG, INFO, and WARNING messages
 (Re)loaded             :  1
-Config file timestamp  :  1675795538.2801797
+Config file timestamp  :  1690662752.091014
 Config LogLevel        :  10
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -74,7 +75,7 @@ Current log file       :  __console__
 
 ----- T2.5:  LogLevel=30, ldcfg_ll=30 (default),  >>>>  Log only WARNING
 (Re)loaded             :  1
-Config file timestamp  :  1675795538.3821797
+Config file timestamp  :  1690662752.194014
 Config LogLevel        :  30
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -88,7 +89,7 @@ Current log file       :  __console__
        cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <30>
 (Re)loaded             :  1
-Config file timestamp  :  1675795538.5841794
+Config file timestamp  :  1690662752.2950141
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -98,7 +99,7 @@ Current log file       :  __console__
 
 ----- T2.7:  ldcfg_ll=30 (default), No changes >>>>  NOT Reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1675795538.5841794
+Config file timestamp  :  1690662752.2950141
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -108,7 +109,7 @@ Current log file       :  __console__
 
 ----- T2.8:  ldcfg_ll=10, flush_on_reload >>>>  NOT Reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1675795538.5841794
+Config file timestamp  :  1690662752.2950141
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -122,7 +123,7 @@ Current log file       :  __console__
        cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <30>
 (Re)loaded             :  1
-Config file timestamp  :  1675795538.5841794
+Config file timestamp  :  1690662752.2950141
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -138,7 +139,7 @@ Current log file       :  __console__
        cjnfuncs.loadconfig           -    DEBUG:  Loaded var2 = <Hello>  (<class 'str'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 (Re)loaded             :  1
-Config file timestamp  :  1675795538.7901793
+Config file timestamp  :  1690662752.3990142
 Config LogLevel        :  20
 Current Logging level  :  20
 testvar                :  True  <class 'bool'>
@@ -153,7 +154,7 @@ Current log file       :  __console__
        cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <40>  (<class 'int'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <40>
 (Re)loaded             :  1
-Config file timestamp  :  1675795538.9931793
+Config file timestamp  :  1690662752.5030143
 Config LogLevel        :  40
 Current Logging level  :  40
 testvar                :  True  <class 'bool'>
@@ -167,7 +168,7 @@ Current log file       :  __console__
        cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 (Re)loaded             :  1
-Config file timestamp  :  1675795539.095179
+Config file timestamp  :  1690662752.6050146
 Config LogLevel        :  30
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -181,7 +182,7 @@ Current log file       :  __console__
        cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <20>
 (Re)loaded             :  1
-Config file timestamp  :  1675795539.198179
+Config file timestamp  :  1690662752.6080146
 Config LogLevel        :  None
 Current Logging level  :  20
 testvar                :  True  <class 'bool'>
@@ -196,7 +197,7 @@ Current log file       :  __console__
        cjnfuncs.loadconfig           -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <10>
 (Re)loaded             :  1
-Config file timestamp  :  1675795539.198179
+Config file timestamp  :  1690662752.6080146
 Config LogLevel        :  None
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -208,7 +209,7 @@ Current log file       :  __console__
 
 ----- T2.15: Externally set log level = 10 with ldcfg_ll=30 (default)
 (Re)loaded             :  1
-Config file timestamp  :  1675795539.198179
+Config file timestamp  :  1690662752.6080146
 Config LogLevel        :  None
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>

@@ -6,6 +6,7 @@
 #
 #  Chris Nelson, 2018-2023
 #
+# 2.0.2 230613 - Documentation touch for logging formats in config file. Improved snd_notif failure logging.
 # 2.0.1 230222 - deploy_files() fix for files from package
 # 2.0   230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 # ...
@@ -41,6 +42,7 @@ FILE_LOGGING_FORMAT    = '{asctime} {module:>15}.{funcName:20} {levelname:>8}:  
 CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message}'
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 MAIN_MODULE_STEM       = Path(__main__.__file__).stem
+# print ("__main__.__spec__:", __main__.__spec__)
 
 # Project globals
 cfg = {}
@@ -55,10 +57,10 @@ for item in stack:  # Look for the import cjnfuncs.cjnfuncs line
         if "cjnfuncs.cjnfuncs" in code_context[0]:
             calling_module = inspect.getmodule(item[0])
             break
-# print (calling_module)
+# print ("calling_module:", calling_module)
 # print (calling_module.__package__)
 # # print (calling_module.__path__)
-# print (calling_module.__spec__) #.submodule_search_locations)
+# print ("calling_module.__spec__", calling_module.__spec__) #.submodule_search_locations)
 
 
 #=====================================================================================
@@ -126,6 +128,16 @@ call_logfile may be an absolute path or relative to the tool.log_dir_base direct
 loaded config.  Selected by `call_logfile_wins = False`.
 config_logfile may be absolute path or relative to the tool.log_dir_base directory.  
 `None` specifies the console.
+
+
+### cfg dictionary params
+`ConsoleLogFormat` (optional)
+- Overrides the default console logging format: `{module:>15}.{funcName:20} - {levelname:>8}:  {message}`.
+
+`FileLogFormat` (optional)
+- Overrides the default file logging format: `{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}`.
+
+Also see `LogFile` and `LogLevel` info in loadconfig() documentation, below.
 
 
 ### Returns
@@ -650,7 +662,9 @@ and files will be created with the `file_stat` permissions.
 #=====================================================================================
 #=====================================================================================
 initial_logging_setup = False   # Global since more than one config can be loaded
-CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")
+CFGLINE = re.compile(r"([^\s=:]+)[\s=:]+(.+)")                   # used in load_config()
+CFGLINE2 = re.compile(r"(\s*)([^\s=:]+)([\s=:]+)([^#]+)(.*)")    # used in modify_configfile()
+
 
 class config_item():
     """
@@ -679,6 +693,7 @@ then the `tool.log_dir_base` will be remapped to `tool.user_config_dir`.
 ### Member functions
 - config_item.stats() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
 - config_item.load_config() - Load the config file to the `cfg` dictionary.  See below.
+- modify_configfile() - Modify, add, remove params from the config file.
 
 
 ### Behaviors and rules
@@ -733,6 +748,7 @@ Output
             self.config_dir         = config.parent
             self.config_full_path   = config.full_path
             self.config_timestamp   = 0
+            self.config_content     = ""    # Used by modify_configfile()
             if remap_logdirbase  and  tool.log_dir_base == tool.user_data_dir:
                 tool.log_dir_base = tool.user_config_dir
         else:
@@ -1022,12 +1038,117 @@ Here are a few key comparisons:
 
 #=====================================================================================
 #=====================================================================================
+#  m o d i f y _ c o n f i g f i l e
+#=====================================================================================
+#=====================================================================================
+    def modify_configfile (self, param="", value="", remove=False, add_if_not_existing=False, save=False):
+        # TODO Comment out / uncomment out a param
+        """
+## modify_configfile (param, value, remove=False, add_if_not_existing=False, save=False) - Make edits to the config file
+
+Params in the config file may have their values changed, be deleted, or new lines added.  All added lines
+are added at the bottom of the file.
+
+On the first call to modify_configfile() the content of the file is read into memory.  Successive
+calls to modify_configfile() may be made, with the changes applied to the in-memory copy.  When
+all changes have been applied the final call to modify_configfile() must have `save=True` to 
+cause the memory version to be written back to the config file.  If the script code checks for
+modifications of the config file, then the modified content will be reloaded into the cfg dictionary.
+
+
+### Parameters
+`param` (default "")
+- The param name, if modifing an existing param or adding a new param
+
+`value` (default "")
+- The new value to be applied to an existing param, or an added param
+
+`remove` (default False)
+- If True, the `param` config file line is removed from the config file
+
+`add_if_not_existing` (default False)
+- Add the `param` `value` line at the bottom of the config file
+- To add a blank line leave out both `param` and `value`, or set both the `""`
+- To add a comment line specify the comment in the `param` field (eg, `modify_configfile("# My comment")`)
+
+`save` (default False)
+- Write the modified config file content back to the file
+- `save=True` may be specified on the last modification call or an a standalone call.
+
+
+### Returns
+- No return value
+- Warning messages are logged for attempting to modify or remove a non-existing param.
+
+
+### Exmaple
+```
+config.modify_configfile("abc",                     remove=True)                # Removed
+config.modify_configfile("def", "123456789 123456789")                          # Mofified value
+config.modify_configfile("", "",                    add_if_not_existing=True)   # Blank line
+config.modify_configfile("George", "was here",      add_if_not_existing=True)   # New param
+config.modify_configfile("Snehal", "wasn't here")                               # Warning message
+config.modify_configfile(                           add_if_not_existing=True)   # Another blank line
+config.modify_configfile("# New comment line",      add_if_not_existing=True, save=True) # New comment and save
+```
+        """
+
+        if self.config_content == "":
+            self.config_content = self.config_full_path.read_text()
+        found_param = False
+        updated_content = ""
+
+        for line in self.config_content.split("\n"):
+            out = CFGLINE2.match(line)
+            if out:
+                # print (f"1: <{out.group(1)}>")    # Any leading whitespace
+                # print (f"2: <{out.group(2)}>")    # param
+                # print (f"3: <{out.group(3)}>")    # whitespace, '=', ':' between param and value
+                # print (f"4: <{out.group(4)}>")    # value, with trailing whitespace
+                # print (f"5: <{out.group(5)}>")    # comment
+
+                if out.group(2) != param:
+                    updated_content += line + "\n"
+                else:
+                    found_param = True
+                    if remove == True:
+                        continue                            # just don't save the line
+
+                    # Update value for the current line
+                    len_current_whitespace = len(out.group(4)) - len(out.group(4).strip())
+                    len_new_whitespace = len_current_whitespace - (len(value) - len(out.group(4).strip()))
+                    if len_new_whitespace < 1:
+                        len_new_whitespace = 1
+                    if len_current_whitespace == 0:
+                        len_new_whitespace = 0
+                    updated_content += out.group(1) + out.group(2) + out.group(3) + value + ' '*len_new_whitespace + out.group(5) + "\n"
+            else:
+                updated_content += line + "\n"
+
+        if found_param == False:
+            if add_if_not_existing == True:
+                updated_content += f"{param}    {value}\n"
+            elif param==""  and  value==""  and save==True: # Save-only call
+                pass
+            else:
+                logging.warning (f"Modification of param <{param}> failed - not found in config file.  Modification skipped.")
+
+        self.config_content = updated_content[:-1]          # Avoid adding extra \n at end of file
+
+        if save:
+            self.config_full_path.write_text(self.config_content + "\n")
+            self.config_content = ""
+
+
+
+#=====================================================================================
+#=====================================================================================
 #  g e t c f g
 #=====================================================================================
 #=====================================================================================
 def getcfg(param, default="_nodefault"):
     """
-## getcfg (param, default=None) - Get a param from the cfg dictionary.
+## getcfg (param, default=None) - Get a param from the cfg dictionary
 
 Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
 but with handling if the item does not exist.
@@ -1378,11 +1499,16 @@ messages are also blocked if `DontEmail` is True.
             logging.debug (f"Notification NOT sent <{subj}> <{msg}>")
         return
 
-    snd_email (subj=subj, body=msg, to=to)
-    if log:
-        logging.warning (f"Notification sent <{subj}> <{msg}>")
-    else:
-        logging.debug (f"Notification sent <{subj}> <{msg}>")
+    try:
+        snd_email (subj=subj, body=msg, to=to)
+        if log:
+            logging.warning (f"Notification sent <{subj}> <{msg}>")
+        else:
+            logging.debug (f"Notification sent <{subj}> <{msg}>")
+    except:
+        # pass
+        logging.warning (f"Notification send failed <{subj}> <{msg}>")
+        raise
 
 
 #=====================================================================================

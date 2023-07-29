@@ -1,6 +1,7 @@
 
 Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
 .user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
@@ -65,6 +66,7 @@ Current log file:              /home/cjn/.config/cjnfuncs_testcfg/call_logfile
 
 Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
 .user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
@@ -89,6 +91,7 @@ Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_
 
 Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
 .user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
@@ -108,11 +111,12 @@ Based on found user or site dirs:
 .log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
 
 
------ T1.10:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile
+----- T1.10:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile2
 Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/cfg_logfile2
 
 Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
 .user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
@@ -138,6 +142,7 @@ Current log file:              __console__
 
 Stats for set_toolname <cjnfuncs_testcfg>:
 .toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
 .user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
 .user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
 .user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
