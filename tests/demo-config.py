@@ -422,6 +422,11 @@ if args.Mode == '14':
         config.modify_configfile("x_no_trailing_whitespace","123456789 123456789")
         config.modify_configfile("x_indented_param",        "False")
         
+        config.modify_configfile("x_float",                 6.5)                            # Check various value types
+        config.modify_configfile("x_int",                   12)
+        config.modify_configfile("x_list",                  ["hello", 3.14, {"abc":42}])
+        config.modify_configfile("x_dict",                  {"one":6, "two":7.0})
+
         config.modify_configfile("", "",                    add_if_not_existing=True)       # Blank line
         config.modify_configfile("George", "was here",      add_if_not_existing=True)       # New param
         config.modify_configfile("Snehal", "wasn't here")                                   # Warning message

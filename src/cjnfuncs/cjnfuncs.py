@@ -42,6 +42,8 @@ from importlib_resources import files as ir_files
 # FILE_LOGGING_FORMAT    = '{asctime}/{module}/{funcName}/{levelname}:  {message}'    # Classic format
 FILE_LOGGING_FORMAT    = '{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}'
 CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message}'
+# CONSOLE_LOGGING_FORMAT = '{pathname:>15}.{funcName:20} - {levelname:>8}:  {message}'
+
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 MAIN_MODULE_STEM       = Path(__main__.__file__).stem
 # print ("__main__.__spec__:", __main__.__spec__)
@@ -53,10 +55,11 @@ cfg = {}
 # Get the main / calling module info.  Made available by set_toolname.main_module
 stack = inspect.stack()
 calling_module = ""
-for item in stack:  # Look for the import cjnfuncs.cjnfuncs line
+for item in stack:  # Look for the import cjnaz.cjnfuncs line
     code_context = item[4]
     if code_context is not None:
-        if "cjnfuncs.cjnfuncs" in code_context[0]:
+        # if "cjnaz.cjnfuncs" in code_context[0]:
+        if "cjnfuncs" in code_context[0]:
             calling_module = inspect.getmodule(item[0])
             break
 # print ("calling_module:", calling_module)
@@ -848,7 +851,7 @@ config file timestamp has changed
   the cfg dictionary, True and False values (case insensitive) are stored as booleans, and 
   all other entries are stored as strings.  This avoids most explicit type casting clutter in the tool script.
 - **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
-  import by other modules (`from cjnfuncs.cjnfuncs import logging`).  By default, logging will go to the
+  import by other modules (`from cjnaz.cjnfuncs import logging`).  By default, logging will go to the
   console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
 - **Logging level control** - Optional `LogLevel` in the config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the config file, then 
@@ -1064,6 +1067,7 @@ modifications of the config file, then the modified content will be reloaded int
 
 `value` (default "")
 - The new value to be applied to an existing param, or an added param
+- Will be cast to str
 
 `remove` (default False)
 - If True, the `param` config file line is removed from the config file
@@ -1099,6 +1103,7 @@ config.modify_configfile("# New comment line",      add_if_not_existing=True, sa
             self.config_content = self.config_full_path.read_text()
         found_param = False
         updated_content = ""
+        value = str(value)
 
         for line in self.config_content.split("\n"):
             out = CFGLINE2.match(line)
