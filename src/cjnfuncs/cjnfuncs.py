@@ -853,7 +853,7 @@ config file timestamp has changed
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
   for type errors (eg, expecting a float but user input error resulted in a str).
 - **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
-  import by other modules (`from cjnaz.cjnfuncs import logging`).  By default, logging will go to the
+  import by other modules (`from cjnfuncs.cjnfuncs import logging`).  By default, logging will go to the
   console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
 - **Logging level control** - Optional `LogLevel` in the config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the config file, then 
