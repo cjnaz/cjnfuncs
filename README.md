@@ -481,11 +481,12 @@ config file timestamp has changed
   directly accessed as well.
 - The format of a config file is param=value pairs (with no section or default as in the Python 
   configparser module).  Separating the param and value may be whitespace, `=` or `:`.
-- **Native int, bool, and str support** - Integer values in the config file are stored as integers in 
-  the cfg dictionary, True and False values (case insensitive) are stored as booleans, and 
-  all other entries are stored as strings.  This avoids most explicit type casting clutter in the tool script.
+- **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
+  type is stored in the cfg dictionary if none of the other types can be resolved for a given value.
+  Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
+  for type errors (eg, expecting a float but user input error resulted in a str).
 - **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
-  import by other modules (`from cjnfuncs.cjnfuncs import logging`).  By default, logging will go to the
+  import by other modules (`from cjnaz.cjnfuncs import logging`).  By default, logging will go to the
   console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
 - **Logging level control** - Optional `LogLevel` in the config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the config file, then 
@@ -541,7 +542,7 @@ Here are a few key comparisons:
 
   Feature | loadconfig | Python configparser
   ---|---|---
-  Native types | int, bool (true/false case insensitive), str | str only, requires explicit type casting via getter functions
+  Native types | int, float, bool (true/false case insensitive), list, tuple, dict, str | str only, requires explicit type casting via getter functions
   Reload on config file change | built-in | not built-in
   Import sub-config files | Yes | No
   Section support | No | Yes
@@ -555,7 +556,7 @@ Here are a few key comparisons:
   Comment prefix | '#' fixed, thus can't be part of the param or value | '#' or ';', customizable
   Interpolation | No | Yes
   Mapping Protocol Access | No | Yes
-  Save to file | No | Yes
+  Save to file | No (see `modify_configfile()`) | Yes
         
 <br/>
 
@@ -581,6 +582,7 @@ modifications of the config file, then the modified content will be reloaded int
 
 `value` (default "")
 - The new value to be applied to an existing param, or an added param
+- Will be cast to str
 
 `remove` (default False)
 - If True, the `param` config file line is removed from the config file
@@ -930,8 +932,9 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     ` `
 ---
 # Revision history
-- 2.0.2 230729 - Added modify_configfile.  Documentation touch for logging formats in config file. 
-Improved snd_notif failure logging.
+- 2.0.2 230801 - Added modify_configfile.  Added native support for float, list, tuple, and dict in loadconfig().
+  Documentation touch for logging formats in config file. 
+  Improved snd_notif failure logging.
 - 2.0.1 230222 - deploy_files() fix for files from package
 - 2.0 230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 - ...

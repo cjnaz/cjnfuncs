@@ -26,6 +26,7 @@ import tempfile
 import inspect
 import platform
 import re
+import ast
 from pathlib import Path, PurePath
 import shutil
 import __main__
@@ -847,9 +848,10 @@ config file timestamp has changed
   directly accessed as well.
 - The format of a config file is param=value pairs (with no section or default as in the Python 
   configparser module).  Separating the param and value may be whitespace, `=` or `:`.
-- **Native int, bool, and str support** - Integer values in the config file are stored as integers in 
-  the cfg dictionary, True and False values (case insensitive) are stored as booleans, and 
-  all other entries are stored as strings.  This avoids most explicit type casting clutter in the tool script.
+- **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
+  type is stored in the cfg dictionary if none of the other types can be resolved for a given value.
+  Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
+  for type errors (eg, expecting a float but user input error resulted in a str).
 - **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
   import by other modules (`from cjnaz.cjnfuncs import logging`).  By default, logging will go to the
   console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
@@ -907,7 +909,7 @@ Here are a few key comparisons:
 
   Feature | loadconfig | Python configparser
   ---|---|---
-  Native types | int, bool (true/false case insensitive), str | str only, requires explicit type casting via getter functions
+  Native types | int, float, bool (true/false case insensitive), list, tuple, dict, str | str only, requires explicit type casting via getter functions
   Reload on config file change | built-in | not built-in
   Import sub-config files | Yes | No
   Section support | No | Yes
@@ -921,7 +923,7 @@ Here are a few key comparisons:
   Comment prefix | '#' fixed, thus can't be part of the param or value | '#' or ';', customizable
   Interpolation | No | Yes
   Mapping Protocol Access | No | Yes
-  Save to file | No | Yes
+  Save to file | No (see `modify_configfile()`) | Yes
         """
 
         global cfg
@@ -960,19 +962,43 @@ Here are a few key comparisons:
                         raise ConfigError (_msg)
 
                 # Check if config file has changed.  If not then return 0
-                current_timestamp = self.config_full_path.stat().st_mtime
+                current_timestamp = int(self.config_full_path.stat().st_mtime)  # integer-second resolution
                 if self.config_timestamp == current_timestamp:
                     return 0
 
                 # Initial load call, or config file has changed.  Do (re)load.
                 self.config_timestamp = current_timestamp
                 logging.getLogger().setLevel(ldcfg_ll)   # Set logging level for remainder of loadconfig call
+                # logging.info (f"Config file timestamp: {current_timestamp}")
+                logging.warning (f"Config file timestamp: {current_timestamp}")
 
                 if flush_on_reload:
                     logging.info (f"cfg dictionary flushed due to changed config file (flush_on_reload)")
                     cfg.clear()
 
             logging.info (f"Loading  <{config}>")
+
+            def parse_value(value_str):
+                try:                                                # Integer
+                    return int(value_str) 
+                except:
+                    pass
+                try:                                                # Float
+                    return float(value_str)
+                except:
+                    pass
+                if value_str.lower() == "true":                     # Boolean True
+                    return True
+                if value_str.lower() == "false":                    # Boolean False
+                    return False
+                try:
+                    if  (value_str.startswith('[') and value_str.endswith(']'))  or \
+                        (value_str.startswith('{') and value_str.endswith('}'))  or \
+                        (value_str.startswith('(') and value_str.endswith(')')):
+                            return ast.literal_eval(value_str)      # List, Dictionary, or Tuple
+                except:
+                    pass
+                return value_str                                    # String
 
 
             with config.open() as ifile:
@@ -990,28 +1016,19 @@ Here are a few key comparisons:
                             _msg = f"Failed importing/processing config file  <{target.full_path}>"
                             raise ConfigError (_msg)
 
-                    # Regular, param/value line
+                    # Is a param/value line
                     else:
-                        _line = line.split("#", maxsplit=1)[0].strip()
+                        _line = line.split("#", maxsplit=1)[0].strip()  # line without comment
                         if len(_line) > 0:
                             out = CFGLINE.match(_line)
                             if out:
                                 param = out.group(1)
-                                rol   = out.group(2)              # rest of line
-                                isint = False
-                                try:
-                                    cfg[param] = int(rol)         # add int to dict
-                                    isint = True
-                                except:
-                                    pass
-                                if not isint:
-                                    if rol.lower() == "true":   # add bool to dict
-                                        cfg[param] = True
-                                    elif rol.lower() == "false":
-                                        cfg[param] = False
-                                    else:
-                                        cfg[param] = rol          # add string to dict
-                                logging.debug (f"Loaded {param} = <{cfg[param]}>  ({type(cfg[param])})")
+                                rol   = out.group(2)        # rest of line (value portion)
+
+                                value = parse_value(rol)
+                                cfg[param] = value
+
+                                logging.debug (f"Loaded {param} = <{value}>  ({type(value)})")
                             else: 
                                 line = line.replace('\n','')
                                 logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")

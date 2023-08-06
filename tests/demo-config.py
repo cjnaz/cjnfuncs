@@ -8,12 +8,16 @@
 #
 #==========================================================
 
-__version__ = "1.0"
+__version__ = "1.1"
 TOOLNAME    = "cjnfuncs_testcfg"
 CONFIG_FILE = "demo_config.cfg"
 
 import argparse
-from cjnfuncs.cjnfuncs import *
+import os.path
+import shutil
+import sys
+import time
+from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, getcfg, cfg, timevalue, retime, mungePath, ConfigError
 
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
@@ -167,27 +171,27 @@ if args.Mode == '2':
     print_stats()
 
     print ("\n----- T2.3:  LogLevel=10, ldcfg_ll=10 >>>>  loadconfig logging, Logging DEBUG, INFO, and WARNING messages")
+    time.sleep(1)  # 1 sec timestamp change sensitivity in loadconfig
     config_T2.modify_configfile ("LogLevel",   "10", add_if_not_existing=True, save=True)
-    time.sleep(.1)  # Seems to be needed to ensure diff timestamps to trigger reloads.  Not always sufficient sleep time!
     reloaded = config_T2.loadconfig(ldcfg_ll=10, flush_on_reload=True)
     print_stats()
 
     print ("\n----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No loadconfig logging, Logging DEBUG, INFO, and WARNING messages")
+    time.sleep(1)
     config_T2.modify_configfile ( "LogLevel",   "10", save=True)
-    time.sleep(.1)
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
     print ("\n----- T2.5:  LogLevel=30, ldcfg_ll=30 (default),  >>>>  Log only WARNING")
+    time.sleep(1)
     config_T2.modify_configfile ("LogLevel",   "30", save=True)
-    time.sleep(.1)
     reloaded = config_T2.loadconfig(flush_on_reload=True)
     print_stats()
 
     print ("\n----- T2.6:  ldcfg_ll=10, No LogLevel >>>>  Restore preexisting level (30)")
+    time.sleep(1)
     config_T2.modify_configfile ("LogLevel",  remove=True)
     config_T2.modify_configfile ("testvar",   "True", save=True)
-    time.sleep(.1)
     reloaded = config_T2.loadconfig(ldcfg_ll=10, flush_on_reload=True)
     print_stats()
 
@@ -204,16 +208,16 @@ if args.Mode == '2':
     print_stats()
 
     print ("\n----- T2.10:  ldcfg_ll=10, LogLevel=20, var2 added >>>>  Reloaded")
+    time.sleep(1)
     config_T2.modify_configfile ("LogLevel",   "20", add_if_not_existing=True)
     config_T2.modify_configfile ("var2",   "Hello", add_if_not_existing=True, save=True)
-    time.sleep(.1)
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
     print ("\n----- T2.11: ldcfg_ll=10, LogLevel=40, var2 removed from config >>>>  var2 still defined, no logging")
+    time.sleep(1)
     config_T2.modify_configfile ("LogLevel",   "40")
     config_T2.modify_configfile ("var2",   remove=True, save=True)
-    time.sleep(.1)
     reloaded = config_T2.loadconfig(ldcfg_ll=10)
     print_stats()
 
@@ -223,9 +227,9 @@ if args.Mode == '2':
     print_stats()
 
     print ("\n----- T2.13: Externally set log level = 20")
+    time.sleep(1)
     config_T2.modify_configfile ("LogLevel",   remove=True, save=True)
     logging.getLogger().setLevel(20)
-    time.sleep(.1)
     reloaded = config_T2.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     print_stats()
 
@@ -315,13 +319,14 @@ if args.Mode == '9':
     config.loadconfig(flush_on_reload=True, ldcfg_ll=10)
     print (f"----- T9.2:  var dummy in cfg:  {getcfg('dummy', False)}  (should be True because not reloaded)\n")
 
+
+    time.sleep(1)  # 1 sec timestamp change sensitivity in loadconfig
     config.config_full_path.touch()
-    time.sleep(.1)  # Seems to be needed to ensure diff timestamps.  ???
     config.loadconfig(ldcfg_ll=10)
     print (f"----- T9.3:  var dummy in cfg:  {getcfg('dummy', False)}  (should be True because flush_on_reload == False)\n")
 
+    time.sleep(1)
     config.config_full_path.touch()
-    time.sleep(.1)
     config.loadconfig(flush_on_reload=True, ldcfg_ll=10)
     print (f"----- T9.4:  var dummy in cfg:  {getcfg('dummy', False)}  (should be False because flush_on_reload == True)\n")
 
@@ -407,10 +412,11 @@ if args.Mode == '13':
         print (f"Exception due to missing imported config file:\n  {e}")
         print (f"Logging level back in the main code:  {logging.getLogger().level}")
 
+
 if args.Mode == '14':
     print ("\n***** Test modify_configfile *****")
     try:
-        config = config_item(CONFIG_FILE)
+        # config = config_item(CONFIG_FILE)
         config.modify_configfile(r"x_7893&(%$,.nasf||\a@",  "Goodbye!    # It was Hello")   # param match check
         config.modify_configfile("x_removeX", remove=True)                                  # Warning message
         config.modify_configfile("x_removed", remove=True)                                  # Removed
@@ -435,6 +441,23 @@ if args.Mode == '14':
         config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # Non-unique, and both get added
         config.modify_configfile("Bjorn",  "was here too   # With a comment", add_if_not_existing=True) #, save=True) # New line
         config.modify_configfile(save=True)
+        config.loadconfig(ldcfg_ll=10, force_flush_reload=True)
+        print (f"Compare <{config.config_full_path}> to golden copy.")
+    except Exception as e:
+        print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
+        sys.exit()
+
+
+if args.Mode == '15':
+    print ("\n***** Access list, tuple, and dictionary params *****")
+    try:
+        # a_list:         ["hello", 3.14, {"abc":42.}]
+        # a_tuple=        ("Im a tuple", 7.0)
+        # a_dict:         {"six":6, 3:3.0}
+        six      = getcfg("a_dict")["six"]
+        seven    = getcfg("a_tuple")[1]
+        fortytwo = getcfg("a_list")[2]["abc"]
+        print (f"{six} times {seven} is {fortytwo}")
     except Exception as e:
         print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
         sys.exit()
