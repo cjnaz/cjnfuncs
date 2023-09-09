@@ -105,7 +105,7 @@ found then user-specific is assumed.  No directories are created.
 
 
 ### Member function
-`stats()`
+`\_\_repr\_\_()`
 - Returns a str() listing of the available attributes of the instance
 
 
@@ -137,8 +137,8 @@ also to the `.site_data_dir`.
 ### Examples
 Given:
 ```
-tool = set_toolname("cjnfuncs_testenv")
-print (tool.stats())
+tool = set_toolname("wanstatus")
+print (tool)
 ```
 
 Example stats() for a user-specific setup:
@@ -233,7 +233,7 @@ User (~user/) and environment vars ($HOME/) are supported and expanded.
 ```
 
 ### Member functions
-- mungePath.stats() - Return a str() listing all stats for the object
+- mungePath.\_\_repr\_\_() - Return a str() listing all stats for the object
 - mungePath.refresh_stats() - Update the boolean state attributes for the object. Returns the object
 so that it may be used directly/immediately in the code.
 
@@ -259,14 +259,25 @@ is raised if you attempt to mkdir on top of an existing file.
 ```
 Given:
     tool = set_toolname("mytool")
-    xx = mungePath ("mysubdir/file.txt", tool.data_dir)
-    mungePath (xx.parent, mkdir=True)
-    if not xx.exists:
-        with xx.full_path.open('w') as outfile:
+    myfile = mungePath ("mysubdir/file.txt", tool.data_dir)
+    mungePath (myfile.parent, mkdir=True)
+    if not myfile.exists:
+        with myfile.full_path.open('w') as outfile:
             file_contents = outfile.write("Hello")
-    print (xx.refresh_stats().stats())      # Refresh needed else prints stats from when xx was created (before file.txt was created)
+        print (myfile)      # NOTE: Prints stats from before the file creation
+        myfile.refresh_stats()
+        print (myfile)
 
 What gets printed:
+    .full_path    :  /home/me/.local/share/mytool/mysubdir/file.txt
+    .parent       :  /home/me/.local/share/mytool/mysubdir
+    .name         :  file.txt
+    .is_absolute  :  True
+    .is_relative  :  False
+    .exists       :  False
+    .is_dir       :  False
+    .is_file      :  False
+
     .full_path    :  /home/me/.local/share/mytool/mysubdir/file.txt
     .parent       :  /home/me/.local/share/mytool/mysubdir
     .name         :  file.txt
@@ -367,7 +378,7 @@ then the `tool.log_dir_base` will be remapped to `tool.user_config_dir`.
 
 
 ### Member functions
-- config_item.stats() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
+- config_item.\_\_repr\_\_() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
 - config_item.load_config() - Load the config file to the `cfg` dictionary.  See below.
 - modify_configfile() - Modify, add, remove params from the config file.
 
@@ -393,9 +404,9 @@ Given
     tool = set_toolname("testcfg")
     print (f"tool.log_dir_base : {tool.log_dir_base}")
     config = config_item("demo_config.cfg", remap_logdirbase=True)
-    print (config.stats())
+    print (config)
     config.loadconfig()
-    print (config.stats())
+    print (config)
 
 Output
     tool.log_dir_base : /home/me/.local/share/testcfg
@@ -479,21 +490,27 @@ config file timestamp has changed
 ### Behaviors and rules
 - See `getcfg()`, below, for accessing loaded config data. `cfg` is a global dictionary which may be
   directly accessed as well.
+
 - The format of a config file is param=value pairs (with no section or default as in the Python 
   configparser module).  Separating the param and value may be whitespace, `=` or `:`.
+
 - **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
   type is stored in the cfg dictionary if none of the other types can be resolved for a given value.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
-  for type errors (eg, expecting a float but user input error resulted in a str).
+  for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
+  `getcfg (param, types=[])` parameter for basic type checking.
+
 - **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
-  import by other modules (`from cjnaz.cjnfuncs import logging`).  By default, logging will go to the
+  import by other modules (`from cjnfuncs.cjnfuncs import logging`).  By default, logging will go to the
   console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
+
 - **Logging level control** - Optional `LogLevel` in the config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the config file, then 
   the logging level is set to the Python default logging level, 30/WARNING.
   The tool script code may also manually/explicitly set the logging level - _after_ the initial `loadconifig()` call -
   and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
   switch feature.  Note that logging done _within_ loadconfig() code is always done at the `ldcfg_ll` level.
+
 - **Log file options** - Where to log has two separate fields:  `call_logifle` in the call to loadconfig(), and 
   `LogFile` in the loaded config file, with `call_logfile_wins` selecting which is used.  This mechanism allows for
   a command line `--log-file` switch to override a _default_ log file defined in the config file.  If the selected 
@@ -519,7 +536,7 @@ then import them in the tool script config file as such: `import ~/creds_SMTP`.
 - **Config reload if changed, `flush_on_reload`, and `force_flush_reload`** - loadconfig() may be called 
 periodically by the tool script, such as in a service loop.
 If the config file timestamp is unchanged then loadconfig() immediately returns `0`. 
-If the timestamp has changed then the config file will be reloaded, and `1` is returned to indicate to 
+If the timestamp has changed then the config file will be reloaded and `1` is returned to indicate to 
 the tool script to do any post-config-load operations. 
   - If `flush_on_reload=True` (default False) then the `cfg`
   dictionary will be cleaned/purged before the config file is reloaded. If `flush_on_reload=False` then the config
@@ -573,7 +590,11 @@ On the first call to modify_configfile() the content of the file is read into me
 calls to modify_configfile() may be made, with the changes applied to the in-memory copy.  When
 all changes have been applied the final call to modify_configfile() must have `save=True` to 
 cause the memory version to be written back to the config file.  If the script code checks for
-modifications of the config file, then the modified content will be reloaded into the cfg dictionary.
+modifications of the config file then the modified content will be reloaded into the cfg dictionary.
+
+NOTE:  In some circumstances the OS-reported timestamp for the modified config file may be erratic.
+It may be necessary to add a time.sleep(0.5) delay between saving the modified config and the loadconfig()
+reload call to avoid multiple config reloads.
 
 
 ### Parameters
@@ -619,10 +640,15 @@ config.modify_configfile("# New comment line",      add_if_not_existing=True, sa
 
 ---
 
-# getcfg (param, default=None) - Get a param from the cfg dictionary
+# getcfg (param, default=None, types=[]) - Get a param from the cfg dictionary
 
 Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
 but with handling if the item does not exist.
+
+Type checking may be performed by listing one or more expected types via the optional `types` parameter.
+If the loaded param is not one of the expected types then a ConfigError is raised.  This check may be 
+useful for basic error checking of param values, EG making sure the return value is a float and not
+a str. (str is the loadconig default if the param type cannot be converted to another supported type.)
 
 NOTE: `getcfg()` is almost equivalent to `cfg.get()`, except that `getcfg()` does not default to `None`.
 Rather, `getcfg()` raises a ConfigError if the param does not exist and no `default` is specified.
@@ -636,11 +662,15 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 `default` (default None)
 - if provided, is returned if `param` does not exist in cfg
 
+`types` (default '[]' empty list)
+- if provided, a ConfigError is raised if the param's value type is not in the list of expected types
+- `types` may be a single type (eg, `types=int`) or a list of types (eg, `types=[int, float]`)
+- Supported types: [str, int, float, bool, list, tuple, dict]
 
 ### Returns
 - param value (cfg[param]), if param is in cfg
 - `default` value if param not in cfg and `default` value provided
-- raises ConfigError if param does not exist in cfg and no `default` provided.
+- raises ConfigError if param does not exist in cfg and no `default` provided, or if not of the expected type(s).
     
 <br/>
 
@@ -674,14 +704,14 @@ Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks
 
 
 ### Member functions
-- timevalue.stats() - Return a str() listing all attributes of the instance
+- timevalue.\_\_repr\_\_() - Return a str() listing all attributes of the instance
 
 
 ### Example
 ```
 Given
     xx = timevalue("1m")
-    print (xx.stats())
+    print (xx)
     print (f"Sleep <{xx.seconds}> seconds")
     time.sleep(xx.seconds)
 
@@ -907,6 +937,12 @@ The `subj` field is part of the log message.
 `EmailVerbose` (default False)
 - If True, detailed transactions with the SMTP server are sent to stdout. Useful for debug.
 
+`EmailNTries` (type int, default 3)
+- Number of tries to send email before aborting
+
+`EmailRetryWait` (seconds, type int or float, default 5)
+- Number of seconds to wait between retry attempts
+
 
 ### Returns
 - NoneType
@@ -932,9 +968,12 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     ` `
 ---
 # Revision history
-- 2.0.2 230801 - Added modify_configfile.  Added native support for float, list, tuple, and dict in loadconfig().
+- 2.1 230914 - Added modify_configfile. 
+  Added native support for float, list, tuple, and dict in loadconfig(). 
+  Added getcfg() type checking. 
   Documentation touch for logging formats in config file. 
-  Improved snd_notif failure logging.
+  Improved snd_notif failure logging. 
+  Added email/notif send retries.
 - 2.0.1 230222 - deploy_files() fix for files from package
 - 2.0 230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 - ...

@@ -25,7 +25,7 @@ Deployed  additional.cfg       to  /home/cjn/.config/cjnfuncs_testcfg
 Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1690923818
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1694285484
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
        cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
        cjnfuncs.loadconfig           -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
@@ -33,6 +33,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
        cjnfuncs.loadconfig           -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
@@ -76,7 +77,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
        cjnfuncs.modify_configfile    -  WARNING:  Modification of param <x_removeX> failed - not found in config file.  Modification skipped.
        cjnfuncs.modify_configfile    -  WARNING:  Modification of param <Snehal> failed - not found in config file.  Modification skipped.
        cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1690923818
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1694285484
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
        cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
        cjnfuncs.loadconfig           -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
@@ -84,6 +85,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
        cjnfuncs.loadconfig           -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
        cjnfuncs.loadconfig           -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)

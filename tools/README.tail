@@ -1,9 +1,12 @@
 ` `
 ---
 # Revision history
-- 2.0.2 230801 - Added modify_configfile.  Added native support for float, list, tuple, and dict in loadconfig().
+- 2.1 230914 - Added modify_configfile. 
+  Added native support for float, list, tuple, and dict in loadconfig(). 
+  Added getcfg() type checking. 
   Documentation touch for logging formats in config file. 
-  Improved snd_notif failure logging.
+  Improved snd_notif failure logging. 
+  Added email/notif send retries.
 - 2.0.1 230222 - deploy_files() fix for files from package
 - 2.0 230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 - ...

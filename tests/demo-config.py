@@ -31,7 +31,7 @@ args = parser.parse_args()
 
 
 tool = set_toolname(TOOLNAME)
-print(tool.stats())
+print(tool)
 
 if args.cleanup:
     if os.path.exists(tool.config_dir):
@@ -98,26 +98,26 @@ if args.Mode == '1':
     print ("\n----- T1.8:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (again)")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
-    print (tool.stats())
+    print (tool)
     logging.warning (f"T1.8 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.9:  Change tool.log_dir_base.  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  mylogdir/call_logfile")
     tool.log_dir_base = tool.config_dir / "mylogdir"
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
-    print (tool.stats())
+    print (tool)
     logging.warning (f"T1.9 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.10:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile2")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
-    print (tool.stats())
+    print (tool)
     logging.warning (f"T1.10 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.11:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {tool.log_full_path}")
-    print (tool.stats())
+    print (tool)
     logging.warning (f"T1.11 - Log to  <{tool.log_full_path}>")
 
     print ("\n----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__")
@@ -264,8 +264,8 @@ except Exception as e:
 
 if args.Mode == '3':
     print ("\n***** Show tool.log_* values (LogFile NOT in config) *****")
-    print(tool.stats())
-    print(config.stats())
+    print(tool)
+    print(config)
 
 
 if args.Mode == '4':
@@ -285,13 +285,13 @@ if args.Mode == '5':
 
 if args.Mode == '6':
     print ("\n***** Co-loading an additional config *****")
-    print(config.stats())
+    print(config)
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
     additional_config = config_item("additional.cfg")
-    print(additional_config.stats())
+    print(additional_config)
     additional_config.loadconfig(ldcfg_ll=10)
-    print(additional_config.stats())
+    print(additional_config)
     logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
     logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
     print (f"Current logging level:      {logging.getLogger().level}")
@@ -338,7 +338,7 @@ if args.Mode == '9':
 def dump(xx):
     print (f"\nGiven <{xx}>     {type(xx)}:")
     yy = timevalue(xx)
-    print (yy.stats())
+    print (yy)
     print (f"   retimed  :  <{retime(yy.seconds, yy.unit_char)}> {yy.unit_str}")
 
 if args.Mode == '10':
@@ -439,7 +439,7 @@ if args.Mode == '14':
         config.modify_configfile(                           add_if_not_existing=True)       # Another blank line
         config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # New comment
         config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # Non-unique, and both get added
-        config.modify_configfile("Bjorn",  "was here too   # With a comment", add_if_not_existing=True) #, save=True) # New line
+        config.modify_configfile("Bjorn",  "was here too   # With a comment and No newline at end of file", add_if_not_existing=True) #, save=True) # New line
         config.modify_configfile(save=True)
         config.loadconfig(ldcfg_ll=10, force_flush_reload=True)
         print (f"Compare <{config.config_full_path}> to golden copy.")
@@ -463,3 +463,21 @@ if args.Mode == '15':
         sys.exit()
 
 
+if args.Mode == '16':
+    print ("\n***** Test getcfg type checking *****")
+
+    def dump(param, types):
+        try:
+            _value = getcfg(param, types=types)
+            print (f"Param <{param}> value <{_value}>, type <{type(_value)}>, expected types <{types}>")
+        except Exception as e:
+            print (f"Param <{param}> not expected type:\n  {e}")
+
+    dump("Tint",   types=[int, float])
+    dump("Tint",   types=int)
+    dump("a_list", types=[list])
+    dump("Tsec",   types=[int, str])
+    dump("Tint",   types=[     float, list, tuple, dict, bool, str])
+    dump("a_list", types=[int, float,       tuple, dict, bool, str])
+    dump("a_dict", types=[int, float, list, tuple,       bool, str])
+    dump("Tsec",   types=[int, float, list, tuple, dict, bool     ])

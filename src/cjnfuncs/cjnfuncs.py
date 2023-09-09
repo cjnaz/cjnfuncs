@@ -47,7 +47,8 @@ CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message
 
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 MAIN_MODULE_STEM       = Path(__main__.__file__).stem
-# print ("__main__.__spec__:", __main__.__spec__)
+SND_EMAIL_NTRIES = 3    # Number of tries to send email before aborting
+SND_EMAIL_WAIT = 5      # seconds between retries
 
 # Project globals
 cfg = {}
@@ -211,7 +212,7 @@ found then user-specific is assumed.  No directories are created.
 
 
 ### Member function
-`stats()`
+`\_\_repr\_\_()`
 - Returns a str() listing of the available attributes of the instance
 
 
@@ -243,8 +244,8 @@ also to the `.site_data_dir`.
 ### Examples
 Given:
 ```
-tool = set_toolname("cjnfuncs_testenv")
-print (tool.stats())
+tool = set_toolname("wanstatus")
+print (tool)
 ```
 
 Example stats() for a user-specific setup:
@@ -328,10 +329,11 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
 
         self.log_file = self.log_dir = self.log_full_path = None
 
-        # print (self.stats())
-
 
     def stats(self):
+        return self.__repr__()
+
+    def __repr__(self):
         stats = ""
         stats +=  f"\nStats for set_toolname <{self.toolname}>:\n"
         stats +=  f".toolname         :  {self.toolname}\n"
@@ -403,7 +405,7 @@ User (~user/) and environment vars ($HOME/) are supported and expanded.
 ```
 
 ### Member functions
-- mungePath.stats() - Return a str() listing all stats for the object
+- mungePath.\_\_repr\_\_() - Return a str() listing all stats for the object
 - mungePath.refresh_stats() - Update the boolean state attributes for the object. Returns the object
 so that it may be used directly/immediately in the code.
 
@@ -429,14 +431,25 @@ is raised if you attempt to mkdir on top of an existing file.
 ```
 Given:
     tool = set_toolname("mytool")
-    xx = mungePath ("mysubdir/file.txt", tool.data_dir)
-    mungePath (xx.parent, mkdir=True)
-    if not xx.exists:
-        with xx.full_path.open('w') as outfile:
+    myfile = mungePath ("mysubdir/file.txt", tool.data_dir)
+    mungePath (myfile.parent, mkdir=True)
+    if not myfile.exists:
+        with myfile.full_path.open('w') as outfile:
             file_contents = outfile.write("Hello")
-    print (xx.refresh_stats().stats())      # Refresh needed else prints stats from when xx was created (before file.txt was created)
+        print (myfile)      # NOTE: Prints stats from before the file creation
+        myfile.refresh_stats()
+        print (myfile)
 
 What gets printed:
+    .full_path    :  /home/me/.local/share/mytool/mysubdir/file.txt
+    .parent       :  /home/me/.local/share/mytool/mysubdir
+    .name         :  file.txt
+    .is_absolute  :  True
+    .is_relative  :  False
+    .exists       :  False
+    .is_dir       :  False
+    .is_file      :  False
+
     .full_path    :  /home/me/.local/share/mytool/mysubdir/file.txt
     .parent       :  /home/me/.local/share/mytool/mysubdir
     .name         :  file.txt
@@ -487,6 +500,9 @@ What gets printed:
 
 
     def stats(self):
+        return self.__repr__()
+
+    def __repr__(self):
         stats = ""
         stats +=  f".full_path    :  {self.full_path}\n"
         stats +=  f".parent       :  {self.parent}\n"
@@ -697,7 +713,7 @@ then the `tool.log_dir_base` will be remapped to `tool.user_config_dir`.
 
 
 ### Member functions
-- config_item.stats() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
+- config_item.\_\_repr\_\_() - Return a str() listing all stats for the instance, plus the `tool.log_dir_base` value.
 - config_item.load_config() - Load the config file to the `cfg` dictionary.  See below.
 - modify_configfile() - Modify, add, remove params from the config file.
 
@@ -723,9 +739,9 @@ Given
     tool = set_toolname("testcfg")
     print (f"tool.log_dir_base : {tool.log_dir_base}")
     config = config_item("demo_config.cfg", remap_logdirbase=True)
-    print (config.stats())
+    print (config)
     config.loadconfig()
-    print (config.stats())
+    print (config)
 
 Output
     tool.log_dir_base : /home/me/.local/share/testcfg
@@ -758,11 +774,14 @@ Output
             if remap_logdirbase  and  tool.log_dir_base == tool.user_data_dir:
                 tool.log_dir_base = tool.user_config_dir
         else:
-            _msg = f"Config file <{config_file}> not found."
-            raise ConfigError (_msg)
+            # _msg = f"Config file <{config_file}> not found."
+            raise ConfigError (f"Config file <{config_file}> not found.")
 
 
     def stats(self):
+        return self.__repr__()
+
+    def __repr__(self):
         stats = ""
         stats += f"\nStats for config file <{self.config_file}>:\n"
         stats += f".config_file        :  {self.config_file}\n"
@@ -846,21 +865,27 @@ config file timestamp has changed
 ### Behaviors and rules
 - See `getcfg()`, below, for accessing loaded config data. `cfg` is a global dictionary which may be
   directly accessed as well.
+
 - The format of a config file is param=value pairs (with no section or default as in the Python 
   configparser module).  Separating the param and value may be whitespace, `=` or `:`.
+
 - **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
   type is stored in the cfg dictionary if none of the other types can be resolved for a given value.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
-  for type errors (eg, expecting a float but user input error resulted in a str).
+  for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
+  `getcfg (param, types=[])` parameter for basic type checking.
+
 - **Logging setup** - `loadconfig()` calls `setuplogging()`.  The `logging` handle is available for
   import by other modules (`from cjnfuncs.cjnfuncs import logging`).  By default, logging will go to the
   console (stdout) filtered at the WARNING/30 level. Don't call `setuplogging()` directly if using loadconfig.
+
 - **Logging level control** - Optional `LogLevel` in the config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the config file, then 
   the logging level is set to the Python default logging level, 30/WARNING.
   The tool script code may also manually/explicitly set the logging level - _after_ the initial `loadconifig()` call -
   and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
   switch feature.  Note that logging done _within_ loadconfig() code is always done at the `ldcfg_ll` level.
+
 - **Log file options** - Where to log has two separate fields:  `call_logifle` in the call to loadconfig(), and 
   `LogFile` in the loaded config file, with `call_logfile_wins` selecting which is used.  This mechanism allows for
   a command line `--log-file` switch to override a _default_ log file defined in the config file.  If the selected 
@@ -886,7 +911,7 @@ then import them in the tool script config file as such: `import ~/creds_SMTP`.
 - **Config reload if changed, `flush_on_reload`, and `force_flush_reload`** - loadconfig() may be called 
 periodically by the tool script, such as in a service loop.
 If the config file timestamp is unchanged then loadconfig() immediately returns `0`. 
-If the timestamp has changed then the config file will be reloaded, and `1` is returned to indicate to 
+If the timestamp has changed then the config file will be reloaded and `1` is returned to indicate to 
 the tool script to do any post-config-load operations. 
   - If `flush_on_reload=True` (default False) then the `cfg`
   dictionary will be cleaned/purged before the config file is reloaded. If `flush_on_reload=False` then the config
@@ -958,8 +983,8 @@ Here are a few key comparisons:
                         return -1
                     else:
                         logging.getLogger().setLevel(preexisting_loglevel)
-                        _msg = f"Could not find  <{config}>"
-                        raise ConfigError (_msg)
+                        # _msg = f"Could not find  <{config}>"
+                        raise ConfigError (f"Could not find  <{config}>")
 
                 # Check if config file has changed.  If not then return 0
                 current_timestamp = int(self.config_full_path.stat().st_mtime)  # integer-second resolution
@@ -969,8 +994,7 @@ Here are a few key comparisons:
                 # Initial load call, or config file has changed.  Do (re)load.
                 self.config_timestamp = current_timestamp
                 logging.getLogger().setLevel(ldcfg_ll)   # Set logging level for remainder of loadconfig call
-                # logging.info (f"Config file timestamp: {current_timestamp}")
-                logging.warning (f"Config file timestamp: {current_timestamp}")
+                logging.info (f"Config file timestamp: {current_timestamp}")
 
                 if flush_on_reload:
                     logging.info (f"cfg dictionary flushed due to changed config file (flush_on_reload)")
@@ -1013,8 +1037,8 @@ Here are a few key comparisons:
                             imported_config.loadconfig(ldcfg_ll, isimport=True)
                         except Exception as e:
                             logging.getLogger().setLevel(preexisting_loglevel)
-                            _msg = f"Failed importing/processing config file  <{target.full_path}>"
-                            raise ConfigError (_msg)
+                            # _msg = f"Failed importing/processing config file  <{target.full_path}>"
+                            raise ConfigError (f"Failed importing/processing config file  <{target.full_path}>")
 
                     # Is a param/value line
                     else:
@@ -1034,8 +1058,8 @@ Here are a few key comparisons:
                                 logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
 
         except Exception as e:
-            _msg = f"Failed opening/processing config file  <{config}>\n  {e}"
-            raise ConfigError (_msg) from None
+            # _msg = f"Failed opening/processing config file  <{config}>\n  {e}"
+            raise ConfigError (f"Failed opening/processing config file  <{config}>\n  {e}") from None
 
 
         # Operations only for finishing a top-level call
@@ -1075,7 +1099,11 @@ On the first call to modify_configfile() the content of the file is read into me
 calls to modify_configfile() may be made, with the changes applied to the in-memory copy.  When
 all changes have been applied the final call to modify_configfile() must have `save=True` to 
 cause the memory version to be written back to the config file.  If the script code checks for
-modifications of the config file, then the modified content will be reloaded into the cfg dictionary.
+modifications of the config file then the modified content will be reloaded into the cfg dictionary.
+
+NOTE:  In some circumstances the OS-reported timestamp for the modified config file may be erratic.
+It may be necessary to add a time.sleep(0.5) delay between saving the modified config and the loadconfig()
+reload call to avoid multiple config reloads.
 
 
 ### Parameters
@@ -1160,7 +1188,7 @@ config.modify_configfile("# New comment line",      add_if_not_existing=True, sa
         self.config_content = updated_content[:-1]          # Avoid adding extra \n at end of file
 
         if save:
-            self.config_full_path.write_text(self.config_content + "\n")
+            self.config_full_path.write_text(self.config_content) # + "\n")
             self.config_content = ""
 
 
@@ -1170,12 +1198,17 @@ config.modify_configfile("# New comment line",      add_if_not_existing=True, sa
 #  g e t c f g
 #=====================================================================================
 #=====================================================================================
-def getcfg(param, default="_nodefault"):
+def getcfg(param, default="_nodefault", types=[]):
     """
-## getcfg (param, default=None) - Get a param from the cfg dictionary
+## getcfg (param, default=None, types=[]) - Get a param from the cfg dictionary
 
 Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
 but with handling if the item does not exist.
+
+Type checking may be performed by listing one or more expected types via the optional `types` parameter.
+If the loaded param is not one of the expected types then a ConfigError is raised.  This check may be 
+useful for basic error checking of param values, EG making sure the return value is a float and not
+a str. (str is the loadconig default if the param type cannot be converted to another supported type.)
 
 NOTE: `getcfg()` is almost equivalent to `cfg.get()`, except that `getcfg()` does not default to `None`.
 Rather, `getcfg()` raises a ConfigError if the param does not exist and no `default` is specified.
@@ -1189,20 +1222,35 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 `default` (default None)
 - if provided, is returned if `param` does not exist in cfg
 
+`types` (default '[]' empty list)
+- if provided, a ConfigError is raised if the param's value type is not in the list of expected types
+- `types` may be a single type (eg, `types=int`) or a list of types (eg, `types=[int, float]`)
+- Supported types: [str, int, float, bool, list, tuple, dict]
 
 ### Returns
 - param value (cfg[param]), if param is in cfg
 - `default` value if param not in cfg and `default` value provided
-- raises ConfigError if param does not exist in cfg and no `default` provided.
+- raises ConfigError if param does not exist in cfg and no `default` provided, or if not of the expected type(s).
     """
     
-    try:
-        return cfg[param]
-    except:
+    if param in cfg:
+        _value = cfg[param]
+    else:
         if default != "_nodefault":
             return default
-    _msg = f"getcfg - Config parameter <{param}> not in cfg and no default."
-    raise ConfigError (_msg)
+        else:
+            raise ConfigError (f"getcfg - Config parameter <{param}> not in cfg and no default.")
+
+    if isinstance(types, type):
+        types = [types]
+
+    if types == []:
+            return _value
+    else:
+        if type(_value) in types:
+            return _value
+        else:
+            raise ConfigError (f"getcfg - Config parameter <{param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
 
 
 #=====================================================================================
@@ -1239,14 +1287,14 @@ Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks
 
 
 ### Member functions
-- timevalue.stats() - Return a str() listing all attributes of the instance
+- timevalue.\_\_repr\_\_() - Return a str() listing all attributes of the instance
 
 
 ### Example
 ```
 Given
     xx = timevalue("1m")
-    print (xx.stats())
+    print (xx)
     print (f"Sleep <{xx.seconds}> seconds")
     time.sleep(xx.seconds)
 
@@ -1292,6 +1340,9 @@ Output:
                 raise ValueError(f"Illegal time units <{self.unit_char}> in time string <{orig_val}>")
 
     def stats(self):
+        return self.__repr__()
+
+    def __repr__(self):
         stats = ""
         stats +=  f".orig_val   :  {self.orig_val:8} {type(self.orig_val)}\n"
         stats +=  f".seconds    :  {self.seconds:<8} {type(self.seconds)}\n"
@@ -1530,7 +1581,6 @@ messages are also blocked if `DontEmail` is True.
         else:
             logging.debug (f"Notification sent <{subj}> <{msg}>")
     except:
-        # pass
         logging.warning (f"Notification send failed <{subj}> <{msg}>")
         raise
 
@@ -1599,6 +1649,12 @@ The `subj` field is part of the log message.
 `EmailVerbose` (default False)
 - If True, detailed transactions with the SMTP server are sent to stdout. Useful for debug.
 
+`EmailNTries` (type int, default 3)
+- Number of tries to send email before aborting
+
+`EmailRetryWait` (seconds, type int or float, default 5)
+- Number of seconds to wait between retry attempts
+
 
 ### Returns
 - NoneType
@@ -1635,8 +1691,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             with Path.open(xx.full_path) as ifile:
                 m_text = ifile.read()
         except Exception as e:
-            _msg = f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}"
-            raise SndEmailError (_msg)
+            raise SndEmailError (f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}")
 
     elif htmlfile:
         xx = mungePath(htmlfile, tool.cache_dir)
@@ -1645,12 +1700,10 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             with Path.open(xx.full_path) as ifile:
                 m_text = ifile.read()
         except Exception as e:
-            _msg = f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}"
-            raise SndEmailError (_msg)
+            raise SndEmailError (f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}")
 
     else:
-        _msg = f"snd_email - Message subject <{subj}>:  No body, filename, or htmlfile specified."
-        raise SndEmailError (_msg)
+        raise SndEmailError (f"snd_email - Message subject <{subj}>:  No body, filename, or htmlfile specified.")
     m_text += f"\n(sent {time.asctime(time.localtime())})"
 
     # Deal with 'to'
@@ -1671,53 +1724,67 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     else:
         To = extract_email_addresses(getcfg(to, ""))
     if len(To) == 0:
-        _msg = f"snd_email - Message subject <{subj}>:  'to' list must not be empty."
-        raise SndEmailError (_msg)
+        raise SndEmailError (f"snd_email - Message subject <{subj}>:  'to' list must not be empty.")
     for address in To:
         if '@' not in address:
-            _msg = f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>."
-            raise SndEmailError (_msg)
+            raise SndEmailError (f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>.")
 
-    # Send the message - After above to allow checking of input parameters
-    if getcfg('DontEmail', default=False):
+    # Gather, check remaining config params
+    ntries     = getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int)
+    retry_wait = getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float])
+    email_from = getcfg('EmailFrom', types=str)
+    cfg_server = getcfg('EmailServer', types=str)
+    cfg_port   = getcfg('EmailServerPort', types=str).lower()
+    if cfg_port not in ['p25', 'p465', 'p587', 'p587tls']:
+        raise ConfigError (f"Config EmailServerPort <{getcfg('EmailServerPort')}> is invalid")
+    email_user = str(getcfg('EmailUser', None, types=[str, int, float]))    # username may be numeric
+    if email_user:
+        email_pass = str(getcfg('EmailPass', types=[str, int, float]))      # password may be numeric
+
+    if getcfg('DontEmail', default=False, types=bool):
         if log:
             logging.warning (f"Email NOT sent <{subj}>")
         else:
             logging.debug (f"Email NOT sent <{subj}>")
         return
 
-    try:
-        msg = MIMEText(m_text, msg_type)
-        msg['Subject'] = subj
-        msg['From'] = getcfg('EmailFrom')
-        msg['To'] = ", ".join(To)
+    # Send the message, with retries
+    for trynum in range(ntries):
+        try:
+            msg = MIMEText(m_text, msg_type)
+            msg['Subject'] = subj
+            msg['From'] = email_from
+            msg['To'] = ", ".join(To)
 
-        cfg_server = getcfg('EmailServer')
-        cfg_port   = getcfg('EmailServerPort')
-        if cfg_port == "P25":
-            server = smtplib.SMTP(cfg_server, 25)
-        elif cfg_port == "P465":
-            server = smtplib.SMTP_SSL(cfg_server, 465)
-        elif cfg_port == "P587":
-            server = smtplib.SMTP(cfg_server, 587)
-        elif cfg_port == "P587TLS":
-            server = smtplib.SMTP(cfg_server, 587)
-            server.starttls()
-        else:
-            raise ConfigError (f"Config EmailServerPort <{cfg_port}> is invalid")
+            if cfg_port == "p25":
+                server = smtplib.SMTP(cfg_server, 25)
+            elif cfg_port == "p465":
+                server = smtplib.SMTP_SSL(cfg_server, 465)
+            elif cfg_port == "p587":
+                server = smtplib.SMTP(cfg_server, 587)
+            else: # cfg_port == "P587TLS":
+                server = smtplib.SMTP(cfg_server, 587)
+                server.starttls()
 
-        if 'EmailUser' in cfg:
-            server.login (getcfg('EmailUser'), getcfg('EmailPass'))
-        if getcfg("EmailVerbose", False):
-            server.set_debuglevel(1)
-        server.sendmail(getcfg('EmailFrom'), To, msg.as_string())
-        server.quit()
+            if email_user:
+                server.login (email_user, email_pass)
+            if getcfg("EmailVerbose", False, types=[bool]):
+                server.set_debuglevel(1)
+            server.sendmail(email_from, To, msg.as_string())
+            server.quit()
 
-        if log:
-            logging.warning (f"Email sent <{subj}>")
-        else:
-            logging.debug (f"Email sent <{subj}>")
-    except Exception as e:
-        _msg = f"snd_email:  Send failed for <{subj}>:\n  <{e}>"
-        raise SndEmailError (_msg)
+            if log:
+                logging.warning (f"Email sent <{subj}>")
+            else:
+                logging.debug (f"Email sent <{subj}>")
+            return
+
+        except Exception as e:
+            last_error = e
+            if trynum < ntries -1:
+                logging.warning(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec:\n  <{e}>") # TODO change to debug or info
+                time.sleep(retry_wait)
+            continue
+
+    raise SndEmailError (f"snd_email:  Send failed for <{subj}>:\n  <{last_error}>")
 

@@ -8,7 +8,7 @@
 #
 #==========================================================
 
-__version__ = "1.0"
+__version__ = "1.1"
 TOOLNAME =    "cjnfuncs_testenv"
 CONFIG_FILE = "demo_env.cfg"
 
@@ -26,7 +26,7 @@ parser.add_argument('--cleanup', action='store_true',
 args = parser.parse_args()
 
 tool = set_toolname(TOOLNAME)
-print(tool.stats())
+print(tool)
 
 
 if args.setup_user:
@@ -77,7 +77,7 @@ if args.cleanup:
         shutil.rmtree(junk2)
 
 tool = set_toolname(TOOLNAME)
-print(tool.stats())
+print(tool)
 
 
 if not mungePath(CONFIG_FILE, tool.user_config_dir).exists  and  not mungePath(CONFIG_FILE, tool.site_config_dir).exists:

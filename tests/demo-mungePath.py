@@ -9,6 +9,8 @@
 #    
 #==========================================================
 
+__version__ = "1.1"
+
 import shutil
 import os
 from cjnfuncs.cjnfuncs import *
@@ -32,7 +34,7 @@ def wrapper (in_path="", base_path="", mkdir=False, note=None):
         print ("NOTE: ", note)
     print (f"Given:\n in_path   :  <{in_path}>\n base_path :  <{base_path}>\n mkdir     :  <{mkdir}>")
     xx = mungePath(in_path=in_path, base_path=base_path, mkdir=mkdir)
-    print(xx.stats())
+    print(xx)
     return xx
 
 print ("\n\n***** File paths relative to a base path")
@@ -90,3 +92,17 @@ try:
 except Exception as e:
     print (f"Exception: {e}")
 
+
+
+print ("\n\n***** README.md mungePath example")
+tool = set_toolname("mytool")
+myfile = mungePath ("mysubdir/file.txt", tool.data_dir)
+mungePath (myfile.parent, mkdir=True)
+if not myfile.exists:
+    with myfile.full_path.open('w') as outfile:
+        file_contents = outfile.write("Hello")
+    print (myfile)      # NOTE: Prints stats from before the file creation
+    myfile.refresh_stats()
+    print (myfile)
+
+remove_tree(tool.data_dir)

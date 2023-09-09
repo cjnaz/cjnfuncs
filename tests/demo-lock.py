@@ -8,7 +8,7 @@
 #
 #==========================================================
 
-__version__ = "1.0"
+__version__ = "1.1"
 TOOLNAME    = "cjnfuncs_testlock"
 LOGFILE     = None
 
@@ -34,7 +34,7 @@ if args.cleanup:
 
 # Shows logfile captured in tool class after setuplogging()
 setuplogging(args.log_file, call_logfile_wins=True)
-print(tool.stats())
+print(tool)
 
 
 print (f"\nUsing default lock file")
