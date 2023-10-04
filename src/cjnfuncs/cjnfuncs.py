@@ -47,8 +47,8 @@ CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message
 
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 MAIN_MODULE_STEM       = Path(__main__.__file__).stem
-SND_EMAIL_NTRIES = 3    # Number of tries to send email before aborting
-SND_EMAIL_WAIT = 5      # seconds between retries
+SND_EMAIL_NTRIES       = 3          # Number of tries to send email before aborting
+SND_EMAIL_WAIT         = '5s'       # seconds between retries
 
 # Project globals
 cfg = {}
@@ -1525,7 +1525,7 @@ The `to` string may be the name of a confg param (who's value is one or more ema
 "NotifList"), or a string with one or more email addresses. Using a config param name allows for customizing the
 `to` addresses without having to edit the code.
 
-The messages to send is passed in the `msg` parameter as a text string.
+The message to send is passed in the `msg` parameter as a text string.
 
     
 ### Parameters
@@ -1652,7 +1652,7 @@ The `subj` field is part of the log message.
 `EmailNTries` (type int, default 3)
 - Number of tries to send email before aborting
 
-`EmailRetryWait` (seconds, type int or float, default 5)
+`EmailRetryWait` (seconds, type int, float, or timevalue, default 5s)
 - Number of seconds to wait between retry attempts
 
 
@@ -1731,7 +1731,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
     # Gather, check remaining config params
     ntries     = getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int)
-    retry_wait = getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float])
+    retry_wait = timevalue(getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float, str])).seconds
     email_from = getcfg('EmailFrom', types=str)
     cfg_server = getcfg('EmailServer', types=str)
     cfg_port   = getcfg('EmailServerPort', types=str).lower()
@@ -1782,7 +1782,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
         except Exception as e:
             last_error = e
             if trynum < ntries -1:
-                logging.warning(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec:\n  <{e}>") # TODO change to debug or info
+                logging.warning(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec>:\n  <{e}>") # TODO change to debug or info
                 time.sleep(retry_wait)
             continue
 

@@ -75,9 +75,10 @@ if args.cleanup:
     if os.path.exists(junk2):
         print (f"Removing 5  {junk2}")
         shutil.rmtree(junk2)
+    sys.exit()
 
-tool = set_toolname(TOOLNAME)
-print(tool)
+# tool = set_toolname(TOOLNAME)
+# print(tool)
 
 
 if not mungePath(CONFIG_FILE, tool.user_config_dir).exists  and  not mungePath(CONFIG_FILE, tool.site_config_dir).exists:
