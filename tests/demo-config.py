@@ -32,7 +32,7 @@ args = parser.parse_args()
 
 
 tool = set_toolname(TOOLNAME)
-print(tool)
+# print(tool)
 
 if args.cleanup:
     if os.path.exists(tool.config_dir):
@@ -254,17 +254,24 @@ deploy_files([
     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
     ], overwrite=True )
 
-try:
-    config = config_item(CONFIG_FILE)
-    print (f"\nLoad config {config.config_full_path}")
-    config.loadconfig(ldcfg_ll=10)
-except Exception as e:
-    print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
-    sys.exit()
+def do_base_setup():
+    global config
+    # config = config_item(CONFIG_FILE)
+    # print (f"\nLoad config {config.config_full_path}")
+    # config.loadconfig(ldcfg_ll=10)
+
+    try:
+        config = config_item(CONFIG_FILE)
+        print (f"\nLoad config {config.config_full_path}")
+        config.loadconfig(ldcfg_ll=10)
+    except Exception as e:
+        print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
+        sys.exit()
 
 
 if args.Mode == '3':
-    print ("\n***** Show tool.log_* values (LogFile NOT in config) *****")
+    do_base_setup()
+    print ("\n***** Basic test (Show tool.log_* values, LogFile NOT in config) *****")
     print(tool)
     print(config)
     print(config.dump())
@@ -288,6 +295,7 @@ if args.Mode == '5':
 
 
 if args.Mode == '6':
+    do_base_setup()
     print ("\n***** Co-loading an additional config *****")
     print(config)
     additional_config = config_item("additional.cfg")
@@ -304,6 +312,7 @@ if args.Mode == '6':
 
 
 if args.Mode == '7':
+    do_base_setup()
     print ("\n***** Test unknown getcfg param with/without fallbacks *****")
     print (f"Testing getcfg - Not in cfg with fallback: <{config.getcfg('NotInCfg', 'My fallback Value')}>")
     try:
@@ -313,11 +322,13 @@ if args.Mode == '7':
 
 
 if args.Mode == '8':
+    do_base_setup()
     print ("\n***** Test untrapped unknown getcfg param *****")
     config.getcfg('NotInCfg-NoDef')
 
 
 if args.Mode == '9':
+    do_base_setup()
     print ("\n***** Test flush_on_reload  and  force_flush_reload cases *****")
     config.cfg["dummy"] = True
     print (f"\n----- T9.1:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True - Initial state)\n")
@@ -348,6 +359,7 @@ def dump(xx):
     print (f"   retimed  :  <{retime(yy.seconds, yy.unit_char)}> {yy.unit_str}")
 
 if args.Mode == '10':
+    do_base_setup()
     print ("\n***** Test timevalue, retime *****")
     dump (config.getcfg("Tint"))
     dump (config.getcfg("Tsec"))
@@ -364,6 +376,7 @@ if args.Mode == '10':
 
 
 if args.Mode == '11':
+    # do_base_setup()
     print ("\n***** Test untrapped invalid time unit *****")
     dump ("3y")             # ValueError raised
 
@@ -374,6 +387,7 @@ if args.Mode == '12':
 
 
 if args.Mode == '13':
+    do_base_setup()
     print ("\n***** Test missing config and externally set logging level *****")
 
     print (f"\n----- T13.1:  Missing config, tolerate_missing=False (default) >>>>  Exception")
@@ -421,6 +435,7 @@ if args.Mode == '13':
 
 
 if args.Mode == '14':
+    do_base_setup()
     print ("\n***** Test modify_configfile *****")
     config.modify_configfile(r"x_7893&(%$,.nasf||\a@",  "Goodbye!    # It was Hello")   # param match check
     config.modify_configfile("x_removeX", remove=True)                                  # Warning message
@@ -451,6 +466,7 @@ if args.Mode == '14':
 
 
 if args.Mode == '15':
+    do_base_setup()
     print ("\n***** Access list, tuple, and dictionary params *****")
     # a_list:         ["hello", 3.14, {"abc":42.}]
     # a_tuple=        ("Im a tuple", 7.0)
@@ -462,6 +478,7 @@ if args.Mode == '15':
 
 
 if args.Mode == '16':
+    do_base_setup()
     print ("\n***** Test getcfg type checking *****")
 
     def dump(param, types):
@@ -482,6 +499,7 @@ if args.Mode == '16':
 
 
 if args.Mode == '17':
+    do_base_setup()
     print ("\n***** Assign getcfg and cfg to config instance *****")
     getcfg = config.getcfg
     cfg = config.cfg
@@ -492,8 +510,9 @@ if args.Mode == '17':
 
 
 if args.Mode == '18':
+    do_base_setup()
     print ("\n***** Sections and DEFAULT *****")
-    def dump(option, section='', desc=''):
+    def dump(option, section='', desc=''):      # TODO option or param?
         try:
             xx = '[' + section + '][' + option + ']'
             _value = config.getcfg(option, section=section)
@@ -527,4 +546,78 @@ if args.Mode == '19':
     print (xx.dump())
 
 
+if args.Mode == '20':
+    print ("\n***** Load dictionary into cfg *****")
+    new_config = config_item('import_nest_top.cfg')     # config has no file
+
+    main_contents = {
+        'a' : 6,
+        'b' : 7.0,
+        'c' : [6, 7.0, 42, 'hi']
+        }
+    sect_contents = {
+        'd' : ('hi', 'there'),
+        'e' : {'hi':'Hi!', 'there':'There!'},
+        'f' : [6, 7.0, 42, 'hi']
+        }
+    def_contents = {
+        'g' : 'Hi',
+        'h' : True,
+        'i' : False
+        }
+    new_config.read_dict(main_contents)
+    new_config.read_dict(sect_contents, 'A section')
+    new_config.read_dict(def_contents, 'DEFAULT')
+
+    print (new_config)
+    print (new_config.dump())
+
+
+if args.Mode == '21':
+    print ("\n***** Load string blob into cfg.  No file. *****")
+    new_config = config_item()
+
+    string_blob = """
+[  ]
+a 9
+b 12
+
+[ Test section  ]
+a 5
+b 25
+
+[ DEFAULT]
+a 10
+c 42
+
+[]
+e 20
+
+#[ Hello# ]
+#f Hello
+"""
+    new_config.read_string(string_blob)
+    print (new_config)
+    print (new_config.dump())
+
+    print ("DEFAULTS cleared")
+    new_config.clear_defaults()
+    print (new_config.dump())
+
+    print ("cfg cleared")
+    new_config.clear_cfg()
+    print (new_config.dump())
+
+    # new_config.modify_configfile(save=True)
+
 # TODO test for section within import error trap
+# TODO test for malformed sections - no ']'
+
+
+if args.Mode == '22':
+    print ("\n***** Force config load as strings *****")
+    config = config_item(CONFIG_FILE, force_str=True)
+    print (f"\nLoad config {config.config_full_path}")
+    config.loadconfig(ldcfg_ll=10)
+    print (config)
+    print (config.dump())
