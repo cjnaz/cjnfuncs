@@ -17,7 +17,8 @@ import os.path
 import shutil
 import sys
 import time
-from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, getcfg, cfg, timevalue, retime, mungePath, ConfigError
+# from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, getcfg, cfg, timevalue, retime, mungePath, ConfigError
+from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, timevalue, retime, mungePath, ConfigError
 
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
@@ -147,10 +148,10 @@ if args.Mode == '2':
     def print_stats ():
         print (f"(Re)loaded             :  {reloaded}")
         print (f"Config file timestamp  :  {config_T2.config_timestamp}")
-        print (f"Config LogLevel        :  {getcfg('LogLevel', 'None')}")
+        print (f"Config LogLevel        :  {config_T2.getcfg('LogLevel', 'None')}")
         print (f"Current Logging level  :  {logging.getLogger().level}")
-        print (f"testvar                :  {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
-        print (f"var2                   :  {getcfg('var2', None)}")
+        print (f"testvar                :  {config_T2.getcfg('testvar', None)}  {type(config_T2.getcfg('testvar', None))}")
+        print (f"var2                   :  {config_T2.getcfg('var2', None)}")
         print (f"Current log file       :  {tool.log_full_path}")
         logging.warning ("Warning level message")
         logging.info    ("Info    level message")
@@ -266,6 +267,9 @@ if args.Mode == '3':
     print ("\n***** Show tool.log_* values (LogFile NOT in config) *****")
     print(tool)
     print(config)
+    print(config.dump())
+    print(config.sections_list)
+    print(config.sections())
 
 
 if args.Mode == '4':
@@ -286,53 +290,55 @@ if args.Mode == '5':
 if args.Mode == '6':
     print ("\n***** Co-loading an additional config *****")
     print(config)
-    logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
-    logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
     additional_config = config_item("additional.cfg")
     print(additional_config)
+    logging.warning (f"testvar:          {config.getcfg('testvar', None)}  {type(config.getcfg('testvar', None))}")
+    logging.warning (f"another:          {additional_config.getcfg('another', None)}  {type(additional_config.getcfg('another', None))}")
+
     additional_config.loadconfig(ldcfg_ll=10)
     print(additional_config)
-    logging.warning (f"testvar:          {getcfg('testvar', None)}  {type(getcfg('testvar', None))}")
-    logging.warning (f"another:          {getcfg('another', None)}  {type(getcfg('another', None))}")
+
+    logging.warning (f"testvar:          {config.getcfg('testvar', None)}  {type(config.getcfg('testvar', None))}")
+    logging.warning (f"another:          {additional_config.getcfg('another', None)}  {type(additional_config.getcfg('another', None))}")
     print (f"Current logging level:      {logging.getLogger().level}")
 
 
 if args.Mode == '7':
-    print ("\n***** Test unknown getcfg param with/without defaults *****")
-    print (f"Testing getcfg - Not in cfg with default: <{getcfg('NotInCfg', 'My Default Value')}>")
+    print ("\n***** Test unknown getcfg param with/without fallbacks *****")
+    print (f"Testing getcfg - Not in cfg with fallback: <{config.getcfg('NotInCfg', 'My fallback Value')}>")
     try:
-        getcfg('NotInCfg-NoDef')
+        config.getcfg('NotInCfg-NoDef')
     except ConfigError as e:
         print (f"ConfigError: {e}")
 
 
 if args.Mode == '8':
     print ("\n***** Test untrapped unknown getcfg param *****")
-    getcfg('NotInCfg-NoDef')
+    config.getcfg('NotInCfg-NoDef')
 
 
 if args.Mode == '9':
     print ("\n***** Test flush_on_reload  and  force_flush_reload cases *****")
-    cfg["dummy"] = True
-    print (f"\n----- T9.1:  var dummy in cfg:  {getcfg('dummy', False)}  (should be True - Initial state)\n")
+    config.cfg["dummy"] = True
+    print (f"\n----- T9.1:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True - Initial state)\n")
 
     config.loadconfig(flush_on_reload=True, ldcfg_ll=10)
-    print (f"----- T9.2:  var dummy in cfg:  {getcfg('dummy', False)}  (should be True because not reloaded)\n")
+    print (f"----- T9.2:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True because not reloaded)\n")
 
 
     time.sleep(1)  # 1 sec timestamp change sensitivity in loadconfig
     config.config_full_path.touch()
     config.loadconfig(ldcfg_ll=10)
-    print (f"----- T9.3:  var dummy in cfg:  {getcfg('dummy', False)}  (should be True because flush_on_reload == False)\n")
+    print (f"----- T9.3:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True because flush_on_reload == False)\n")
 
     time.sleep(1)
     config.config_full_path.touch()
     config.loadconfig(flush_on_reload=True, ldcfg_ll=10)
-    print (f"----- T9.4:  var dummy in cfg:  {getcfg('dummy', False)}  (should be False because flush_on_reload == True)\n")
+    print (f"----- T9.4:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because flush_on_reload == True)\n")
 
-    cfg["dummy"] = True
+    config.cfg["dummy"] = True
     config.loadconfig(force_flush_reload=True, ldcfg_ll=10)
-    print (f"----- T9.5:  var dummy in cfg:  {getcfg('dummy', False)}  (should be False because force_flush_reload == True)\n")
+    print (f"----- T9.5:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because force_flush_reload == True)\n")
 
 
 def dump(xx):
@@ -343,12 +349,12 @@ def dump(xx):
 
 if args.Mode == '10':
     print ("\n***** Test timevalue, retime *****")
-    dump (getcfg("Tint"))
-    dump (getcfg("Tsec"))
-    dump (getcfg("Tmin"))
-    dump (getcfg("Thour"))
-    dump (getcfg("Tday"))
-    dump (getcfg("Tweek"))
+    dump (config.getcfg("Tint"))
+    dump (config.getcfg("Tsec"))
+    dump (config.getcfg("Tmin"))
+    dump (config.getcfg("Thour"))
+    dump (config.getcfg("Tday"))
+    dump (config.getcfg("Tweek"))
     dump (2/7)
     dump ("5.123m")
     sleeptime = timevalue("1.9s")
@@ -392,6 +398,7 @@ if args.Mode == '13':
     nest_cfg = mungePath("import_nest_top.cfg", tool.config_dir).full_path
     xx = config_item(nest_cfg)
     xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
+    print (xx.dump())
     print (f"Logging level back in the main code:  {logging.getLogger().level}")
     
     print (f"\n----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.")
@@ -415,52 +422,43 @@ if args.Mode == '13':
 
 if args.Mode == '14':
     print ("\n***** Test modify_configfile *****")
-    try:
-        # config = config_item(CONFIG_FILE)
-        config.modify_configfile(r"x_7893&(%$,.nasf||\a@",  "Goodbye!    # It was Hello")   # param match check
-        config.modify_configfile("x_removeX", remove=True)                                  # Warning message
-        config.modify_configfile("x_removed", remove=True)                                  # Removed
+    config.modify_configfile(r"x_7893&(%$,.nasf||\a@",  "Goodbye!    # It was Hello")   # param match check
+    config.modify_configfile("x_removeX", remove=True)                                  # Warning message
+    config.modify_configfile("x_removed", remove=True)                                  # Removed
 
-        config.modify_configfile("x_shorter",               "12345")                        # Whitespace between value and comment tests
-        config.modify_configfile("x_longer",                "123456789 123456789")
-        config.modify_configfile("x_same",                  "54321 987654321")
-        config.modify_configfile("x_really_long",           "123456789 123456789 123456789 12345")
-        config.modify_configfile("x_no_trailing_whitespace","123456789 123456789")
-        config.modify_configfile("x_indented_param",        "False")
-        
-        config.modify_configfile("x_float",                 6.5)                            # Check various value types
-        config.modify_configfile("x_int",                   12)
-        config.modify_configfile("x_list",                  ["hello", 3.14, {"abc":42}])
-        config.modify_configfile("x_dict",                  {"one":6, "two":7.0})
+    config.modify_configfile("x_shorter",               "12345")                        # Whitespace between value and comment tests
+    config.modify_configfile("x_longer",                "123456789 123456789")
+    config.modify_configfile("x_same",                  "54321 987654321")
+    config.modify_configfile("x_really_long",           "123456789 123456789 123456789 12345")
+    config.modify_configfile("x_no_trailing_whitespace","123456789 123456789")
+    config.modify_configfile("x_indented_param",        "False")
+    
+    config.modify_configfile("x_float",                 6.5)                            # Check various value types
+    config.modify_configfile("x_int",                   12)
+    config.modify_configfile("x_list",                  ["hello", 3.14, {"abc":42}])
+    config.modify_configfile("x_dict",                  {"one":6, "two":7.0})
 
-        config.modify_configfile("", "",                    add_if_not_existing=True)       # Blank line
-        config.modify_configfile("George", "was here",      add_if_not_existing=True)       # New param
-        config.modify_configfile("Snehal", "wasn't here")                                   # Warning message
-        config.modify_configfile(                           add_if_not_existing=True)       # Another blank line
-        config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # New comment
-        config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # Non-unique, and both get added
-        config.modify_configfile("Bjorn",  "was here too   # With a comment and No newline at end of file", add_if_not_existing=True) #, save=True) # New line
-        config.modify_configfile(save=True)
-        config.loadconfig(ldcfg_ll=10, force_flush_reload=True)
-        print (f"Compare <{config.config_full_path}> to golden copy.")
-    except Exception as e:
-        print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
-        sys.exit()
+    config.modify_configfile("", "",                    add_if_not_existing=True)       # Blank line
+    config.modify_configfile("George", "was here",      add_if_not_existing=True)       # New param
+    config.modify_configfile("Snehal", "wasn't here")                                   # Warning message
+    config.modify_configfile(                           add_if_not_existing=True)       # Another blank line
+    config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # New comment
+    config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # Non-unique, and both get added
+    config.modify_configfile("Bjorn",  "was here too   # With a comment and No newline at end of file", add_if_not_existing=True) #, save=True) # New line
+    config.modify_configfile(save=True)
+    config.loadconfig(ldcfg_ll=10, force_flush_reload=True)
+    print (f"Compare <{config.config_full_path}> to golden copy.")
 
 
 if args.Mode == '15':
     print ("\n***** Access list, tuple, and dictionary params *****")
-    try:
-        # a_list:         ["hello", 3.14, {"abc":42.}]
-        # a_tuple=        ("Im a tuple", 7.0)
-        # a_dict:         {"six":6, 3:3.0}
-        six      = getcfg("a_dict")["six"]
-        seven    = getcfg("a_tuple")[1]
-        fortytwo = getcfg("a_list")[2]["abc"]
-        print (f"{six} times {seven} is {fortytwo}")
-    except Exception as e:
-        print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
-        sys.exit()
+    # a_list:         ["hello", 3.14, {"abc":42.}]
+    # a_tuple=        ("Im a tuple", 7.0)
+    # a_dict:         {"six":6, 3:3.0}
+    six      = config.getcfg("a_dict")["six"]
+    seven    = config.getcfg("a_tuple")[1]
+    fortytwo = config.getcfg("a_list")[2]["abc"]
+    print (f"{six} times {seven} is {fortytwo}")
 
 
 if args.Mode == '16':
@@ -468,7 +466,7 @@ if args.Mode == '16':
 
     def dump(param, types):
         try:
-            _value = getcfg(param, types=types)
+            _value = config.getcfg(param, types=types)
             print (f"Param <{param}> value <{_value}>, type <{type(_value)}>, expected types <{types}>")
         except Exception as e:
             print (f"Param <{param}> not expected type:\n  {e}")
@@ -481,3 +479,52 @@ if args.Mode == '16':
     dump("a_list", types=[int, float,       tuple, dict, bool, str])
     dump("a_dict", types=[int, float, list, tuple,       bool, str])
     dump("Tsec",   types=[int, float, list, tuple, dict, bool     ])
+
+
+if args.Mode == '17':
+    print ("\n***** Assign getcfg and cfg to config instance *****")
+    getcfg = config.getcfg
+    cfg = config.cfg
+    six      = getcfg("a_dict")["six"]
+    seven    = cfg['a_tuple'][1]  # getcfg("a_tuple")[1]
+    fortytwo = getcfg("a_list")[2]["abc"]
+    print (f"{six} times {seven} is {fortytwo}")
+
+
+if args.Mode == '18':
+    print ("\n***** Sections and DEFAULT *****")
+    def dump(option, section='', desc=''):
+        try:
+            xx = '[' + section + '][' + option + ']'
+            _value = config.getcfg(option, section=section)
+            print (f"{xx:17}   {_value:<11}  {desc}")
+        except:
+            print (f"{xx:17}   NOT DEFINED  {desc}")
+
+    print (config)
+    dump('a',                         desc='Expecting  <9>  from [],             [DEFAULT] ignored')
+    dump('b',                         desc='Expecting  <12> from [],             no default')
+    dump('c',                         desc='Expecting  <42> from [DEFAULT],      not in []')
+    dump('d',                         desc='Not in [] or [DEFAULT]')
+
+    dump('a', section='Test section', desc='Expecting  <5>  from [Test section], [DEFAULT] ignored')
+    dump('b', section='Test section', desc='Expecting  <25> from [Test section], no default')
+    dump('c', section='Test section', desc='Expecting  <42> from [DEFAULT],      not in [Test section]')
+    dump('e', section='Test section', desc='Not in [Test section] or [DEFAULT] and [] not considered')
+
+
+if args.Mode == '19':
+    print ("\n***** Imports within Sections and DEFAULT *****")
+    deploy_files([
+        { "source": "import_nest_top.cfg",  "target_dir": "USER_CONFIG_DIR"},
+        { "source": "import_nest_1.cfg",    "target_dir": "USER_CONFIG_DIR"},
+        { "source": "import_nest_2.cfg",    "target_dir": "USER_CONFIG_DIR"},
+        ], overwrite=True )
+    nest_cfg = mungePath("import_nest_top.cfg", tool.config_dir).full_path
+    xx = config_item(nest_cfg)
+    xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
+    print ("\n***** config contents *****")
+    print (xx.dump())
+
+
+# TODO test for section within import

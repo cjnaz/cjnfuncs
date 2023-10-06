@@ -20,7 +20,6 @@ Based on found user or site dirs:
 .log_file         :  None
 .log_full_path    :  None
 
-
 ***** Tests for log file control *****
 Deployed  demo_config_T1.cfg   to  /home/cjn/.config/cjnfuncs_testcfg
 
@@ -30,29 +29,29 @@ Current log file:              __console__
 
 ----- T1.2:  LogFile=None, call_logfile=None, call_logfile_wins=True >>>>  Log file: __console__
        cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1690923910
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696567676
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
-       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogLevel] = <30>  (<class 'int'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 Current log file:              __console__
     demo-config.<module>             -  WARNING:  T1.2 - Log to  <__console__>
 
 ----- T1.3:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__ (override cfg_logfile)
        cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1690923910
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696567676
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
-       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
-       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogLevel] = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogFile] = <cfg_logfile>  (<class 'str'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 Current log file:              __console__
     demo-config.<module>             -  WARNING:  T1.3 - Log to  <__console__>
 
 ----- T1.4:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  call_logfile
        cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1690923910
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696567676
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
-       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
-       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogLevel] = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogFile] = <cfg_logfile>  (<class 'str'>)
 Current log file:              /home/cjn/.config/cjnfuncs_testcfg/call_logfile
 
 ----- T1.5:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (no change)
@@ -88,7 +87,6 @@ Based on found user or site dirs:
 .log_file         :  call_logfile
 .log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/call_logfile
 
-
 ----- T1.9:  Change tool.log_dir_base.  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  mylogdir/call_logfile
 Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
 
@@ -112,7 +110,6 @@ Based on found user or site dirs:
 .log_dir          :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 .log_file         :  call_logfile
 .log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
-
 
 ----- T1.10:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile2
 Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/cfg_logfile2
@@ -138,7 +135,6 @@ Based on found user or site dirs:
 .log_file         :  cfg_logfile2
 .log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir/cfg_logfile2
 
-
 ----- T1.11:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 Current log file:              __console__
@@ -163,33 +159,32 @@ Based on found user or site dirs:
 .log_dir          :  None
 .log_file         :  None
 .log_full_path    :  __console__
-
     demo-config.<module>             -  WARNING:  T1.11 - Log to  <__console__>
 
 ----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__
        cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1690923910
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696567676
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
-       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogLevel] = <30>  (<class 'int'>)
        cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 Current log file:              __console__
     demo-config.<module>             -  WARNING:  T1.12 - Log to  <__console__>
 
 ----- T1.13: Modified console logging format >>>>  Log file:  __console__
        cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1690923910
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696567676
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
-       cjnfuncs.loadconfig           -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
-       cjnfuncs.loadconfig           -    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogLevel] = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -    DEBUG:  Loaded [][ConsoleLogFormat] = <{levelname:>8}:  {message}>  (<class 'str'>)
     INFO:  Logging level set to config LogLevel <30>
 Current log file:              __console__
  WARNING:  T1.13 - Log to  <__console__>
 
 ----- T1.14: Modified file logging format >>>>  Log file:  call_logfile
     INFO:  cfg dictionary force flushed (force_flush_reload)
-    INFO:  Config file timestamp: 1690923910
+    INFO:  Config file timestamp: 1696567676
     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
-   DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
-   DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
-   DEBUG:  Loaded FileLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
+   DEBUG:  Loaded [][LogLevel] = <30>  (<class 'int'>)
+   DEBUG:  Loaded [][ConsoleLogFormat] = <{levelname:>8}:  {message}>  (<class 'str'>)
+   DEBUG:  Loaded [][FileLogFormat] = <{levelname:>8}:  {message}>  (<class 'str'>)
 Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
