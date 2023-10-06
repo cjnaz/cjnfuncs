@@ -1073,7 +1073,9 @@ Here are a few key comparisons:
                 return None
 # TODO trap for sections defined within sections
 # TODO sections not allowed in imported config files
-# TODO doc DEFAULTs not flushed 
+# TODO doc DEFAULTs not flushed, but will be loaded
+# TODO doc stress that modify_config will find only the first occurance of option.  May not be possible to get to other occurences in sections or DEFAULT
+
 
         with config.open() as ifile:
             for line in ifile:

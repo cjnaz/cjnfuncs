@@ -24,7 +24,7 @@ Deployed  additional.cfg       to  /home/cjn/.config/cjnfuncs_testcfg
 Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696570206
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696569423
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
        cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogLevel] = <20>  (<class 'int'>)
        cjnfuncs.loadconfig           -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
@@ -84,7 +84,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
        cjnfuncs.modify_configfile    -  WARNING:  Modification of param <x_removeX> failed - not found in config file.  Modification skipped.
        cjnfuncs.modify_configfile    -  WARNING:  Modification of param <Snehal> failed - not found in config file.  Modification skipped.
        cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
-       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696570206
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696569423
        cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
        cjnfuncs.loadconfig           -    DEBUG:  Loaded [][LogLevel] = <20>  (<class 'int'>)
        cjnfuncs.loadconfig           -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.

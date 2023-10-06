@@ -527,4 +527,4 @@ if args.Mode == '19':
     print (xx.dump())
 
 
-# TODO test for section within import
+# TODO test for section within import error trap
