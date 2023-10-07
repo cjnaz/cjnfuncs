@@ -64,7 +64,7 @@ except Exception as e:
     print (f"  {e}")
     sys.exit()
 
-if args.test == 0  or args.test == 1:
+if args.test == 0  or  args.test == 1:
     print ()
     try:    # This first send will fail with <[Errno -2] Name or service not known> if smtp server params are not valid
         snd_email (subj="1:  body to EmailTo", to="EmailTo", body="To be, or not to be...", log=True, smpt_config=config)
@@ -73,86 +73,86 @@ if args.test == 0  or args.test == 1:
         print ("The config files probably need to be customized.")
         sys.exit()
 
-if args.test == 0  or args.test == 2:
+if args.test == 0  or  args.test == 2:
     print ()
     try:
         snd_email (subj="2:  body to EmailTo - not logged", to="EmailTo", body="To be, or not to be...", smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 3:
+if args.test == 0  or  args.test == 3:
     print ()
     try:
         snd_email (subj="3:  filename to EmailTo - not logged", to="EmailTo", filename=mungePath("testfile.txt", tool.config_dir).full_path, smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 4:
+if args.test == 0  or  args.test == 4:
     print ()
     try:
         snd_email (subj="4:  htmlfile to EmailTo", htmlfile="testfile.html", to="EmailTo", log=True, smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 5:
+if args.test == 0  or  args.test == 5:
     print ()
     snd_email (subj="5:  body to EmailToMulti", body="To be, or not to be...", to="EmailToMulti", log=True, smpt_config=config)
 
-if args.test == 0  or args.test == 6:
+if args.test == 0  or  args.test == 6:
     print ()
     try:
         snd_email (subj="6:  No such file nofile.txt", filename="nofile.txt", to="EmailTo", log=True, smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 7:
+if args.test == 0  or  args.test == 7:
     print ()
     try:
         snd_email (subj="7:  No to=", body="Hello", smpt_config=config)
     except Exception as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 8:
+if args.test == 0  or  args.test == 8:
     print ()
     try:
         snd_email (subj="8:  Invalid to=", body="Hello", to="me@example.com, junkAtexample.com", log=True, smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 9:
+if args.test == 0  or  args.test == 9:
     print ()
     snd_notif (subj="9:  This is a test subject - not logged", msg='This is the message body', smpt_config=config)       # to defaults to cfg["NotifList"]
 
-if args.test == 0  or args.test == 10:
+if args.test == 0  or  args.test == 10:
     print ()
     snd_notif (subj="10: This is another test subject", msg='This is another message body', log=True, smpt_config=config)
 
-if args.test == 0  or args.test == 11:
+if args.test == 0  or  args.test == 11:
     print ()
     snd_notif (subj="11: snd_notif with to='EmailTo'", msg='This is another message body', to="EmailTo", log=True, smpt_config=config)
 
-if args.test == 0  or args.test == 12:
+if args.test == 0  or  args.test == 12:
     print ()
     try:
         snd_email (subj="12: No body, filename, or htmlfile", to="EmailTo", log=True, smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 13:
+if args.test == 0  or  args.test == 13:
     print ()
     try:
         snd_email (subj="13: Empty to=", to="", body="Hello", log=True, smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 14:
+if args.test == 0  or  args.test == 14:
     print ()
     try:
         snd_email (subj="14: Invalid to='inval@i^*#d", to="inval@i^*#d", body="Hello", log=True, smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 15:
+if args.test == 0  or  args.test == 15:
     print ()
     config.cfg['SMTP']['EmailServer'] = 'nosuchserver.nosuchmail.com'
     # cfg['EmailServer'] = 'nosuchserver.nosuchmail.com'
@@ -161,7 +161,7 @@ if args.test == 0  or args.test == 15:
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
-if args.test == 0  or args.test == 16:
+if args.test == 0  or  args.test == 16:
     print ()
     config.read_dict({'EmailServerPort':'badport'}, section_name='SMTP')
     # cfg['EmailServerPort'] = 'badport'
