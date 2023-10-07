@@ -657,9 +657,9 @@ and files will be created with the `file_stat` permissions.
                 except Exception as e:
                     print (f"File copy of <{item['source']}> to <{target_dir.full_path}> failed.  Aborting.\n  {e}")
                     sys.exit(1)
-                print (f"Deployed  {item['source']:20} to  {target_dir.full_path}")
+                print (f"Deployed  {item['source']:20} to  {outfile}") #{target_dir.full_path}")
             else:
-                print (f"File <{item['source']}> already exists at <{target_dir.full_path}>.  Skipped.")
+                print (f"File <{item['source']}> already exists at <{outfile}>.  Skipped.")
 
         elif source.is_dir():
                 # ONLY WORKS if the source dir is on the file system (eg, not in a package .zip)
@@ -887,7 +887,8 @@ Output
 
                             value = self._parse_value(rol)
                             self._add_key(param, value, self.current_section_name)
-                            logging.debug (f"Loaded [{self.current_section_name}][{param}] = <{value}>  ({type(value)})")
+                            # logging.debug (f"Loaded [{self.current_section_name}][{param}] = <{value}>  ({type(value)})")
+                            logging.debug (f"Loaded {param} = <{value}>  ({type(value)})")
                         else: 
                             line = line.replace('\n','')
                             logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
@@ -1269,10 +1270,10 @@ Here are a few key comparisons:
             elif self.getcfg("DontNotif", False):
                 logging.info ('DontNotif is set - Notifications will NOT be sent')
 
-            config_loglevel = int(self.getcfg("LogLevel", None))
+            config_loglevel = self.getcfg("LogLevel", None)
             if config_loglevel is not None:
                 logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
-                logging.getLogger().setLevel(config_loglevel)
+                logging.getLogger().setLevel(int(config_loglevel))
             else:
                 logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
                 logging.getLogger().setLevel(preexisting_loglevel)
@@ -1521,6 +1522,7 @@ config.modify_configfile("# New comment line",      add_if_not_existing=True, sa
             self.config_full_path.write_text(self.config_content) # + "\n")
             self.config_content = ""
 
+# TODO - update all occurrence of param.  Add first only?  Add section selection?
 
 
 # #=====================================================================================
@@ -1844,7 +1846,7 @@ file locks ensures that the tool script does not run if the prior run has not co
 #  s n d _ n o t i f
 #=====================================================================================
 #=====================================================================================
-def snd_notif(subj="Notification message", msg="", to="NotifList", log=False):
+def snd_notif(subj="Notification message", msg="", to="NotifList", log=False, smpt_config=None):
     """
 ## snd_notif (subj="Notification message, msg="", to="NotifList", log=False) - Send a text message using info from the config file
 
@@ -1897,7 +1899,7 @@ messages are also blocked if `DontEmail` is True.
 - `snd_notif()` uses `snd_email()` to send the message. See `snd_email()` for related setup.
     """
 
-    if getcfg('DontNotif', default=False)  or  getcfg('DontEmail', default=False):
+    if smpt_config.getcfg('DontNotif', fallback=False, section='SMTP')  or  smpt_config.getcfg('DontEmail', fallback=False, section='SMTP'):
         if log:
             logging.warning (f"Notification NOT sent <{subj}> <{msg}>")
         else:
@@ -1905,7 +1907,7 @@ messages are also blocked if `DontEmail` is True.
         return
 
     try:
-        snd_email (subj=subj, body=msg, to=to)
+        snd_email (subj=subj, body=msg, to=to, smpt_config=smpt_config)
         if log:
             logging.warning (f"Notification sent <{subj}> <{msg}>")
         else:
@@ -1920,7 +1922,7 @@ messages are also blocked if `DontEmail` is True.
 #  s n d _ e m a i l
 #=====================================================================================
 #=====================================================================================
-def snd_email(subj, to, body=None, filename=None, htmlfile=None, log=False):
+def snd_email(subj, to, body=None, filename=None, htmlfile=None, log=False, smpt_config=None):
     """
 ## snd_email (subj, to, body=None, filename=None, htmlfile=None, log=False)) - Send an email message using info from the config file
 
@@ -2052,7 +2054,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     if '@' in to:
         To = extract_email_addresses(to)
     else:
-        To = extract_email_addresses(getcfg(to, ""))
+        To = extract_email_addresses(smpt_config.getcfg(to, "", section='SMTP'))
     if len(To) == 0:
         raise SndEmailError (f"snd_email - Message subject <{subj}>:  'to' list must not be empty.")
     for address in To:
@@ -2060,18 +2062,18 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             raise SndEmailError (f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>.")
 
     # Gather, check remaining config params
-    ntries     = getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int)
-    retry_wait = timevalue(getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float, str])).seconds
-    email_from = getcfg('EmailFrom', types=str)
-    cfg_server = getcfg('EmailServer', types=str)
-    cfg_port   = getcfg('EmailServerPort', types=str).lower()
+    ntries     = smpt_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
+    retry_wait = timevalue(smpt_config.getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float, str], section='SMTP')).seconds
+    email_from = smpt_config.getcfg('EmailFrom', types=str, section='SMTP')
+    cfg_server = smpt_config.getcfg('EmailServer', types=str, section='SMTP')
+    cfg_port   = smpt_config.getcfg('EmailServerPort', types=str, section='SMTP').lower()
     if cfg_port not in ['p25', 'p465', 'p587', 'p587tls']:
-        raise ConfigError (f"Config EmailServerPort <{getcfg('EmailServerPort')}> is invalid")
-    email_user = str(getcfg('EmailUser', None, types=[str, int, float]))    # username may be numeric
+        raise SndEmailError (f"Config EmailServerPort <{smpt_config.getcfg('EmailServerPort', fallback='', section='SMTP')}> is invalid")
+    email_user = str(smpt_config.getcfg('EmailUser', None, types=[str, int, float], section='SMTP'))    # username may be numeric
     if email_user:
-        email_pass = str(getcfg('EmailPass', types=[str, int, float]))      # password may be numeric
+        email_pass = str(smpt_config.getcfg('EmailPass', types=[str, int, float], section='SMTP'))      # password may be numeric
 
-    if getcfg('DontEmail', default=False, types=bool):
+    if smpt_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
         if log:
             logging.warning (f"Email NOT sent <{subj}>")
         else:
@@ -2098,7 +2100,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
             if email_user:
                 server.login (email_user, email_pass)
-            if getcfg("EmailVerbose", False, types=[bool]):
+            if smpt_config.getcfg("EmailVerbose", False, types=[bool], section='SMTP'):
                 server.set_debuglevel(1)
             server.sendmail(email_from, To, msg.as_string())
             server.quit()

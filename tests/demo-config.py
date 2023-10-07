@@ -22,10 +22,12 @@ from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files,
 
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('Mode',
-                    help="Test modes (1, 2, ...)")
-parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
-                    help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory.")
+# parser.add_argument('Mode', default=3, nargs='?',
+#                     help="Test modes (1, 2, ...)")
+parser.add_argument('-t', '--test', type=int, default=3,
+                    help="Test number to run (default 3).  0 runs most all tests (those without untrapped errors)")
+# parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
+#                     help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory.")
 parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 args = parser.parse_args()
@@ -45,10 +47,15 @@ def remove_file (file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
 
+def print_test_header(tnum, header):
+    print ("\n======================================================================================================")
+    print (f"***** Test number {tnum}: {header} *****")
+    print ("======================================================================================================\n")
 
 
-if args.Mode == '1':
-    print ("\n***** Tests for log file control *****")
+#===============================================================================================
+if args.test == 0  or  args.test == 1:
+    print_test_header (1, "Tests for log file control")
     deploy_files([
         { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
         ], overwrite=True )
@@ -139,11 +146,12 @@ if args.Mode == '1':
     print (f"Current log file:              {tool.log_full_path}")
     logging.warning (f"T1.14 - Log to  <{tool.log_full_path}>")
 
-    sys.exit()
+    # sys.exit()
 
 
-if args.Mode == '2':
-    print ("\n***** Tests for ldcfg_ll, config LogLevel, flush_on_reload, force_flush_reload *****")
+#===============================================================================================
+if args.test == 0  or  args.test == 2:
+    print_test_header (2, "Tests for ldcfg_ll, config LogLevel, flush_on_reload, force_flush_reload")
 
     def print_stats ():
         print (f"(Re)loaded             :  {reloaded}")
@@ -244,34 +252,41 @@ if args.Mode == '2':
     reloaded = config_T2.loadconfig(force_flush_reload=True)
     print_stats()
 
-    sys.exit()
+    # sys.exit()
 
 
 # Initial load for following tests
-deploy_files([
-    { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
-    { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
-    { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
-    ], overwrite=True )
+# deploy_files([
+#     { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
+#     { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
+#     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
+#     ], overwrite=True )
 
-def do_base_setup():
+def do_base_setup(config_load_ll=30):
     global config
-    # config = config_item(CONFIG_FILE)
-    # print (f"\nLoad config {config.config_full_path}")
-    # config.loadconfig(ldcfg_ll=10)
+    deploy_files([
+        { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
+        { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
+        { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
+        ], overwrite=True )
+    config = config_item(CONFIG_FILE)
+    print (f"\nLoad config {config.config_full_path}")
+    config.loadconfig(ldcfg_ll=config_load_ll)
 
-    try:
-        config = config_item(CONFIG_FILE)
-        print (f"\nLoad config {config.config_full_path}")
-        config.loadconfig(ldcfg_ll=10)
-    except Exception as e:
-        print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
-        sys.exit()
+    # try:
+    #     config = config_item(CONFIG_FILE)
+    #     print (f"\nLoad config {config.config_full_path}")
+    #     config.loadconfig(ldcfg_ll=10)
+    # except Exception as e:
+    #     print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
+    #     sys.exit()
 
 
-if args.Mode == '3':
-    do_base_setup()
-    print ("\n***** Basic test (Show tool.log_* values, LogFile NOT in config) *****")
+#===============================================================================================
+if args.test == 0  or  args.test == 3:
+    print_test_header(3, "Basic test (Show tool.log_* values, LogFile NOT in config)")
+    do_base_setup(config_load_ll=10)
+    # print ("\n***** Basic test (Show tool.log_* values, LogFile NOT in config) *****")
     print(tool)
     print(config)
     print(config.dump())
@@ -279,8 +294,9 @@ if args.Mode == '3':
     print(config.sections())
 
 
-if args.Mode == '4':
-    print ("\n***** Test trapped config loading exception *****")
+#===============================================================================================
+if args.test == 0  or  args.test == 4:
+    print_test_header (4, "Test trapped config loading exception")
     try:
         configX = config_item("nosuchfile.cfg")
         configX.loadconfig(ldcfg_ll=10)
@@ -288,15 +304,17 @@ if args.Mode == '4':
         print (f"In main...  {e}")
 
 
-if args.Mode == '5':
-    print ("\n***** Test untrapped config loading exception *****")
+#===============================================================================================
+if args.test == 5:
+    print_test_header (5, "Test untrapped config loading exception")
     configX = config_item("nosuchfile.cfg")
     configX.loadconfig(ldcfg_ll=10)
 
 
-if args.Mode == '6':
+#===============================================================================================
+if args.test == 0  or  args.test == 6:
+    print_test_header (6, "Co-loading an additional config")
     do_base_setup()
-    print ("\n***** Co-loading an additional config *****")
     print(config)
     additional_config = config_item("additional.cfg")
     print(additional_config)
@@ -311,9 +329,10 @@ if args.Mode == '6':
     print (f"Current logging level:      {logging.getLogger().level}")
 
 
-if args.Mode == '7':
+#===============================================================================================
+if args.test == 0  or  args.test == 7:
+    print_test_header (7, "Test unknown getcfg param with/without fallbacks")
     do_base_setup()
-    print ("\n***** Test unknown getcfg param with/without fallbacks *****")
     print (f"Testing getcfg - Not in cfg with fallback: <{config.getcfg('NotInCfg', 'My fallback Value')}>")
     try:
         config.getcfg('NotInCfg-NoDef')
@@ -321,15 +340,17 @@ if args.Mode == '7':
         print (f"ConfigError: {e}")
 
 
-if args.Mode == '8':
+#===============================================================================================
+if args.test == 8:
+    print_test_header (8, "Test untrapped unknown getcfg param")
     do_base_setup()
-    print ("\n***** Test untrapped unknown getcfg param *****")
     config.getcfg('NotInCfg-NoDef')
 
 
-if args.Mode == '9':
+#===============================================================================================
+if args.test == 0  or  args.test == 9:
+    print_test_header (9, "Test flush_on_reload  and  force_flush_reload cases")
     do_base_setup()
-    print ("\n***** Test flush_on_reload  and  force_flush_reload cases *****")
     config.cfg["dummy"] = True
     print (f"\n----- T9.1:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True - Initial state)\n")
 
@@ -352,15 +373,16 @@ if args.Mode == '9':
     print (f"----- T9.5:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because force_flush_reload == True)\n")
 
 
+#===============================================================================================
 def dump(xx):
     print (f"\nGiven <{xx}>     {type(xx)}:")
     yy = timevalue(xx)
     print (yy)
     print (f"   retimed  :  <{retime(yy.seconds, yy.unit_char)}> {yy.unit_str}")
 
-if args.Mode == '10':
+if args.test == 0  or  args.test == 10:
+    print_test_header (10, "Test timevalue, retime")
     do_base_setup()
-    print ("\n***** Test timevalue, retime *****")
     dump (config.getcfg("Tint"))
     dump (config.getcfg("Tsec"))
     dump (config.getcfg("Tmin"))
@@ -375,20 +397,22 @@ if args.Mode == '10':
     print ("done sleeping")
 
 
-if args.Mode == '11':
-    # do_base_setup()
-    print ("\n***** Test untrapped invalid time unit *****")
+#===============================================================================================
+if args.test == 11:
+    print_test_header (11, "Test untrapped invalid time unit")
     dump ("3y")             # ValueError raised
 
 
-if args.Mode == '12':
-    print ("\n***** Test untrapped retime with invalid unitC *****")
+#===============================================================================================
+if args.test == 12:
+    print_test_header (12, "Test untrapped retime with invalid unitC")
     retime (12345, "y")     # ValueError raised
 
 
-if args.Mode == '13':
+#===============================================================================================
+if args.test == 0  or  args.test == 13:
+    print_test_header (13, "Test missing config and externally set logging level")
     do_base_setup()
-    print ("\n***** Test missing config and externally set logging level *****")
 
     print (f"\n----- T13.1:  Missing config, tolerate_missing=False (default) >>>>  Exception")
     remove_file(config.config_full_path)
@@ -434,9 +458,10 @@ if args.Mode == '13':
         print (f"Logging level back in the main code:  {logging.getLogger().level}")
 
 
-if args.Mode == '14':
+#===============================================================================================
+if args.test == 0  or  args.test == 14:
+    print_test_header (14, "Test modify_configfile")
     do_base_setup()
-    print ("\n***** Test modify_configfile *****")
     config.modify_configfile(r"x_7893&(%$,.nasf||\a@",  "Goodbye!    # It was Hello")   # param match check
     config.modify_configfile("x_removeX", remove=True)                                  # Warning message
     config.modify_configfile("x_removed", remove=True)                                  # Removed
@@ -460,14 +485,21 @@ if args.Mode == '14':
     config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # New comment
     config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # Non-unique, and both get added
     config.modify_configfile("Bjorn",  "was here too   # With a comment and No newline at end of file", add_if_not_existing=True) #, save=True) # New line
+
+    config.modify_configfile("EmailTo",                  "Modify within SMTP section")
+    config.modify_configfile("a",                        "Modify all occurrences")
+
     config.modify_configfile(save=True)
-    config.loadconfig(ldcfg_ll=10, force_flush_reload=True)
+    # config.loadconfig(ldcfg_ll=10, force_flush_reload=True)
+    config.loadconfig(force_flush_reload=True)
+    print(config.dump())
     print (f"Compare <{config.config_full_path}> to golden copy.")
 
 
-if args.Mode == '15':
+#===============================================================================================
+if args.test == 0  or  args.test == 15:
+    print_test_header (15, "Access list, tuple, and dictionary params")
     do_base_setup()
-    print ("\n***** Access list, tuple, and dictionary params *****")
     # a_list:         ["hello", 3.14, {"abc":42.}]
     # a_tuple=        ("Im a tuple", 7.0)
     # a_dict:         {"six":6, 3:3.0}
@@ -477,9 +509,10 @@ if args.Mode == '15':
     print (f"{six} times {seven} is {fortytwo}")
 
 
-if args.Mode == '16':
+#===============================================================================================
+if args.test == 0  or  args.test == 16:
+    print_test_header (16, "Test getcfg type checking")
     do_base_setup()
-    print ("\n***** Test getcfg type checking *****")
 
     def dump(param, types):
         try:
@@ -498,9 +531,10 @@ if args.Mode == '16':
     dump("Tsec",   types=[int, float, list, tuple, dict, bool     ])
 
 
-if args.Mode == '17':
+#===============================================================================================
+if args.test == 0  or  args.test == 17:
+    print_test_header (17, "Assign getcfg and cfg to config instance")
     do_base_setup()
-    print ("\n***** Assign getcfg and cfg to config instance *****")
     getcfg = config.getcfg
     cfg = config.cfg
     six      = getcfg("a_dict")["six"]
@@ -509,31 +543,34 @@ if args.Mode == '17':
     print (f"{six} times {seven} is {fortytwo}")
 
 
-if args.Mode == '18':
+#===============================================================================================
+if args.test == 0  or  args.test == 18:
+    print_test_header (18, "Sections and DEFAULT")
     do_base_setup()
-    print ("\n***** Sections and DEFAULT *****")
+    print (config.dump())
     def dump(option, section='', desc=''):      # TODO option or param?
         try:
             xx = '[' + section + '][' + option + ']'
             _value = config.getcfg(option, section=section)
-            print (f"{xx:17}   {_value:<11}  {desc}")
+            print (f"{xx:19}   {_value:<11}  {desc}")
         except:
-            print (f"{xx:17}   NOT DEFINED  {desc}")
+            print (f"{xx:19}   NOT DEFINED  {desc}")
 
     print (config)
-    dump('a',                         desc='Expecting  <9>  from [],             [DEFAULT] ignored')
-    dump('b',                         desc='Expecting  <12> from [],             no default')
-    dump('c',                         desc='Expecting  <42> from [DEFAULT],      not in []')
-    dump('d',                         desc='Not in [] or [DEFAULT]')
+    dump('a',                           desc='Expecting  <9>  from [],             [DEFAULT] ignored')
+    dump('b',                           desc='Expecting  <12> from [],             no default')
+    dump('c',                           desc='Expecting  <42> from [DEFAULT],      not in []')
+    dump('d',                           desc='Not in [] or [DEFAULT]')
 
-    dump('a', section='Test section', desc='Expecting  <5>  from [Test section], [DEFAULT] ignored')
-    dump('b', section='Test section', desc='Expecting  <25> from [Test section], no default')
-    dump('c', section='Test section', desc='Expecting  <42> from [DEFAULT],      not in [Test section]')
-    dump('e', section='Test section', desc='Not in [Test section] or [DEFAULT] and [] not considered')
+    dump('a', section='Test section 1', desc='Expecting  <5>  from [Test section], [DEFAULT] ignored')
+    dump('b', section='Test section 1', desc='Expecting  <25> from [Test section], no default')
+    dump('c', section='Test section 1', desc='Expecting  <42> from [DEFAULT],      not in [Test section 1]')
+    dump('e', section='Test section 1', desc='Not in [Test section 1] or [DEFAULT] and [] not considered')
 
 
-if args.Mode == '19':
-    print ("\n***** Imports within Sections and DEFAULT *****")
+#===============================================================================================
+if args.test == 0  or  args.test == 19:
+    print_test_header (19, "Imports within Sections and DEFAULT")
     deploy_files([
         { "source": "import_nest_top.cfg",  "target_dir": "USER_CONFIG_DIR"},
         { "source": "import_nest_1.cfg",    "target_dir": "USER_CONFIG_DIR"},
@@ -545,10 +582,10 @@ if args.Mode == '19':
     print ("\n***** config contents *****")
     print (xx.dump())
 
-
-if args.Mode == '20':
-    print ("\n***** Load dictionary into cfg *****")
-    new_config = config_item('import_nest_top.cfg')     # config has no file
+#===============================================================================================
+if args.test == 0  or  args.test == 20:
+    print_test_header (20, "Load dictionary into cfg. No file.")
+    new_config = config_item() #'import_nest_top.cfg')     # config has no file
 
     main_contents = {
         'a' : 6,
@@ -573,8 +610,9 @@ if args.Mode == '20':
     print (new_config.dump())
 
 
-if args.Mode == '21':
-    print ("\n***** Load string blob into cfg.  No file. *****")
+#===============================================================================================
+if args.test == 0  or  args.test == 21:
+    print_test_header (21, "Load string blob into cfg. No file.")
     new_config = config_item()
 
     string_blob = """
@@ -614,8 +652,9 @@ e 20
 # TODO test for malformed sections - no ']'
 
 
-if args.Mode == '22':
-    print ("\n***** Force config load as strings *****")
+#===============================================================================================
+if args.test == 0  or  args.test == 22:
+    print_test_header (22, "Force config load as strings")
     config = config_item(CONFIG_FILE, force_str=True)
     print (f"\nLoad config {config.config_full_path}")
     config.loadconfig(ldcfg_ll=10)

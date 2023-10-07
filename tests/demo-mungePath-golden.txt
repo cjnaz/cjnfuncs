@@ -396,3 +396,24 @@ Given:
  base_path :  </tmp/mungePath>
  mkdir     :  <True>
 Exception: [Errno 17] File exists: '/tmp/mungePath/dummyfile.txt'
+
+
+***** README.md mungePath example
+.full_path    :  /home/cjn/.local/share/mytool/mysubdir/file.txt
+.parent       :  /home/cjn/.local/share/mytool/mysubdir
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+.full_path    :  /home/cjn/.local/share/mytool/mysubdir/file.txt
+.parent       :  /home/cjn/.local/share/mytool/mysubdir
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
