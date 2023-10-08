@@ -8,7 +8,7 @@
 #
 #==========================================================
 
-__version__ = "1.1"
+__version__ = "1.2"
 TOOLNAME    = "cjnfuncs_testcfg"
 CONFIG_FILE = "demo_config.cfg"
 
@@ -22,26 +22,20 @@ from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files,
 
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
-# parser.add_argument('Mode', default=3, nargs='?',
-#                     help="Test modes (1, 2, ...)")
 parser.add_argument('-t', '--test', type=int, default=3,
                     help="Test number to run (default 3).  0 runs most all tests (those without untrapped errors)")
-# parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
-#                     help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory.")
 parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 args = parser.parse_args()
 
 
 tool = set_toolname(TOOLNAME)
-# print(tool)
 
 if args.cleanup:
     if os.path.exists(tool.config_dir):
         print (f"Removing 1  {tool.config_dir}")
         shutil.rmtree(tool.config_dir)
     sys.exit()
-
 
 def remove_file (file_path):
     if os.path.exists(file_path):
@@ -252,34 +246,16 @@ if args.test == 0  or  args.test == 2:
     reloaded = config_T2.loadconfig(force_flush_reload=True)
     print_stats()
 
-    # sys.exit()
-
-
-# Initial load for following tests
-# deploy_files([
-#     { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
-#     { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
-#     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
-#     ], overwrite=True )
 
 def do_base_setup(config_load_ll=30):
     global config
     deploy_files([
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
-        { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
         { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
         ], overwrite=True )
     config = config_item(CONFIG_FILE)
     print (f"\nLoad config {config.config_full_path}")
     config.loadconfig(ldcfg_ll=config_load_ll)
-
-    # try:
-    #     config = config_item(CONFIG_FILE)
-    #     print (f"\nLoad config {config.config_full_path}")
-    #     config.loadconfig(ldcfg_ll=10)
-    # except Exception as e:
-    #     print (f"No user or site setup found.  Run with <--setup-user> to set up the environment.\n  {e}")
-    #     sys.exit()
 
 
 #===============================================================================================
@@ -315,6 +291,10 @@ if args.test == 5:
 if args.test == 0  or  args.test == 6:
     print_test_header (6, "Co-loading an additional config")
     do_base_setup()
+    deploy_files([
+        { "source": "additional.cfg",       "target_dir": "USER_CONFIG_DIR"},
+        ], overwrite=True )
+
     print(config)
     additional_config = config_item("additional.cfg")
     print(additional_config)
@@ -443,10 +423,8 @@ if args.test == 0  or  args.test == 13:
     remove_file(mungePath("import_nest_2.cfg", tool.config_dir).full_path)
     try:
         xx.loadconfig(ldcfg_ll=9, tolerate_missing=True, force_flush_reload=True)
-    except Exception as e:
+    except ConfigError as e:
         print (f"Exception due to missing imported config file:\n  {e}")
-        # NOTE:  Failed importing/processing config file  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
-        # rather than saying can't import/process nest_2
         print (f"Logging level back in the main code:  {logging.getLogger().level}")
     
     print (f"\n----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.")
@@ -612,7 +590,7 @@ if args.test == 0  or  args.test == 20:
 
 #===============================================================================================
 if args.test == 0  or  args.test == 21:
-    print_test_header (21, "Load string blob into cfg. No file.")
+    print_test_header (21, "Load string blob into cfg. No file.  Delete/clear sections and top-level")
     new_config = config_item()
 
     string_blob = """
@@ -624,6 +602,10 @@ b 12
 a 5
 b 25
 
+[Test section 2]
+a 50
+b 250
+
 [ DEFAULT]
 a 10
 c 42
@@ -634,22 +616,34 @@ e 20
 #[ Hello# ]
 #f Hello
 """
+    print (f"\n----- T21.0:  Initial state")
     new_config.read_string(string_blob)
     print (new_config)
     print (new_config.dump())
 
-    print ("DEFAULTS cleared")
-    new_config.clear_defaults()
+    print (f"\n----- T21.1:  DEFAULTS cleared")
+    # print ("\nDEFAULTS cleared")
+    new_config.clear('DEFAULT')
     print (new_config.dump())
+    print ("Sections list:", new_config.sections_list)
 
-    print ("cfg cleared")
-    new_config.clear_cfg()
+    print (f"\n----- T21.2:  <Test section> cleared")
+    # print ("\n<Test section> cleared")
+    new_config.clear('Test section')
     print (new_config.dump())
+    print ("Sections list:", new_config.sections_list)
 
-    # new_config.modify_configfile(save=True)
+    print (f"\n----- T21.3:  <cfg> cleared")
+    # print ("\ncfg cleared")
+    new_config.clear()
+    print (new_config.dump())
+    print ("Sections list:", new_config.sections_list)
 
-# TODO test for section within import error trap
-# TODO test for malformed sections - no ']'
+    print (f"\n----- T21.4:  Exception for attempting to clear non-existing section")
+    try:
+        new_config.clear('Test section')
+    except ConfigError as e:
+        print (f"ConfigError: {e}")
 
 
 #===============================================================================================
@@ -660,3 +654,28 @@ if args.test == 0  or  args.test == 22:
     config.loadconfig(ldcfg_ll=10)
     print (config)
     print (config.dump())
+
+
+#===============================================================================================
+if args.test == 0  or  args.test == 23:
+    print_test_header (23, "Section-related errors")
+
+    deploy_files([
+        { "source": "demo_config_T23a.cfg",       "target_dir": "USER_CONFIG_DIR"},
+        { "source": "demo_config_T23b.cfg",       "target_dir": "USER_CONFIG_DIR"},
+        { "source": "demo_config_T23c.cfg",       "target_dir": "USER_CONFIG_DIR"},
+        ], overwrite=True )
+
+    print (f"\n----- T23.1:  Section defined within imported config file")
+    try:
+        T23_config = config_item("demo_config_T23a.cfg")
+        T23_config.loadconfig(ldcfg_ll=10)
+    except ConfigError as e:
+        print (f"ConfigError:  {e}")
+
+    print (f"\n----- T23.2:  Malformed Section name")
+    try:
+        T23_config = config_item("demo_config_T23c.cfg")
+        T23_config.loadconfig(ldcfg_ll=10)
+    except ConfigError as e:
+        print (f"ConfigError:  {e}")

@@ -852,9 +852,16 @@ Output
             if line.strip().lower().startswith("import"):
                 line = line.split("#", maxsplit=1)[0].strip()
                 target = mungePath(line.split(maxsplit=1)[1], self.config_dir)
+                # try:
+                #     imported_config = config_item(target.full_path)
+                #     imported_config.loadconfig(ldcfg_ll, isimport=True)
                 try:
                     imported_config = config_item(target.full_path)
                     imported_config.loadconfig(ldcfg_ll, isimport=True)
+                except Exception as e:
+                    logging.getLogger().setLevel(preexisting_loglevel)
+                    raise ConfigError (e)
+                try:
                     for key in imported_config.cfg:
                         if self.current_section_name == '':
                             self.cfg[key] = imported_config.cfg[key]
@@ -873,9 +880,11 @@ Output
                     if _line.startswith('['):                       # TODO param cannot start with '['
                         xx = self._check_section(_line)
                         if xx is None:
+                            logging.getLogger().setLevel(preexisting_loglevel)
                             raise ConfigError (f"Malformed section line <{line}>")
                         else:
                             if isimport:
+                                logging.getLogger().setLevel(preexisting_loglevel)
                                 raise ConfigError ("Section within imported file is not supported.")
                             self.current_section_name = xx
 
@@ -899,13 +908,17 @@ Output
         return self.sections_list
 
 
-    def clear_defaults(self):
-        self.defaults.clear()
-
-
-    def clear_cfg(self):
-        self.cfg.clear()
-        self.sections_list = []
+    def clear(self, section=''):
+        if section == '':
+            self.cfg.clear()
+            self.sections_list = []
+        elif section in self.sections_list:
+            self.cfg.pop(section, None)
+            self.sections_list.remove(section)
+        elif section == 'DEFAULT':
+            self.defaults.clear()
+        else:
+            raise ConfigError (f"Failed attempt to remove non-existing section <{section}> from config")
 
 
     def __repr__(self):
@@ -1094,25 +1107,26 @@ Here are a few key comparisons:
   Save to file | No (see `modify_configfile()`) | Yes
         """
 
-        # global cfg
+# TODO doc DEFAULTs not flushed, but will be loaded
+# TODO doc modify_config will change all occurrences in main, sections or DEFAULT
+        # NOTE:  Failed importing/processing config file  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+        # rather than saying can't import/process nest_2
+
+
         global initial_logging_setup
         global preexisting_loglevel
 
         if not initial_logging_setup:   # Do only once, globally
             # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
             # The logging level defaults to WARNING / 30.
-            # setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins)
             console_lf = self.getcfg("ConsoleLogFormat", None)
             file_lf = self.getcfg("FileLogFormat", None)
-
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
             initial_logging_setup = True
 
         config = self.config_full_path
 
-        # try:
         if not isimport:                # Operations only on top level config file
-
             # Save externally set / prior log level for later restore
             preexisting_loglevel = logging.getLogger().level
 
@@ -1128,16 +1142,15 @@ Here are a few key comparisons:
                     logging.getLogger().setLevel(ldcfg_ll)
                     logging.info (f"Config file  <{config}>  is not currently accessible.  Skipping (re)load.")
                     logging.getLogger().setLevel(preexisting_loglevel)
-                    return -1
+                    return -1   # 1 indicates that the config file cannot currently be found
                 else:
                     logging.getLogger().setLevel(preexisting_loglevel)
-                    # _msg = f"Could not find  <{config}>"
                     raise ConfigError (f"Could not find  <{config}>")
 
             # Check if config file has changed.  If not then return 0
             current_timestamp = int(self.config_full_path.stat().st_mtime)  # integer-second resolution
             if self.config_timestamp == current_timestamp:
-                return 0
+                return 0    # 0 indicates that the config file was NOT (re)loaded
 
             # Initial load call, or config file has changed.  Do (re)load.
             self.config_timestamp = current_timestamp
@@ -1149,120 +1162,16 @@ Here are a few key comparisons:
                 self.cfg.clear()
                 self.sections_list = []
 
+
         logging.info (f"Loading  <{config}>")
-
-        # def parse_value(value_str):
-        #     try:                                                # Integer
-        #         return int(value_str) 
-        #     except:
-        #         pass
-        #     try:                                                # Float
-        #         return float(value_str)
-        #     except:
-        #         pass
-        #     if value_str.lower() == "true":                     # Boolean True
-        #         return True
-        #     if value_str.lower() == "false":                    # Boolean False
-        #         return False
-        #     try:
-        #         if  (value_str.startswith('[') and value_str.endswith(']'))  or \
-        #             (value_str.startswith('{') and value_str.endswith('}'))  or \
-        #             (value_str.startswith('(') and value_str.endswith(')')):
-        #                 return ast.literal_eval(value_str)      # List, Dictionary, or Tuple
-        #     except:
-        #         pass
-        #     return value_str                                    # String
-
-        # def check_section(xyz):
-        #     out = SECLINE.match(xyz)
-        #     if out:
-        #         section_name = out.group(1).strip()
-        #         if section_name != ''  and  section_name not in self.sections_list  and  section_name != 'DEFAULT':
-        #             self.cfg[section_name] = {}
-        #             self.sections_list.append(section_name)
-        #         return section_name
-        #         # return out.group(1).strip()     # remove any leading/training whitespace
-        #     else:
-        #         return None
-# TODO trap for sections defined within sections
-# TODO sections not allowed in imported config files
-# TODO doc DEFAULTs not flushed, but will be loaded
-# TODO doc stress that modify_config will find only the first occurance of option.  May not be possible to get to other occurences in sections or DEFAULT
-
-
         string_blob = config.read_text()
         self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
-
-        # with config.open() as ifile:
-            # for line in ifile:
-
-            #     # Is an import line
-            #     if line.strip().lower().startswith("import"):
-            #         line = line.split("#", maxsplit=1)[0].strip()
-            #         target = mungePath(line.split(maxsplit=1)[1], self.config_dir)
-            #         try:
-            #             imported_config = config_item(target.full_path)
-            #             imported_config.loadconfig(ldcfg_ll, isimport=True)
-            #             for key in imported_config.cfg:
-            #                 if self.current_section_name == '':
-            #                     self.cfg[key] = imported_config.cfg[key]
-            #                 elif self.current_section_name == 'DEFAULT':
-            #                     self.defaults[key] = imported_config.cfg[key]
-            #                 else:
-            #                     self.cfg[self.current_section_name][key] = imported_config.cfg[key]
-            #         except Exception as e:
-            #             logging.getLogger().setLevel(preexisting_loglevel)
-            #             # _msg = f"Failed importing/processing config file  <{target.full_path}>"
-            #             raise ConfigError (f"Failed importing/processing config file  <{target.full_path}>")
-
-            #     # Is a param/value line or a [section] line
-            #     else:
-            #         _line = line.split("#", maxsplit=1)[0].strip()  # line without comment and leading/trailing whitespace
-            #         if len(_line) > 0:
-            #             if _line.startswith('['):                       # TODO param cannot start with '['
-            #                 xx = self._check_section(_line)
-            #                 if xx is None:
-            #                     raise ConfigError (f"Malformed section line <{line}>")
-            #                     # logging.warning () # TODO not a valid section line.  line cannot start with '[' if not a section
-            #                     # continue            # skip rest like below Error on line
-            #                 else:
-            #                     if isimport:
-            #                         raise ConfigError ("Section within imported file is not supported.")
-            #                     self.current_section_name = xx
-
-            #             else:
-            #                 out = CFGLINE.match(_line)
-            #                 if out:
-            #                     param = out.group(1)
-            #                     rol   = out.group(2)        # rest of line (value portion)
-
-            #                     value = self._parse_value(rol)
-            #                     self._add_key(param, value, self.current_section_name)
-            #                     # if self.current_section_name == '':
-            #                     #     self.cfg[param] = value
-            #                     # elif self.current_section_name == 'DEFAULT':
-            #                     #     self.defaults[param] = value
-            #                     # else:
-            #                     #     self.cfg[self.current_section_name][param] = value
-
-            #                     # self.cfg[param] = value
-
-            #                     logging.debug (f"Loaded [{self.current_section_name}][{param}] = <{value}>  ({type(value)})")
-            #                 else: 
-            #                     line = line.replace('\n','')
-            #                     logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
-
-        # except Exception as e:
-        #     raise ConfigError (f"Failed opening/processing config file  <{config}>\n  {e}") from None
 
 
         # Operations only for finishing a top-level call
         if not isimport:
             console_lf = self.getcfg("ConsoleLogFormat", None)
             file_lf = self.getcfg("FileLogFormat", None)
-            # setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
-
-            # setuplogging(config_logfile=self.getcfg("LogFile", None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins)
             setuplogging(config_logfile=self.getcfg("LogFile", None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
 
             if self.getcfg("DontEmail", False):
@@ -1391,26 +1300,6 @@ This can lead to cleaner tool script code.  Either access method may be used, al
                 raise ConfigError (f"getcfg - Config parameter <{param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
 
 
-        # if param in self.cfg:
-        #     _value = self.cfg[param]
-        # else:
-        #     if default != "_nodefault":
-        #         return default
-        #     else:
-        #         raise ConfigError (f"getcfg - Config parameter <{param}> not in cfg and no default.")
-
-        # if isinstance(types, type):
-        #     types = [types]
-
-        # if types == []:
-        #         return _value
-        # else:
-        #     if type(_value) in types:
-        #         return _value
-        #     else:
-        #         raise ConfigError (f"getcfg - Config parameter <{param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
-
-
 #=====================================================================================
 #=====================================================================================
 #  m o d i f y _ c o n f i g f i l e
@@ -1521,68 +1410,6 @@ config.modify_configfile("# New comment line",      add_if_not_existing=True, sa
         if save:
             self.config_full_path.write_text(self.config_content) # + "\n")
             self.config_content = ""
-
-# TODO - update all occurrence of param.  Add first only?  Add section selection?
-
-
-# #=====================================================================================
-# #=====================================================================================
-# #  g e t c f g
-# #=====================================================================================
-# #=====================================================================================
-# def getcfg(param, default="_nodefault", types=[]):
-#     """
-# ## getcfg (param, default=None, types=[]) - Get a param from the cfg dictionary
-
-# Returns the value of param from the cfg dictionary.  Equivalent to just referencing cfg[]
-# but with handling if the item does not exist.
-
-# Type checking may be performed by listing one or more expected types via the optional `types` parameter.
-# If the loaded param is not one of the expected types then a ConfigError is raised.  This check may be 
-# useful for basic error checking of param values, EG making sure the return value is a float and not
-# a str. (str is the loadconig default if the param type cannot be converted to another supported type.)
-
-# NOTE: `getcfg()` is almost equivalent to `cfg.get()`, except that `getcfg()` does not default to `None`.
-# Rather, `getcfg()` raises a ConfigError if the param does not exist and no `default` is specified.
-# This can lead to cleaner tool script code.  Either access method may be used, along with `x = cfg["param"]`.
-
-
-# ### Parameters
-# `param`
-# - String name of param to be fetched from cfg
-
-# `default` (default None)
-# - if provided, is returned if `param` does not exist in cfg
-
-# `types` (default '[]' empty list)
-# - if provided, a ConfigError is raised if the param's value type is not in the list of expected types
-# - `types` may be a single type (eg, `types=int`) or a list of types (eg, `types=[int, float]`)
-# - Supported types: [str, int, float, bool, list, tuple, dict]
-
-# ### Returns
-# - param value (cfg[param]), if param is in cfg
-# - `default` value if param not in cfg and `default` value provided
-# - raises ConfigError if param does not exist in cfg and no `default` provided, or if not of the expected type(s).
-#     """
-    
-#     if param in cfg:
-#         _value = cfg[param]
-#     else:
-#         if default != "_nodefault":
-#             return default
-#         else:
-#             raise ConfigError (f"getcfg - Config parameter <{param}> not in cfg and no default.")
-
-#     if isinstance(types, type):
-#         types = [types]
-
-#     if types == []:
-#             return _value
-#     else:
-#         if type(_value) in types:
-#             return _value
-#         else:
-#             raise ConfigError (f"getcfg - Config parameter <{param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
 
 
 #=====================================================================================
@@ -1958,7 +1785,7 @@ contain an '@' it is assumed to be a config param.
 at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
-
+TODO  in section [SMTP]
 ### cfg dictionary params
 `EmailFrom`
 - An email address, such as `me@myserver.com`
@@ -2068,7 +1895,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     cfg_server = smpt_config.getcfg('EmailServer', types=str, section='SMTP')
     cfg_port   = smpt_config.getcfg('EmailServerPort', types=str, section='SMTP').lower()
     if cfg_port not in ['p25', 'p465', 'p587', 'p587tls']:
-        raise SndEmailError (f"Config EmailServerPort <{smpt_config.getcfg('EmailServerPort', fallback='', section='SMTP')}> is invalid")
+        raise SndEmailError (f"snd_email - Config EmailServerPort <{smpt_config.getcfg('EmailServerPort', fallback='', section='SMTP')}> is invalid")
     email_user = str(smpt_config.getcfg('EmailUser', None, types=[str, int, float], section='SMTP'))    # username may be numeric
     if email_user:
         email_pass = str(smpt_config.getcfg('EmailPass', types=[str, int, float], section='SMTP'))      # password may be numeric
