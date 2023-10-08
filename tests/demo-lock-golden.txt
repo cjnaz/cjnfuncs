@@ -1,0 +1,41 @@
+
+Stats for set_toolname <cjnfuncs_testlock>:
+.toolname         :  cjnfuncs_testlock
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-lock.py'>
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testlock
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testlock
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testlock
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testlock
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testlock/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testlock
+.site_data_dir    :  /usr/share/cjnfuncs_testlock
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testlock
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testlock
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testlock
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testlock
+.log_dir_base     :  /home/cjn/.local/share/cjnfuncs_testlock
+.log_dir          :  None
+.log_file         :  None
+.log_full_path    :  __console__
+
+Using default lock file
+got back from 1st requestLock.  stat = 0
+       cjnfuncs.requestlock          -  WARNING:  Timed out waiting for lock file </tmp/cjnfuncs_testlock_LOCK> to be cleared.  Locked by <try1> at Sat Oct  7 13:51:39 2023.
+got back from 2nd requestLock.  stat = -1
+got back from 1st releaseLock.  stat = 0
+       cjnfuncs.releaselock          -  WARNING:  Attempted to remove lock file </tmp/cjnfuncs_testlock_LOCK> but the file does not exist.
+got back from 2nd releaseLock.  stat = -1
+
+Using absolute lockfile path
+got back from abs path requestLock.  stat = 0
+       cjnfuncs.requestlock          -  WARNING:  Timed out waiting for lock file </home/cjn/.local/share/cjnfuncs_testlock/myuserlock> to be cleared.  Locked by <abs path> at Sat Oct  7 13:51:44 2023.
+got back from second abs path requestLock.  stat = -1
+got back from abs path releaseLock.  stat = 0
+
+Using relative lockfile path
+got back from rel path requestLock.  stat = 0
+       cjnfuncs.requestlock          -  WARNING:  Timed out waiting for lock file </tmp/myuserlock> to be cleared.  Locked by <rel path> at Sat Oct  7 13:51:45 2023.
+got back from second rel path requestLock.  stat = -1
+got back from rel path releaseLock.  stat = 0

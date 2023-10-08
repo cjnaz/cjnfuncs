@@ -100,7 +100,7 @@ myfile = mungePath ("mysubdir/file.txt", tool.data_dir)
 mungePath (myfile.parent, mkdir=True)
 if not myfile.exists:
     with myfile.full_path.open('w') as outfile:
-        file_contents = outfile.write("Hello")
+        outfile.write("Hello")
     print (myfile)      # NOTE: Prints stats from before the file creation
     myfile.refresh_stats()
     print (myfile)

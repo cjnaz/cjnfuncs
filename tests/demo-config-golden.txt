@@ -1,0 +1,1431 @@
+
+======================================================================================================
+***** Test number 1: Tests for log file control *****
+======================================================================================================
+
+Deployed  demo_config_T1.cfg   to  /home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg
+
+----- T1.1:  setuplogging with call_logfile_wins=False, call_logfile=None, config_logfile=None >>>>  Log file: __console__ (setuplogging with no config)
+Current log file:              __console__
+    demo-config.<module>             -  WARNING:  T1.1 - Log to  <__console__>
+
+----- T1.2:  LogFile=None, call_logfile=None, call_logfile_wins=True >>>>  Log file: __console__
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797267
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
+Current log file:              __console__
+    demo-config.<module>             -  WARNING:  T1.2 - Log to  <__console__>
+
+----- T1.3:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__ (override cfg_logfile)
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797267
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
+Current log file:              __console__
+    demo-config.<module>             -  WARNING:  T1.3 - Log to  <__console__>
+
+----- T1.4:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  call_logfile
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797267
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/call_logfile
+
+----- T1.5:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (no change)
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/call_logfile
+
+----- T1.6:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  'cfg_logfile'
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/cfg_logfile
+
+----- T1.7:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  'cfg_logfile2'
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/cfg_logfile2
+
+----- T1.8:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (again)
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/call_logfile
+
+Stats for set_toolname <cjnfuncs_testcfg>:
+.toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
+.site_data_dir    :  /usr/share/cjnfuncs_testcfg
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg
+.log_dir          :  /home/cjn/.config/cjnfuncs_testcfg
+.log_file         :  call_logfile
+.log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/call_logfile
+
+----- T1.9:  Change tool.log_dir_base.  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  mylogdir/call_logfile
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
+
+Stats for set_toolname <cjnfuncs_testcfg>:
+.toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
+.site_data_dir    :  /usr/share/cjnfuncs_testcfg
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_dir          :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_file         :  call_logfile
+.log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
+
+----- T1.10:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile2
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/cfg_logfile2
+
+Stats for set_toolname <cjnfuncs_testcfg>:
+.toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
+.site_data_dir    :  /usr/share/cjnfuncs_testcfg
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_dir          :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_file         :  cfg_logfile2
+.log_full_path    :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir/cfg_logfile2
+
+----- T1.11:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
+Current log file:              __console__
+
+Stats for set_toolname <cjnfuncs_testcfg>:
+.toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
+.site_data_dir    :  /usr/share/cjnfuncs_testcfg
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_dir          :  None
+.log_file         :  None
+.log_full_path    :  __console__
+    demo-config.<module>             -  WARNING:  T1.11 - Log to  <__console__>
+
+----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797267
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
+Current log file:              __console__
+    demo-config.<module>             -  WARNING:  T1.12 - Log to  <__console__>
+
+----- T1.13: Modified console logging format >>>>  Log file:  __console__
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797267
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
+    INFO:  Logging level set to config LogLevel <30>
+Current log file:              __console__
+ WARNING:  T1.13 - Log to  <__console__>
+
+----- T1.14: Modified file logging format >>>>  Log file:  call_logfile
+    INFO:  cfg dictionary force flushed (force_flush_reload)
+    INFO:  Config file timestamp: 1696797267
+    INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
+   DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+   DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
+   DEBUG:  Loaded FileLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
+Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_logfile
+
+======================================================================================================
+***** Test number 2: Tests for ldcfg_ll, config LogLevel, flush_on_reload, force_flush_reload *****
+======================================================================================================
+
+Deployed  demo_config_T2.cfg   to  /home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg
+
+----- T2.1:  Initial load.  Default logging level 30
+(Re)loaded             :  1
+Config file timestamp  :  1696797267
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.2:  No config change >>>>  Not reloaded
+(Re)loaded             :  0
+Config file timestamp  :  1696797267
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.3:  LogLevel=10, ldcfg_ll=10 >>>>  loadconfig logging, Logging DEBUG, INFO, and WARNING messages
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797268
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary flushed due to changed config file (flush_on_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <10>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <10>
+(Re)loaded             :  1
+Config file timestamp  :  1696797268
+Config LogLevel        :  10
+Current Logging level  :  10
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+    demo-config.print_stats          -    DEBUG:  Debug   level message
+
+----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No loadconfig logging, Logging DEBUG, INFO, and WARNING messages
+(Re)loaded             :  1
+Config file timestamp  :  1696797269
+Config LogLevel        :  10
+Current Logging level  :  10
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+    demo-config.print_stats          -    DEBUG:  Debug   level message
+
+----- T2.5:  LogLevel=30, ldcfg_ll=30 (default),  >>>>  Log only WARNING
+(Re)loaded             :  1
+Config file timestamp  :  1696797270
+Config LogLevel        :  30
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.6:  ldcfg_ll=10, No LogLevel >>>>  Restore preexisting level (30)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797271
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary flushed due to changed config file (flush_on_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <30>
+(Re)loaded             :  1
+Config file timestamp  :  1696797271
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.7:  ldcfg_ll=30 (default), No changes >>>>  NOT Reloaded
+(Re)loaded             :  0
+Config file timestamp  :  1696797271
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.8:  ldcfg_ll=10, flush_on_reload >>>>  NOT Reloaded
+(Re)loaded             :  0
+Config file timestamp  :  1696797271
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.9:  ldcfg_ll=10, force_flush_reload >>>>  Loadconfig logging
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797271
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <30>
+(Re)loaded             :  1
+Config file timestamp  :  1696797271
+Config LogLevel        :  None
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.10:  ldcfg_ll=10, LogLevel=20, var2 added >>>>  Reloaded
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797272
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded var2 = <Hello>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
+(Re)loaded             :  1
+Config file timestamp  :  1696797272
+Config LogLevel        :  20
+Current Logging level  :  20
+testvar                :  True  <class 'bool'>
+var2                   :  Hello
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+
+----- T2.11: ldcfg_ll=10, LogLevel=40, var2 removed from config >>>>  var2 still defined, no logging
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797273
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <40>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <40>
+(Re)loaded             :  1
+Config file timestamp  :  1696797273
+Config LogLevel        :  40
+Current Logging level  :  40
+testvar                :  True  <class 'bool'>
+var2                   :  Hello
+Current log file       :  __console__
+
+----- T2.12: ldcfg_ll=10, LogLevel=30, force_flush_reload=True >>>>  var2 gone
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797273
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
+(Re)loaded             :  1
+Config file timestamp  :  1696797273
+Config LogLevel        :  30
+Current Logging level  :  30
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+
+----- T2.13: Externally set log level = 20
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797274
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <20>
+(Re)loaded             :  1
+Config file timestamp  :  1696797274
+Config LogLevel        :  None
+Current Logging level  :  20
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+
+----- T2.14: Externally set log level = 10
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797274
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <10>
+(Re)loaded             :  1
+Config file timestamp  :  1696797274
+Config LogLevel        :  None
+Current Logging level  :  10
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+    demo-config.print_stats          -    DEBUG:  Debug   level message
+
+----- T2.15: Externally set log level = 10 with ldcfg_ll=30 (default)
+(Re)loaded             :  1
+Config file timestamp  :  1696797274
+Config LogLevel        :  None
+Current Logging level  :  10
+testvar                :  True  <class 'bool'>
+var2                   :  None
+Current log file       :  __console__
+    demo-config.print_stats          -  WARNING:  Warning level message
+    demo-config.print_stats          -     INFO:  Info    level message
+    demo-config.print_stats          -    DEBUG:  Debug   level message
+
+======================================================================================================
+***** Test number 3: Basic test (Show tool.log_* values, LogFile NOT in config) *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797274
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tint = <10>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tsec = <5s>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tmin = <6m>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Thour = <2h>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tday = <4d>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tweek = <3w>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Indented_item = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded NotifList = <4809991234@vzwpix.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailTo = <your.email@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailToMulti = <me@example.com, 	you@example.com>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/creds_SMTP>
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServer = <mail.myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServerPort = <P587TLS>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailUser = <outbound@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailPass = <mypassword>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_reference = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_removed = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_shorter = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_longer = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_same = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_really_long = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_no_trailing_whitespace = <123456789 12345x>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_indented_param = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_float = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_int = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_list = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_dict = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <9>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <12>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <25>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x = <42>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded y = <2.54>  (<class 'float'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <10>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded c = <42>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded e = <20>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
+
+Stats for set_toolname <cjnfuncs_testcfg>:
+.toolname         :  cjnfuncs_testcfg
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py'>
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testcfg
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testcfg
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testcfg
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testcfg
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testcfg/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testcfg
+.site_data_dir    :  /usr/share/cjnfuncs_testcfg
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testcfg
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testcfg
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testcfg
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testcfg
+.log_dir_base     :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+.log_dir          :  None
+.log_file         :  None
+.log_full_path    :  __console__
+
+Stats for config file <demo_config.cfg>:
+.config_file        :  demo_config.cfg
+.config_dir         :  /home/cjn/.config/cjnfuncs_testcfg
+.config_full_path   :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+.config_timestamp   :  1696797274
+.sections_list      :  ['SMTP', 'Test section 1', 'Test section 2']
+tool.log_dir_base   :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+
+***** Section [] *****
+            LogLevel = 20  <class 'int'>
+             testvar = True  <class 'bool'>
+           Test.Bool = False  <class 'bool'>
+ 7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+               again = True  <class 'bool'>
+             a_float = 42.0  <class 'float'>
+        a_float_calc = 6 * 7.0  <class 'str'>
+              a_list = ['hello', 3.14, {'abc': 42.0}]  <class 'list'>
+             a_tuple = ('Im a tuple', 7.0)  <class 'tuple'>
+              a_dict = {'six': 6, 3: 3.0}  <class 'dict'>
+            bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
+           bad_tuple = (Im a tuple, 7.0)  <class 'str'>
+            bad_dict = {"six":6, 3:3.0, milk:3}  <class 'str'>
+           bad_float = 52.3.5  <class 'str'>
+                Tint = 10  <class 'int'>
+                Tsec = 5s  <class 'str'>
+                Tmin = 6m  <class 'str'>
+               Thour = 2h  <class 'str'>
+                Tday = 4d  <class 'str'>
+               Tweek = 3w  <class 'str'>
+       Indented_item = True  <class 'bool'>
+         x_reference = 123456789012345  <class 'int'>
+           x_removed = 123456789012345  <class 'int'>
+           x_shorter = 123456789012345  <class 'int'>
+            x_longer = 123456789012345  <class 'int'>
+              x_same = 123456789012345  <class 'int'>
+       x_really_long = 123456789012345  <class 'int'>
+x_no_trailing_whitespace = 123456789 12345x  <class 'str'>
+x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+    x_indented_param = True  <class 'bool'>
+             x_float = xyz  <class 'str'>
+               x_int = xyz  <class 'str'>
+              x_list = xyz  <class 'str'>
+              x_dict = xyz  <class 'str'>
+                   a = In top level  <class 'str'>
+                   b = 12  <class 'int'>
+                   e = 20  <class 'int'>
+***** Section [SMTP] *****
+           EmailFrom = me@myserver.com  <class 'str'>
+           NotifList = 4809991234@vzwpix.com  <class 'str'>
+             EmailTo = your.email@example.com  <class 'str'>
+        EmailToMulti = me@example.com, 	you@example.com  <class 'str'>
+         EmailServer = mail.myserver.com  <class 'str'>
+     EmailServerPort = P587TLS  <class 'str'>
+           EmailUser = outbound@myserver.com  <class 'str'>
+           EmailPass = mypassword  <class 'str'>
+***** Section [Test section 1] *****
+                   a = 5  <class 'int'>
+                   b = 25  <class 'int'>
+***** Section [Test section 2] *****
+                   x = 42  <class 'int'>
+                   y = 2.54  <class 'float'>
+***** Section [DEFAULT] *****
+                   a = 10  <class 'int'>
+                   c = 42  <class 'int'>
+['SMTP', 'Test section 1', 'Test section 2']
+['SMTP', 'Test section 1', 'Test section 2']
+
+======================================================================================================
+***** Test number 4: Test trapped config loading exception *****
+======================================================================================================
+
+In main...  Config file <nosuchfile.cfg> not found.
+
+======================================================================================================
+***** Test number 6: Co-loading an additional config *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+Deployed  additional.cfg       to  /home/cjn/.config/cjnfuncs_testcfg/additional.cfg
+
+Stats for config file <demo_config.cfg>:
+.config_file        :  demo_config.cfg
+.config_dir         :  /home/cjn/.config/cjnfuncs_testcfg
+.config_full_path   :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+.config_timestamp   :  1696797274
+.sections_list      :  ['SMTP', 'Test section 1', 'Test section 2']
+tool.log_dir_base   :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+
+
+Stats for config file <additional.cfg>:
+.config_file        :  additional.cfg
+.config_dir         :  /home/cjn/.config/cjnfuncs_testcfg
+.config_full_path   :  /home/cjn/.config/cjnfuncs_testcfg/additional.cfg
+.config_timestamp   :  0
+.sections_list      :  []
+tool.log_dir_base   :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+
+    demo-config.<module>             -  WARNING:  testvar:          True  <class 'bool'>
+    demo-config.<module>             -  WARNING:  another:          None  <class 'NoneType'>
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797274
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/additional.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded another = <yes>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded One = <5>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <20>
+
+Stats for config file <additional.cfg>:
+.config_file        :  additional.cfg
+.config_dir         :  /home/cjn/.config/cjnfuncs_testcfg
+.config_full_path   :  /home/cjn/.config/cjnfuncs_testcfg/additional.cfg
+.config_timestamp   :  1696797274
+.sections_list      :  []
+tool.log_dir_base   :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+
+    demo-config.<module>             -  WARNING:  testvar:          True  <class 'bool'>
+    demo-config.<module>             -  WARNING:  another:          yes  <class 'str'>
+Current logging level:      20
+
+======================================================================================================
+***** Test number 7: Test unknown getcfg param with/without fallbacks *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+Testing getcfg - Not in cfg with fallback: <My fallback Value>
+ConfigError: getcfg - Config parameter <NotInCfg-NoDef> not in cfg and no fallback.
+
+======================================================================================================
+***** Test number 9: Test flush_on_reload  and  force_flush_reload cases *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+
+----- T9.1:  var dummy in cfg:  True  (should be True - Initial state)
+
+----- T9.2:  var dummy in cfg:  True  (should be True because not reloaded)
+
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797275
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tint = <10>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tsec = <5s>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tmin = <6m>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Thour = <2h>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tday = <4d>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tweek = <3w>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Indented_item = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded NotifList = <4809991234@vzwpix.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailTo = <your.email@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailToMulti = <me@example.com, 	you@example.com>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/creds_SMTP>
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServer = <mail.myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServerPort = <P587TLS>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailUser = <outbound@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailPass = <mypassword>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_reference = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_removed = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_shorter = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_longer = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_same = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_really_long = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_no_trailing_whitespace = <123456789 12345x>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_indented_param = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_float = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_int = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_list = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_dict = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <9>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <12>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <25>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x = <42>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded y = <2.54>  (<class 'float'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <10>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded c = <42>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded e = <20>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
+----- T9.3:  var dummy in cfg:  True  (should be True because flush_on_reload == False)
+
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797276
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary flushed due to changed config file (flush_on_reload)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tint = <10>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tsec = <5s>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tmin = <6m>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Thour = <2h>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tday = <4d>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tweek = <3w>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Indented_item = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded NotifList = <4809991234@vzwpix.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailTo = <your.email@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailToMulti = <me@example.com, 	you@example.com>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/creds_SMTP>
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServer = <mail.myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServerPort = <P587TLS>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailUser = <outbound@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailPass = <mypassword>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_reference = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_removed = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_shorter = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_longer = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_same = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_really_long = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_no_trailing_whitespace = <123456789 12345x>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_indented_param = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_float = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_int = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_list = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_dict = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <9>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <12>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <25>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x = <42>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded y = <2.54>  (<class 'float'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <10>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded c = <42>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded e = <20>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
+----- T9.4:  var dummy in cfg:  False  (should be False because flush_on_reload == True)
+
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797276
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tint = <10>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tsec = <5s>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tmin = <6m>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Thour = <2h>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tday = <4d>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tweek = <3w>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Indented_item = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded NotifList = <4809991234@vzwpix.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailTo = <your.email@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailToMulti = <me@example.com, 	you@example.com>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/creds_SMTP>
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServer = <mail.myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServerPort = <P587TLS>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailUser = <outbound@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailPass = <mypassword>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_reference = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_removed = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_shorter = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_longer = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_same = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_really_long = <123456789012345>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_no_trailing_whitespace = <123456789 12345x>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_indented_param = <True>  (<class 'bool'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_float = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_int = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_list = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_dict = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <9>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <12>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <25>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x = <42>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded y = <2.54>  (<class 'float'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <10>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded c = <42>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded e = <20>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
+----- T9.5:  var dummy in cfg:  False  (should be False because force_flush_reload == True)
+
+
+======================================================================================================
+***** Test number 10: Test timevalue, retime *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+
+Given <10>     <class 'int'>:
+.orig_val   :  10       <class 'str'>
+.seconds    :  10.0     <class 'float'>
+.unit char  :  s        <class 'str'>
+.unit_str   :  secs     <class 'str'>
+   retimed  :  <10.0> secs
+
+Given <5s>     <class 'str'>:
+.orig_val   :  5s       <class 'str'>
+.seconds    :  5.0      <class 'float'>
+.unit char  :  s        <class 'str'>
+.unit_str   :  secs     <class 'str'>
+   retimed  :  <5.0> secs
+
+Given <6m>     <class 'str'>:
+.orig_val   :  6m       <class 'str'>
+.seconds    :  360.0    <class 'float'>
+.unit char  :  m        <class 'str'>
+.unit_str   :  mins     <class 'str'>
+   retimed  :  <6.0> mins
+
+Given <2h>     <class 'str'>:
+.orig_val   :  2h       <class 'str'>
+.seconds    :  7200.0   <class 'float'>
+.unit char  :  h        <class 'str'>
+.unit_str   :  hours    <class 'str'>
+   retimed  :  <2.0> hours
+
+Given <4d>     <class 'str'>:
+.orig_val   :  4d       <class 'str'>
+.seconds    :  345600.0 <class 'float'>
+.unit char  :  d        <class 'str'>
+.unit_str   :  days     <class 'str'>
+   retimed  :  <4.0> days
+
+Given <3w>     <class 'str'>:
+.orig_val   :  3w       <class 'str'>
+.seconds    :  1814400.0 <class 'float'>
+.unit char  :  w        <class 'str'>
+.unit_str   :  weeks    <class 'str'>
+   retimed  :  <3.0> weeks
+
+Given <0.2857142857142857>     <class 'float'>:
+.orig_val   :  0.2857142857142857 <class 'str'>
+.seconds    :  0.2857142857142857 <class 'float'>
+.unit char  :  s        <class 'str'>
+.unit_str   :  secs     <class 'str'>
+   retimed  :  <0.2857142857142857> secs
+
+Given <5.123m>     <class 'str'>:
+.orig_val   :  5.123m   <class 'str'>
+.seconds    :  307.38   <class 'float'>
+.unit char  :  m        <class 'str'>
+.unit_str   :  mins     <class 'str'>
+   retimed  :  <5.123> mins
+Sleeping 1.9 secs
+done sleeping
+
+======================================================================================================
+***** Test number 13: Test missing config and externally set logging level *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+
+----- T13.1:  Missing config, tolerate_missing=False (default) >>>>  Exception
+Config loading exception:
+  Could not find  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
+Logging level back in the main code:  7
+
+----- T13.2:  Missing config, tolerate_missing=True >>>>  Returned -1
+       cjnfuncs.loadconfig           -     INFO:  Config file  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>  is not currently accessible.  Skipping (re)load.
+Returned:  <-1>
+Logging level back in the main code:  7
+
+----- T13.3:  Working nested import
+Deployed  import_nest_top.cfg  to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg
+Deployed  import_nest_1.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg
+Deployed  import_nest_2.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797278
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_a = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_2 = <2>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_b = <1>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_top_b = <0>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_a = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_2 = <2>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_b = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_a = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_2 = <2>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_b = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <7>
+***** Section [] *****
+          nest_top_a = 0  <class 'int'>
+            nest_1_a = 1  <class 'int'>
+              nest_2 = 2  <class 'int'>
+            nest_1_b = 1  <class 'int'>
+          nest_top_b = 0  <class 'int'>
+***** Section [sect 1] *****
+            nest_1_a = 1  <class 'int'>
+              nest_2 = 2  <class 'int'>
+            nest_1_b = 1  <class 'int'>
+***** Section [DEFAULT] *****
+            nest_1_a = 1  <class 'int'>
+              nest_2 = 2  <class 'int'>
+            nest_1_b = 1  <class 'int'>
+Logging level back in the main code:  7
+
+----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797278
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_a = <1>  (<class 'int'>)
+Exception due to missing imported config file:
+  Config file </home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg> not found.
+Logging level back in the main code:  7
+
+----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797278
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
+Exception due to missing imported config file:
+  Config file </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg> not found.
+Logging level back in the main code:  7
+
+======================================================================================================
+***** Test number 14: Test modify_configfile *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+       cjnfuncs.modify_configfile    -  WARNING:  Modification of param <x_removeX> failed - not found in config file.  Modification skipped.
+       cjnfuncs.modify_configfile    -  WARNING:  Modification of param <Snehal> failed - not found in config file.  Modification skipped.
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+***** Section [] *****
+            LogLevel = 20  <class 'int'>
+             testvar = True  <class 'bool'>
+           Test.Bool = False  <class 'bool'>
+ 7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+               again = True  <class 'bool'>
+             a_float = 42.0  <class 'float'>
+        a_float_calc = 6 * 7.0  <class 'str'>
+              a_list = ['hello', 3.14, {'abc': 42.0}]  <class 'list'>
+             a_tuple = ('Im a tuple', 7.0)  <class 'tuple'>
+              a_dict = {'six': 6, 3: 3.0}  <class 'dict'>
+            bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
+           bad_tuple = (Im a tuple, 7.0)  <class 'str'>
+            bad_dict = {"six":6, 3:3.0, milk:3}  <class 'str'>
+           bad_float = 52.3.5  <class 'str'>
+                Tint = 10  <class 'int'>
+                Tsec = 5s  <class 'str'>
+                Tmin = 6m  <class 'str'>
+               Thour = 2h  <class 'str'>
+                Tday = 4d  <class 'str'>
+               Tweek = 3w  <class 'str'>
+       Indented_item = True  <class 'bool'>
+         x_reference = 123456789012345  <class 'int'>
+           x_shorter = 12345  <class 'int'>
+            x_longer = 123456789 123456789  <class 'str'>
+              x_same = 54321 987654321  <class 'str'>
+       x_really_long = 123456789 123456789 123456789 12345  <class 'str'>
+x_no_trailing_whitespace = 123456789 123456789  <class 'str'>
+x_7893&(%$,.nasf||\a@ = Goodbye!  <class 'str'>
+    x_indented_param = False  <class 'bool'>
+             x_float = 6.5  <class 'float'>
+               x_int = 12  <class 'int'>
+              x_list = ['hello', 3.14, {'abc': 42}]  <class 'list'>
+              x_dict = {'one': 6, 'two': 7.0}  <class 'dict'>
+                   a = Modify all occurrences  <class 'str'>
+                   b = 12  <class 'int'>
+                   e = 20  <class 'int'>
+              George = was here  <class 'str'>
+               Bjorn = was here too  <class 'str'>
+***** Section [SMTP] *****
+           EmailFrom = me@myserver.com  <class 'str'>
+           NotifList = 4809991234@vzwpix.com  <class 'str'>
+             EmailTo = Modify within SMTP section  <class 'str'>
+        EmailToMulti = me@example.com, 	you@example.com  <class 'str'>
+         EmailServer = mail.myserver.com  <class 'str'>
+     EmailServerPort = P587TLS  <class 'str'>
+           EmailUser = outbound@myserver.com  <class 'str'>
+           EmailPass = mypassword  <class 'str'>
+***** Section [Test section 1] *****
+                   a = Modify all occurrences  <class 'str'>
+                   b = 25  <class 'int'>
+***** Section [Test section 2] *****
+                   x = 42  <class 'int'>
+                   y = 2.54  <class 'float'>
+***** Section [DEFAULT] *****
+                   a = Modify all occurrences  <class 'str'>
+                   c = 42  <class 'int'>
+Compare </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg> to golden copy.
+
+======================================================================================================
+***** Test number 15: Access list, tuple, and dictionary params *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+6 times 7.0 is 42.0
+
+======================================================================================================
+***** Test number 16: Test getcfg type checking *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+Param <Tint> value <10>, type <<class 'int'>>, expected types <[<class 'int'>, <class 'float'>]>
+Param <Tint> value <10>, type <<class 'int'>>, expected types <<class 'int'>>
+Param <a_list> value <['hello', 3.14, {'abc': 42.0}]>, type <<class 'list'>>, expected types <[<class 'list'>]>
+Param <Tsec> value <5s>, type <<class 'str'>>, expected types <[<class 'int'>, <class 'str'>]>
+Param <Tint> not expected type:
+  getcfg - Config parameter <Tint> value <10> type <class 'int'> not of expected type(s): [<class 'float'>, <class 'list'>, <class 'tuple'>, <class 'dict'>, <class 'bool'>, <class 'str'>]
+Param <a_list> not expected type:
+  getcfg - Config parameter <a_list> value <['hello', 3.14, {'abc': 42.0}]> type <class 'list'> not of expected type(s): [<class 'int'>, <class 'float'>, <class 'tuple'>, <class 'dict'>, <class 'bool'>, <class 'str'>]
+Param <a_dict> not expected type:
+  getcfg - Config parameter <a_dict> value <{'six': 6, 3: 3.0}> type <class 'dict'> not of expected type(s): [<class 'int'>, <class 'float'>, <class 'list'>, <class 'tuple'>, <class 'bool'>, <class 'str'>]
+Param <Tsec> not expected type:
+  getcfg - Config parameter <Tsec> value <5s> type <class 'str'> not of expected type(s): [<class 'int'>, <class 'float'>, <class 'list'>, <class 'tuple'>, <class 'dict'>, <class 'bool'>]
+
+======================================================================================================
+***** Test number 17: Assign getcfg and cfg to config instance *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+6 times 7.0 is 42.0
+
+======================================================================================================
+***** Test number 18: Sections and DEFAULT *****
+======================================================================================================
+
+Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+***** Section [] *****
+            LogLevel = 20  <class 'int'>
+             testvar = True  <class 'bool'>
+           Test.Bool = False  <class 'bool'>
+ 7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+               again = True  <class 'bool'>
+             a_float = 42.0  <class 'float'>
+        a_float_calc = 6 * 7.0  <class 'str'>
+              a_list = ['hello', 3.14, {'abc': 42.0}]  <class 'list'>
+             a_tuple = ('Im a tuple', 7.0)  <class 'tuple'>
+              a_dict = {'six': 6, 3: 3.0}  <class 'dict'>
+            bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
+           bad_tuple = (Im a tuple, 7.0)  <class 'str'>
+            bad_dict = {"six":6, 3:3.0, milk:3}  <class 'str'>
+           bad_float = 52.3.5  <class 'str'>
+                Tint = 10  <class 'int'>
+                Tsec = 5s  <class 'str'>
+                Tmin = 6m  <class 'str'>
+               Thour = 2h  <class 'str'>
+                Tday = 4d  <class 'str'>
+               Tweek = 3w  <class 'str'>
+       Indented_item = True  <class 'bool'>
+         x_reference = 123456789012345  <class 'int'>
+           x_removed = 123456789012345  <class 'int'>
+           x_shorter = 123456789012345  <class 'int'>
+            x_longer = 123456789012345  <class 'int'>
+              x_same = 123456789012345  <class 'int'>
+       x_really_long = 123456789012345  <class 'int'>
+x_no_trailing_whitespace = 123456789 12345x  <class 'str'>
+x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+    x_indented_param = True  <class 'bool'>
+             x_float = xyz  <class 'str'>
+               x_int = xyz  <class 'str'>
+              x_list = xyz  <class 'str'>
+              x_dict = xyz  <class 'str'>
+                   a = In top level  <class 'str'>
+                   b = 12  <class 'int'>
+                   e = 20  <class 'int'>
+***** Section [SMTP] *****
+           EmailFrom = me@myserver.com  <class 'str'>
+           NotifList = 4809991234@vzwpix.com  <class 'str'>
+             EmailTo = your.email@example.com  <class 'str'>
+        EmailToMulti = me@example.com, 	you@example.com  <class 'str'>
+         EmailServer = mail.myserver.com  <class 'str'>
+     EmailServerPort = P587TLS  <class 'str'>
+           EmailUser = outbound@myserver.com  <class 'str'>
+           EmailPass = mypassword  <class 'str'>
+***** Section [Test section 1] *****
+                   a = 5  <class 'int'>
+                   b = 25  <class 'int'>
+***** Section [Test section 2] *****
+                   x = 42  <class 'int'>
+                   y = 2.54  <class 'float'>
+***** Section [DEFAULT] *****
+                   a = 10  <class 'int'>
+                   c = 42  <class 'int'>
+
+Stats for config file <demo_config.cfg>:
+.config_file        :  demo_config.cfg
+.config_dir         :  /home/cjn/.config/cjnfuncs_testcfg
+.config_full_path   :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+.config_timestamp   :  1696797278
+.sections_list      :  ['SMTP', 'Test section 1', 'Test section 2']
+tool.log_dir_base   :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+
+[][a]                 In top level  Expecting  <9>  from [],             [DEFAULT] ignored
+[][b]                 12           Expecting  <12> from [],             no default
+[][c]                 42           Expecting  <42> from [DEFAULT],      not in []
+[][d]                 NOT DEFINED  Not in [] or [DEFAULT]
+[Test section 1][a]   5            Expecting  <5>  from [Test section], [DEFAULT] ignored
+[Test section 1][b]   25           Expecting  <25> from [Test section], no default
+[Test section 1][c]   42           Expecting  <42> from [DEFAULT],      not in [Test section 1]
+[Test section 1][e]   NOT DEFINED  Not in [Test section 1] or [DEFAULT] and [] not considered
+
+======================================================================================================
+***** Test number 19: Imports within Sections and DEFAULT *****
+======================================================================================================
+
+Deployed  import_nest_top.cfg  to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg
+Deployed  import_nest_1.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg
+Deployed  import_nest_2.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg
+       cjnfuncs.loadconfig           -     INFO:  cfg dictionary force flushed (force_flush_reload)
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797278
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_a = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_2 = <2>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_b = <1>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_top_b = <0>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_a = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_2 = <2>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_b = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_a = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_2 = <2>  (<class 'int'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded nest_1_b = <1>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to preexisting level <20>
+
+***** config contents *****
+***** Section [] *****
+          nest_top_a = 0  <class 'int'>
+            nest_1_a = 1  <class 'int'>
+              nest_2 = 2  <class 'int'>
+            nest_1_b = 1  <class 'int'>
+          nest_top_b = 0  <class 'int'>
+***** Section [sect 1] *****
+            nest_1_a = 1  <class 'int'>
+              nest_2 = 2  <class 'int'>
+            nest_1_b = 1  <class 'int'>
+***** Section [DEFAULT] *****
+            nest_1_a = 1  <class 'int'>
+              nest_2 = 2  <class 'int'>
+            nest_1_b = 1  <class 'int'>
+
+======================================================================================================
+***** Test number 20: Load dictionary into cfg. No file. *****
+======================================================================================================
+
+
+Stats for config file <None>:
+.config_file        :  None
+.config_dir         :  None
+.config_full_path   :  None
+.config_timestamp   :  0
+.sections_list      :  ['A section']
+tool.log_dir_base   :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+
+***** Section [] *****
+                   a = 6  <class 'int'>
+                   b = 7.0  <class 'float'>
+                   c = [6, 7.0, 42, 'hi']  <class 'list'>
+***** Section [A section] *****
+                   d = ('hi', 'there')  <class 'tuple'>
+                   e = {'hi': 'Hi!', 'there': 'There!'}  <class 'dict'>
+                   f = [6, 7.0, 42, 'hi']  <class 'list'>
+***** Section [DEFAULT] *****
+                   g = Hi  <class 'str'>
+                   h = True  <class 'bool'>
+                   i = False  <class 'bool'>
+
+======================================================================================================
+***** Test number 21: Load string blob into cfg. No file.  Delete/clear sections and top-level *****
+======================================================================================================
+
+
+----- T21.0:  Initial state
+
+Stats for config file <None>:
+.config_file        :  None
+.config_dir         :  None
+.config_full_path   :  None
+.config_timestamp   :  0
+.sections_list      :  ['Test section', 'Test section 2']
+tool.log_dir_base   :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+
+***** Section [] *****
+                   a = 9  <class 'int'>
+                   b = 12  <class 'int'>
+                   e = 20  <class 'int'>
+***** Section [Test section] *****
+                   a = 5  <class 'int'>
+                   b = 25  <class 'int'>
+***** Section [Test section 2] *****
+                   a = 50  <class 'int'>
+                   b = 250  <class 'int'>
+***** Section [DEFAULT] *****
+                   a = 10  <class 'int'>
+                   c = 42  <class 'int'>
+
+----- T21.1:  DEFAULTS cleared
+***** Section [] *****
+                   a = 9  <class 'int'>
+                   b = 12  <class 'int'>
+                   e = 20  <class 'int'>
+***** Section [Test section] *****
+                   a = 5  <class 'int'>
+                   b = 25  <class 'int'>
+***** Section [Test section 2] *****
+                   a = 50  <class 'int'>
+                   b = 250  <class 'int'>
+***** Section [DEFAULT] *****
+Sections list: ['Test section', 'Test section 2']
+
+----- T21.2:  <Test section> cleared
+***** Section [] *****
+                   a = 9  <class 'int'>
+                   b = 12  <class 'int'>
+                   e = 20  <class 'int'>
+***** Section [Test section 2] *****
+                   a = 50  <class 'int'>
+                   b = 250  <class 'int'>
+***** Section [DEFAULT] *****
+Sections list: ['Test section 2']
+
+----- T21.3:  <cfg> cleared
+***** Section [] *****
+***** Section [DEFAULT] *****
+Sections list: []
+
+----- T21.4:  Exception for attempting to clear non-existing section
+ConfigError: Failed attempt to remove non-existing section <Test section> from config
+
+======================================================================================================
+***** Test number 22: Force config load as strings *****
+======================================================================================================
+
+
+Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797278
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'str'>)
+       cjnfuncs.read_string          -  WARNING:  loadconfig:  Error on line <ThisIsAnIllegalLine         # Missing value produces warning>.  Line skipped.
+       cjnfuncs.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Test.Bool = <false>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded again = <true>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_list = <["hello", 3.14, {"abc":42.}]>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_tuple = <("Im a tuple", 7.0)>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a_dict = <{"six":6, 3:3.0}>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tint = <10>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tsec = <5s>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tmin = <6m>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Thour = <2h>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tday = <4d>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Tweek = <3w>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded Indented_item = <True>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded NotifList = <4809991234@vzwpix.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailTo = <your.email@example.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailToMulti = <me@example.com, 	you@example.com>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/creds_SMTP>
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServer = <mail.myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailServerPort = <P587TLS>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailUser = <outbound@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailPass = <mypassword>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded EmailFrom = <me@myserver.com>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_reference = <123456789012345>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_removed = <123456789012345>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_shorter = <123456789012345>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_longer = <123456789012345>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_same = <123456789012345>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_really_long = <123456789012345>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_no_trailing_whitespace = <123456789 12345x>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_indented_param = <True>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_float = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_int = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_list = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x_dict = <xyz>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <9>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <12>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <5>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded b = <25>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded x = <42>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded y = <2.54>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <10>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded c = <42>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
+       cjnfuncs.read_string          -    DEBUG:  Loaded e = <20>  (<class 'str'>)
+       cjnfuncs.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
+
+Stats for config file <demo_config.cfg>:
+.config_file        :  demo_config.cfg
+.config_dir         :  /home/cjn/.config/cjnfuncs_testcfg
+.config_full_path   :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
+.config_timestamp   :  1696797278
+.sections_list      :  ['SMTP', 'Test section 1', 'Test section 2']
+tool.log_dir_base   :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
+
+***** Section [] *****
+            LogLevel = 20  <class 'str'>
+             testvar = True  <class 'str'>
+           Test.Bool = false  <class 'str'>
+ 7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+               again = true  <class 'str'>
+             a_float = 42.0  <class 'str'>
+        a_float_calc = 6 * 7.0  <class 'str'>
+              a_list = ["hello", 3.14, {"abc":42.}]  <class 'str'>
+             a_tuple = ("Im a tuple", 7.0)  <class 'str'>
+              a_dict = {"six":6, 3:3.0}  <class 'str'>
+            bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
+           bad_tuple = (Im a tuple, 7.0)  <class 'str'>
+            bad_dict = {"six":6, 3:3.0, milk:3}  <class 'str'>
+           bad_float = 52.3.5  <class 'str'>
+                Tint = 10  <class 'str'>
+                Tsec = 5s  <class 'str'>
+                Tmin = 6m  <class 'str'>
+               Thour = 2h  <class 'str'>
+                Tday = 4d  <class 'str'>
+               Tweek = 3w  <class 'str'>
+       Indented_item = True  <class 'str'>
+         x_reference = 123456789012345  <class 'str'>
+           x_removed = 123456789012345  <class 'str'>
+           x_shorter = 123456789012345  <class 'str'>
+            x_longer = 123456789012345  <class 'str'>
+              x_same = 123456789012345  <class 'str'>
+       x_really_long = 123456789012345  <class 'str'>
+x_no_trailing_whitespace = 123456789 12345x  <class 'str'>
+x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+    x_indented_param = True  <class 'str'>
+             x_float = xyz  <class 'str'>
+               x_int = xyz  <class 'str'>
+              x_list = xyz  <class 'str'>
+              x_dict = xyz  <class 'str'>
+                   a = In top level  <class 'str'>
+                   b = 12  <class 'str'>
+                   e = 20  <class 'str'>
+***** Section [SMTP] *****
+           EmailFrom = me@myserver.com  <class 'str'>
+           NotifList = 4809991234@vzwpix.com  <class 'str'>
+             EmailTo = your.email@example.com  <class 'str'>
+        EmailToMulti = me@example.com, 	you@example.com  <class 'str'>
+         EmailServer = mail.myserver.com  <class 'str'>
+     EmailServerPort = P587TLS  <class 'str'>
+           EmailUser = outbound@myserver.com  <class 'str'>
+           EmailPass = mypassword  <class 'str'>
+***** Section [Test section 1] *****
+                   a = 5  <class 'str'>
+                   b = 25  <class 'str'>
+***** Section [Test section 2] *****
+                   x = 42  <class 'str'>
+                   y = 2.54  <class 'str'>
+***** Section [DEFAULT] *****
+                   a = 10  <class 'str'>
+                   c = 42  <class 'str'>
+
+======================================================================================================
+***** Test number 23: Section-related errors *****
+======================================================================================================
+
+Deployed  demo_config_T23a.cfg to  /home/cjn/.config/cjnfuncs_testcfg/demo_config_T23a.cfg
+Deployed  demo_config_T23b.cfg to  /home/cjn/.config/cjnfuncs_testcfg/demo_config_T23b.cfg
+Deployed  demo_config_T23c.cfg to  /home/cjn/.config/cjnfuncs_testcfg/demo_config_T23c.cfg
+
+----- T23.1:  Section defined within imported config file
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797278
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23a.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23b.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
+ConfigError:  Section within imported file is not supported.
+
+----- T23.2:  Malformed Section name
+       cjnfuncs.loadconfig           -     INFO:  Config file timestamp: 1696797278
+       cjnfuncs.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23c.cfg>
+       cjnfuncs.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
+ConfigError:  Malformed section line <[section malform        # No closing ']'>
