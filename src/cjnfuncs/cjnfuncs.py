@@ -28,6 +28,7 @@ import platform
 import re
 import ast
 from pathlib import Path, PurePath
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import shutil
 import __main__
 import appdirs
@@ -363,6 +364,17 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
         return stats
 
 
+# TODO doc
+# https://stackoverflow.com/questions/67819869/how-to-efficiently-implement-a-version-of-path-exists-with-a-timeout-on-window
+def check_path_exists(path, timeout=1):
+    executor = ThreadPoolExecutor(max_workers=1)
+    future = executor.submit(path.exists)
+    try:
+        return future.result(timeout)
+    except TimeoutError:
+        return False
+
+
 #=====================================================================================
 #=====================================================================================
 #  C l a s s   m u n g e P a t h
@@ -468,38 +480,48 @@ What gets printed:
         self.in_path = str(in_path)
         self.base_path = str(base_path)
 
-        PP_in_path = PurePath(os.path.expandvars(os.path.expanduser(str(in_path))))
+        in_path_pp = PurePath(os.path.expandvars(os.path.expanduser(str(in_path))))
 
-        if not PP_in_path.is_absolute():
+        if not in_path_pp.is_absolute():
             _base_path = str(base_path)
             if _base_path.startswith("."):
                 _base_path = Path.cwd() / _base_path
             _base_path = PurePath(os.path.expandvars(os.path.expanduser(str(_base_path))))
-            PP_in_path = _base_path / PP_in_path
+            in_path_pp = _base_path / in_path_pp
 
         if mkdir:
             try:
-                Path(PP_in_path).mkdir(parents=True, exist_ok=True)
+                Path(in_path_pp).mkdir(parents=True, exist_ok=True)
             except Exception as e:
                 raise FileExistsError (e)
 
-        self.parent = Path(PP_in_path.parent)
-        self.full_path = Path(PP_in_path)
+        self.parent = Path(in_path_pp.parent)
+        self.full_path = Path(in_path_pp)
 
         self.name = self.full_path.name
-        self.exists =  self.full_path.exists()
+        self.exists = check_path_exists(self.full_path)
         self.is_absolute = self.full_path.is_absolute()
         self.is_relative = not self.is_absolute
-        self.is_dir =  self.full_path.is_dir()
-        self.is_file = self.full_path.is_file()
+        try:
+            self.is_dir =  self.full_path.is_dir()
+            self.is_file = self.full_path.is_file()
+        except:
+            self.is_dir =  False
+            self.is_file = False
 
 
     def refresh_stats(self):
-        self.exists =  self.full_path.exists()
+        self.exists = check_path_exists(self.full_path)
         self.is_absolute = self.full_path.is_absolute()
         self.is_relative = not self.is_absolute
-        self.is_dir =  self.full_path.is_dir()
-        self.is_file = self.full_path.is_file()
+        # self.is_dir =  self.full_path.is_dir()
+        # self.is_file = self.full_path.is_file()
+        try:
+            self.is_dir =  self.full_path.is_dir()
+            self.is_file = self.full_path.is_file()
+        except:
+            self.is_dir =  False
+            self.is_file = False
         return self
 
 
@@ -517,6 +539,17 @@ What gets printed:
         stats +=  f".is_dir       :  {self.is_dir}\n"
         stats +=  f".is_file      :  {self.is_file}\n"
         return stats
+
+
+    # # https://stackoverflow.com/questions/67819869/how-to-efficiently-implement-a-version-of-path-exists-with-a-timeout-on-window
+    # def _check_exists(self, path, timeout=1):
+    #     executor = ThreadPoolExecutor(max_workers=1)
+    #     future = executor.submit(path.exists)
+    #     try:
+    #         return future.result(timeout)
+    #     except TimeoutError:
+    #         return False
+
 
 
 #=====================================================================================
@@ -765,11 +798,12 @@ Output
     .config_timestamp   :  1675529660.7154639
     tool.log_dir_base   :  /home/me/.config/testcfg
 ```
-    """
-    def __init__(self, config_file=None, remap_logdirbase=True, force_str=False):
+    """     # TODO doc secondary_config
+    def __init__(self, config_file=None, remap_logdirbase=True, force_str=False, secondary_config=False):
         global tool
 
         self.force_str = force_str
+        self.secondary_config = secondary_config
         self.cfg = {}
         self.current_section_name = ''
         self.sections_list = []
@@ -1116,10 +1150,10 @@ Here are a few key comparisons:
         global initial_logging_setup
         global preexisting_loglevel
 
-        if not initial_logging_setup:   # Do only once, globally
+        if not initial_logging_setup:   # Do only once, globally  TODO and not self.secondary_config ??? to allow secondary before primary
             # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
             # The logging level defaults to WARNING / 30.
-            console_lf = self.getcfg("ConsoleLogFormat", None)
+            console_lf = self.getcfg("ConsoleLogFormat", None)  # TODO Why get these when no config will have been loaded at this point?
             file_lf = self.getcfg("FileLogFormat", None)
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
             initial_logging_setup = True
@@ -1132,12 +1166,23 @@ Here are a few key comparisons:
 
             if force_flush_reload:
                 logging.getLogger().setLevel(ldcfg_ll)   # logging within loadconfig is always done at ldcfg_ll
-                logging.info("cfg dictionary force flushed (force_flush_reload)")
+                logging.info("cfg dictionary force flushed (force_flush_reload)")   # TODO - get the name of the config??  2+ places
                 self.cfg.clear()
                 self.sections_list = []
                 self.config_timestamp = 0       # Force reload of the config file
 
-            if not config.exists():
+            # _exists = False
+            # try:                                # Tolerate Host is down error.  TODO move this up?  Don't force flush if config not available?
+            #     if config.exists():
+            #         _exists = True
+            # except:
+            #     pass
+
+            # logging.info (f"config file found? {_exists}")
+
+            # if not config.exists():
+            # if not _exists:
+            if not check_path_exists(config):
                 if tolerate_missing:
                     logging.getLogger().setLevel(ldcfg_ll)
                     logging.info (f"Config file  <{config}>  is not currently accessible.  Skipping (re)load.")
@@ -1169,7 +1214,7 @@ Here are a few key comparisons:
 
 
         # Operations only for finishing a top-level call
-        if not isimport:
+        if not isimport  and  not self.secondary_config:
             console_lf = self.getcfg("ConsoleLogFormat", None)
             file_lf = self.getcfg("FileLogFormat", None)
             setuplogging(config_logfile=self.getcfg("LogFile", None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
@@ -1179,13 +1224,19 @@ Here are a few key comparisons:
             elif self.getcfg("DontNotif", False):
                 logging.info ('DontNotif is set - Notifications will NOT be sent')
 
-            config_loglevel = self.getcfg("LogLevel", None)
+            config_loglevel = self.getcfg("LogLevel", None, types=int)
             if config_loglevel is not None:
                 logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
-                logging.getLogger().setLevel(int(config_loglevel))
+                logging.getLogger().setLevel(config_loglevel)    #(int(config_loglevel))
             else:
                 logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
                 logging.getLogger().setLevel(preexisting_loglevel)
+
+        # Secondary configs may not modify the Loglevel
+        if self.secondary_config:
+            logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
+            logging.getLogger().setLevel(preexisting_loglevel)
+
 
         return 1    # 1 indicates that the config file was (re)loaded
 

@@ -296,11 +296,13 @@ if args.test == 0  or  args.test == 6:
         ], overwrite=True )
 
     print(config)
-    additional_config = config_item("additional.cfg")
+    additional_config = config_item("additional.cfg", secondary_config=True)
     print(additional_config)
     logging.warning (f"testvar:          {config.getcfg('testvar', None)}  {type(config.getcfg('testvar', None))}")
     logging.warning (f"another:          {additional_config.getcfg('another', None)}  {type(additional_config.getcfg('another', None))}")
-
+    logging.getLogger().setLevel(17)
+    print (f"Current Logging level  :  {logging.getLogger().level}")
+    
     additional_config.loadconfig(ldcfg_ll=10)
     print(additional_config)
 
