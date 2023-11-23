@@ -929,8 +929,8 @@ Output
                             rol   = out.group(2)        # rest of line (value portion)
 
                             value = self._parse_value(rol)
-                            self._add_key(param, value, self.current_section_name)
                             # logging.debug (f"Loaded [{self.current_section_name}][{param}] = <{value}>  ({type(value)})")
+                            self._add_key(param, value, self.current_section_name)
                             logging.debug (f"Loaded {param} = <{value}>  ({type(value)})")
                         else: 
                             line = line.replace('\n','')
@@ -1183,7 +1183,7 @@ Here are a few key comparisons:
             # if not config.exists():
             # if not _exists:
             if not check_path_exists(config):
-                if tolerate_missing:
+                if tolerate_missing:                        # TODO 3 tries before return not found
                     logging.getLogger().setLevel(ldcfg_ll)
                     logging.info (f"Config file  <{config}>  is not currently accessible.  Skipping (re)load.")
                     logging.getLogger().setLevel(preexisting_loglevel)
@@ -1237,7 +1237,7 @@ Here are a few key comparisons:
             logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
             logging.getLogger().setLevel(preexisting_loglevel)
 
-
+        self.current_section_name = ''      # TODO.  Test reloading config with sections
         return 1    # 1 indicates that the config file was (re)loaded
 
 
