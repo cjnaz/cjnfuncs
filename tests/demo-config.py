@@ -8,7 +8,7 @@
 #
 #==========================================================
 
-__version__ = "1.2"
+__version__ = "1.3"
 TOOLNAME    = "cjnfuncs_testcfg"
 CONFIG_FILE = "demo_config.cfg"
 
@@ -18,8 +18,17 @@ import shutil
 import sys
 import time
 # from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, getcfg, cfg, timevalue, retime, mungePath, ConfigError
-from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, timevalue, retime, mungePath, ConfigError
 
+
+# from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, timevalue, retime, mungePath, ConfigError
+from cjnfuncs.core     import set_toolname, setuplogging, logging, ConfigError
+import cjnfuncs.core as core
+# tool = set_toolname(TOOLNAME)
+
+from cjnfuncs.deployfiles import deploy_files
+from cjnfuncs.configman import config_item
+from cjnfuncs.timevalue import timevalue, retime
+from cjnfuncs.mungePath import mungePath
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-t', '--test', type=int, default=3,
@@ -29,12 +38,13 @@ parser.add_argument('--cleanup', action='store_true',
 args = parser.parse_args()
 
 
-tool = set_toolname(TOOLNAME)
+# tool = set_toolname(TOOLNAME)
+set_toolname(TOOLNAME)
 
 if args.cleanup:
-    if os.path.exists(tool.config_dir):
-        print (f"Removing 1  {tool.config_dir}")
-        shutil.rmtree(tool.config_dir)
+    if os.path.exists(core.tool.config_dir):
+        print (f"Removing 1  {core.tool.config_dir}")
+        shutil.rmtree(core.tool.config_dir)
     sys.exit()
 
 def remove_file (file_path):
@@ -53,92 +63,92 @@ if args.test == 0  or  args.test == 1:
     deploy_files([
         { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
         ], overwrite=True )
-    remove_file(mungePath('call_logfile', tool.config_dir).full_path)
-    remove_file(mungePath('cfg_logfile',  tool.config_dir).full_path)
-    remove_file(mungePath('cfg_logfile2', tool.config_dir).full_path)
+    remove_file(mungePath('call_logfile', core.tool.config_dir).full_path)
+    remove_file(mungePath('cfg_logfile',  core.tool.config_dir).full_path)
+    remove_file(mungePath('cfg_logfile2', core.tool.config_dir).full_path)
 
     print ("\n----- T1.1:  setuplogging with call_logfile_wins=False, call_logfile=None, config_logfile=None >>>>  Log file: __console__ (setuplogging with no config)")
     setuplogging()
-    print (f"Current log file:              {tool.log_full_path}")
+    print (f"Current log file:              {core.tool.log_full_path}")
     logging.info("Info level log (not displayed)")
-    logging.warning (f"T1.1 - Log to  <{tool.log_full_path}>")
+    logging.warning (f"T1.1 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.2:  LogFile=None, call_logfile=None, call_logfile_wins=True >>>>  Log file: __console__")
     config_T1 = config_item("demo_config_T1.cfg")
     config_T1.loadconfig(ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,    force_flush_reload=True)
         # loadconfig params:   ldcfg_ll=10, call_logfile=None, call_logfile_wins=True, flush_on_reload=True, force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.2 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.2 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.3:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__ (override cfg_logfile)")
     config_T1.modify_configfile ("LogFile",   "cfg_logfile", add_if_not_existing=True, save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.3 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.3 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.4:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  call_logfile")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.4 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.4 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.5:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (no change)")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.5 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.5 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.6:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  'cfg_logfile'")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.6 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.6 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.7:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  'cfg_logfile2'")
     config_T1.modify_configfile ("LogFile",   "cfg_logfile2", save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.7 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.7 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.8:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (again)")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    print (tool)
-    logging.warning (f"T1.8 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    print (core.tool)
+    logging.warning (f"T1.8 - Log to  <{core.tool.log_full_path}>")
 
-    print ("\n----- T1.9:  Change tool.log_dir_base.  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  mylogdir/call_logfile")
-    tool.log_dir_base = tool.config_dir / "mylogdir"
+    print ("\n----- T1.9:  Change core.tool.log_dir_base.  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  mylogdir/call_logfile")
+    core.tool.log_dir_base = core.tool.config_dir / "mylogdir"
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    print (tool)
-    logging.warning (f"T1.9 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    print (core.tool)
+    logging.warning (f"T1.9 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.10:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile2")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    print (tool)
-    logging.warning (f"T1.10 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    print (core.tool)
+    logging.warning (f"T1.10 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.11:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__")
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    print (tool)
-    logging.warning (f"T1.11 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    print (core.tool)
+    logging.warning (f"T1.11 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__")
     config_T1.modify_configfile ("LogFile",   remove=True, save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.12 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.12 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.13: Modified console logging format >>>>  Log file:  __console__")
     config_T1.modify_configfile ("ConsoleLogFormat", "{levelname:>8}:  {message}", add_if_not_existing=True, save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.13 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.13 - Log to  <{core.tool.log_full_path}>")
 
     print ("\n----- T1.14: Modified file logging format >>>>  Log file:  call_logfile")
     config_T1.modify_configfile ("FileLogFormat", "{levelname:>8}:  {message}", add_if_not_existing=True, save=True)
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
-    print (f"Current log file:              {tool.log_full_path}")
-    logging.warning (f"T1.14 - Log to  <{tool.log_full_path}>")
+    print (f"Current log file:              {core.tool.log_full_path}")
+    logging.warning (f"T1.14 - Log to  <{core.tool.log_full_path}>")
 
     # sys.exit()
 
@@ -154,7 +164,7 @@ if args.test == 0  or  args.test == 2:
         print (f"Current Logging level  :  {logging.getLogger().level}")
         print (f"testvar                :  {config_T2.getcfg('testvar', None)}  {type(config_T2.getcfg('testvar', None))}")
         print (f"var2                   :  {config_T2.getcfg('var2', None)}")
-        print (f"Current log file       :  {tool.log_full_path}")
+        print (f"Current log file       :  {core.tool.log_full_path}")
         logging.warning ("Warning level message")
         logging.info    ("Info    level message")
         logging.debug   ("Debug   level message")
@@ -260,10 +270,9 @@ def do_base_setup(config_load_ll=30):
 
 #===============================================================================================
 if args.test == 0  or  args.test == 3:
-    print_test_header(3, "Basic test (Show tool.log_* values, LogFile NOT in config)")
+    print_test_header(3, "Basic test (Show core.tool.log_* values, LogFile NOT in config)")
     do_base_setup(config_load_ll=10)
-    # print ("\n***** Basic test (Show tool.log_* values, LogFile NOT in config) *****")
-    print(tool)
+    print(core.tool)
     print(config)
     print(config.dump())
     print(config.sections_list)
@@ -300,7 +309,7 @@ if args.test == 0  or  args.test == 6:
     print(additional_config)
     logging.warning (f"testvar:          {config.getcfg('testvar', None)}  {type(config.getcfg('testvar', None))}")
     logging.warning (f"another:          {additional_config.getcfg('another', None)}  {type(additional_config.getcfg('another', None))}")
-    logging.getLogger().setLevel(17)
+    logging.getLogger().setLevel(17)        # Should survive after additional_config load
     print (f"Current Logging level  :  {logging.getLogger().level}")
     
     additional_config.loadconfig(ldcfg_ll=10)
@@ -309,6 +318,7 @@ if args.test == 0  or  args.test == 6:
     logging.warning (f"testvar:          {config.getcfg('testvar', None)}  {type(config.getcfg('testvar', None))}")
     logging.warning (f"another:          {additional_config.getcfg('another', None)}  {type(additional_config.getcfg('another', None))}")
     print (f"Current logging level:      {logging.getLogger().level}")
+    print (core.tool)
 
 
 #===============================================================================================
@@ -415,14 +425,14 @@ if args.test == 0  or  args.test == 13:
         { "source": "import_nest_1.cfg",    "target_dir": "USER_CONFIG_DIR"},
         { "source": "import_nest_2.cfg",    "target_dir": "USER_CONFIG_DIR"},
         ], overwrite=True )
-    nest_cfg = mungePath("import_nest_top.cfg", tool.config_dir).full_path
+    nest_cfg = mungePath("import_nest_top.cfg", core.tool.config_dir).full_path
     xx = config_item(nest_cfg)
     xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
     print (xx.dump())
     print (f"Logging level back in the main code:  {logging.getLogger().level}")
     
     print (f"\n----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.")
-    remove_file(mungePath("import_nest_2.cfg", tool.config_dir).full_path)
+    remove_file(mungePath("import_nest_2.cfg", core.tool.config_dir).full_path)
     try:
         xx.loadconfig(ldcfg_ll=9, tolerate_missing=True, force_flush_reload=True)
     except ConfigError as e:
@@ -430,7 +440,7 @@ if args.test == 0  or  args.test == 13:
         print (f"Logging level back in the main code:  {logging.getLogger().level}")
     
     print (f"\n----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.")
-    remove_file(mungePath("import_nest_1.cfg", tool.config_dir).full_path)
+    remove_file(mungePath("import_nest_1.cfg", core.tool.config_dir).full_path)
     try:
         xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
     except Exception as e:
@@ -556,7 +566,7 @@ if args.test == 0  or  args.test == 19:
         { "source": "import_nest_1.cfg",    "target_dir": "USER_CONFIG_DIR"},
         { "source": "import_nest_2.cfg",    "target_dir": "USER_CONFIG_DIR"},
         ], overwrite=True )
-    nest_cfg = mungePath("import_nest_top.cfg", tool.config_dir).full_path
+    nest_cfg = mungePath("import_nest_top.cfg", core.tool.config_dir).full_path
     xx = config_item(nest_cfg)
     xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
     print ("\n***** config contents *****")

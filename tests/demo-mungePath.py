@@ -13,7 +13,15 @@ __version__ = "1.1"
 
 import shutil
 import os
-from cjnfuncs.cjnfuncs import *
+from pathlib import Path, PurePath
+# from cjnfuncs.cjnfuncs import *
+
+from cjnfuncs.core     import set_toolname
+import cjnfuncs.core as core
+
+set_toolname("mytool")
+from cjnfuncs.mungePath import mungePath
+
 
 def touch (file_path):
     file_path.open('w').close()
@@ -95,8 +103,9 @@ except Exception as e:
 
 
 print ("\n\n***** README.md mungePath example")
-tool = set_toolname("mytool")
-myfile = mungePath ("mysubdir/file.txt", tool.data_dir)
+# tool = set_toolname("mytool")
+# set_toolname("mytool")
+myfile = mungePath ("mysubdir/file.txt", core.tool.data_dir)
 mungePath (myfile.parent, mkdir=True)
 if not myfile.exists:
     with myfile.full_path.open('w') as outfile:
@@ -105,4 +114,4 @@ if not myfile.exists:
     myfile.refresh_stats()
     print (myfile)
 
-remove_tree(tool.data_dir)
+remove_tree(core.tool.data_dir)

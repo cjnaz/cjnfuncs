@@ -13,10 +13,16 @@ TOOLNAME    = "cjnfuncs_testlock"
 LOGFILE     = None
 
 import argparse
-from cjnfuncs.cjnfuncs import *
+import os
+import shutil
+import sys
 
+# from cjnfuncs.cjnfuncs import *
+from cjnfuncs.core import set_toolname, setuplogging
+import cjnfuncs.core as core
+from cjnfuncs.locks import requestlock, releaselock
 
-tool = set_toolname(TOOLNAME)
+set_toolname(TOOLNAME)
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--log-file', '-l', default=LOGFILE,
@@ -26,15 +32,15 @@ parser.add_argument('--cleanup', action='store_true',
 args = parser.parse_args()
 
 if args.cleanup:
-    if os.path.exists(tool.data_dir):
-        print (f"Removing 1  {tool.data_dir}")
-        shutil.rmtree(tool.data_dir)
+    if os.path.exists(core.tool.data_dir):
+        print (f"Removing 1  {core.tool.data_dir}")
+        shutil.rmtree(core.tool.data_dir)
     sys.exit()
 
 
 # Shows logfile captured in tool class after setuplogging()
 setuplogging(args.log_file, call_logfile_wins=True)
-print(tool)
+print(core.tool)
 
 
 print (f"\nUsing default lock file")
@@ -52,12 +58,12 @@ print (f"got back from 2nd releaseLock.  stat = {stat}")
 
 
 print (f"\nUsing absolute lockfile path")
-stat = requestlock ("abs path", lockfile= tool.data_dir / "myuserlock")
+stat = requestlock ("abs path", lockfile= core.tool.data_dir / "myuserlock")
 print (f"got back from abs path requestLock.  stat = {stat}")
-stat = requestlock ("abs path", lockfile= tool.data_dir / "myuserlock", timeout="1s")
+stat = requestlock ("abs path", lockfile= core.tool.data_dir / "myuserlock", timeout="1s")
 print (f"got back from second abs path requestLock.  stat = {stat}")
 
-stat = releaselock (lockfile= tool.data_dir / "myuserlock")
+stat = releaselock (lockfile= core.tool.data_dir / "myuserlock")
 print (f"got back from abs path releaseLock.  stat = {stat}")
 
 

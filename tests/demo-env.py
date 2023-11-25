@@ -13,7 +13,15 @@ TOOLNAME =    "cjnfuncs_testenv"
 CONFIG_FILE = "demo_env.cfg"
 
 import argparse
-from cjnfuncs.cjnfuncs import *
+import os
+import sys
+import shutil
+# from cjnfuncs.cjnfuncs import *
+from cjnfuncs.core     import set_toolname #, setuplogging, logging, ConfigError
+import cjnfuncs.core as core
+# set_toolname(TOOLNAME)
+from cjnfuncs.deployfiles import deploy_files
+from cjnfuncs.mungePath import mungePath
 
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
@@ -25,8 +33,9 @@ parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 args = parser.parse_args()
 
-tool = set_toolname(TOOLNAME)
-print(tool)
+# tool = set_toolname(TOOLNAME)
+set_toolname(TOOLNAME)
+# print(tool)
 
 
 if args.setup_user:
@@ -54,20 +63,20 @@ if args.setup_site:
         ] , overwrite=True)
 
 if args.cleanup:
-    if os.path.exists(tool.user_config_dir):
-        print (f"Removing 1  {tool.user_config_dir}")
-        shutil.rmtree(tool.user_config_dir)
-    if os.path.exists(tool.user_data_dir):
-        print (f"Removing 2  {tool.user_data_dir}")
-        shutil.rmtree(tool.user_data_dir)
+    if os.path.exists(core.tool.user_config_dir):
+        print (f"Removing 1  {core.tool.user_config_dir}")
+        shutil.rmtree(core.tool.user_config_dir)
+    if os.path.exists(core.tool.user_data_dir):
+        print (f"Removing 2  {core.tool.user_data_dir}")
+        shutil.rmtree(core.tool.user_data_dir)
 
     try:
-        if os.path.exists(tool.site_config_dir):
-            print (f"Removing 3  {tool.site_config_dir}")
-            shutil.rmtree(tool.site_config_dir)
-        if os.path.exists(tool.site_data_dir):
-            print (f"Removing 4  {tool.site_data_dir}")
-            shutil.rmtree(tool.site_data_dir)
+        if os.path.exists(core.tool.site_config_dir):
+            print (f"Removing 3  {core.tool.site_config_dir}")
+            shutil.rmtree(core.tool.site_config_dir)
+        if os.path.exists(core.tool.site_data_dir):
+            print (f"Removing 4  {core.tool.site_data_dir}")
+            shutil.rmtree(core.tool.site_data_dir)
     except:
         print ("NOTE:  Run as root/sudo to cleanup site dirs")
 
@@ -78,10 +87,10 @@ if args.cleanup:
     sys.exit()
 
 # tool = set_toolname(TOOLNAME)
-# print(tool)
+print(core.tool)
 
 
-if not mungePath(CONFIG_FILE, tool.user_config_dir).exists  and  not mungePath(CONFIG_FILE, tool.site_config_dir).exists:
+if not mungePath(CONFIG_FILE, core.tool.user_config_dir).exists  and  not mungePath(CONFIG_FILE, core.tool.site_config_dir).exists:
     print (f"No user or site setup found.  Run with <--setup-user> or <--setup-site> to set up the environment.")
 else:
     print ("Inspect the created directories/files for proper content and permissions per the deploy_files call.")

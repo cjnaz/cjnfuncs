@@ -13,7 +13,16 @@ TOOLNAME =    "cjnfuncs_testsmtp"
 CONFIG_FILE = "demo_smtp.cfg"
 
 import argparse
-from cjnfuncs.cjnfuncs import *
+import sys
+import os
+import shutil
+
+from cjnfuncs.core     import set_toolname, SndEmailError
+from cjnfuncs.configman import config_item
+from cjnfuncs.deployfiles import deploy_files
+from cjnfuncs.mungePath import mungePath
+from cjnfuncs.SMTP import snd_email, snd_notif
+import cjnfuncs.core as core
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-t', '--test', type=int, default=0,
@@ -27,14 +36,13 @@ parser.add_argument('--cleanup', action='store_true',
 args = parser.parse_args()
 
 
-tool = set_toolname(TOOLNAME)
-print(tool)
+set_toolname(TOOLNAME)
+print(core.tool)
 
-if args.setup_user: #config_file == "pushuser":
+if args.setup_user:
     deploy_files([
         { "source": CONFIG_FILE,        "target_dir": "USER_CONFIG_DIR" },
         { "source": "testfile.txt",     "target_dir": "USER_CONFIG_DIR" },
-        # { "source": "testfile.html",    "target_dir": "USER_CONFIG_DIR" },
         { "source": "testfile.html",    "target_dir": "USER_CACHE_DIR" },
         { "source": "creds_SMTP",       "target_dir": "USER_CONFIG_DIR" },
         { "source": "cjn_demo_smtp.cfg","target_dir": "USER_CONFIG_DIR" },  # file not distributed to github
@@ -42,12 +50,12 @@ if args.setup_user: #config_file == "pushuser":
     sys.exit()
 
 if args.cleanup:
-    if os.path.exists(tool.user_config_dir):
-        print (f"Removing 1  {tool.user_config_dir}")
-        shutil.rmtree(tool.user_config_dir)
-    if os.path.exists(tool.user_cache_dir):
-        print (f"Removing 2  {tool.user_cache_dir}")
-        shutil.rmtree(tool.user_cache_dir)
+    if os.path.exists(core.tool.user_config_dir):
+        print (f"Removing 1  {core.tool.user_config_dir}")
+        shutil.rmtree(core.tool.user_config_dir)
+    if os.path.exists(core.tool.user_cache_dir):
+        print (f"Removing 2  {core.tool.user_cache_dir}")
+        shutil.rmtree(core.tool.user_cache_dir)
     sys.exit()
 
 
@@ -83,7 +91,7 @@ if args.test == 0  or  args.test == 2:
 if args.test == 0  or  args.test == 3:
     print ()
     try:
-        snd_email (subj="3:  filename to EmailTo - not logged", to="EmailTo", filename=mungePath("testfile.txt", tool.config_dir).full_path, smpt_config=config)
+        snd_email (subj="3:  filename to EmailTo - not logged", to="EmailTo", filename=mungePath("testfile.txt", core.tool.config_dir).full_path, smpt_config=config)
     except SndEmailError as e:
         print (f"snd_email failed:  {e}")
 
