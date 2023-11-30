@@ -323,11 +323,25 @@ if args.test == 0  or  args.test == 6:
 
 #===============================================================================================
 if args.test == 0  or  args.test == 7:
-    print_test_header (7, "Test unknown getcfg param with/without fallbacks")
+    print_test_header (7, "Test unknown getcfg param with/without defaults and fallbacks")
     do_base_setup()
+
+    print (f"Testing getcfg - Not in cfg with default:  <{config.getcfg('my_def_param')}>")
+
     print (f"Testing getcfg - Not in cfg with fallback: <{config.getcfg('NotInCfg', 'My fallback Value')}>")
+
+    print (f"Testing getcfg - Section not in cfg with default:  <{config.getcfg('my_def_param', section='nosuchsection')}>")
+
+    print (f"Testing getcfg - Section not in cfg with fallback: <{config.getcfg('NotInCfg', 'My fallback Value', section='nosuchsection')}>")
+
+
     try:
-        config.getcfg('NotInCfg-NoDef')
+        config.getcfg('NotInCfg-NoFB')
+    except ConfigError as e:
+        print (f"ConfigError: {e}")
+
+    try:
+        config.getcfg('NotInCfg-NoFB', section='nosuchsection')
     except ConfigError as e:
         print (f"ConfigError: {e}")
 
@@ -336,7 +350,7 @@ if args.test == 0  or  args.test == 7:
 if args.test == 8:
     print_test_header (8, "Test untrapped unknown getcfg param")
     do_base_setup()
-    config.getcfg('NotInCfg-NoDef')
+    config.getcfg('NotInCfg-NoFB')
 
 
 #===============================================================================================

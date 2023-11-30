@@ -465,54 +465,52 @@ Here are a few key comparisons:
 
         config = self.config_full_path
 
-        if not isimport:                # Operations only on top level config file
+        # Operations only on top-level config file
+        if not isimport:
+
             # Save externally set / prior log level for later restore
             preexisting_loglevel = logging.getLogger().level
 
             if force_flush_reload:
                 logging.getLogger().setLevel(ldcfg_ll)   # logging within loadconfig is always done at ldcfg_ll
-                logging.info("cfg dictionary force flushed (force_flush_reload)")   # TODO - get the name of the config??  2+ places
+                logging.info(f"Config  <{self.config_file}>  force flushed (force_flush_reload)")   # TODO - get the name of the config??  2+ places
                 self.cfg.clear()
                 self.sections_list = []
                 self.config_timestamp = 0       # Force reload of the config file
 
-            # _exists = False
-            # try:                                # Tolerate Host is down error.  TODO move this up?  Don't force flush if config not available?
-            #     if config.exists():
-            #         _exists = True
-            # except:
-            #     pass
+            # Check if config file is available and has changed
+            _exists = False
+            for _ in range(3):
+                if check_path_exists(config):
+                    _exists = True
+                    break
 
-            # logging.info (f"config file found? {_exists}")
-
-            # if not config.exists():
-            # if not _exists:
-            if not check_path_exists(config):
-                if tolerate_missing:                        # TODO 3 tries before return not found
+            if not _exists:
+                if tolerate_missing:
                     logging.getLogger().setLevel(ldcfg_ll)
-                    logging.info (f"Config file  <{config}>  is not currently accessible.  Skipping (re)load.")
+                    logging.info (f"Config  <{self.config_file}>  file not currently accessible.  Skipping (re)load.")
                     logging.getLogger().setLevel(preexisting_loglevel)
-                    return -1   # 1 indicates that the config file cannot currently be found
+                    return -1           # -1 indicates that the config file cannot currently be found
                 else:
                     logging.getLogger().setLevel(preexisting_loglevel)
-                    raise ConfigError (f"Could not find  <{config}>")
+                    raise ConfigError (f"Could not find  <{self.config_file}>")
 
-            # Check if config file has changed.  If not then return 0
             current_timestamp = int(self.config_full_path.stat().st_mtime)  # integer-second resolution
             if self.config_timestamp == current_timestamp:
-                return 0    # 0 indicates that the config file was NOT (re)loaded
+                return 0                # 0 indicates that the config file was NOT (re)loaded
 
-            # Initial load call, or config file has changed.  Do (re)load.
+            # It's an initial load call, or config file has changed.  Do (re)load.
             self.config_timestamp = current_timestamp
             logging.getLogger().setLevel(ldcfg_ll)   # Set logging level for remainder of loadconfig call
-            logging.info (f"Config file timestamp: {current_timestamp}")
+            logging.info (f"Config  <{self.config_file}>  file timestamp: {current_timestamp}")
 
             if flush_on_reload:
-                logging.info (f"cfg dictionary flushed due to changed config file (flush_on_reload)")
+                logging.info (f"Config  <{self.config_file}>  flushed due to changed file (flush_on_reload)")
                 self.cfg.clear()
                 self.sections_list = []
 
 
+        # Load the config
         logging.info (f"Loading  <{config}>")
         string_blob = config.read_text()
         self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
@@ -524,15 +522,11 @@ Here are a few key comparisons:
             file_lf = self.getcfg("FileLogFormat", None)
             setuplogging(config_logfile=self.getcfg("LogFile", None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
 
-            if self.getcfg("DontEmail", False):
-                logging.info ('DontEmail is set - Emails and Notifications will NOT be sent')
-            elif self.getcfg("DontNotif", False):
-                logging.info ('DontNotif is set - Notifications will NOT be sent')
+            # if self.getcfg("DontEmail", False, section='SMTP'):
+            #     logging.info ('DontEmail is set - Emails and Notifications will NOT be sent')
+            # elif self.getcfg("DontNotif", False, section='SMTP'):
+            #     logging.info ('DontNotif is set - Notifications will NOT be sent')
 
-            # config_loglevel = self.getcfg("LogLevel", None, types=int)
-            # if config_loglevel is not None:
-            #     logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
-            #     logging.getLogger().setLevel(config_loglevel)    #(int(config_loglevel))
             config_loglevel = self.getcfg("LogLevel", None)
             if config_loglevel is not None:
                 try:
@@ -551,7 +545,7 @@ Here are a few key comparisons:
             logging.getLogger().setLevel(preexisting_loglevel)
 
         self.current_section_name = ''      # TODO.  Test reloading config with sections
-        return 1    # 1 indicates that the config file was (re)loaded
+        return 1                        # 1 indicates that the config file was (re)loaded
 
 
 #=====================================================================================
@@ -629,39 +623,81 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 - `fallback` value if param not in cfg and `fallback` value provided
 - raises ConfigError if param does not exist in cfg and no `fallback` provided, or if not of the expected type(s).
     """
-        if section == '':
+        _value = None
+        if section == '':                           # Top-level case
             if param in self.cfg:
                 _value = self.cfg[param]
             elif param in self.defaults:
                 _value = self.defaults[param]
-            else:
-                if fallback != "_nofallback":
-                    return fallback
-                else:
-                    raise ConfigError (f"getcfg - Config parameter <{param}> not in cfg and no fallback.")
         else:
-            if section not in self.sections_list:
-                raise ConfigError (f"getcfg - Section <{section}> not in cfg.")
-            if param in self.cfg[section]:
-                _value = self.cfg[section][param]
-            elif param in self.defaults:
-                _value = self.defaults[param]
+            if section in self.sections_list:       # Section exists case
+                if param in self.cfg[section]:
+                    _value = self.cfg[section][param]
+                elif param in self.defaults:
+                    _value = self.defaults[param]
+            else:                                   # Section doesn't exist case
+                if param in self.defaults:
+                    _value = self.defaults[param]
+
+        if _value is None:
+            if fallback != "_nofallback":
+                return fallback
             else:
-                if fallback != "_nofallback":
-                    return fallback
-                else:
-                    raise ConfigError (f"getcfg - Config parameter [{section}]<{param}> not in cfg and no fallback.")
-
-        if isinstance(types, type):
-            types = [types]
-
-        if types == []:
-                return _value
+                raise ConfigError (f"Param <[{section}] {param}> not in <{self.config_file}> and no default or fallback.")
         else:
-            if type(_value) in types:
-                return _value
+            # Optional type checking
+            if isinstance(types, type):
+                types = [types]
+
+            if types == []:
+                    return _value
             else:
-                raise ConfigError (f"getcfg - Config parameter <{param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
+                if type(_value) in types:
+                    return _value
+                else:
+                    raise ConfigError (f"Config parameter <[{section}] {param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
+
+
+        # if section == '':                           # Top-level case
+        #     if param in self.cfg:
+        #         _value = self.cfg[param]
+        #     elif param in self.defaults:
+        #         _value = self.defaults[param]
+        #     else:
+        #         if fallback != "_nofallback":
+        #             return fallback
+        #         else:
+        #             raise ConfigError (f"getcfg - Param <[{section}] {param}> not in <{self.config_file}> and no default or fallback.")
+        # else:                                       # Section specified case
+        #     if section not in self.sections_list:       # Section doesn't exist case
+        #         if param in self.defaults:
+        #             _value = self.defaults[param]
+        #         else:
+        #             if fallback != "_nofallback":
+        #                 return fallback
+        #             else:
+        #                 raise ConfigError (f"getcfg - Param <[{section}] {param}> not in <{self.config_file}> and no default or fallback.")
+        #     else:                                       # Section exists case
+        #         if param in self.cfg[section]:
+        #             _value = self.cfg[section][param]
+        #         elif param in self.defaults:
+        #             _value = self.defaults[param]
+        #         else:
+        #             if fallback != "_nofallback":
+        #                 return fallback
+        #             else:
+        #                 raise ConfigError (f"getcfg - Param <[{section}] {param}> not in <{self.config_file}> and no default or fallback.")
+
+        # if isinstance(types, type):
+        #     types = [types]
+
+        # if types == []:
+        #         return _value
+        # else:
+        #     if type(_value) in types:
+        #         return _value
+        #     else:
+        #         raise ConfigError (f"getcfg - Config parameter <{param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
 
 
 #=====================================================================================

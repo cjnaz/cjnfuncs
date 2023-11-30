@@ -22,7 +22,6 @@ import logging
 import inspect
 import platform
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import __main__
 import appdirs
 
@@ -41,8 +40,6 @@ SND_EMAIL_NTRIES       = 3          # Number of tries to send email before abort
 SND_EMAIL_WAIT         = '5s'       # seconds between retries
 
 # Project globals
-# tool = 'unset'
-# cfg = {}
 
 
 # Get the main / calling module info.  Made available by set_toolname.main_module
@@ -352,13 +349,3 @@ Example stats() for a site setup (.site_config_dir and/or .site_data_dir exist):
         stats +=  f".log_full_path    :  {self.log_full_path}" #\n"
         return stats
 
-
-# # TODO doc
-# # https://stackoverflow.com/questions/67819869/how-to-efficiently-implement-a-version-of-path-exists-with-a-timeout-on-window
-# def check_path_exists(path, timeout=1):
-#     executor = ThreadPoolExecutor(max_workers=1)
-#     future = executor.submit(path.exists)
-#     try:
-#         return future.result(timeout)
-#     except TimeoutError:
-#         return False
