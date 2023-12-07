@@ -518,9 +518,9 @@ if args.test == 0  or  args.test == 16:
     print_test_header (16, "Test getcfg type checking")
     do_base_setup()
 
-    def dump(param, types):
+    def dump(param, types, section=''):
         try:
-            _value = config.getcfg(param, types=types)
+            _value = config.getcfg(param, types=types, section=section)
             print (f"Param <{param}> value <{_value}>, type <{type(_value)}>, expected types <{types}>")
         except Exception as e:
             print (f"Param <{param}> not expected type:\n  {e}")
@@ -529,6 +529,8 @@ if args.test == 0  or  args.test == 16:
     dump("Tint",   types=int)
     dump("a_list", types=[list])
     dump("Tsec",   types=[int, str])
+    dump("y",      types=float,    section='Test section 2')
+    dump("y",      types=bool,     section='Test section 2')
     dump("Tint",   types=[     float, list, tuple, dict, bool, str])
     dump("a_list", types=[int, float,       tuple, dict, bool, str])
     dump("a_dict", types=[int, float, list, tuple,       bool, str])
@@ -589,7 +591,7 @@ if args.test == 0  or  args.test == 19:
 #===============================================================================================
 if args.test == 0  or  args.test == 20:
     print_test_header (20, "Load dictionary into cfg. No file.")
-    new_config = config_item() #'import_nest_top.cfg')     # config has no file
+    new_config = config_item() # config has no file
 
     main_contents = {
         'a' : 6,

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.1b8"
+version = "2.1b9"
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
 requires-python = ">=3.6"       # Centos 7 uses 3.6.8
@@ -14,7 +14,8 @@ license = {file = "LICENSE.txt"}
 dependencies = [
     'requests',
     'appdirs >= 1.4',
-    'importlib_resources' #; python_version < "3.9"',  # in 2.0.1, used for all python versions
+    'importlib_resources',      #; python_version < "3.9"',  # in 2.0.1, used for all python versions
+    'posix-ipc >= 1.1.1'
     ]
 classifiers = [                 # https://pypi.org/classifiers/
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -24,5 +25,6 @@ classifiers = [                 # https://pypi.org/classifiers/
 [project.urls]
 repository = "https://github.com/cjnaz/cjnfuncs"
 
-#[tool.setuptools.packages.find]
-#where = ["src"]
+
+[project.scripts]
+resourcelock = "cjnfuncs.resourcelock:cli"

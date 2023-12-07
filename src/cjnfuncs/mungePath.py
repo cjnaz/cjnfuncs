@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cjnfuncs.mungePath - Paths made easy and useful.
+"""cjnfuncs.mungePath - pathlib Paths made easy and useful
 """
 
 #==========================================================
@@ -11,18 +11,6 @@
 import os.path
 from pathlib import Path, PurePath
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
-
-
-
-# TODO doc
-# https://stackoverflow.com/questions/67819869/how-to-efficiently-implement-a-version-of-path-exists-with-a-timeout-on-window
-def check_path_exists(path, timeout=1):
-    executor = ThreadPoolExecutor(max_workers=1)
-    future = executor.submit(path.exists)
-    try:
-        return future.result(timeout)
-    except TimeoutError:
-        return False
 
 
 #=====================================================================================
@@ -59,21 +47,17 @@ User (~user/) and environment vars ($HOME/) are supported and expanded.
 
 
 ### Instance attributes
-```
-    .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
-    .parent         Path        The directory above the .full_path
-    .name           str         Just the name.suffix of the .full_path
-    .is_absolute    Boolean     True if the .full_path starts from the filesystem root (isn't a relative path) 
-    .is_relative    Boolean     Not .is_absolute
-    .exists         Boolean     True if the .full_path item (file or dir) actually exists
-    .is_file        Boolean     True if the .full_path item exists and is a file
-    .is_dir         Boolean     True if the .full_path item exists and is a directory
-```
 
-### Member functions
-- mungePath.\_\_repr\_\_() - Return a str() listing all stats for the object
-- mungePath.refresh_stats() - Update the boolean state attributes for the object. Returns the object
-so that it may be used directly/immediately in the code.
+Attribute | Type | Description
+-- | -- | --
+`.full_path`     | Path     |   The full expanduser/expandvars path to a file or directory (may not exist)
+`.parent`        | Path     |   The directory above the .full_path
+`.name`          | str      |   Just the name.suffix of the .full_path
+`.is_absolute`   | Boolean  |   True if the .full_path starts from the filesystem root (isn't a relative path) 
+`.is_relative`   | Boolean  |   Not .is_absolute
+`.exists`        | Boolean  |   True if the .full_path item (file or dir) actually exists
+`.is_file`       | Boolean  |   True if the .full_path item exists and is a file
+`.is_dir`        | Boolean  |   True if the .full_path item exists and is a directory
 
 
 ### Behaviors and rules
@@ -91,42 +75,19 @@ directory containing the file.  If the object `.is_dir` then the `.full_path` in
 to a file), and will be created if it does not already exist. (Uses pathlib.Path.mkdir()).  A FileExistsError 
 is raised if you attempt to mkdir on top of an existing file.
 - See [GitHub repo](https://github.com/cjnaz/cjnfuncs) /tests/demo-mungePath.py for numerous application examples.
-
-
-### Example
-```
-Given:
-    tool = set_toolname("mytool")
-    myfile = mungePath ("mysubdir/file.txt", tool.data_dir)
-    mungePath (myfile.parent, mkdir=True)
-    if not myfile.exists:
-        with myfile.full_path.open('w') as outfile:
-            file_contents = outfile.write("Hello")
-        print (myfile)      # NOTE: Prints stats from before the file creation
-        myfile.refresh_stats()
-        print (myfile)
-
-What gets printed:
-    .full_path    :  /home/me/.local/share/mytool/mysubdir/file.txt
-    .parent       :  /home/me/.local/share/mytool/mysubdir
-    .name         :  file.txt
-    .is_absolute  :  True
-    .is_relative  :  False
-    .exists       :  False
-    .is_dir       :  False
-    .is_file      :  False
-
-    .full_path    :  /home/me/.local/share/mytool/mysubdir/file.txt
-    .parent       :  /home/me/.local/share/mytool/mysubdir
-    .name         :  file.txt
-    .is_absolute  :  True
-    .is_relative  :  False
-    .exists       :  True
-    .is_dir       :  False
-    .is_file      :  True
-```
         """
-        
+
+# ```
+# .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
+# .parent         Path        The directory above the .full_path
+# .name           str         Just the name.suffix of the .full_path
+# .is_absolute    Boolean     True if the .full_path starts from the filesystem root (isn't a relative path) 
+# .is_relative    Boolean     Not .is_absolute
+# .exists         Boolean     True if the .full_path item (file or dir) actually exists
+# .is_file        Boolean     True if the .full_path item exists and is a file
+# .is_dir         Boolean     True if the .full_path item exists and is a directory
+# ```
+
         self.in_path = str(in_path)
         self.base_path = str(base_path)
 
@@ -159,8 +120,24 @@ What gets printed:
             self.is_dir =  False
             self.is_file = False
 
-
+#=====================================================================================
+#=====================================================================================
+#  r e f r e s h _ s t a t s
+#=====================================================================================
+#=====================================================================================
     def refresh_stats(self):
+        """
+## refresh_stats () - Update the instance booleans
+
+***mungePath() class member function***
+
+The boolean status attributes (.is_absolute, .is_relative, .exists, .is_dir, and .is_file) are set 
+at the time the mungePath is created.  These attributes are not updated automatically as changes
+happen on the filesystem.  Call refresh_stats() as needed.
+
+### Returns
+- The instance handle is returned so that refresh_stats() may be used in-line.
+        """
         self.exists = check_path_exists(self.full_path)
         self.is_absolute = self.full_path.is_absolute()
         self.is_relative = not self.is_absolute
@@ -175,9 +152,6 @@ What gets printed:
         return self
 
 
-    def stats(self):
-        return self.__repr__()
-
     def __repr__(self):
         stats = ""
         stats +=  f".full_path    :  {self.full_path}\n"
@@ -189,4 +163,40 @@ What gets printed:
         stats +=  f".is_dir       :  {self.is_dir}\n"
         stats +=  f".is_file      :  {self.is_file}\n"
         return stats
+
+
+#=====================================================================================
+#=====================================================================================
+#  c h e c k _ p a t h _ e x i s t s
+#=====================================================================================
+#=====================================================================================
+def check_path_exists(path, timeout=1):
+    """
+## check_path_exists (path, timeout=1) - With enforced timeout (no hang)
+
+pathlib.Path.exists() tends to hang for an extended period of time.  
+check_path_exists() wraps pathlib.Path.exists() with a timeout mechanism.
+
+Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-efficiently-implement-a-version-of-path-exists-with-a-timeout-on-window
+
+
+### Parameters
+`path`
+- A pathlib.Path type
+
+`timeout` (default 1 second)
+- resolution seconds
+
+
+### Returns
+- True if the path exists
+- False if the path does not exist or the timeout is reached
+    """
+    executor = ThreadPoolExecutor(max_workers=1)
+    future = executor.submit(path.exists)
+    try:
+        return future.result(timeout)
+    except TimeoutError:
+        return False
+
 

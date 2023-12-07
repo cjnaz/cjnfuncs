@@ -9,10 +9,6 @@
 #==========================================================
 
 
-# Configs / Constants
-
-# Project globals
-
 
 #=====================================================================================
 #=====================================================================================
@@ -45,27 +41,6 @@ Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks
 - `.seconds` - time value in seconds resolution, type float, useful for time calculations
 - `.unit_char` - the single character suffix unit of the `orig_val` value.  's' for int and float orig_val values.
 - `.unit_str` - the long-form units of the `orig_val` value useful for printing/logging ("secs", "mins", "hours", "days", or "weeks")
-
-
-### Member functions
-- timevalue.\_\_repr\_\_() - Return a str() listing all attributes of the instance
-
-
-### Example
-```
-Given
-    xx = timevalue("1m")
-    print (xx)
-    print (f"Sleep <{xx.seconds}> seconds")
-    time.sleep(xx.seconds)
-
-Output:
-    .orig_val   :  1m       <class 'str'>
-    .seconds    :  60.0     <class 'float'>
-    .unit char  :  m        <class 'str'>
-    .unit_str   :  mins     <class 'str'>
-    Sleep <60.0> seconds
-```
         """
         self.orig_val = str(orig_val)
 
@@ -107,7 +82,7 @@ Output:
         stats = ""
         stats +=  f".orig_val   :  {self.orig_val:8} {type(self.orig_val)}\n"
         stats +=  f".seconds    :  {self.seconds:<8} {type(self.seconds)}\n"
-        stats +=  f".unit char  :  {self.unit_char:8} {type(self.unit_char)}\n"
+        stats +=  f".unit_char  :  {self.unit_char:8} {type(self.unit_char)}\n"
         stats +=  f".unit_str   :  {self.unit_str:8} {type(self.unit_str)}"
         return stats
 
@@ -136,17 +111,6 @@ def retime(time_sec, unitC):
 - `time_sec` value scaled for the specified `unitC`, type float
 - Raises ValueError if not given an int or float value for `time_sec`, or given an unsupported 
   unitC time unit suffix.
-
-
-### Example
-```
-Given
-    xx = timevalue("210H")
-    print (f"{xx.orig_val} = {xx.seconds} seconds = {retime(xx.seconds, 'W')} weeks")
-
-Output
-    210H = 756000.0 seconds = 1.25 weeks
-```
     """
     unitC = unitC.lower()
     if type(time_sec) in [int, float]:

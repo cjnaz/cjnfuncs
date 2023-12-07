@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cjnfuncs - A collection of support functions for writing clean and effective tool scripts
+"""cjnfuncs.SMTP - Send text message notifications and emails
 """
 
 #==========================================================
@@ -22,51 +22,56 @@ import cjnfuncs.core as core
 SND_EMAIL_NTRIES       = 3          # Number of tries to send email before aborting
 SND_EMAIL_WAIT         = '5s'       # seconds between retries
 
-# Project globals
-
 
 #=====================================================================================
 #=====================================================================================
 #  s n d _ n o t i f
 #=====================================================================================
 #=====================================================================================
-def snd_notif(subj="Notification message", msg="", to="NotifList", log=False, smpt_config=None):
+
+def snd_notif(subj='Notification message', msg='', to='NotifList', log=False, smtp_config=None):
     """
-## snd_notif (subj="Notification message, msg="", to="NotifList", log=False) - Send a text message using info from the config file
+## snd_notif (subj='Notification message', msg=' ', to='NotifList', log=False, smtp_config=None) - Send a text message using info from the config file
 
 Intended for use of your mobile provider's email-to-text bridge email address, eg, 
-5405551212@vzwtxt.com for Verizon, but any eamil address will work.
+5405551212@vzwtxt.com for Verizon, but any email address will work.
 
-The `to` string may be the name of a confg param (who's value is one or more email addresses, default 
+The `to` string may be the name of a config param (who's value is one or more email addresses, default 
 "NotifList"), or a string with one or more email addresses. Using a config param name allows for customizing the
 `to` addresses without having to edit the code.
 
 The message to send is passed in the `msg` parameter as a text string.
+Three attempts are made to send the message.
 
     
 ### Parameters
-`subj` (default "Notification message")
+`subj` (default 'Notification message')
 - Text message subject field
+- Some SMS/MMS apps display the subj field in bold, some in raw form, and some not at all.
 
-`msg` (default "")
+`msg` (default ' ')
 - Text message body
 
-`to` (default "NotifList")
+`to` (default 'NotifList')
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name (also listing one
 or more whitespace or comma separated email addresses).  If the `to` parameter does not
 contain an '@' it is assumed to be a config param.
+- Define `NotifList` in the config file to use the default `to` value.
 
 `log` (default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
 at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
+`smtp_config` (required)
+- config_item class instance containing the [SMTP] section and related params
 
-### cfg dictionary params
+
+### cfg dictionary params in the [SMTP] section
 `NotifList` (optional)
 - string list of email addresses (whitespace or comma separated).  
-Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
+- Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
 default `to` parameter value.
 
 `DontNotif` (default False)
@@ -76,14 +81,14 @@ messages are also blocked if `DontEmail` is True.
 
 ### Returns
 - NoneType
-- Raises SndEmailError on error
+- Raises `SndEmailError` on error
 
 
 ### Behaviors and rules
 - `snd_notif()` uses `snd_email()` to send the message. See `snd_email()` for related setup.
     """
 
-    if smpt_config.getcfg('DontNotif', fallback=False, section='SMTP')  or  smpt_config.getcfg('DontEmail', fallback=False, section='SMTP'):
+    if smtp_config.getcfg('DontNotif', fallback=False, section='SMTP')  or  smtp_config.getcfg('DontEmail', fallback=False, section='SMTP'):
         if log:
             logging.warning (f"Notification NOT sent <{subj}> <{msg}>")
         else:
@@ -91,7 +96,7 @@ messages are also blocked if `DontEmail` is True.
         return
 
     try:
-        snd_email (subj=subj, body=msg, to=to, smpt_config=smpt_config)
+        snd_email (subj=subj, body=msg, to=to, smtp_config=smtp_config)
         if log:
             logging.warning (f"Notification sent <{subj}> <{msg}>")
         else:
@@ -106,16 +111,20 @@ messages are also blocked if `DontEmail` is True.
 #  s n d _ e m a i l
 #=====================================================================================
 #=====================================================================================
-def snd_email(subj, to, body=None, filename=None, htmlfile=None, log=False, smpt_config=None):
-    """
-## snd_email (subj, to, body=None, filename=None, htmlfile=None, log=False)) - Send an email message using info from the config file
 
-The `to` string may be the name of a confg param (who's value is one or more email addresses),
+def snd_email(subj, to, body=None, filename=None, htmlfile=None, log=False, smtp_config=None):
+    """
+## snd_email (subj, to, body=None, filename=None, htmlfile=None, log=False, smtp_config=None) - Send an email message using info from the config file
+
+The `to` string may be the name of a config param (who's value is one or more email addresses),
 or a string with one or more email addresses. Using a config param name allows for customizing the
 `to` addresses without having to edit the code.
 
 What to send may be a `body` string, the text contents of `filename`, or the HTML-formatted contents
-of `htmlfile`, in this order of precendent.
+of `htmlfile`, in this order of precedent.
+
+Three attempts are made to send the message.
+
 
     
 ### Parameters
@@ -124,7 +133,7 @@ of `htmlfile`, in this order of precendent.
 
 `to`
 - To whom to send the message. `to` may be either an explicit string list of email addresses
-(whitespace or comma separated) or a config param name (also listing one
+(whitespace or comma separated) or a config param name in the [SMTP] section (also listing one
 or more whitespace or comma separated email addresses).  If the `to` parameter does not
 contain an '@' it is assumed to be a config param.
 
@@ -132,18 +141,21 @@ contain an '@' it is assumed to be a config param.
 - A string message to be sent
 
 `filename` (default None)
-- A str or Path to the file to be sent, relative to the `tool.cache_dir`, or an absolute path.
+- A str or Path to the file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
 
 `htmlfile` (default None)
-- A str or Path to the html formatted file to be sent, relative to the `tool.cache_dir`, or an absolute path.
+- A str or Path to the html formatted file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
 
 `log` (default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
 at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
-TODO  in section [SMTP]
-### cfg dictionary params
+`smtp_config` (required)
+- config_item class instance containing the [SMTP] section and related params
+
+
+### cfg dictionary params in the [SMTP] section
 `EmailFrom`
 - An email address, such as `me@myserver.com`
 
@@ -185,7 +197,7 @@ found is used.
   - P465: SMTP_SSL to port 465
   - P587: SMTP to port 587 without any encryption
   - P587TLS:  SMTP to port 587 and with TLS encryption
-- It is recommneded (not required) that the email server params be placed in a user-read-only
+- It is recommended (not required) that the email server params be placed in a user-read-only
 file in the user's home directory, such as `~/creds_SMTP`, and imported by the main config file.
 Some email servers require that the `EmailFrom` address be of the same domain as the server, 
 so it may be practical to bundle `EmailFrom` with the server specifics.  Place all of these in 
@@ -238,7 +250,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     if '@' in to:
         To = extract_email_addresses(to)
     else:
-        To = extract_email_addresses(smpt_config.getcfg(to, "", section='SMTP'))
+        To = extract_email_addresses(smtp_config.getcfg(to, "", section='SMTP'))
     if len(To) == 0:
         raise SndEmailError (f"snd_email - Message subject <{subj}>:  'to' list must not be empty.")
     for address in To:
@@ -246,18 +258,18 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             raise SndEmailError (f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>.")
 
     # Gather, check remaining config params
-    ntries     = smpt_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
-    retry_wait = timevalue(smpt_config.getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float, str], section='SMTP')).seconds
-    email_from = smpt_config.getcfg('EmailFrom', types=str, section='SMTP')
-    cfg_server = smpt_config.getcfg('EmailServer', types=str, section='SMTP')
-    cfg_port   = smpt_config.getcfg('EmailServerPort', types=str, section='SMTP').lower()
+    ntries     = smtp_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
+    retry_wait = timevalue(smtp_config.getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float, str], section='SMTP')).seconds
+    email_from = smtp_config.getcfg('EmailFrom', types=str, section='SMTP')
+    cfg_server = smtp_config.getcfg('EmailServer', types=str, section='SMTP')
+    cfg_port   = smtp_config.getcfg('EmailServerPort', types=str, section='SMTP').lower()
     if cfg_port not in ['p25', 'p465', 'p587', 'p587tls']:
-        raise SndEmailError (f"snd_email - Config EmailServerPort <{smpt_config.getcfg('EmailServerPort', fallback='', section='SMTP')}> is invalid")
-    email_user = str(smpt_config.getcfg('EmailUser', None, types=[str, int, float], section='SMTP'))    # username may be numeric
+        raise SndEmailError (f"snd_email - Config EmailServerPort <{smtp_config.getcfg('EmailServerPort', fallback='', section='SMTP')}> is invalid")
+    email_user = str(smtp_config.getcfg('EmailUser', None, types=[str, int, float], section='SMTP'))    # username may be numeric
     if email_user:
-        email_pass = str(smpt_config.getcfg('EmailPass', types=[str, int, float], section='SMTP'))      # password may be numeric
+        email_pass = str(smtp_config.getcfg('EmailPass', types=[str, int, float], section='SMTP'))      # password may be numeric
 
-    if smpt_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
+    if smtp_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
         if log:
             logging.warning (f"Email NOT sent <{subj}>")
         else:
@@ -284,7 +296,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
             if email_user:
                 server.login (email_user, email_pass)
-            if smpt_config.getcfg("EmailVerbose", False, types=[bool], section='SMTP'):
+            if smtp_config.getcfg("EmailVerbose", False, types=[bool], section='SMTP'):
                 server.set_debuglevel(1)
             server.sendmail(email_from, To, msg.as_string())
             server.quit()
@@ -303,4 +315,3 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             continue
 
     raise SndEmailError (f"snd_email:  Send failed for <{subj}>:\n  <{last_error}>")
-

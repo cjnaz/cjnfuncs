@@ -16,12 +16,10 @@ import argparse
 import os
 import sys
 import shutil
-# from cjnfuncs.cjnfuncs import *
-from cjnfuncs.core     import set_toolname #, setuplogging, logging, ConfigError
-import cjnfuncs.core as core
-# set_toolname(TOOLNAME)
+from cjnfuncs.core        import set_toolname
 from cjnfuncs.deployfiles import deploy_files
-from cjnfuncs.mungePath import mungePath
+from cjnfuncs.mungePath   import mungePath
+import cjnfuncs.core as core
 
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
@@ -33,9 +31,7 @@ parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 args = parser.parse_args()
 
-# tool = set_toolname(TOOLNAME)
 set_toolname(TOOLNAME)
-# print(tool)
 
 
 if args.setup_user:
@@ -86,7 +82,6 @@ if args.cleanup:
         shutil.rmtree(junk2)
     sys.exit()
 
-# tool = set_toolname(TOOLNAME)
 print(core.tool)
 
 

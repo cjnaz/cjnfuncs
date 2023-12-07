@@ -25,9 +25,6 @@ import cjnfuncs.core as core
 from importlib_resources import files as ir_files
 
 
-# # Configs / Constants
-
-
 #=====================================================================================
 #=====================================================================================
 #  d e p l o y _ f i l e s
@@ -42,7 +39,7 @@ or site config and data directories. Suggested usage is with the CLI `--setup-us
 Distribution files and directory trees are hosted in `<module_root>/deployment_files/`.
 
 `deploy_files()` accepts a list of dictionaries to be pushed to user or site space. 
-If deployment fails then execution aborts.  This functions is intended for interactive use.
+If deployment fails then execution aborts.  This function is intended for interactive use.
 
 
 ### Parameters
@@ -68,27 +65,6 @@ if they exist - data may be lost!
 
 ### Returns
 - NoneType
-
-
-### Example
-```
-    deploy_files( [
-        { "source": "creds_test", "target_dir": "USER_CONFIG_DIR/example", "file_stat": 0o600, "dir_stat": 0o707},
-        { "source": "test_dir",   "target_dir": "USER_DATA_DIR",           "file_stat": 0o633, "dir_stat": 0o770},
-        ...
-        ], overwrite=True )
-```
-
-The first line will push the `<module_root>/deployment_files/creds_test` file to `~/.config/mytool/example/creds_test`.
-The toolname `mytool` was set by a prior call to `set_toolname("mytool")`, in this example.
-The directories `~/.config/mytool/` and `~/.config/mytool/example` will have permissions 0o707 and files will have
-permission 0o600.
-Directory and file owner:group settings will be user:user, or root:root if called under sudo.
-
-The second line pushes a directory (with possible subdirectories) to `~/.local/share/mytool/`.
-The target_dir may specify a subdirectory, such as `"target_dir": "USER_DATA_DIR/mydirs"`.
-Any _new directories_ in the  `target_dir` path will be created with the `dir_stat` permissions,
-and files will be created with the `file_stat` permissions.
     """
 
     mapping = [

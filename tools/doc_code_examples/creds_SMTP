@@ -1,0 +1,6 @@
+EmailServer	        mail.myserver.com
+EmailServerPort     P587TLS
+EmailUser	        outbound@myserver.com
+EmailPass	        mypassword
+EmailFrom           me@myserver.com
+

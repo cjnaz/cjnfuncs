@@ -5,3 +5,4 @@ dist/
 log*.txt
 *.egg-info/
 cjn_demo_smtp.cfg
+junk.txt
