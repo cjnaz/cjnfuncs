@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Demo/test for cjnfuncs environment classes/functions
+"""Demo/test for cjnfuncs environment/deployfiles classes/functions
 """
 
 #==========================================================
@@ -8,9 +8,9 @@
 #
 #==========================================================
 
-__version__ = "1.1"
-TOOLNAME =    "cjnfuncs_testenv"
-CONFIG_FILE = "demo_env.cfg"
+__version__ = "1.3"
+TOOLNAME =    "cjnfuncs_testdeployfiles"
+CONFIG_FILE = "demo_deployfiles.cfg"
 
 import argparse
 import os

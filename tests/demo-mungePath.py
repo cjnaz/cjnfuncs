@@ -9,7 +9,7 @@
 #    
 #==========================================================
 
-__version__ = "1.1"
+__version__ = "1.3"
 
 import shutil
 import os
@@ -45,24 +45,25 @@ def wrapper (in_path="", base_path="", mkdir=False, note=None):
     return xx
 
 print ("\n\n***** File paths relative to a base path")
-wrapper ("xyz/file.txt", ".",       note="01 - Path specified relative to the calling script directory - Returns absolute results")
-wrapper ("", "",                    note="02 - Returns relative '.' (current directory)")
-wrapper ("file.txt",                note="03 - No base_path - returns relative to script dir - same dir")
-wrapper ("xyz/file.txt",            note="04 - No base_path - returns relative to script dir - below")
-wrapper ("../file.txt",             note="05 - No base_path - returns relative to script dir - above")
-wrapper ("", ".",                   note="06 - Returns absolute full path to calling script dir")
-wrapper ("", "~",                   note="07 - User expanded")
-wrapper ("xyz/file.txt", "$HOME",   note="08 - Env vars expanded")
-wrapper ("~/xyz/file.txt", ".",     note="09 - User expanded, An absolute in_path overrides the base_path (base_path not used)")
+wrapper ("xyz/file.txt", ".",                               note="01 - Returns absolute path to shell cwd")
+wrapper ("", "",                                            note="02 - No base_path - Returns relative path from shell cwd")
+wrapper ("file.txt",                                        note="03 - No base_path - Returns relative path from shell cwd - same dir")
+wrapper ("xyz/file.txt",                                    note="04 - No base_path - Returns relative path from shell cwd - below")
+wrapper ("../file.txt",                                     note="05 - No base_path - Returns relative path from shell cwd - above")
+wrapper ("newdir", mkdir=True,                              note="05a- No base_path - Make dir at shell cwd)")
+wrapper ("", ".",                                           note="06 - Returns absolute full path to shell cwd")
+wrapper ("", "~",                                           note="07 - User expanded")
+wrapper ("xyz/file.txt", "$HOME",                           note="08 - Env vars expanded")
+wrapper ("~/xyz/file.txt", ".",                             note="09 - User expanded, Absolute in_path overrides the base_path (base_path not used)")
 
 print ("\n\n***** Using the base_path")
-if wrapper ("", "/tmp/mungePath",   note="10 - Check existence of the work space tree").exists:
+if wrapper ("", "/tmp/mungePath",                           note="10 - Check existence of the work space tree").exists:
     print ("Exists, removed.")
     remove_tree ("/tmp/mungePath")
 else:
     print ("Does not exist")
 testpath = wrapper ("", "/tmp/mungePath", mkdir=True,
-    note="11 - Make a work space, then create /tmp/mungePath/file.txt").full_path
+                                                            note="11 - Make a work space, then create /tmp/mungePath/file.txt").full_path
 touch (mungePath("file.txt", testpath).full_path)
 
 wrapper ("", testpath,                                      note="12 - /tmp/mungePath exists")
@@ -95,8 +96,9 @@ wrapper ("subdir/testxxxx.txt", testpath, mkdir=True,       note="25 - Happy to 
 touch(testpath / "dummyfile.txt")
 try:
     wrapper ("dummyfile.txt", testpath, mkdir=True, 
-        note="26 - Exception raised due to trying to make a directory on top of an existing file")
+                                                            note="26 - Exception raised due to trying to make a directory on top of an existing file")
 except Exception as e:
     print (f"Exception: {e}")
 
-remove_tree(core.tool.data_dir)
+print ("\n\n***** Referencing the tool script dir")
+wrapper ("xyz/file.txt", core.tool.main_dir,                note="27 - Returns absolute path to script dir")

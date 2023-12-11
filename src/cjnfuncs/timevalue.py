@@ -9,12 +9,12 @@
 #==========================================================
 
 
-
 #=====================================================================================
 #=====================================================================================
 #  C l a s s   t i m e v a l u e
 #=====================================================================================
 #=====================================================================================
+
 class timevalue():
     def __init__(self, orig_val):
         """
@@ -92,6 +92,7 @@ Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks
 #  r e t i m e
 #=====================================================================================
 #=====================================================================================
+
 def retime(time_sec, unitC):
     """
 ## retime (time_sec, unitC) - Convert time value in seconds to unitC resolution
@@ -122,4 +123,3 @@ def retime(time_sec, unitC):
         raise ValueError(f"Invalid unitC value <{unitC}> passed to retime()")
     else:
         raise ValueError(f"Invalid seconds value <{time_sec}> passed to retime().  Must be type int or float.")
-

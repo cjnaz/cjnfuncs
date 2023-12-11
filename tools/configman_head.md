@@ -2,9 +2,6 @@
 
 Skip to [API documentation](#links)
 
-TODO:  Clean up personal path info
-.config_dir             :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples
-core.tool.log_dir_base  :  /home/cjn/.config/configman_ex3
 
 ## Getting started - A basic config file example
 
@@ -56,7 +53,7 @@ See the `cjnfuncs.core` module for more details.
 
 <br>
 
-## A full blown example - check out these nifty features
+## A full blown example - check out these nifty features...
 
 The config file:
 
@@ -78,7 +75,7 @@ LogFile         configman_ex2.log   # Full path, or relative to core.tool.log_di
 
 # Example param definitions - name-value pairs that are whitespace, "=", or ":" separated
 # **** NOTE 2
-I'm_tall!       True        # Most any chars supported in a param name - All but '#' or separators
+I'm_tall!       True        # Most any chars supported in a param name - All but '#' or separators, nor start with '['
 Test.Bool       false       # '.' is not special.  True and false values not case sensitive, stored as bools
 7893&(%$,.nasf||\a@=Hello   # '=' separator, with or without whitespace
 again:true                  # ':' separator, with or without whitespace
@@ -181,7 +178,7 @@ Stats for config file <configman_ex2.cfg>:
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex2.cfg
 .config_timestamp       :  1701632145
 .sections_list          :  ['Bad params', 'SMTP']
-core.tool.log_dir_base  :  /home/cjn/.config/configman_ex2
+core.tool.log_dir_base  :  /home/me/.config/configman_ex2
 
 ***** Section [] *****
             LogLevel = 20  <class 'int'>
@@ -308,7 +305,7 @@ Stats for config file <configman_ex3.cfg>:
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex3.cfg
 .config_timestamp       :  1701710699
 .sections_list          :  []
-core.tool.log_dir_base  :  /home/cjn/.config/configman_ex3
+core.tool.log_dir_base  :  /home/me/.config/configman_ex3
 
   configman_ex3.service_loop         -  WARNING:  Config file reloaded.  Refreshing setup.
   configman_ex3.service_loop         -  WARNING:  
@@ -318,7 +315,7 @@ Stats for config file <configman_ex3.cfg>:
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex3.cfg
 .config_timestamp       :  1701712450
 .sections_list          :  []
-core.tool.log_dir_base  :  /home/cjn/.config/configman_ex3
+core.tool.log_dir_base  :  /home/me/.config/configman_ex3
 ```
 
 Notables:
@@ -390,20 +387,20 @@ Notables:
 
 ## Comparison to Python's configparser module
 
-  Feature | loadconfig | Python configparser
+  Feature | configman | Python configparser
   ---|---|---
-  Native types | int, float, bool (true/false case insensitive), list, tuple, dict, str | str only, requires explicit type casting via getter functions
-  Reload on config file change | built-in | not built-in
-  Import sub-config files | Yes | No
-  Section support | No | Yes
-  Default support | No | Yes
-  Fallback support | Yes (getcfg default) | Yes
+  Native types | **int, float, bool (true/false case insensitive), list, tuple, dict, str** | str only, requires explicit type casting via getter functions
+  Reload on config file change | **built-in** | not built-in
+  Import sub-config files | **Yes** | No
+  Section support | Yes | Yes
+  Default support | Yes | Yes
+  Fallback support | Yes (getcfg(fallback=)) | Yes
   Whitespace in params | No | Yes
   Case sensitive params | Yes (always) | Default No, customizable
-  Param/value delimiter | whitespace, ':', or '=' | ':' or '=', customizable
-  Param only (no value) | No | Yes
+  Param/value delimiter | whitespace, ':', or '=' fixed | ':' or '=', customizable
+  Param only (no value) | Yes (stored as True) | Yes
   Multi-line values | No | Yes
-  Comment prefix | '#' fixed, thus can't be part of the param or value | '#' or ';', customizable
+  Comment prefix | '#' fixed (thus '#' can't be part of the param or value) | '#' or ';', customizable
   Interpolation | No | Yes
   Mapping Protocol Access | No | Yes
-  Save to file | No (see `modify_configfile()`) | Yes
+  Save to file | Yes | Yes

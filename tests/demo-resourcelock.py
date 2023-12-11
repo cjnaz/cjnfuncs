@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""Demo/test for cjnfuncs resourcelock functions
+"""
+
+#==========================================================
+#
+#  Chris Nelson, 2023
+#
+#==========================================================
+
+__version__ = "1.3"
+
 from cjnfuncs.core import set_toolname, setuplogging, logging
 from cjnfuncs.resourcelock import resource_lock
 

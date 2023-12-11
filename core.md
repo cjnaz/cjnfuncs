@@ -20,26 +20,29 @@ Given core_ex1.py:
     print (core.tool)
 
 Output:
-    $ ./core_ex1.py
-    Path to the config dir: /home/cjn/.config/core_ex1
+    $ ./core_ex1.py 
+    Path to the config dir: /home/me/.config/core_ex1
 
     Stats for set_toolname <core_ex1>:
     .toolname         :  core_ex1
     .main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/./core_ex1.py'>
-    .user_config_dir  :  /home/cjn/.config/core_ex1
-    .user_data_dir    :  /home/cjn/.local/share/core_ex1
-    .user_state_dir   :  /home/cjn/.local/state/core_ex1
-    .user_cache_dir   :  /home/cjn/.cache/core_ex1
-    .user_log_dir     :  /home/cjn/.cache/core_ex1/log
+    .main_full_path   :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/core_ex1.py
+    .main_dir         :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples
+    General user and site paths:
+    .user_config_dir  :  /home/me/.config/core_ex1
+    .user_data_dir    :  /home/me/.local/share/core_ex1
+    .user_state_dir   :  /home/me/.local/state/core_ex1
+    .user_cache_dir   :  /home/me/.cache/core_ex1
+    .user_log_dir     :  /home/me/.cache/core_ex1/log
     .site_config_dir  :  /etc/xdg/core_ex1
     .site_data_dir    :  /usr/share/core_ex1
     Based on found user or site dirs:
     .env_defined      :  user
-    .config_dir       :  /home/cjn/.config/core_ex1
-    .data_dir         :  /home/cjn/.local/share/core_ex1
-    .state_dir        :  /home/cjn/.local/state/core_ex1
-    .cache_dir        :  /home/cjn/.cache/core_ex1
-    .log_dir_base     :  /home/cjn/.local/share/core_ex1
+    .config_dir       :  /home/me/.config/core_ex1
+    .data_dir         :  /home/me/.local/share/core_ex1
+    .state_dir        :  /home/me/.local/state/core_ex1
+    .cache_dir        :  /home/me/.cache/core_ex1
+    .log_dir_base     :  /home/me/.local/share/core_ex1
     .log_dir          :  None
     .log_file         :  None
     .log_full_path    :  None
@@ -56,7 +59,7 @@ is needed as calls to setuplogging() will modify the `core.tool` attributes.  Ju
 `from cjnfuncs.core import set_toolname` line only provides a _copy_ of the variable, which isn't updated
 by later changes.
 
-### What does all this mean and what is it use for?
+### What does all this mean and what is it used for?
 - A tool script may declare/load a config file (eg, `myconfig.cfg`).  `cjnfuncs.configman.config_item()` will look 
 for that config file at `<core.tool.config_dir>/myconfig.cfg`.
 - A tool script may specify a log file (eg, `mylogfile.txt`).  `cjnfuncs.core.setuplogging()` will write
@@ -79,9 +82,13 @@ differences in `.main_module` between a standalone script usage (as above) versu
 
 Example `print(core.tool)` for a user-specific setup:
 ```
+
     Stats for set_toolname <wanstatus>:
     .toolname         :  wanstatus
     .main_module      :  <module 'wanstatus.wanstatus' from '/<path-to-venv>/lib/python3.9/site-packages/wanstatus/wanstatus.py'>
+    .main_full_path   :  /<path-to-venv>/lib/python3.9/site-packages/wanstatus/wanstatus.py
+    .main_dir         :  /<path-to-venv>/lib/python3.9/site-packages/wanstatus
+    General user and site paths:
     .user_config_dir  :  /home/me/.config/wanstatus
     .user_data_dir    :  /home/me/.local/share/wanstatus
     .user_state_dir   :  /home/me/.local/state/wanstatus
@@ -103,9 +110,11 @@ Example `print(core.tool)` for a user-specific setup:
     
 Example `print(core.tool)` for a site setup (.site_config_dir and/or .site_data_dir exist):
 ```
-    Stats for set_toolname <wanstatus>:
     .toolname         :  wanstatus
     .main_module      :  <module 'wanstatus.wanstatus' from '/<path-to-venv>/lib/python3.9/site-packages/wanstatus/wanstatus.py'>
+    .main_full_path   :  /<path-to-venv>/lib/python3.9/site-packages/wanstatus/wanstatus.py
+    .main_dir         :  /<path-to-venv>/lib/python3.9/site-packages/wanstatus
+    General user and site paths:
     .user_config_dir  :  /root/.config/wanstatus
     .user_data_dir    :  /root/.local/share/wanstatus
     .user_state_dir   :  /root/.local/state/wanstatus
@@ -155,49 +164,55 @@ Console output:
     Stats for set_toolname <core_ex2>:
     .toolname         :  core_ex2
     .main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/./core_ex2.py'>
-    .user_config_dir  :  /home/cjn/.config/core_ex2
-    .user_data_dir    :  /home/cjn/.local/share/core_ex2
-    .user_state_dir   :  /home/cjn/.local/state/core_ex2
-    .user_cache_dir   :  /home/cjn/.cache/core_ex2
-    .user_log_dir     :  /home/cjn/.cache/core_ex2/log
+    .main_full_path   :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/core_ex2.py
+    .main_dir         :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples
+    General user and site paths:
+    .user_config_dir  :  /home/me/.config/core_ex2
+    .user_data_dir    :  /home/me/.local/share/core_ex2
+    .user_state_dir   :  /home/me/.local/state/core_ex2
+    .user_cache_dir   :  /home/me/.cache/core_ex2
+    .user_log_dir     :  /home/me/.cache/core_ex2/log
     .site_config_dir  :  /etc/xdg/core_ex2
     .site_data_dir    :  /usr/share/core_ex2
     Based on found user or site dirs:
     .env_defined      :  user
-    .config_dir       :  /home/cjn/.config/core_ex2
-    .data_dir         :  /home/cjn/.local/share/core_ex2
-    .state_dir        :  /home/cjn/.local/state/core_ex2
-    .cache_dir        :  /home/cjn/.cache/core_ex2
-    .log_dir_base     :  /home/cjn/.local/share/core_ex2
+    .config_dir       :  /home/me/.config/core_ex2
+    .data_dir         :  /home/me/.local/share/core_ex2
+    .state_dir        :  /home/me/.local/state/core_ex2
+    .cache_dir        :  /home/me/.cache/core_ex2
+    .log_dir_base     :  /home/me/.local/share/core_ex2
     .log_dir          :  None
     .log_file         :  None
     .log_full_path    :  __console__
 
 
 Log file output:
-    $ cat /home/cjn/.local/share/core_ex2/mylogfile.txt
-    2023-12-01 11:43:41,238        core_ex2.<module>              WARNING:  This is a warning-level log message to the log file </home/cjn/.local/share/core_ex2/mylogfile.txt>.
+    $ cat /home/me/.local/share/core_ex2/mylogfile.txt
+    2023-12-10 22:56:47,699        core_ex2.<module>              WARNING:  This is a warning-level log message to the log file </home/me/.local/share/core_ex2/mylogfile.txt>.
 
     Stats for set_toolname <core_ex2>:
     .toolname         :  core_ex2
     .main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/./core_ex2.py'>
-    .user_config_dir  :  /home/cjn/.config/core_ex2
-    .user_data_dir    :  /home/cjn/.local/share/core_ex2
-    .user_state_dir   :  /home/cjn/.local/state/core_ex2
-    .user_cache_dir   :  /home/cjn/.cache/core_ex2
-    .user_log_dir     :  /home/cjn/.cache/core_ex2/log
+    .main_full_path   :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/core_ex2.py
+    .main_dir         :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples
+    General user and site paths:
+    .user_config_dir  :  /home/me/.config/core_ex2
+    .user_data_dir    :  /home/me/.local/share/core_ex2
+    .user_state_dir   :  /home/me/.local/state/core_ex2
+    .user_cache_dir   :  /home/me/.cache/core_ex2
+    .user_log_dir     :  /home/me/.cache/core_ex2/log
     .site_config_dir  :  /etc/xdg/core_ex2
     .site_data_dir    :  /usr/share/core_ex2
     Based on found user or site dirs:
     .env_defined      :  user
-    .config_dir       :  /home/cjn/.config/core_ex2
-    .data_dir         :  /home/cjn/.local/share/core_ex2
-    .state_dir        :  /home/cjn/.local/state/core_ex2
-    .cache_dir        :  /home/cjn/.cache/core_ex2
-    .log_dir_base     :  /home/cjn/.local/share/core_ex2
-    .log_dir          :  /home/cjn/.local/share/core_ex2
+    .config_dir       :  /home/me/.config/core_ex2
+    .data_dir         :  /home/me/.local/share/core_ex2
+    .state_dir        :  /home/me/.local/state/core_ex2
+    .cache_dir        :  /home/me/.cache/core_ex2
+    .log_dir_base     :  /home/me/.local/share/core_ex2
+    .log_dir          :  /home/me/.local/share/core_ex2
     .log_file         :  mylogfile.txt
-    .log_full_path    :  /home/cjn/.local/share/core_ex2/mylogfile.txt
+    .log_full_path    :  /home/me/.local/share/core_ex2/mylogfile.txt
 ```
 
 Note the differences in the `.log_` prefixed attributes, above, for console and file logging.
@@ -212,7 +227,6 @@ or `FileLogFormat` in the config file, respectively.
 
 Typically, console logging is used for tool script interactive use, and file logging is used for a tool
 script running as a service.
-
 
 
 <a id="links"></a>
@@ -239,14 +253,14 @@ script running as a service.
 set_toolname() centralizes and establishes a set of base directory path variables for use in
 the tool script.  It looks for existing directories, based on the specified toolname, in
 the site-wide (system-wide) and then user-specific locations.  Specifically, site-wide 
-config and/or data directories are looked for at (eg) `/etc/xdg/cjnfuncs_testenv` and/or 
-`/usr/share/cjnfuncs_testenv`.  If site-wide directories are not 
+config and/or data directories are looked for at `/etc/xdg/<toolname>` and/or 
+`/usr/share/<toolname>`.  If site-wide directories are not 
 found then user-specific is assumed.  No directories are created.
 
 
 ### Parameter
 `toolname`
-- Name of the tool, type str()
+- Name of the tool, type str
 
 
 ### Returns
@@ -260,11 +274,11 @@ If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
 Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
 style variance, and can be reset in the tool script by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
-other directory) before calling loadconfig() or setuplogging().
+other directory) before calling cjnfuncs.configman.loadconfig() or setuplogging().
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
-- The `.log_dir`, `.log_file`, and `.log_full_path` attributes are set by calls to setuplogging() or loadconfig(),
-and are initially set to `None` by set_toolname().
+- The `.log_dir`, `.log_file`, and `.log_full_path` attributes are set by calls to setuplogging() 
+  (or loadconfig() which in turn calls setuplogging()) and are initially set to `None` by set_toolname().
 
 - For a `site` setup, the `.site_data_dir` is set to `/usr/share/<toolname>`.  The XDG spec states that 
 the `.cache_dir` and `.state_dir` should be in the root user tree; however, set_toolname() sets these two 
@@ -308,16 +322,13 @@ loaded config.  Selected by `call_logfile_wins = False`.
 config_logfile may be an absolute path or relative to the `core.tool.log_dir_base` directory.  
 - `None` specifies the console.
 
-
-### config params
-`ConsoleLogFormat` (optional)
+`ConsoleLogFormat` (default None)
 - Overrides the default console logging format: `{module:>15}.{funcName:20} - {levelname:>8}:  {message}`.
+- loadconfig() passes `ConsoleLogFormat` from the primary config file, if defined.
 
-`FileLogFormat` (optional)
+`FileLogFormat` (default None)
 - Overrides the default file logging format: `{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}`.
-
-Also see `LogFile` and `LogLevel` info in loadconfig() documentation, below.  setuplogging() does not 
-access these config params directly.
+- loadconfig() passes `FileLogFormat` from the primary config file, if defined.
 
 
 ### Returns

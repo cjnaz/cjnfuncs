@@ -34,7 +34,7 @@ def snd_notif(subj='Notification message', msg='', to='NotifList', log=False, sm
 ## snd_notif (subj='Notification message', msg=' ', to='NotifList', log=False, smtp_config=None) - Send a text message using info from the config file
 
 Intended for use of your mobile provider's email-to-text bridge email address, eg, 
-5405551212@vzwtxt.com for Verizon, but any email address will work.
+`5405551212@vzwtxt.com` for Verizon, but any email address will work.
 
 The `to` string may be the name of a config param (who's value is one or more email addresses, default 
 "NotifList"), or a string with one or more email addresses. Using a config param name allows for customizing the
@@ -123,10 +123,9 @@ or a string with one or more email addresses. Using a config param name allows f
 What to send may be a `body` string, the text contents of `filename`, or the HTML-formatted contents
 of `htmlfile`, in this order of precedent.
 
-Three attempts are made to send the message.
+Three attempts are made to send the message (see `EmailNTries`, below).
 
 
-    
 ### Parameters
 `subj`
 - Email subject text
@@ -310,7 +309,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
         except Exception as e:
             last_error = e
             if trynum < ntries -1:
-                logging.warning(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec>:\n  <{e}>") # TODO change to debug or info
+                logging.debug(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec>:\n  <{e}>")
                 time.sleep(retry_wait)
             continue
 

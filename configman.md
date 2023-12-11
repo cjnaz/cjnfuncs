@@ -2,9 +2,6 @@
 
 Skip to [API documentation](#links)
 
-TODO:  Clean up personal path info
-.config_dir             :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples
-core.tool.log_dir_base  :  /home/cjn/.config/configman_ex3
 
 ## Getting started - A basic config file example
 
@@ -56,7 +53,7 @@ See the `cjnfuncs.core` module for more details.
 
 <br>
 
-## A full blown example - check out these nifty features
+## A full blown example - check out these nifty features...
 
 The config file:
 
@@ -78,7 +75,7 @@ LogFile         configman_ex2.log   # Full path, or relative to core.tool.log_di
 
 # Example param definitions - name-value pairs that are whitespace, "=", or ":" separated
 # **** NOTE 2
-I'm_tall!       True        # Most any chars supported in a param name - All but '#' or separators
+I'm_tall!       True        # Most any chars supported in a param name - All but '#' or separators, nor start with '['
 Test.Bool       false       # '.' is not special.  True and false values not case sensitive, stored as bools
 7893&(%$,.nasf||\a@=Hello   # '=' separator, with or without whitespace
 again:true                  # ':' separator, with or without whitespace
@@ -181,7 +178,7 @@ Stats for config file <configman_ex2.cfg>:
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex2.cfg
 .config_timestamp       :  1701632145
 .sections_list          :  ['Bad params', 'SMTP']
-core.tool.log_dir_base  :  /home/cjn/.config/configman_ex2
+core.tool.log_dir_base  :  /home/me/.config/configman_ex2
 
 ***** Section [] *****
             LogLevel = 20  <class 'int'>
@@ -308,7 +305,7 @@ Stats for config file <configman_ex3.cfg>:
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex3.cfg
 .config_timestamp       :  1701710699
 .sections_list          :  []
-core.tool.log_dir_base  :  /home/cjn/.config/configman_ex3
+core.tool.log_dir_base  :  /home/me/.config/configman_ex3
 
   configman_ex3.service_loop         -  WARNING:  Config file reloaded.  Refreshing setup.
   configman_ex3.service_loop         -  WARNING:  
@@ -318,7 +315,7 @@ Stats for config file <configman_ex3.cfg>:
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex3.cfg
 .config_timestamp       :  1701712450
 .sections_list          :  []
-core.tool.log_dir_base  :  /home/cjn/.config/configman_ex3
+core.tool.log_dir_base  :  /home/me/.config/configman_ex3
 ```
 
 Notables:
@@ -390,23 +387,23 @@ Notables:
 
 ## Comparison to Python's configparser module
 
-  Feature | loadconfig | Python configparser
+  Feature | configman | Python configparser
   ---|---|---
-  Native types | int, float, bool (true/false case insensitive), list, tuple, dict, str | str only, requires explicit type casting via getter functions
-  Reload on config file change | built-in | not built-in
-  Import sub-config files | Yes | No
-  Section support | No | Yes
-  Default support | No | Yes
-  Fallback support | Yes (getcfg default) | Yes
+  Native types | **int, float, bool (true/false case insensitive), list, tuple, dict, str** | str only, requires explicit type casting via getter functions
+  Reload on config file change | **built-in** | not built-in
+  Import sub-config files | **Yes** | No
+  Section support | Yes | Yes
+  Default support | Yes | Yes
+  Fallback support | Yes (getcfg(fallback=)) | Yes
   Whitespace in params | No | Yes
   Case sensitive params | Yes (always) | Default No, customizable
-  Param/value delimiter | whitespace, ':', or '=' | ':' or '=', customizable
-  Param only (no value) | No | Yes
+  Param/value delimiter | whitespace, ':', or '=' fixed | ':' or '=', customizable
+  Param only (no value) | Yes (stored as True) | Yes
   Multi-line values | No | Yes
-  Comment prefix | '#' fixed, thus can't be part of the param or value | '#' or ';', customizable
+  Comment prefix | '#' fixed (thus '#' can't be part of the param or value) | '#' or ';', customizable
   Interpolation | No | Yes
   Mapping Protocol Access | No | Yes
-  Save to file | No (see `modify_configfile()`) | Yes
+  Save to file | Yes | Yes
 
 
 <a id="links"></a>
@@ -426,6 +423,7 @@ Notables:
 - [read_dict](#read_dict)
 - [getcfg](#getcfg)
 - [modify_configfile](#modify_configfile)
+- [write](#write)
 
 
 
@@ -452,13 +450,15 @@ The config_item() class provides handling of one or more config file instances. 
 
 `remap_logdirbase` (default True)
 - If `remap_logdirbase=True` and the tool script is running in _user_ mode (not site mode) 
-then the `core.tool.log_dir_base` will be set to `core.tool.user_config_dir`.
+then the `core.tool.log_dir_base` will be set to `core.tool.config_dir`.
 
 `force_str` (default False)
 - Causes all params to be loaded as type `str`, overriding the default type identification.
 
 `secondary_config` (default False)
 - Set to `True` when loading additional config files.  Disables logging setup related changes.
+- The primary config file should be loaded first before any secondary_config loads, so that logging 
+is properly set up.
 
 
 ### Returns
@@ -475,13 +475,17 @@ Also see the loadconfig() `import` feature.
 - Initially in _user_ mode, after the `set_toolname()` call, `core.tool.log_dir_base` 
 (the log directory) is set to the `core.tool.user_data_dir`.
 Once `config_item()` is called the `core.tool.log_dir_base` is _remapped_ to 
-`core.tool.user_config_dir`.  This is the author's style preference (centralize user files, and 
+`core.tool.config_dir`.  This is the author's style preference (centralize primary files, and 
 reduce spreading files around the file system).
 To disable this remap, in the `config_item()` call set `remap_logdirbase=False`.
 This remapping is not done in site mode.
 - A different log base directory may be set by user code by setting `core.tool.log_dir_base` to a different 
 path after the `set_toolname()` call and before the `config_item()` call, for example 
 `core.tool.log_dir_base = "/var/log"` may be desireable in site mode.
+- A different config directory may be set by user code by setting `core.tool.config_dir` to a different 
+path after the `set_toolname()` call and before the `config_item()` call, for example 
+`core.tool.config_dir = core.tool.main_dir`, which sets the config dir to the same as the tool script's 
+directory.  With `remap_logdirbase=True`, the log dir will also be set to the tool script's directory.
 - Details of the configuration instance may be printed, eg, `print (my_config)`.
     
 <br/>
@@ -516,8 +520,10 @@ output:
 ***config_item() class member function***
 
 ### Parameters
-`section` (default ' ' - top level)
-- Section to be purged
+`section` (default '')
+- `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
+- `section = '<section_name>'` clears just that section
+- `section = 'DEFAULT'` clears just the DEFAULT section
 
 
 ### Returns
@@ -600,8 +606,14 @@ regardless of whether the config file timestamp has changed
 - See `getcfg()`, below, for accessing loaded config data. The class instance-specific `cfg` dictionary may be
   directly accessed as well.
 
-- The format of a config file is param=value pairs.  Separating the param and value may be
-  whitespace, `=` or `:`.  Sections and a DEFAULT section are supported.
+- The format of a config file is param=value pairs.
+  - Separating the param and value may be whitespace, `=` or `:`.  
+  - Param names can contain most all characters, except:  `#` or the separators, and cannot start with `[`.
+
+- Sections and a DEFAULT section are supported.  Section name are enclosed in `[ ]`.
+  - Leading and trailing whitespace is trimmed off of the section name, and embedded whitespace is retained.
+    EG: `[  hello my name  is  Fred  ]` becomes section name `'hello my name  is  Fred'`.
+  - Section names can contain most all characters, except `#` and `]`.
 
 - **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
   type is stored in the `cfg` dictionary if none of the other types can be resolved for a given param value.
@@ -637,8 +649,9 @@ regardless of whether the config file timestamp has changed
   in the config file.
 
 - **Import nested config files** - loadconfig() supports `Import` (case insensitive). The imported file path
-is relative to the `core.tool.config_dir` if not an absolute path.
+is relative to the `core.tool.config_dir`, if not an absolute path.
 The specified file is imported as if the params were in the main config file.  Nested imports are allowed. 
+Sections are not allowed within an imported file - only in the main/top-level config file.
 A prime usage of `import` is to place email server credentials in your home directory with user-only readability,
 then import them in the tool script config file as such: `import ~/creds_SMTP`.  
 
@@ -707,7 +720,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
 ---
 
-# read_dict (param_dict, section_name='') - Load the content of a dictionary into the cfg dictionary
+# read_dict (param_dict, section_name=' ') - Load the content of a dictionary into the cfg dictionary
 
 ***config_item() class member function***
 
@@ -810,8 +823,9 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 
 Params in the config file may have their values changed, be deleted, or new lines added.
 - All added lines are added at the bottom of the file.
-- All instances of the param (in all sections and DEFAULT) will be modified to the new value.
-- NOTE: This function modifies the instance's configuration file, not
+- _All instances of the param (in all sections and DEFAULT) will be modified to the new value._
+
+NOTE: This function modifies the instance's configuration file, not
 the content currently loaded into the cfg dictionary.
 
 On the first call to modify_configfile() the content of the file is read into memory.  Successive
@@ -826,12 +840,12 @@ reload call to avoid multiple config reloads.
 
 
 ### Parameters
-`param` (default "")
+`param` (default ' ')
 - The param name, if modifying an existing param or adding a new param
 
-`value` (default "")
+`value` (default ' ')
 - The new value to be applied to an existing param, or an added param
-- Will be cast to str
+- Any comment text (after a '#') in the new value will be prepended to any existing comment text
 
 `remove` (default False)
 - If True, the `param` config file line is removed from the config file
@@ -849,4 +863,30 @@ reload call to avoid multiple config reloads.
 ### Returns
 - No return value
 - Warning messages are logged for attempting to modify or remove a non-existing param.
+        
+<br/>
+
+<a id="write"></a>
+
+---
+
+# write (savefile) - Write config data to a file
+
+***config_item() class member function***
+
+### Parameter
+
+`savefile`
+- Path to the output file.  Path or str type.
+- The config data will be written to an absolute path, or relative to the `core.tool.config_dir`
+
+
+### Returns
+- None on success
+- Raises ConfigError if unable to write the file
+
+
+### Behaviors and rules
+- The created config file is as loaded in memory.  Any imports in the originally loaded config file
+ are merged into the top-level.
         

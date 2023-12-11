@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cjnfuncs.deployfiles - Push tool-specific files to their proper locations.
+"""cjnfuncs.deployfiles - Push tool-specific files to their proper locations
 """
 
 #==========================================================
@@ -30,6 +30,7 @@ from importlib_resources import files as ir_files
 #  d e p l o y _ f i l e s
 #=====================================================================================
 #=====================================================================================
+
 def deploy_files(files_list, overwrite=False, missing_ok=False):
     """
 ## deploy_files (files_list, overwrite=False, missing_ok=False) - Install initial tool script files in user or site space
@@ -140,7 +141,7 @@ if they exist - data may be lost!
                 except Exception as e:
                     print (f"File copy of <{item['source']}> to <{target_dir.full_path}> failed.  Aborting.\n  {e}")
                     sys.exit(1)
-                print (f"Deployed  {item['source']:20} to  {outfile}") #{target_dir.full_path}")
+                print (f"Deployed  {item['source']:20} to  {outfile}")
             else:
                 print (f"File <{item['source']}> already exists at <{outfile}>.  Skipped.")
 

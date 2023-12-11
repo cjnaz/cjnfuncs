@@ -7,6 +7,7 @@ The mungePath() class adds value in these important ways:
 - Allows platform base paths and script-specific files and directories to be entered separately, and then appropriately merges them.  The split-handling greatly cleans up script code.
 - Absolute and relative paths are supported, along with expansion of user (~user/) and environment vars ($HOME/).
 
+# TODO add table of base paths '', '.', ...
 
 ## Example
 Given:
@@ -40,8 +41,8 @@ else:
 What gets printed:
 ```
 $ ./mungePath_ex1.py 
-.full_path    :  /home/cjn/.local/share/mungePath_ex1/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mungePath_ex1/mysubdir
+.full_path    :  /home/me/.local/share/mungePath_ex1/mysubdir/file.txt
+.parent       :  /home/me/.local/share/mungePath_ex1/mysubdir
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False
@@ -50,8 +51,8 @@ $ ./mungePath_ex1.py
 .is_file      :  False
 
 Making the file <file.txt>
-.full_path    :  /home/cjn/.local/share/mungePath_ex1/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mungePath_ex1/mysubdir
+.full_path    :  /home/me/.local/share/mungePath_ex1/mysubdir/file.txt
+.parent       :  /home/me/.local/share/mungePath_ex1/mysubdir
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False
@@ -61,8 +62,8 @@ Making the file <file.txt>
 
 
 $ ./mungePath_ex1.py 
-.full_path    :  /home/cjn/.local/share/mungePath_ex1/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mungePath_ex1/mysubdir
+.full_path    :  /home/me/.local/share/mungePath_ex1/mysubdir/file.txt
+.parent       :  /home/me/.local/share/mungePath_ex1/mysubdir
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False
@@ -72,8 +73,8 @@ $ ./mungePath_ex1.py
 
 File content:  Hello
 Removing the file
-.full_path    :  /home/cjn/.local/share/mungePath_ex1/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mungePath_ex1/mysubdir
+.full_path    :  /home/me/.local/share/mungePath_ex1/mysubdir/file.txt
+.parent       :  /home/me/.local/share/mungePath_ex1/mysubdir
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False
@@ -117,22 +118,26 @@ Executing pathlib.Path(/path/not/currently/available/myfile) may result in a man
 
 ---
 
-# Class mungePath (in_path="", base_path="", mkdir=False) - A clean interface for dealing with filesystem paths
+# Class mungePath (in_path=' ', base_path=' ', mkdir=False) - A clean interface for dealing with filesystem paths
 
 `mungePath()` is based on pathlib, producing Path type attributes and status booleans which may be used with all
 pathlib.Path methods, such as .open().  `mungePath()` accepts paths in two parts - the tool script specific
 portion `in_path` and a `base_path` (prepended if `in_path` is relative), and returns an instance that may 
 be cleanly used in the tool script code.
-User (~user/) and environment vars ($HOME/) are supported and expanded.
+User (`~user/`) and environment vars (`$HOME/`) are supported and expanded.
 
 
 ### Parameters
-`in_path`
-- An absolute or relative path to a file or directory, such as `mydir/myfile.txt`.  
+`in_path` (default '')
+- An absolute or relative path to a file or directory, such as `mydir/myfile.txt`
+- If `in_path` is an absolute path then `base_path` is disregarded.
 
-`base_path`
-- An absolute or relative path to a file or directory, such as `~/.config/mytool`, prepended to `in_path` if
-`in_path` is a relative path.
+`base_path` (default '')
+- An absolute or relative path to a directory, such as `~/.config/mytool`
+- `base_path` is prepended to `in_path` if `in_path` is a relative path
+- `base_path = ''` (the default) results in a relative path based on the shell current working directory (cwd)
+- `base_path = '.'` results in an absolute path based on the shell cwd
+- `base_path = core.tool.main_dir` results in an absolute path based on the tool script directory
 
 `mkdir`
 - Force-make a full directory path.  `in_path` / `base_path` is understood to be to a directory.
@@ -159,7 +164,7 @@ Attribute | Type | Description
 ### Behaviors and rules
 - If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
 - If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
-the tool script directory (generally not useful).
+the shell cwd.
 - If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
 - `in_path` and `base_path` may be type str(), Path(), or PurePath().
 - Symlinks are followed (not resolved).
@@ -168,9 +173,9 @@ the tool script directory (generally not useful).
 directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
 `.parent` is the directory above the end-point directory.
 - When using `mkdir=True` the combined `in_path` / `base_path` is understood to be a directory path (not
-to a file), and will be created if it does not already exist. (Uses pathlib.Path.mkdir()).  A FileExistsError 
+to a file), and will be created if it does not already exist. (Uses `pathlib.Path.mkdir()`).  A FileExistsError 
 is raised if you attempt to mkdir on top of an existing file.
-- See [GitHub repo](https://github.com/cjnaz/cjnfuncs) /tests/demo-mungePath.py for numerous application examples.
+- See [GitHub repo](https://github.com/cjnaz/cjnfuncs) tests/demo-mungePath.py for numerous application examples.
         
 <br/>
 

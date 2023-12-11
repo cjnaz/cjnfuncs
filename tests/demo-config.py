@@ -466,7 +466,10 @@ if args.test == 0  or  args.test == 13:
 if args.test == 0  or  args.test == 14:
     print_test_header (14, "Test modify_configfile")
     do_base_setup()
-    config.modify_configfile(r"x_7893&(%$,.nasf||\a@",  "Goodbye!    # It was Hello")   # param match check
+    config.modify_configfile(r"x_7893&(%$,.nasf||\a@",  "Goodbye!    # It was Hello")   # param match checks
+    config.modify_configfile("param_no_value",          "new value   # Had no value")
+    config.modify_configfile("testvar",                 "            # It was True")    # value removed
+
     config.modify_configfile("x_removeX", remove=True)                                  # Warning message
     config.modify_configfile("x_removed", remove=True)                                  # Removed
 
@@ -487,8 +490,10 @@ if args.test == 0  or  args.test == 14:
     config.modify_configfile("Snehal", "wasn't here")                                   # Warning message
     config.modify_configfile(                           add_if_not_existing=True)       # Another blank line
     config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # New comment
-    config.modify_configfile("# New comment line",  "", add_if_not_existing=True)       # Non-unique, and both get added
-    config.modify_configfile("Bjorn",  "was here too   # With a comment and No newline at end of file", add_if_not_existing=True) #, save=True) # New line
+    config.modify_configfile("# New comment line",      add_if_not_existing=True)       # Non-unique, and both get added
+    config.modify_configfile("new_param_no_value",      add_if_not_existing=True)       # No value
+    
+    config.modify_configfile("Bjorn",  "was here too   # With a comment and No newline at end of file", add_if_not_existing=True)
 
     config.modify_configfile("EmailTo",                  "Modify within SMTP section")
     config.modify_configfile("a",                        "Modify all occurrences")
@@ -497,7 +502,7 @@ if args.test == 0  or  args.test == 14:
     # config.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     config.loadconfig(force_flush_reload=True)
     print(config.dump())
-    print (f"Compare <{config.config_full_path}> to golden copy.")
+    print (f"Check:  diff {config.config_full_path} demo-config-T14-golden.cfg")
 
 
 #===============================================================================================
@@ -650,19 +655,20 @@ e 20
     print (new_config.dump())
 
     print (f"\n----- T21.1:  DEFAULTS cleared")
-    # print ("\nDEFAULTS cleared")
     new_config.clear('DEFAULT')
     print (new_config.dump())
     print ("Sections list:", new_config.sections_list)
 
     print (f"\n----- T21.2:  <Test section> cleared")
-    # print ("\n<Test section> cleared")
     new_config.clear('Test section')
     print (new_config.dump())
     print ("Sections list:", new_config.sections_list)
 
-    print (f"\n----- T21.3:  <cfg> cleared")
-    # print ("\ncfg cleared")
+    print (f"\n----- T21.3:  <cfg> clear all")
+    new_config.clear()
+    new_config.read_string(string_blob)
+    print (new_config.dump())
+    print ("Sections list:", new_config.sections_list)
     new_config.clear()
     print (new_config.dump())
     print ("Sections list:", new_config.sections_list)
@@ -707,3 +713,47 @@ if args.test == 0  or  args.test == 23:
         T23_config.loadconfig(ldcfg_ll=10)
     except ConfigError as e:
         print (f"ConfigError:  {e}")
+
+
+#===============================================================================================
+if args.test == 0  or  args.test == 24:
+    print_test_header (24, "Remap core.tool.config_dir and core.tool.log_dir_base")
+
+    print (f"\n----- T24.1:  Both .config_dir and .log_dir_base remapped to same")
+    set_toolname('T24.1')
+    print (core.tool)
+    core.tool.config_dir = '/both_path_T24_1'
+    config_T24_1 = config_item()
+    print (core.tool)
+
+    print (f"\n----- T24.2:  Both .config_dir and .log_dir_base remapped to different dirs")
+    set_toolname('T24.2')
+    print (core.tool)
+    core.tool.config_dir =   '/config_path_T24_2'
+    core.tool.log_dir_base = '/log_dir_base_path_T24_2'
+    config_T24_2 = config_item()
+    print (core.tool)
+
+
+#===============================================================================================
+if args.test == 0  or  args.test == 25:
+    print_test_header (25, "Write the config to a file")
+
+    def dump_file(filepath):
+        _file = mungePath(filepath, core.tool.config_dir)
+        print (f"\n***** File <{_file.full_path}> content:")
+        print (_file.full_path.read_text())
+
+    set_toolname(TOOLNAME)
+    do_base_setup()
+
+    outfile = 'T25config.cfg'
+    config.write(outfile)
+    dump_file(outfile)
+
+    xx = config_item(outfile)
+    xx.loadconfig()
+    print (f"Getting a value from the written then loaded <{outfile}>:  <a_tuple> = {xx.getcfg('a_tuple')}")
+
+    if config.dump() == xx.dump():
+        print ("They match!")

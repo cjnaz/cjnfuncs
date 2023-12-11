@@ -7,6 +7,7 @@ The mungePath() class adds value in these important ways:
 - Allows platform base paths and script-specific files and directories to be entered separately, and then appropriately merges them.  The split-handling greatly cleans up script code.
 - Absolute and relative paths are supported, along with expansion of user (~user/) and environment vars ($HOME/).
 
+# TODO add table of base paths '', '.', ...
 
 ## Example
 Given:
@@ -40,8 +41,8 @@ else:
 What gets printed:
 ```
 $ ./mungePath_ex1.py 
-.full_path    :  /home/cjn/.local/share/mungePath_ex1/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mungePath_ex1/mysubdir
+.full_path    :  /home/me/.local/share/mungePath_ex1/mysubdir/file.txt
+.parent       :  /home/me/.local/share/mungePath_ex1/mysubdir
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False
@@ -50,8 +51,8 @@ $ ./mungePath_ex1.py
 .is_file      :  False
 
 Making the file <file.txt>
-.full_path    :  /home/cjn/.local/share/mungePath_ex1/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mungePath_ex1/mysubdir
+.full_path    :  /home/me/.local/share/mungePath_ex1/mysubdir/file.txt
+.parent       :  /home/me/.local/share/mungePath_ex1/mysubdir
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False
@@ -61,8 +62,8 @@ Making the file <file.txt>
 
 
 $ ./mungePath_ex1.py 
-.full_path    :  /home/cjn/.local/share/mungePath_ex1/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mungePath_ex1/mysubdir
+.full_path    :  /home/me/.local/share/mungePath_ex1/mysubdir/file.txt
+.parent       :  /home/me/.local/share/mungePath_ex1/mysubdir
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False
@@ -72,8 +73,8 @@ $ ./mungePath_ex1.py
 
 File content:  Hello
 Removing the file
-.full_path    :  /home/cjn/.local/share/mungePath_ex1/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mungePath_ex1/mysubdir
+.full_path    :  /home/me/.local/share/mungePath_ex1/mysubdir/file.txt
+.parent       :  /home/me/.local/share/mungePath_ex1/mysubdir
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False

@@ -8,7 +8,7 @@
 #
 #==========================================================
 
-__version__ = "1.1"
+__version__ = "1.3"
 TOOLNAME =    "cjnfuncs_testsmtp"
 CONFIG_FILE = "demo_smtp.cfg"
 

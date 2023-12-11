@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
-"""cjnfuncs - A collection of support functions for writing clean and effective tool scripts
+"""cjnfuncs - Establish the base environment for cjnfuncs
 """
 
 #==========================================================
 #
 #  Chris Nelson, 2018-2023
 #
-# 2.1   231125 - Partitioned on several modules.
-# 2.0.2 230729 - Added modify_configfile.
-#   Documentation touch for logging formats in config file. 
-#   Improved snd_notif failure logging.
-# 2.0.1 230222 - deploy_files() fix for files from package
-# 2.0   230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
-# ...
-# 0.1   180520 - New
-#
-# #==========================================================
+# TODO Identification of the main module / tool script file may be wrong if a script imports a script that then imports cjnfuncs.
+#==========================================================
 
 import sys
 import logging
@@ -32,29 +24,17 @@ from .mungePath import mungePath
 # FILE_LOGGING_FORMAT    = '{asctime}/{module}/{funcName}/{levelname}:  {message}'    # Classic format
 FILE_LOGGING_FORMAT    = '{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}'
 CONSOLE_LOGGING_FORMAT = '{module:>15}.{funcName:20} - {levelname:>8}:  {message}'
-# CONSOLE_LOGGING_FORMAT = '{pathname:>15}.{funcName:20} - {levelname:>8}:  {message}'
-
-DEFAULT_LOGGING_LEVEL  = logging.WARNING
-MAIN_MODULE_STEM       = Path(__main__.__file__).stem
-SND_EMAIL_NTRIES       = 3          # Number of tries to send email before aborting
-SND_EMAIL_WAIT         = '5s'       # seconds between retries
-
-# Project globals
 
 
-# Get the main / calling module info.  Made available by set_toolname.main_module
+# Get the main / calling module info (who imported cjnfuncs.core)
 stack = inspect.stack()
 calling_module = ""
-for item in stack:  # Look for the import cjnaz.cjnfuncs line
+for item in stack:  # Look for the import cjnfuncs line
     code_context = item[4]
     if code_context is not None:
-        # if "cjnaz.cjnfuncs" in code_context[0]:
         if "cjnfuncs" in code_context[0]:
             calling_module = inspect.getmodule(item[0])
             break
-# print ("calling_module:", calling_module)
-# print ("calling_module.__package__:", calling_module.__package__)
-# print ("calling_module.__spec__", calling_module.__spec__) #.submodule_search_locations)
 
 
 #=====================================================================================
@@ -62,6 +42,7 @@ for item in stack:  # Look for the import cjnaz.cjnfuncs line
 #  M o d u l e   e x c e p t i o n s
 #=====================================================================================
 #=====================================================================================
+
 class Error(Exception):
     """Base class for exceptions in this module."""
     pass
@@ -92,6 +73,7 @@ class SndEmailError(Error):
 #  C l a s s   s e t _ t o o l n a m e
 #=====================================================================================
 #=====================================================================================
+
 class set_toolname():
     """
 ## Class set_toolname (toolname) - Set target directories for config and data storage
@@ -99,14 +81,14 @@ class set_toolname():
 set_toolname() centralizes and establishes a set of base directory path variables for use in
 the tool script.  It looks for existing directories, based on the specified toolname, in
 the site-wide (system-wide) and then user-specific locations.  Specifically, site-wide 
-config and/or data directories are looked for at (eg) `/etc/xdg/cjnfuncs_testenv` and/or 
-`/usr/share/cjnfuncs_testenv`.  If site-wide directories are not 
+config and/or data directories are looked for at `/etc/xdg/<toolname>` and/or 
+`/usr/share/<toolname>`.  If site-wide directories are not 
 found then user-specific is assumed.  No directories are created.
 
 
 ### Parameter
 `toolname`
-- Name of the tool, type str()
+- Name of the tool, type str
 
 
 ### Returns
@@ -120,11 +102,11 @@ If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
 Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
 style variance, and can be reset in the tool script by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
-other directory) before calling loadconfig() or setuplogging().
+other directory) before calling cjnfuncs.configman.loadconfig() or setuplogging().
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
-- The `.log_dir`, `.log_file`, and `.log_full_path` attributes are set by calls to setuplogging() or loadconfig(),
-and are initially set to `None` by set_toolname().
+- The `.log_dir`, `.log_file`, and `.log_full_path` attributes are set by calls to setuplogging() 
+  (or loadconfig() which in turn calls setuplogging()) and are initially set to `None` by set_toolname().
 
 - For a `site` setup, the `.site_data_dir` is set to `/usr/share/<toolname>`.  The XDG spec states that 
 the `.cache_dir` and `.state_dir` should be in the root user tree; however, set_toolname() sets these two 
@@ -136,6 +118,12 @@ also to the `.site_data_dir`.
         tool = self
         self.toolname  = toolname
         self.main_module        = calling_module
+        try:
+            self.main_full_path = Path(self.main_module.__file__)
+            self.main_dir       = self.main_full_path.parent
+        except:                 # Referencing an installed module's file/path may not be legal
+            self.main_full_path = None
+            self.main_dir       = None
         self.user_config_dir    = Path(appdirs.user_config_dir(toolname, appauthor=False))  # appauthor=False to avoid double toolname on Windows
         self.user_data_dir      = Path(appdirs.user_data_dir  (toolname, appauthor=False))
         self.user_state_dir     = Path(appdirs.user_state_dir (toolname, appauthor=False))
@@ -170,6 +158,10 @@ also to the `.site_data_dir`.
         stats +=  f"\nStats for set_toolname <{self.toolname}>:\n"
         stats +=  f".toolname         :  {self.toolname}\n"
         stats +=  f".main_module      :  {self.main_module}\n"
+        stats +=  f".main_full_path   :  {self.main_full_path}\n"
+        stats +=  f".main_dir         :  {self.main_dir}\n"
+
+        stats +=  f"General user and site paths:\n"
         stats +=  f".user_config_dir  :  {self.user_config_dir}\n"
         stats +=  f".user_data_dir    :  {self.user_data_dir}\n"
         stats +=  f".user_state_dir   :  {self.user_state_dir}\n"
@@ -196,6 +188,7 @@ also to the `.site_data_dir`.
 #  s e t u p l o g g i n g
 #=====================================================================================
 #=====================================================================================
+
 def setuplogging(call_logfile=None, call_logfile_wins=False, config_logfile=None, ConsoleLogFormat=None, FileLogFormat=None):
     """
 ## setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None) - Set up the root logger
@@ -229,16 +222,13 @@ loaded config.  Selected by `call_logfile_wins = False`.
 config_logfile may be an absolute path or relative to the `core.tool.log_dir_base` directory.  
 - `None` specifies the console.
 
-
-### config params
-`ConsoleLogFormat` (optional)
+`ConsoleLogFormat` (default None)
 - Overrides the default console logging format: `{module:>15}.{funcName:20} - {levelname:>8}:  {message}`.
+- loadconfig() passes `ConsoleLogFormat` from the primary config file, if defined.
 
-`FileLogFormat` (optional)
+`FileLogFormat` (default None)
 - Overrides the default file logging format: `{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}`.
-
-Also see `LogFile` and `LogLevel` info in loadconfig() documentation, below.  setuplogging() does not 
-access these config params directly.
+- loadconfig() passes `FileLogFormat` from the primary config file, if defined.
 
 
 ### Returns
@@ -256,7 +246,6 @@ access these config params directly.
     logger.handlers.clear()
 
     if _lfp == "__console__":
-        # log_format = logging.Formatter(getcfg("ConsoleLogFormat", CONSOLE_LOGGING_FORMAT), style='{')
         _fmt = CONSOLE_LOGGING_FORMAT  if ConsoleLogFormat == None  else  ConsoleLogFormat
         log_format = logging.Formatter(_fmt, style='{')
         handler = logging.StreamHandler(sys.stdout)
@@ -269,11 +258,10 @@ access these config params directly.
         tool.log_full_path = "__console__"
 
     else:
-        mungePath(_lfp.parent, mkdir=True)  # Force make the target dir
-        # log_format = logging.Formatter(getcfg("FileLogFormat", FILE_LOGGING_FORMAT), style='{')
+        mungePath(_lfp.parent, mkdir=True)      # Force make the target dir
         _fmt = FILE_LOGGING_FORMAT  if FileLogFormat == None  else  FileLogFormat
         log_format = logging.Formatter(_fmt, style='{')
-        handler = logging.FileHandler(_lfp.full_path, "a") #, sys.stdout)                             
+        handler = logging.FileHandler(_lfp.full_path, "a")
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(log_format)
         logger.addHandler(handler)

@@ -7,31 +7,28 @@
 #  Chris Nelson, 2018-2023
 #
 #==========================================================
-# TODO
-#   param without value loaded as True
-#   Optional quotes around string values stripped off
-#   config file writer
 
 
 import re
 import ast
+from pathlib import Path
 
 from .core      import setuplogging, logging, ConfigError
 from .mungePath import mungePath, check_path_exists
 import cjnfuncs.core as core
 
-
 # Configs / Constants
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
-
+IO_RETRY_COUNT         = 3
 
 #=====================================================================================
 #=====================================================================================
 #  C l a s s   c o n f i g _ i t e m
 #=====================================================================================
 #=====================================================================================
-initial_logging_setup = False   # Global since more than one config can be loaded
-CFGLINE =  re.compile(r"([^\s=:]+)[\s=:]+(.+)")                 # used in load_config() for param:value lines
+
+initial_logging_setup_done = False   # Global since more than one config can be loaded
+CFGLINE =  re.compile(r"([^\s=:]+)[\s=:]*(.*)")                 # used in load_config() for param:value lines
 CFGLINE2 = re.compile(r"(\s*)([^\s=:]+)([\s=:]+)([^#]+)(.*)")   # used in modify_configfile()
 SECLINE =  re.compile(r"\[(.*)\]")                              # used for getting section names
 
@@ -55,13 +52,15 @@ The config_item() class provides handling of one or more config file instances. 
 
 `remap_logdirbase` (default True)
 - If `remap_logdirbase=True` and the tool script is running in _user_ mode (not site mode) 
-then the `core.tool.log_dir_base` will be set to `core.tool.user_config_dir`.
+then the `core.tool.log_dir_base` will be set to `core.tool.config_dir`.
 
 `force_str` (default False)
 - Causes all params to be loaded as type `str`, overriding the default type identification.
 
 `secondary_config` (default False)
 - Set to `True` when loading additional config files.  Disables logging setup related changes.
+- The primary config file should be loaded first before any secondary_config loads, so that logging 
+is properly set up.
 
 
 ### Returns
@@ -78,15 +77,20 @@ Also see the loadconfig() `import` feature.
 - Initially in _user_ mode, after the `set_toolname()` call, `core.tool.log_dir_base` 
 (the log directory) is set to the `core.tool.user_data_dir`.
 Once `config_item()` is called the `core.tool.log_dir_base` is _remapped_ to 
-`core.tool.user_config_dir`.  This is the author's style preference (centralize user files, and 
+`core.tool.config_dir`.  This is the author's style preference (centralize primary files, and 
 reduce spreading files around the file system).
 To disable this remap, in the `config_item()` call set `remap_logdirbase=False`.
 This remapping is not done in site mode.
 - A different log base directory may be set by user code by setting `core.tool.log_dir_base` to a different 
 path after the `set_toolname()` call and before the `config_item()` call, for example 
 `core.tool.log_dir_base = "/var/log"` may be desireable in site mode.
+- A different config directory may be set by user code by setting `core.tool.config_dir` to a different 
+path after the `set_toolname()` call and before the `config_item()` call, for example 
+`core.tool.config_dir = core.tool.main_dir`, which sets the config dir to the same as the tool script's 
+directory.  With `remap_logdirbase=True`, the log dir will also be set to the tool script's directory.
 - Details of the configuration instance may be printed, eg, `print (my_config)`.
     """
+
     def __init__(self, config_file=None, remap_logdirbase=True, force_str=False, secondary_config=False):
         global tool
 
@@ -102,7 +106,7 @@ path after the `set_toolname()` call and before the `config_item()` call, for ex
             self.config_dir         = None
             self.config_full_path   = None
             self.config_timestamp   = 0
-            self.config_content     = ""    # Used by modify_configfile()
+            self.config_content     = ''        # Used by modify_configfile()
         else:
             config = mungePath(config_file, core.tool.config_dir)
             if config.is_file:
@@ -110,14 +114,11 @@ path after the `set_toolname()` call and before the `config_item()` call, for ex
                 self.config_dir         = config.parent
                 self.config_full_path   = config.full_path
                 self.config_timestamp   = 0
-                self.config_content     = ""    # Used by modify_configfile()
-                # if remap_logdirbase  and  tool.log_dir_base == tool.user_data_dir:
-                #     tool.log_dir_base = tool.user_config_dir
+                self.config_content     = ''    # Used by modify_configfile()
             else:
-                # _msg = f"Config file <{config_file}> not found."
                 raise ConfigError (f"Config file <{config_file}> not found.")
         if remap_logdirbase  and  core.tool.log_dir_base == core.tool.user_data_dir:
-            core.tool.log_dir_base = core.tool.user_config_dir  # TODO set this to the current config dir.  Allows log dir to track user modified config dir
+            core.tool.log_dir_base = core.tool.config_dir
 
 
     def _add_key(self, key, value, section_name=''):
@@ -167,69 +168,12 @@ path after the `set_toolname()` call and before the `config_item()` call, for ex
             return None
 
 
-    # def read_string(self, str_blob, ldcfg_ll=DEFAULT_LOGGING_LEVEL, isimport=False):
-    #     for line in str_blob.split('\n'):
-
-    #         # Is an import line
-    #         if line.strip().lower().startswith("import"):
-    #             line = line.split("#", maxsplit=1)[0].strip()
-    #             target = mungePath(line.split(maxsplit=1)[1], self.config_dir)
-    #             # try:
-    #             #     imported_config = config_item(target.full_path)
-    #             #     imported_config.loadconfig(ldcfg_ll, isimport=True)
-    #             try:
-    #                 imported_config = config_item(target.full_path)
-    #                 imported_config.loadconfig(ldcfg_ll, isimport=True)
-    #             except Exception as e:
-    #                 logging.getLogger().setLevel(preexisting_loglevel)
-    #                 raise ConfigError (e)
-    #             try:
-    #                 for key in imported_config.cfg:
-    #                     if self.current_section_name == '':
-    #                         self.cfg[key] = imported_config.cfg[key]
-    #                     elif self.current_section_name == 'DEFAULT':
-    #                         self.defaults[key] = imported_config.cfg[key]
-    #                     else:
-    #                         self.cfg[self.current_section_name][key] = imported_config.cfg[key]
-    #             except Exception as e:
-    #                 logging.getLogger().setLevel(preexisting_loglevel)
-    #                 raise ConfigError (f"Failed importing/processing config file  <{target.full_path}>")
-
-    #         # Is a param/value line or a [section] line
-    #         else:
-    #             _line = line.split("#", maxsplit=1)[0].strip()  # line without comment and leading/trailing whitespace
-    #             if len(_line) > 0:
-    #                 if _line.startswith('['):                       # TODO param cannot start with '['
-    #                     xx = self._check_section(_line)
-    #                     if xx is None:
-    #                         logging.getLogger().setLevel(preexisting_loglevel)
-    #                         raise ConfigError (f"Malformed section line <{line}>")
-    #                     else:
-    #                         if isimport:
-    #                             logging.getLogger().setLevel(preexisting_loglevel)
-    #                             raise ConfigError ("Section within imported file is not supported.")
-    #                         self.current_section_name = xx
-
-    #                 else:
-    #                     out = CFGLINE.match(_line)
-    #                     if out:
-    #                         param = out.group(1)
-    #                         rol   = out.group(2)        # rest of line (value portion)
-
-    #                         value = self._parse_value(rol)
-    #                         # logging.debug (f"Loaded [{self.current_section_name}][{param}] = <{value}>  ({type(value)})")
-    #                         self._add_key(param, value, self.current_section_name)
-    #                         logging.debug (f"Loaded {param} = <{value}>  ({type(value)})")
-    #                     else: 
-    #                         line = line.replace('\n','')
-    #                         logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
-
-
 #=====================================================================================
 #=====================================================================================
 #  s e c t i o n s
 #=====================================================================================
 #=====================================================================================
+
     def sections(self):
         """
 ## sections () - Return a list of sections in the cfg dictionary
@@ -247,6 +191,7 @@ output:
     ['Bad params', 'SMTP']
 ```
         """
+
         return self.sections_list
 
 
@@ -255,23 +200,28 @@ output:
 #  c l e a r
 #=====================================================================================
 #=====================================================================================
-    def clear(self, section=''):        # TODO 'all'
+
+    def clear(self, section=''):
         """
 ## clear (section=' ') - Purge a portion of the cfg dictionary
 
 ***config_item() class member function***
 
 ### Parameters
-`section` (default ' ' - top level)
-- Section to be purged
+`section` (default '')
+- `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
+- `section = '<section_name>'` clears just that section
+- `section = 'DEFAULT'` clears just the DEFAULT section
 
 
 ### Returns
 - A ConfigError is raised if attempting to remove a non-existing section
         """
+
         if section == '':
             self.cfg.clear()
             self.sections_list = []
+            self.defaults.clear()
         elif section in self.sections_list:
             self.cfg.pop(section, None)
             self.sections_list.remove(section)
@@ -286,6 +236,7 @@ output:
 #  _ _ r e p r _ _
 #=====================================================================================
 #=====================================================================================
+
     def __repr__(self):
         stats = ""
         stats += f"\nStats for config file <{self.config_file}>:\n"
@@ -304,12 +255,14 @@ output:
 #  d u m p
 #=====================================================================================
 #=====================================================================================
+
     def dump(self):
         """
 ## dump () - Return the formatted content of the cfg dictionary
 
 ***config_item() class member function***
         """
+
         cfg_list = "***** Section [] *****\n"
         for key in self.cfg:
             if key not in self.sections_list:
@@ -329,6 +282,7 @@ output:
 #  l o a d c o n f i g
 #=====================================================================================
 #=====================================================================================
+
     def loadconfig(self,
             ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
             call_logfile        = None,
@@ -399,8 +353,14 @@ regardless of whether the config file timestamp has changed
 - See `getcfg()`, below, for accessing loaded config data. The class instance-specific `cfg` dictionary may be
   directly accessed as well.
 
-- The format of a config file is param=value pairs.  Separating the param and value may be
-  whitespace, `=` or `:`.  Sections and a DEFAULT section are supported.
+- The format of a config file is param=value pairs.
+  - Separating the param and value may be whitespace, `=` or `:`.  
+  - Param names can contain most all characters, except:  `#` or the separators, and cannot start with `[`.
+
+- Sections and a DEFAULT section are supported.  Section name are enclosed in `[ ]`.
+  - Leading and trailing whitespace is trimmed off of the section name, and embedded whitespace is retained.
+    EG: `[  hello my name  is  Fred  ]` becomes section name `'hello my name  is  Fred'`.
+  - Section names can contain most all characters, except `#` and `]`.
 
 - **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
   type is stored in the `cfg` dictionary if none of the other types can be resolved for a given param value.
@@ -436,8 +396,9 @@ regardless of whether the config file timestamp has changed
   in the config file.
 
 - **Import nested config files** - loadconfig() supports `Import` (case insensitive). The imported file path
-is relative to the `core.tool.config_dir` if not an absolute path.
+is relative to the `core.tool.config_dir`, if not an absolute path.
 The specified file is imported as if the params were in the main config file.  Nested imports are allowed. 
+Sections are not allowed within an imported file - only in the main/top-level config file.
 A prime usage of `import` is to place email server credentials in your home directory with user-only readability,
 then import them in the tool script config file as such: `import ~/creds_SMTP`.  
 
@@ -464,23 +425,15 @@ tool script of the problem for appropriate handling. If `tolerate_missing=False`
 a ConfigError if the config file cannot be accessed.
         """
 
-# TODO what if import changes section?  revert to prior on return?
-# TODO doc DEFAULTs not flushed, but will be loaded
-# TODO doc modify_config will change all occurrences in main, sections or DEFAULT
-        # NOTE:  Failed importing/processing config file  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
-        # rather than saying can't import/process nest_2
-
-
-        global initial_logging_setup
+        global initial_logging_setup_done
         global preexisting_loglevel
 
-        if not initial_logging_setup:   # Do only once, globally  TODO and not self.secondary_config ??? to allow secondary before primary
-            # Initial logging will go to the console if no call_logfile is specified on the initial loadconfig call.
-            # The logging level defaults to WARNING / 30.
-            console_lf = self.getcfg("ConsoleLogFormat", None)  # TODO Why get these when no config will have been loaded at this point?
+        if not initial_logging_setup_done:
+            # Initial logging will go to the console if no call_logfile is specified (and call_logfile_wins) on the initial loadconfig call.
+            console_lf = self.getcfg("ConsoleLogFormat", None)
             file_lf = self.getcfg("FileLogFormat", None)
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
-            initial_logging_setup = True
+            initial_logging_setup_done = True
 
         config = self.config_full_path
 
@@ -491,15 +444,14 @@ a ConfigError if the config file cannot be accessed.
             preexisting_loglevel = logging.getLogger().level
 
             if force_flush_reload:
-                logging.getLogger().setLevel(ldcfg_ll)   # logging within loadconfig is always done at ldcfg_ll
-                logging.info(f"Config  <{self.config_file}>  force flushed (force_flush_reload)")   # TODO - get the name of the config??  2+ places
-                self.cfg.clear()
-                self.sections_list = []
-                self.config_timestamp = 0       # Force reload of the config file
+                logging.getLogger().setLevel(ldcfg_ll)  # logging within loadconfig is always done at ldcfg_ll
+                logging.info(f"Config  <{self.config_file}>  force flushed (force_flush_reload)")
+                self.clear()
+                self.config_timestamp = 0               # Force reload of the config file
 
             # Check if config file is available and has changed
             _exists = False
-            for _ in range(3):
+            for _ in range(IO_RETRY_COUNT):
                 if check_path_exists(config):
                     _exists = True
                     break
@@ -509,24 +461,23 @@ a ConfigError if the config file cannot be accessed.
                     logging.getLogger().setLevel(ldcfg_ll)
                     logging.info (f"Config  <{self.config_file}>  file not currently accessible.  Skipping (re)load.")
                     logging.getLogger().setLevel(preexisting_loglevel)
-                    return -1           # -1 indicates that the config file cannot currently be found
+                    return -1                           # -1 indicates that the config file cannot currently be found
                 else:
                     logging.getLogger().setLevel(preexisting_loglevel)
                     raise ConfigError (f"Could not find  <{self.config_file}>")
 
             current_timestamp = int(self.config_full_path.stat().st_mtime)  # integer-second resolution
             if self.config_timestamp == current_timestamp:
-                return 0                # 0 indicates that the config file was NOT (re)loaded
+                return 0                                # 0 indicates that the config file was NOT (re)loaded
 
             # It's an initial load call, or config file has changed.  Do (re)load.
             self.config_timestamp = current_timestamp
-            logging.getLogger().setLevel(ldcfg_ll)   # Set logging level for remainder of loadconfig call
+            logging.getLogger().setLevel(ldcfg_ll)      # Set logging level for remainder of loadconfig call
             logging.info (f"Config  <{self.config_file}>  file timestamp: {current_timestamp}")
 
             if flush_on_reload:
                 logging.info (f"Config  <{self.config_file}>  flushed due to changed file (flush_on_reload)")
-                self.cfg.clear()
-                self.sections_list = []
+                self.clear()
 
 
         # Load the config
@@ -541,10 +492,11 @@ a ConfigError if the config file cannot be accessed.
             file_lf = self.getcfg("FileLogFormat", None)
             setuplogging(config_logfile=self.getcfg("LogFile", None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
 
-            # if self.getcfg("DontEmail", False, section='SMTP'):
-            #     logging.info ('DontEmail is set - Emails and Notifications will NOT be sent')
-            # elif self.getcfg("DontNotif", False, section='SMTP'):
-            #     logging.info ('DontNotif is set - Notifications will NOT be sent')
+            if 'SMTP' in self.sections_list:
+                if self.getcfg("DontEmail", False, section='SMTP'):
+                    logging.info ('DontEmail is set - Emails and Notifications will NOT be sent')
+                elif self.getcfg("DontNotif", False, section='SMTP'):
+                    logging.info ('DontNotif is set - Notifications will NOT be sent')
 
             config_loglevel = self.getcfg("LogLevel", None)
             if config_loglevel is not None:
@@ -563,8 +515,8 @@ a ConfigError if the config file cannot be accessed.
             logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
             logging.getLogger().setLevel(preexisting_loglevel)
 
-        self.current_section_name = ''      # TODO.  Test reloading config with sections
-        return 1                        # 1 indicates that the config file was (re)loaded
+        self.current_section_name = ''
+        return 1                                        # 1 indicates that the config file was (re)loaded
 
 
 #=====================================================================================
@@ -572,6 +524,7 @@ a ConfigError if the config file cannot be accessed.
 #  r e a d _ s t r i n g
 #=====================================================================================
 #=====================================================================================
+
     def read_string(self, str_blob, ldcfg_ll=DEFAULT_LOGGING_LEVEL, isimport=False):
         """
 ## read_string (str_blob, ldcfg_ll=DEFAULT_LOGGING_LEVEL, isimport=False) - Load content of a string into the cfg dictionary
@@ -605,15 +558,13 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 ### Behaviors and rules
 - See loadconfig() for config loading Behaviors and rules.
         """
+
         for line in str_blob.split('\n'):
 
             # Is an import line
             if line.strip().lower().startswith("import"):
                 line = line.split("#", maxsplit=1)[0].strip()
                 target = mungePath(line.split(maxsplit=1)[1], self.config_dir)
-                # try:
-                #     imported_config = config_item(target.full_path)
-                #     imported_config.loadconfig(ldcfg_ll, isimport=True)
                 try:
                     imported_config = config_item(target.full_path)
                     imported_config.loadconfig(ldcfg_ll, isimport=True)
@@ -636,7 +587,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
             else:
                 _line = line.split("#", maxsplit=1)[0].strip()  # line without comment and leading/trailing whitespace
                 if len(_line) > 0:
-                    if _line.startswith('['):                       # TODO param cannot start with '['
+                    if _line.startswith('['):                   # Section
                         xx = self._check_section(_line)
                         if xx is None:
                             logging.getLogger().setLevel(preexisting_loglevel)
@@ -647,14 +598,16 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                                 raise ConfigError ("Section within imported file is not supported.")
                             self.current_section_name = xx
 
-                    else:
+                    else:                                       # param/value
                         out = CFGLINE.match(_line)
                         if out:
                             param = out.group(1)
                             rol   = out.group(2)        # rest of line (value portion)
 
-                            value = self._parse_value(rol)
-                            # logging.debug (f"Loaded [{self.current_section_name}][{param}] = <{value}>  ({type(value)})")
+                            if rol == '':               # param with no value stored as True
+                                value = True
+                            else:
+                                value = self._parse_value(rol)
                             self._add_key(param, value, self.current_section_name)
                             logging.debug (f"Loaded {param} = <{value}>  ({type(value)})")
                         else: 
@@ -667,9 +620,10 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 #  read_dict
 #=====================================================================================
 #=====================================================================================
+
     def read_dict(self, param_dict, section_name=''):
         """
-## read_dict (param_dict, section_name='') - Load the content of a dictionary into the cfg dictionary
+## read_dict (param_dict, section_name=' ') - Load the content of a dictionary into the cfg dictionary
 
 ***config_item() class member function***
 
@@ -713,6 +667,7 @@ Loaded content is added to and/or modifies any previously loaded content.
     new_config.read_dict(def_contents, 'DEFAULT')
 ```
         """
+
         try:
             if section_name == '':
                 for key in param_dict:
@@ -735,7 +690,8 @@ Loaded content is added to and/or modifies any previously loaded content.
 #  g e t c f g
 #=====================================================================================
 #=====================================================================================
-    def getcfg(self, param, fallback="_nofallback", types=[], section=''):
+
+    def getcfg(self, param, fallback='_nofallback', types=[], section=''):
         """
 ## getcfg (param, fallback=None, types=[ ], section=' ') - Get a param's value from the cfg dictionary
 
@@ -778,6 +734,7 @@ This can lead to cleaner tool script code.  Either access method may be used, al
   or 3) from the `fallback` value if specified.
 - If the param is not found, or the param's type is not in the `types` list, if specified, then a ConfigError is raised.
         """
+
         _value = None
         if section == '':                           # Top-level case
             if param in self.cfg:
@@ -813,57 +770,16 @@ This can lead to cleaner tool script code.  Either access method may be used, al
                     raise ConfigError (f"Config parameter <[{section}] {param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
 
 
-        # if section == '':                           # Top-level case
-        #     if param in self.cfg:
-        #         _value = self.cfg[param]
-        #     elif param in self.defaults:
-        #         _value = self.defaults[param]
-        #     else:
-        #         if fallback != "_nofallback":
-        #             return fallback
-        #         else:
-        #             raise ConfigError (f"getcfg - Param <[{section}] {param}> not in <{self.config_file}> and no default or fallback.")
-        # else:                                       # Section specified case
-        #     if section not in self.sections_list:       # Section doesn't exist case
-        #         if param in self.defaults:
-        #             _value = self.defaults[param]
-        #         else:
-        #             if fallback != "_nofallback":
-        #                 return fallback
-        #             else:
-        #                 raise ConfigError (f"getcfg - Param <[{section}] {param}> not in <{self.config_file}> and no default or fallback.")
-        #     else:                                       # Section exists case
-        #         if param in self.cfg[section]:
-        #             _value = self.cfg[section][param]
-        #         elif param in self.defaults:
-        #             _value = self.defaults[param]
-        #         else:
-        #             if fallback != "_nofallback":
-        #                 return fallback
-        #             else:
-        #                 raise ConfigError (f"getcfg - Param <[{section}] {param}> not in <{self.config_file}> and no default or fallback.")
-
-        # if isinstance(types, type):
-        #     types = [types]
-
-        # if types == []:
-        #         return _value
-        # else:
-        #     if type(_value) in types:
-        #         return _value
-        #     else:
-        #         raise ConfigError (f"getcfg - Config parameter <{param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
-
-
 #=====================================================================================
 #=====================================================================================
 #  m o d i f y _ c o n f i g f i l e
 #=====================================================================================
 #=====================================================================================
+
     def modify_configfile (self, param='', value='', remove=False, add_if_not_existing=False, save=False):
         # TODO Comment out / uncomment out a param
-        # TODO ** Add section select parameter for selective changes.  Also all mode
-        # TODO ** Add a section label
+        # TODO Add section select parameter for selective changes.  Also all mode
+        # TODO Add a section label
         """
 ## modify_configfile (param=' ', value=' ', remove=False, add_if_not_existing=False, save=False) - Make edits to the config file
 
@@ -871,8 +787,9 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 
 Params in the config file may have their values changed, be deleted, or new lines added.
 - All added lines are added at the bottom of the file.
-- All instances of the param (in all sections and DEFAULT) will be modified to the new value.
-- NOTE: This function modifies the instance's configuration file, not
+- _All instances of the param (in all sections and DEFAULT) will be modified to the new value._
+
+NOTE: This function modifies the instance's configuration file, not
 the content currently loaded into the cfg dictionary.
 
 On the first call to modify_configfile() the content of the file is read into memory.  Successive
@@ -887,12 +804,12 @@ reload call to avoid multiple config reloads.
 
 
 ### Parameters
-`param` (default "")
+`param` (default ' ')
 - The param name, if modifying an existing param or adding a new param
 
-`value` (default "")
+`value` (default ' ')
 - The new value to be applied to an existing param, or an added param
-- Will be cast to str
+- Any comment text (after a '#') in the new value will be prepended to any existing comment text
 
 `remove` (default False)
 - If True, the `param` config file line is removed from the config file
@@ -911,6 +828,7 @@ reload call to avoid multiple config reloads.
 - No return value
 - Warning messages are logged for attempting to modify or remove a non-existing param.
         """
+
         if self.config_file is None:
             raise ConfigError ("Config file is None. Cannot modify config not loaded from a file.")
 
@@ -961,3 +879,56 @@ reload call to avoid multiple config reloads.
             self.config_full_path.write_text(self.config_content) # + "\n")
             self.config_content = ""
 
+
+#=====================================================================================
+#=====================================================================================
+#  w r i t e
+#=====================================================================================
+#=====================================================================================
+
+    def write(self, savefile):
+        """
+## write (savefile) - Write config data to a file
+
+***config_item() class member function***
+
+### Parameter
+
+`savefile`
+- Path to the output file.  Path or str type.
+- The config data will be written to an absolute path, or relative to the `core.tool.config_dir`
+
+
+### Returns
+- None on success
+- Raises ConfigError if unable to write the file
+
+
+### Behaviors and rules
+- The created config file is as loaded in memory.  Any imports in the originally loaded config file
+ are merged into the top-level.
+        """
+
+        cfg_list = ''
+        for key in self.cfg:
+            if key not in self.sections_list:
+                cfg_list += f"{key:20} = {self.cfg[key]}\n"
+        cfg_list += f"\n[DEFAULT]\n"
+        for key in self.defaults:
+            cfg_list += f"{key:20} = {self.defaults[key]}\n"
+        for section in self.sections_list:
+            cfg_list += f"\n[{section}]\n"
+            for key in self.cfg[section]:
+                cfg_list += f"{key:20} = {self.cfg[section][key]}\n"
+        
+        outfile = mungePath(savefile, core.tool.config_dir).full_path
+        for _ in range(IO_RETRY_COUNT):
+            try:
+                Path(outfile).write_text(cfg_list)
+                return
+            except Exception as e:
+                _e = e
+                logging.debug(f"Failed try {_} to write config {self.config_file} to file {outfile}\n  {e}")
+
+        raise ConfigError (f"Failed to write config {self.config_file} to file {outfile}\n  {_e}")
+    

@@ -18,25 +18,30 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError
 #  C l a s s   m u n g e P a t h
 #=====================================================================================
 #=====================================================================================
+
 class mungePath():
-    def __init__(self, in_path="", base_path="", mkdir=False):
+    def __init__(self, in_path='', base_path='', mkdir=False):
         """
-## Class mungePath (in_path="", base_path="", mkdir=False) - A clean interface for dealing with filesystem paths
+## Class mungePath (in_path=' ', base_path=' ', mkdir=False) - A clean interface for dealing with filesystem paths
 
 `mungePath()` is based on pathlib, producing Path type attributes and status booleans which may be used with all
 pathlib.Path methods, such as .open().  `mungePath()` accepts paths in two parts - the tool script specific
 portion `in_path` and a `base_path` (prepended if `in_path` is relative), and returns an instance that may 
 be cleanly used in the tool script code.
-User (~user/) and environment vars ($HOME/) are supported and expanded.
+User (`~user/`) and environment vars (`$HOME/`) are supported and expanded.
 
 
 ### Parameters
-`in_path`
-- An absolute or relative path to a file or directory, such as `mydir/myfile.txt`.  
+`in_path` (default '')
+- An absolute or relative path to a file or directory, such as `mydir/myfile.txt`
+- If `in_path` is an absolute path then `base_path` is disregarded.
 
-`base_path`
-- An absolute or relative path to a file or directory, such as `~/.config/mytool`, prepended to `in_path` if
-`in_path` is a relative path.
+`base_path` (default '')
+- An absolute or relative path to a directory, such as `~/.config/mytool`
+- `base_path` is prepended to `in_path` if `in_path` is a relative path
+- `base_path = ''` (the default) results in a relative path based on the shell current working directory (cwd)
+- `base_path = '.'` results in an absolute path based on the shell cwd
+- `base_path = core.tool.main_dir` results in an absolute path based on the tool script directory
 
 `mkdir`
 - Force-make a full directory path.  `in_path` / `base_path` is understood to be to a directory.
@@ -63,7 +68,7 @@ Attribute | Type | Description
 ### Behaviors and rules
 - If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
 - If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
-the tool script directory (generally not useful).
+the shell cwd.
 - If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
 - `in_path` and `base_path` may be type str(), Path(), or PurePath().
 - Symlinks are followed (not resolved).
@@ -72,12 +77,12 @@ the tool script directory (generally not useful).
 directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
 `.parent` is the directory above the end-point directory.
 - When using `mkdir=True` the combined `in_path` / `base_path` is understood to be a directory path (not
-to a file), and will be created if it does not already exist. (Uses pathlib.Path.mkdir()).  A FileExistsError 
+to a file), and will be created if it does not already exist. (Uses `pathlib.Path.mkdir()`).  A FileExistsError 
 is raised if you attempt to mkdir on top of an existing file.
-- See [GitHub repo](https://github.com/cjnaz/cjnfuncs) /tests/demo-mungePath.py for numerous application examples.
+- See [GitHub repo](https://github.com/cjnaz/cjnfuncs) tests/demo-mungePath.py for numerous application examples.
         """
 
-# ```
+# ``` TODO # Keep until above table format verified on PyPI & Github
 # .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
 # .parent         Path        The directory above the .full_path
 # .name           str         Just the name.suffix of the .full_path
@@ -116,15 +121,17 @@ is raised if you attempt to mkdir on top of an existing file.
         try:
             self.is_dir =  self.full_path.is_dir()
             self.is_file = self.full_path.is_file()
-        except:
+        except:     # Trap if the path does not exist
             self.is_dir =  False
             self.is_file = False
+
 
 #=====================================================================================
 #=====================================================================================
 #  r e f r e s h _ s t a t s
 #=====================================================================================
 #=====================================================================================
+
     def refresh_stats(self):
         """
 ## refresh_stats () - Update the instance booleans
@@ -141,12 +148,10 @@ happen on the filesystem.  Call refresh_stats() as needed.
         self.exists = check_path_exists(self.full_path)
         self.is_absolute = self.full_path.is_absolute()
         self.is_relative = not self.is_absolute
-        # self.is_dir =  self.full_path.is_dir()
-        # self.is_file = self.full_path.is_file()
         try:
             self.is_dir =  self.full_path.is_dir()
             self.is_file = self.full_path.is_file()
-        except:
+        except:     # Trap if the path does not exist
             self.is_dir =  False
             self.is_file = False
         return self
@@ -170,6 +175,7 @@ happen on the filesystem.  Call refresh_stats() as needed.
 #  c h e c k _ p a t h _ e x i s t s
 #=====================================================================================
 #=====================================================================================
+
 def check_path_exists(path, timeout=1):
     """
 ## check_path_exists (path, timeout=1) - With enforced timeout (no hang)
