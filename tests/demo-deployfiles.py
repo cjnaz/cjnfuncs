@@ -16,9 +16,10 @@ import argparse
 import os
 import sys
 import shutil
-from cjnfuncs.core        import set_toolname
+from pathlib import Path
+from cjnfuncs.core        import set_toolname, setuplogging, logging
 from cjnfuncs.deployfiles import deploy_files
-from cjnfuncs.mungePath   import mungePath
+from cjnfuncs.mungePath   import mungePath, check_path_exists
 import cjnfuncs.core as core
 
 
@@ -32,6 +33,8 @@ parser.add_argument('--cleanup', action='store_true',
 args = parser.parse_args()
 
 set_toolname(TOOLNAME)
+setuplogging()
+logging.getLogger().setLevel(logging.INFO)
 
 
 if args.setup_user:
@@ -84,8 +87,93 @@ if args.cleanup:
 
 print(core.tool)
 
-
 if not mungePath(CONFIG_FILE, core.tool.user_config_dir).exists  and  not mungePath(CONFIG_FILE, core.tool.site_config_dir).exists:
     print (f"No user or site setup found.  Run with <--setup-user> or <--setup-site> to set up the environment.")
 else:
     print ("Inspect the created directories/files for proper content and permissions per the deploy_files call.")
+
+
+# *****  Test Error Traps
+print ("\n\n=====================================================================")
+print ("***** Test 1:  User cannot write on site dir")
+try:
+    deploy_files([
+        { "source": CONFIG_FILE,            "target_dir": "SITE_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o777} ])
+except Exception:
+    logging.exception("deploy_files() failed.")
+
+print ("\n\n=====================================================================")
+print ("***** Test 1a: User cannot write on site dir - Quiet exception handling")
+try:
+    deploy_files([
+        { "source": CONFIG_FILE,            "target_dir": "SITE_CONFIG_DIR",            "file_stat": 0o644, "dir_stat": 0o777} ])
+except Exception as e:
+    logging.warning(f"deploy_files() failed.\n  {e}")
+
+print ("\n\n=====================================================================")
+print ("***** Test 2:  Overwrite existing directory")
+try:
+    deploy_files([
+        { "source": "test_dir",             "target_dir": "USER_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o770}, ], overwrite=True)
+    deploy_files([
+        { "source": "test_dir",             "target_dir": "USER_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o770}, ], overwrite=True)
+except Exception:
+    logging.exception("deploy_files() failed.")
+
+print ("\n\n=====================================================================")
+print ("***** Test 3:  Overwrite existing directory skipped")
+try:
+    deploy_files([
+        { "source": "test_dir",             "target_dir": "USER_DATA_DIR/mydirs",       "file_stat": 0o633, "dir_stat": 0o770}, ])
+except Exception:
+    logging.exception("deploy_files() failed.")
+
+print ("\n\n=====================================================================")
+print ("***** Test 4:  Try copy non-existing source file")
+try:
+    deploy_files([
+        { "source": "no_such_file",         "target_dir": "USER_DATA_DIR",              "file_stat": 0o633, "dir_stat": 0o770}, ])
+except Exception:
+    logging.exception("deploy_files() failed.")
+
+print ("\n\n=====================================================================")
+print ("***** Test 4a: Try copy non-existing source file - Quiet exception handling")
+try:
+    deploy_files([
+        { "source": "no_such_file",         "target_dir": "USER_DATA_DIR",              "file_stat": 0o633, "dir_stat": 0o770}, ])
+except Exception as e:
+    logging.warning(f"deploy_files() failed.\n  {e}")
+
+print ("\n\n=====================================================================")
+print ("***** Test 5:  Try copy non-existing source file with missing_ok")
+try:
+    deploy_files([
+        { "source": "no_such_file",         "target_dir": "USER_DATA_DIR",              "file_stat": 0o633, "dir_stat": 0o770}, ], missing_ok=True)
+except Exception:
+    logging.exception("deploy_files() failed.")
+
+print ("\n\n=====================================================================")
+print ("***** Test 6:  Destination is an existing file")
+outfile = Path('/tmp/deployfile_T6')
+outfile.write_text('')
+try:
+    deploy_files([
+        { "source": CONFIG_FILE,            "target_dir": "/tmp/deployfile_T6",         "file_stat": 0o633, "dir_stat": 0o770}, ], missing_ok=True)
+except Exception:
+    logging.exception("deploy_files() failed.")
+outfile.unlink()
+
+print ("\n\n=====================================================================")
+print ("***** Test 7:  Destination is an existing file, overwrite but no permission")
+outfile = mungePath(CONFIG_FILE, '/tmp').full_path
+if not check_path_exists(outfile):
+    outfile.write_text('')
+    os.chmod(str(outfile), 0o000)
+try:
+    deploy_files([
+        { "source": CONFIG_FILE,            "target_dir": "/tmp",         "file_stat": 0o633} ], overwrite=True)
+except Exception:
+    logging.exception("deploy_files() failed.")
+outfile.unlink(missing_ok=True)
+
+

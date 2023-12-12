@@ -501,9 +501,10 @@ a ConfigError if the config file cannot be accessed.
             config_loglevel = self.getcfg("LogLevel", None)
             if config_loglevel is not None:
                 try:
-                    config_loglevel = int(config_loglevel)
+                    config_loglevel = int(config_loglevel)  # Handles force_str=True
                 except:
-                    raise ConfigError (f"Config file <LogLevel> must be integer value (found {config_loglevel})")
+                # if not isinstance(config_loglevel, int):
+                    raise ConfigError (f"Config file <LogLevel> must be integer value (found <{config_loglevel}>)") from None
                 logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
                 logging.getLogger().setLevel(config_loglevel)
             else:
@@ -568,10 +569,6 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                 try:
                     imported_config = config_item(target.full_path)
                     imported_config.loadconfig(ldcfg_ll, isimport=True)
-                except Exception as e:
-                    logging.getLogger().setLevel(preexisting_loglevel)
-                    raise ConfigError (e)
-                try:
                     for key in imported_config.cfg:
                         if self.current_section_name == '':
                             self.cfg[key] = imported_config.cfg[key]
@@ -581,7 +578,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                             self.cfg[self.current_section_name][key] = imported_config.cfg[key]
                 except Exception as e:
                     logging.getLogger().setLevel(preexisting_loglevel)
-                    raise ConfigError (f"Failed importing/processing config file  <{target.full_path}>")
+                    raise e
 
             # Is a param/value line or a [section] line
             else:
@@ -681,7 +678,9 @@ Loaded content is added to and/or modifies any previously loaded content.
                     self.sections_list.append(section_name)
                 for key in param_dict:
                     self.cfg[section_name][key] = param_dict[key]
-        except Exception as e:
+        # except Exception as e:
+        #     raise ConfigError (f"Failed loading dictionary into cfg around key <{key}>")
+        except Exception:
             raise ConfigError (f"Failed loading dictionary into cfg around key <{key}>")
 
 
@@ -922,13 +921,13 @@ reload call to avoid multiple config reloads.
                 cfg_list += f"{key:20} = {self.cfg[section][key]}\n"
         
         outfile = mungePath(savefile, core.tool.config_dir).full_path
-        for _ in range(IO_RETRY_COUNT):
+        for ntry in range(IO_RETRY_COUNT):
             try:
                 Path(outfile).write_text(cfg_list)
                 return
             except Exception as e:
                 _e = e
-                logging.debug(f"Failed try {_} to write config {self.config_file} to file {outfile}\n  {e}")
+                logging.debug(f"Failed try {ntry} to write config {self.config_file} to file {outfile}\n  {e}")
 
         raise ConfigError (f"Failed to write config {self.config_file} to file {outfile}\n  {_e}")
     

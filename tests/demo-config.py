@@ -707,6 +707,15 @@ if args.test == 0  or  args.test == 23:
     except ConfigError as e:
         print (f"ConfigError:  {e}")
 
+    logging.warning (f"\n----- T23.1a:  Section defined within imported config file")
+    try:
+        T23_config = config_item("demo_config_T23a.cfg")
+        T23_config.loadconfig(ldcfg_ll=10)
+    except ConfigError as e:
+        logging.exception ("----- T23.1a:  Section defined within imported config file")
+        # print (f"ConfigError:  {e}")
+
+
     print (f"\n----- T23.2:  Malformed Section name")
     try:
         T23_config = config_item("demo_config_T23c.cfg")

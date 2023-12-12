@@ -106,10 +106,11 @@ is raised if you attempt to mkdir on top of an existing file.
             in_path_pp = _base_path / in_path_pp
 
         if mkdir:
-            try:
-                Path(in_path_pp).mkdir(parents=True, exist_ok=True)
-            except Exception as e:
-                raise FileExistsError (e)
+            Path(in_path_pp).mkdir(parents=True, exist_ok=True)
+            # try:
+            #     Path(in_path_pp).mkdir(parents=True, exist_ok=True)
+            # except Exception as e:
+            #     raise FileExistsError (e)
 
         self.parent = Path(in_path_pp.parent)
         self.full_path = Path(in_path_pp)

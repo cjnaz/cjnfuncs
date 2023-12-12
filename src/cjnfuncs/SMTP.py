@@ -101,9 +101,9 @@ messages are also blocked if `DontEmail` is True.
             logging.warning (f"Notification sent <{subj}> <{msg}>")
         else:
             logging.debug (f"Notification sent <{subj}> <{msg}>")
-    except:
+    except Exception as e:
         logging.warning (f"Notification send failed <{subj}> <{msg}>")
-        raise
+        raise e
 
 
 #=====================================================================================
@@ -218,7 +218,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             with Path.open(xx.full_path) as ifile:
                 m_text = ifile.read()
         except Exception as e:
-            raise SndEmailError (f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}")
+            raise SndEmailError (f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}") from None
 
     elif htmlfile:
         xx = mungePath(htmlfile, core.tool.cache_dir)
@@ -227,7 +227,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             with Path.open(xx.full_path) as ifile:
                 m_text = ifile.read()
         except Exception as e:
-            raise SndEmailError (f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}")
+            raise SndEmailError (f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}") from None
 
     else:
         raise SndEmailError (f"snd_email - Message subject <{subj}>:  No body, filename, or htmlfile specified.")
@@ -308,8 +308,8 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
         except Exception as e:
             last_error = e
+            logging.debug(f"Email send try {trynum} failed:\n  <{e}>")
             if trynum < ntries -1:
-                logging.debug(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec>:\n  <{e}>")
                 time.sleep(retry_wait)
             continue
 

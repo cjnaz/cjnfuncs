@@ -1,0 +1,123 @@
+    deployfiles.deploy_files         -     INFO:  Deployed  demo_deployfiles.cfg to  /home/cjn/.config/cjnfuncs_testdeployfiles/demo_deployfiles.cfg
+    deployfiles.deploy_files         -     INFO:  Deployed  demo_deployfiles.cfg to  /home/cjn/.config/cjnfuncs_testdeployfiles/subdir/demo_deployfiles.cfg
+    deployfiles.deploy_files         -     INFO:  Deployed  testfile.txt         to  /home/cjn/.config/junk2/testfile.txt
+    deployfiles.deploy_files         -     INFO:  Deployed  testfile.txt         to  /home/cjn/.config/cjnfuncs_testdeployfiles/dirxxx/testfile.txt
+    deployfiles.deploy_files         -     INFO:  Deployed  test_dir             to  /home/cjn/.local/share/cjnfuncs_testdeployfiles/mydirs
+    deployfiles.deploy_files         -     INFO:  Deployed  test_dir/subdir/x4   to  /home/cjn/.config/cjnfuncs_testdeployfiles/mydirs/x4
+
+Stats for set_toolname <cjnfuncs_testdeployfiles>:
+.toolname         :  cjnfuncs_testdeployfiles
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py'>
+.main_full_path   :  /mnt/share/dev/packages/cjnfuncs/tests/demo-deployfiles.py
+.main_dir         :  /mnt/share/dev/packages/cjnfuncs/tests
+General user and site paths:
+.user_config_dir  :  /home/cjn/.config/cjnfuncs_testdeployfiles
+.user_data_dir    :  /home/cjn/.local/share/cjnfuncs_testdeployfiles
+.user_state_dir   :  /home/cjn/.local/state/cjnfuncs_testdeployfiles
+.user_cache_dir   :  /home/cjn/.cache/cjnfuncs_testdeployfiles
+.user_log_dir     :  /home/cjn/.cache/cjnfuncs_testdeployfiles/log
+.site_config_dir  :  /etc/xdg/cjnfuncs_testdeployfiles
+.site_data_dir    :  /usr/share/cjnfuncs_testdeployfiles
+Based on found user or site dirs:
+.env_defined      :  user
+.config_dir       :  /home/cjn/.config/cjnfuncs_testdeployfiles
+.data_dir         :  /home/cjn/.local/share/cjnfuncs_testdeployfiles
+.state_dir        :  /home/cjn/.local/state/cjnfuncs_testdeployfiles
+.cache_dir        :  /home/cjn/.cache/cjnfuncs_testdeployfiles
+.log_dir_base     :  /home/cjn/.local/share/cjnfuncs_testdeployfiles
+.log_dir          :  None
+.log_file         :  None
+.log_full_path    :  __console__
+Inspect the created directories/files for proper content and permissions per the deploy_files call.
+
+
+=====================================================================
+***** Test 1:  User cannot write on site dir
+demo-deployfiles.<module>             -    ERROR:  deploy_files() failed.
+Traceback (most recent call last):
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 100, in <module>
+    deploy_files([
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 126, in deploy_files
+    target_dir = resolve_target(item["target_dir"], mkdir=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 92, in resolve_target
+    xx = mungePath(_targ, base_path, mkdir=mkdir)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 109, in __init__
+    Path(in_path_pp).mkdir(parents=True, exist_ok=True)
+  File "/usr/local/lib/python3.11/pathlib.py", line 1116, in mkdir
+    os.mkdir(self, mode)
+PermissionError: [Errno 13] Permission denied: '/etc/xdg/cjnfuncs_testdeployfiles'
+
+
+=====================================================================
+***** Test 1a: User cannot write on site dir - Quiet exception handling
+demo-deployfiles.<module>             -  WARNING:  deploy_files() failed.
+  [Errno 13] Permission denied: '/etc/xdg/cjnfuncs_testdeployfiles'
+
+
+=====================================================================
+***** Test 2:  Overwrite existing directory
+    deployfiles.deploy_files         -     INFO:  Deployed  test_dir             to  /home/cjn/.local/share/cjnfuncs_testdeployfiles/mydirs
+    deployfiles.deploy_files         -     INFO:  Deployed  test_dir             to  /home/cjn/.local/share/cjnfuncs_testdeployfiles/mydirs
+
+
+=====================================================================
+***** Test 3:  Overwrite existing directory skipped
+    deployfiles.deploy_files         -     INFO:  Directory </home/cjn/.local/share/cjnfuncs_testdeployfiles/mydirs> already exists.  Copytree skipped.
+
+
+=====================================================================
+***** Test 4:  Try copy non-existing source file
+demo-deployfiles.<module>             -    ERROR:  deploy_files() failed.
+Traceback (most recent call last):
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 134, in <module>
+    deploy_files([
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 156, in deploy_files
+    raise FileNotFoundError (f"Can't deploy <{source.name}>.  Item not found.")
+FileNotFoundError: Can't deploy <no_such_file>.  Item not found.
+
+
+=====================================================================
+***** Test 4a: Try copy non-existing source file - Quiet exception handling
+demo-deployfiles.<module>             -  WARNING:  deploy_files() failed.
+  Can't deploy <no_such_file>.  Item not found.
+
+
+=====================================================================
+***** Test 5:  Try copy non-existing source file with missing_ok
+    deployfiles.deploy_files         -     INFO:  Can't deploy <no_such_file>.  Item not found and missing_ok=True.  Skipping.
+
+
+=====================================================================
+***** Test 6:  Destination is an existing file
+demo-deployfiles.<module>             -    ERROR:  deploy_files() failed.
+Traceback (most recent call last):
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 160, in <module>
+    deploy_files([
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 126, in deploy_files
+    target_dir = resolve_target(item["target_dir"], mkdir=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 92, in resolve_target
+    xx = mungePath(_targ, base_path, mkdir=mkdir)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 109, in __init__
+    Path(in_path_pp).mkdir(parents=True, exist_ok=True)
+  File "/usr/local/lib/python3.11/pathlib.py", line 1116, in mkdir
+    os.mkdir(self, mode)
+FileExistsError: [Errno 17] File exists: '/tmp/deployfile_T6'
+
+
+=====================================================================
+***** Test 7:  Destination is an existing file, overwrite but no permission
+demo-deployfiles.<module>             -    ERROR:  deploy_files() failed.
+Traceback (most recent call last):
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 173, in <module>
+    deploy_files([
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 132, in deploy_files
+    with outfile.open('w') as ofile:
+         ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/tmp/demo_deployfiles.cfg'

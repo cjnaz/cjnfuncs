@@ -17,7 +17,7 @@ import sys
 import os
 import shutil
 
-from cjnfuncs.core     import set_toolname, SndEmailError
+from cjnfuncs.core     import set_toolname, SndEmailError, logging
 from cjnfuncs.configman import config_item
 from cjnfuncs.deployfiles import deploy_files
 from cjnfuncs.mungePath import mungePath
@@ -73,107 +73,162 @@ except Exception as e:
     sys.exit()
 
 if args.test == 0  or  args.test == 1:
-    print ()
+    print ("\n\n=====================================================================")
+    test_desc = '1:  body to EmailTo'
     try:    # This first send will fail with <[Errno -2] Name or service not known> if smtp server params are not valid
-        snd_email (subj="1:  body to EmailTo", to="EmailTo", body="To be, or not to be...", log=True, smpt_config=config)
-    except Exception as e:
-        print (f"snd_email failed:  {e}")
-        print ("The config files probably need to be customized.")
+        snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>. The config files need to be customized?")
+        # print (f"snd_email failed:  {e}")
+        # print ("The config files probably need to be customized.")
         sys.exit()
 
 if args.test == 0  or  args.test == 2:
-    print ()
+    print ("\n\n=====================================================================")
+    test_desc = '2:  body to EmailTo - not logged'
     try:
-        snd_email (subj="2:  body to EmailTo - not logged", to="EmailTo", body="To be, or not to be...", smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
+    # except SndEmailError as e:
+    #     print (f"snd_email failed:  {e}")
 
 if args.test == 0  or  args.test == 3:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '3:  filename to EmailTo - not logged'
     try:
-        snd_email (subj="3:  filename to EmailTo - not logged", to="EmailTo", filename=mungePath("testfile.txt", core.tool.config_dir).full_path, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, to="EmailTo", filename=mungePath("testfile.txt", core.tool.config_dir).full_path, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 4:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '4:  htmlfile to EmailTo'
     try:
-        snd_email (subj="4:  htmlfile to EmailTo", htmlfile="testfile.html", to="EmailTo", log=True, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, htmlfile="testfile.html", to="EmailTo", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 5:
-    print ()
-    snd_email (subj="5:  body to EmailToMulti", body="To be, or not to be...", to="EmailToMulti", log=True, smpt_config=config)
+    print ("\n\n=====================================================================")
+
+    test_desc = '5:  body to EmailToMulti'
+    try:
+        snd_email (subj=test_desc, body="To be, or not to be...", to="EmailToMulti", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 6:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '6:  No such file nofile.txt'
     try:
-        snd_email (subj="6:  No such file nofile.txt", filename="nofile.txt", to="EmailTo", log=True, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, filename="nofile.txt", to="EmailTo", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 7:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '7:  No to='
     try:
-        snd_email (subj="7:  No to=", body="Hello", smpt_config=config)
-    except Exception as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, body="Hello", smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 8:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '8:  Invalid to='
     try:
-        snd_email (subj="8:  Invalid to=", body="Hello", to="me@example.com, junkAtexample.com", log=True, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, body="Hello", to="me@example.com, junkAtexample.com", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 9:
-    print ()
-    snd_notif (subj="9:  This is a test subject - not logged", msg='This is the message body', smpt_config=config)       # to defaults to cfg["NotifList"]
+    print ("\n\n=====================================================================")
+
+    test_desc = '9:  This is a test subject - not logged'
+    try:
+        snd_notif (subj=test_desc, msg='This is the message body', smtp_config=config)       # to defaults to cfg["NotifList"]
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 10:
-    print ()
-    snd_notif (subj="10: This is another test subject", msg='This is another message body', log=True, smpt_config=config)
+    print ("\n\n=====================================================================")
+
+    test_desc = '10: This is another test subject'
+    try:
+        snd_notif (subj=test_desc, msg='This is another message body', log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 11:
-    print ()
-    snd_notif (subj="11: snd_notif with to='EmailTo'", msg='This is another message body', to="EmailTo", log=True, smpt_config=config)
+    print ("\n\n=====================================================================")
+
+    test_desc = "11: snd_notif with to='EmailTo'"
+    try:
+        snd_notif (subj=test_desc, msg='This is another message body', to="EmailTo", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 12:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '12: No body, filename, or htmlfile'
     try:
-        snd_email (subj="12: No body, filename, or htmlfile", to="EmailTo", log=True, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, to="EmailTo", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 13:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '13: Empty to='
     try:
-        snd_email (subj="13: Empty to=", to="", body="Hello", log=True, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, to="", body="Hello", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 14:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = "14: Invalid to='inval@i^*#d"
     try:
-        snd_email (subj="14: Invalid to='inval@i^*#d", to="inval@i^*#d", body="Hello", log=True, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, to="inval@i^*#d", body="Hello", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 15:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '15:  Failed email server'
     config.cfg['SMTP']['EmailServer'] = 'nosuchserver.nosuchmail.com'
-    # cfg['EmailServer'] = 'nosuchserver.nosuchmail.com'
     try:
-        snd_email (subj="15:  Failed email server", to="EmailTo", body="To be, or not to be...", log=True, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 16:
-    print ()
+    print ("\n\n=====================================================================")
+
+    test_desc = '16:  Bad server port'
     config.read_dict({'EmailServerPort':'badport'}, section_name='SMTP')
-    # cfg['EmailServerPort'] = 'badport'
     try:
-        snd_email (subj="16:  Bad server port", to="EmailTo", body="To be, or not to be...", log=True, smpt_config=config)
-    except SndEmailError as e:
-        print (f"snd_email failed:  {e}")
+        snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
+
+if args.test == 0  or  args.test == 17:
+    print ("\n\n=====================================================================")
+
+    test_desc = '17:  snd_notif Failed email server'
+    config.cfg['SMTP']['EmailServer'] = 'nosuchserver.nosuchmail.com'
+    try:
+        snd_notif (subj=test_desc, msg='This is the message body', smtp_config=config)
+        # snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
+    except Exception:
+        logging.exception (f"Test failed:  <{test_desc}>")
+
