@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.1b10"
+version = "2.1b11"
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
 requires-python = ">=3.6"       # Centos 7 uses 3.6.8

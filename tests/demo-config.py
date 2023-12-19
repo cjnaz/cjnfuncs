@@ -17,18 +17,13 @@ import os.path
 import shutil
 import sys
 import time
-# from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, getcfg, cfg, timevalue, retime, mungePath, ConfigError
 
-
-# from cjnfuncs.cjnfuncs import set_toolname, setuplogging, logging, deploy_files, config_item, timevalue, retime, mungePath, ConfigError
 from cjnfuncs.core     import set_toolname, setuplogging, logging, ConfigError
-import cjnfuncs.core as core
-# tool = set_toolname(TOOLNAME)
-
 from cjnfuncs.deployfiles import deploy_files
 from cjnfuncs.configman import config_item
 from cjnfuncs.timevalue import timevalue, retime
 from cjnfuncs.mungePath import mungePath
+import cjnfuncs.core as core
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-t', '--test', type=int, default=3,
@@ -37,9 +32,8 @@ parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 args = parser.parse_args()
 
-
-# tool = set_toolname(TOOLNAME)
 set_toolname(TOOLNAME)
+
 
 if args.cleanup:
     if os.path.exists(core.tool.config_dir):
@@ -60,7 +54,7 @@ def print_test_header(tnum, header):
 #===============================================================================================
 if args.test == 0  or  args.test == 1:
     print_test_header (1, "Tests for log file control")
-    deploy_files([
+    deploy_files([      # Not logged since default logging level is WARNING
         { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
         ], overwrite=True )
     remove_file(mungePath('call_logfile', core.tool.config_dir).full_path)
@@ -76,7 +70,6 @@ if args.test == 0  or  args.test == 1:
     print ("\n----- T1.2:  LogFile=None, call_logfile=None, call_logfile_wins=True >>>>  Log file: __console__")
     config_T1 = config_item("demo_config_T1.cfg")
     config_T1.loadconfig(ldcfg_ll=10, call_logfile=None, call_logfile_wins=True,    force_flush_reload=True)
-        # loadconfig params:   ldcfg_ll=10, call_logfile=None, call_logfile_wins=True, flush_on_reload=True, force_flush_reload=True)
     print (f"Current log file:              {core.tool.log_full_path}")
     logging.warning (f"T1.2 - Log to  <{core.tool.log_full_path}>")
 
@@ -149,8 +142,6 @@ if args.test == 0  or  args.test == 1:
     config_T1.loadconfig (ldcfg_ll=10, call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
     print (f"Current log file:              {core.tool.log_full_path}")
     logging.warning (f"T1.14 - Log to  <{core.tool.log_full_path}>")
-
-    # sys.exit()
 
 
 #===============================================================================================
@@ -259,6 +250,7 @@ if args.test == 0  or  args.test == 2:
 
 def do_base_setup(config_load_ll=30):
     global config
+    logging.getLogger().setLevel(20)
     deploy_files([
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
         { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
@@ -499,7 +491,6 @@ if args.test == 0  or  args.test == 14:
     config.modify_configfile("a",                        "Modify all occurrences")
 
     config.modify_configfile(save=True)
-    # config.loadconfig(ldcfg_ll=10, force_flush_reload=True)
     config.loadconfig(force_flush_reload=True)
     print(config.dump())
     print (f"Check:  diff {config.config_full_path} demo-config-T14-golden.cfg")
@@ -707,13 +698,12 @@ if args.test == 0  or  args.test == 23:
     except ConfigError as e:
         print (f"ConfigError:  {e}")
 
-    logging.warning (f"\n----- T23.1a:  Section defined within imported config file")
+    print (f"\n----- T23.1a:  Section defined within imported config file")
     try:
         T23_config = config_item("demo_config_T23a.cfg")
         T23_config.loadconfig(ldcfg_ll=10)
     except ConfigError as e:
         logging.exception ("----- T23.1a:  Section defined within imported config file")
-        # print (f"ConfigError:  {e}")
 
 
     print (f"\n----- T23.2:  Malformed Section name")

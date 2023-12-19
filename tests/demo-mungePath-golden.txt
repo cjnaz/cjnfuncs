@@ -2,7 +2,7 @@
 
 ***** File paths relative to a base path
 
-NOTE:  01 - Path specified relative to the calling script directory - Returns absolute results
+NOTE:  01 - Returns absolute path to shell cwd
 Given:
  in_path   :  <xyz/file.txt>
  base_path :  <.>
@@ -17,7 +17,7 @@ Given:
 .is_file      :  False
 
 
-NOTE:  02 - Returns relative '.' (current directory)
+NOTE:  02 - No base_path - Returns relative path from shell cwd
 Given:
  in_path   :  <>
  base_path :  <>
@@ -32,7 +32,7 @@ Given:
 .is_file      :  False
 
 
-NOTE:  03 - No base_path - returns relative to script dir - same dir
+NOTE:  03 - No base_path - Returns relative path from shell cwd - same dir
 Given:
  in_path   :  <file.txt>
  base_path :  <>
@@ -47,7 +47,7 @@ Given:
 .is_file      :  False
 
 
-NOTE:  04 - No base_path - returns relative to script dir - below
+NOTE:  04 - No base_path - Returns relative path from shell cwd - below
 Given:
  in_path   :  <xyz/file.txt>
  base_path :  <>
@@ -62,7 +62,7 @@ Given:
 .is_file      :  False
 
 
-NOTE:  05 - No base_path - returns relative to script dir - above
+NOTE:  05 - No base_path - Returns relative path from shell cwd - above
 Given:
  in_path   :  <../file.txt>
  base_path :  <>
@@ -77,7 +77,22 @@ Given:
 .is_file      :  False
 
 
-NOTE:  06 - Returns absolute full path to calling script dir
+NOTE:  05a- No base_path - Make dir at shell cwd)
+Given:
+ in_path   :  <newdir>
+ base_path :  <>
+ mkdir     :  <True>
+.full_path    :  newdir
+.parent       :  .
+.name         :  newdir
+.is_absolute  :  False
+.is_relative  :  True
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+
+NOTE:  06 - Returns absolute full path to shell cwd
 Given:
  in_path   :  <>
  base_path :  <.>
@@ -122,7 +137,7 @@ Given:
 .is_file      :  False
 
 
-NOTE:  09 - User expanded, An absolute in_path overrides the base_path (base_path not used)
+NOTE:  09 - User expanded, Absolute in_path overrides the base_path (base_path not used)
 Given:
  in_path   :  <~/xyz/file.txt>
  base_path :  <.>
@@ -398,22 +413,19 @@ Given:
 Exception: [Errno 17] File exists: '/tmp/mungePath/dummyfile.txt'
 
 
-***** README.md mungePath example
-.full_path    :  /home/cjn/.local/share/mytool/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mytool/mysubdir
+***** Referencing the tool script dir
+
+NOTE:  27 - Returns absolute path to script dir
+Given:
+ in_path   :  <xyz/file.txt>
+ base_path :  </mnt/share/dev/packages/cjnfuncs/tests>
+ mkdir     :  <False>
+.full_path    :  /mnt/share/dev/packages/cjnfuncs/tests/xyz/file.txt
+.parent       :  /mnt/share/dev/packages/cjnfuncs/tests/xyz
 .name         :  file.txt
 .is_absolute  :  True
 .is_relative  :  False
 .exists       :  False
 .is_dir       :  False
 .is_file      :  False
-
-.full_path    :  /home/cjn/.local/share/mytool/mysubdir/file.txt
-.parent       :  /home/cjn/.local/share/mytool/mysubdir
-.name         :  file.txt
-.is_absolute  :  True
-.is_relative  :  False
-.exists       :  True
-.is_dir       :  False
-.is_file      :  True
 
