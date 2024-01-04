@@ -4,13 +4,13 @@ cjnfuncs is comprised of several modules (links to respective documentation):
 
 module | Description/Purpose
 --|--
-[core](./core.md)               | Set up the base environment
-[configman](./configman.md)     | Feature-rich configuration file toolset
-[timevalue](./timevalue.md)     | Handle time values with units, such as '5m' (5 minutes)
-[mungePath](./mungePath.md)     | Ease-of-use pathlib extenstion for constructing and manipulating file paths
-[deployfiles](./deployfiles.md) | Push bundled setup files within a package to the proper user/system locations
-[resourcelock](./resourcelock.md) | Inter-process resource lock mechanism
-[SMTP](./SMTP.md)               | Send notification and email messages
+[core](core.md)               | Set up the base environment
+[configman](configman.md)     | Feature-rich configuration file toolset
+[timevalue](timevalue.md)     | Handle time values with units, such as '5m' (5 minutes)
+[mungePath](mungePath.md)     | Ease-of-use pathlib extenstion for constructing and manipulating file paths
+[deployfiles](deployfiles.md) | Push bundled setup files within a package to the proper user/system locations
+[resourcelock](resourcelock.md) | Inter-process resource lock mechanism
+[SMTP](SMTP.md)               | Send notification and email messages
 
 Developed and tested on Python 3.6.8, and supported on all higher Python versions.
 Developed on Linux, supported also on Windows (tested on Windows 10).
