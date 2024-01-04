@@ -206,6 +206,9 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 - Checking the validity of email addresses is very basic... an email address must contain an '@'.
     """
 
+    if smtp_config is None:
+        raise SndEmailError ("smtp_section required for SMTP params")
+
     # Deal with what to send
     if body:
         msg_type = "plain"

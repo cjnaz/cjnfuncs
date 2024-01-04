@@ -52,7 +52,8 @@ if args.setup_site:
 Notables
 - deploy_files() uses mungePath() for processing the target_dir path, so all of mungePath's features and rules apply, such as user and environment var expanstion, absolute and relative paths.
 - Permissions may be set on deployed files and directories.  For example, `creds_SMTP` is set to user-read-write only.
-- If you don't have write-access to the target directory then an error is printed and the script aborts with `sys.exit(1)`. Usage of deploy_files() is generally intended to be interactive, at tool setup time.
+- Various exceptions may be raised, including PermissionError, FileNotFoundError, FileExistsError.  If untrapped then 
+these will cause the tool script to exit.  If usage is interactive only then exception handling in unnecessary.
 - By default, if the target file already exists then a warning in printed and that file deploy is skipped, leaving the existing file untouched. Setting `overwrite=True` does what you might expect.  One usage method is to simply delete a deployed file and run the tool script with `--setup-user` again to replace the file with a fresh copy.
 
 
@@ -114,7 +115,6 @@ or site config and data directories. Suggested usage is with the CLI `--setup-us
 Distribution files and directory trees are hosted in `<module_root>/deployment_files/`.
 
 `deploy_files()` accepts a list of dictionaries to be pushed to user or site space. 
-If deployment fails then execution aborts.  This function is intended for interactive use.
 
 
 ### Parameters
@@ -140,4 +140,5 @@ if they exist - data may be lost!
 
 ### Returns
 - NoneType
+- Raises various exceptions on failure
     

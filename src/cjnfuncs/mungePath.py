@@ -189,7 +189,7 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
 
 ### Parameters
 `path`
-- A pathlib.Path type
+- A pathlib.Path or str type
 
 `timeout` (default 1 second)
 - resolution seconds
@@ -199,6 +199,7 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
 - True if the path exists
 - False if the path does not exist or the timeout is reached
     """
+    path = Path(path)
     executor = ThreadPoolExecutor(max_workers=1)
     future = executor.submit(path.exists)
     try:

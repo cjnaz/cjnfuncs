@@ -8,6 +8,8 @@
 #
 #==========================================================
 
+import signal
+import sys
 import posix_ipc
 from .core import logging
 
@@ -202,6 +204,14 @@ unless `force=True`.
 #  c l i
 #=====================================================================================
 #=====================================================================================
+
+def int_handler(sig, frame):
+    logging.warning(f"Signal {sig} received")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT,  int_handler)      # Ctrl-C
+signal.signal(signal.SIGTERM, int_handler)      # kill
+
 
 def cli():
     docplus = """

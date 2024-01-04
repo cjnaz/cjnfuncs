@@ -210,7 +210,7 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
 
 ### Parameters
 `path`
-- A pathlib.Path type
+- A pathlib.Path or str type
 
 `timeout` (default 1 second)
 - resolution seconds

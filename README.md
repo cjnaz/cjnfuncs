@@ -36,12 +36,14 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 <br/>
 
 ## Revision history
-- 2.1 230914 - Added modify_configfile. 
+- 2.1 230914 - Partitioned to separate modules.
+  Added modify_configfile. 
   Added native support for float, list, tuple, and dict in loadconfig(). 
   Added getcfg() type checking. 
   Documentation touch for logging formats in config file. 
   Improved snd_notif failure logging. 
   Added email/notif send retries.
+  Added resourcelock module.
 - 2.0.1 230222 - deploy_files() fix for files from package
 - 2.0 230208 - Refactored and converted to installed package.  Renamed funcs3 to cjnfuncs.
 - ...
