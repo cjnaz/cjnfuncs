@@ -7,8 +7,6 @@ The mungePath() class adds value in these important ways:
 - Allows platform base paths and script-specific files and directories to be entered separately, and then appropriately merges them.  The split-handling greatly cleans up script code.
 - Absolute and relative paths are supported, along with expansion of user (~user/) and environment vars ($HOME/).
 
-# TODO add table of base paths '', '.', ...
-
 ## Example
 Given:
 ```

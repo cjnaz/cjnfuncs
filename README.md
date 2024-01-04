@@ -1,6 +1,8 @@
 # cjnfuncs - A framework and collection of utility functions for script writing
 
-cjnfuncs is comprised of several modules (links to respective documentation):
+## cjnfuncs is comprised of several modules (links to respective documentation)
+
+NOTE:  Since relative links to other .md files do not work on PyPI, please go to the [cjnfuncs GitHub repo](https://github.com/cjnaz/cjnfuncs) to read the documentation. 
 
 module | Description/Purpose
 --|--
@@ -36,7 +38,7 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 <br/>
 
 ## Revision history
-- 2.1 230914 - Partitioned to separate modules.
+- 2.1 240104 - Partitioned to separate modules.
   Added modify_configfile. 
   Added native support for float, list, tuple, and dict in loadconfig(). 
   Added getcfg() type checking. 

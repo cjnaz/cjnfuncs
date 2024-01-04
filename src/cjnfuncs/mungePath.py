@@ -82,17 +82,6 @@ is raised if you attempt to mkdir on top of an existing file.
 - See [GitHub repo](https://github.com/cjnaz/cjnfuncs) tests/demo-mungePath.py for numerous application examples.
         """
 
-# ``` TODO # Keep until above table format verified on PyPI & Github
-# .full_path      Path        The full expanduser/expandvars path to a file or directory (may not exist)
-# .parent         Path        The directory above the .full_path
-# .name           str         Just the name.suffix of the .full_path
-# .is_absolute    Boolean     True if the .full_path starts from the filesystem root (isn't a relative path) 
-# .is_relative    Boolean     Not .is_absolute
-# .exists         Boolean     True if the .full_path item (file or dir) actually exists
-# .is_file        Boolean     True if the .full_path item exists and is a file
-# .is_dir         Boolean     True if the .full_path item exists and is a directory
-# ```
-
         self.in_path = str(in_path)
         self.base_path = str(base_path)
 
