@@ -9,13 +9,13 @@ module | Description/Purpose
 [core](core.md)               | Set up the base environment
 [configman](configman.md)     | Feature-rich configuration file toolset
 [timevalue](timevalue.md)     | Handle time values with units, such as '5m' (5 minutes)
-[mungePath](mungePath.md)     | Ease-of-use pathlib extenstion for constructing and manipulating file paths
+[mungePath](mungePath.md)     | Ease-of-use pathlib extension for constructing and manipulating file paths
 [deployfiles](deployfiles.md) | Push bundled setup files within a package to the proper user/system locations
 [resourcelock](resourcelock.md) | Inter-process resource lock mechanism
 [SMTP](SMTP.md)               | Send notification and email messages
 
 Developed and tested on Python 3.6.8, and supported on all higher Python versions.
-Developed on Linux, supported also on Windows (tested on Windows 10).
+Developed on Linux.  Not supported on Windows (posix-ipc module dependency).
 
 In this documentation, "tool script" refers to a Python project that imports and uses cjnfuncs. Some may be simple scripts, and others may themselves be installed packages.
 
@@ -38,6 +38,7 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 <br/>
 
 ## Revision history
+- 2.2 240119 - Added SMTP DKIM support.  Set SMTP server connect timeout to EmailRetryWait.
 - 2.1 240104 - Partitioned to separate modules.
   Added modify_configfile. 
   Added native support for float, list, tuple, and dict in loadconfig(). 

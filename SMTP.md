@@ -15,7 +15,7 @@ LogLevel =      20
 
 # Email and Notifications params
 [SMTP]
-NotifList =     5205551212@vzwpix.com, 6132125555@vzwpix.com  # Notifications - white space or comma separeated list
+NotifList =     5205551212@vzwpix.com, 6132125555@vzwpix.com  # Notifications - white space or comma separated list
 NotifTech =     8185551212@vzwpix.com  # Notifs for code problems
 EmailSummary =  George123@gmail.com    # Summary reports - white space or comma separated list
 import          creds_SMTP             # Provides EmailServer, EmailServerPort, EmailUser, EmailPass, and EmailFrom
@@ -80,10 +80,30 @@ Deployed  creds_SMTP           to  /home/me/.config/SMTP_ex1/creds_SMTP
            SMTP.snd_notif            -  WARNING:  Notification sent <My first text message> <This is pretty clean interface!>
            SMTP.snd_email            -  WARNING:  Email sent <My first email send>
 ```
-
 Notables:
-- The [SMTP] section of the specified config file holds all of the static email settings, while the individual calls to snd_notif() and snd_email contain the message specifics.
+- The [SMTP] section of the specified config file (eg, `myconfig`) holds all of the static email settings, while the individual calls to snd_notif() and snd_email() contain the message specifics.
 - A SndEmailError is raised for any issues, and should be trapped in the script code.
+
+
+## Sending DKIM signed messages
+
+DKIM signed messages can greatly reduce the chance that the recipient's email server (eg, gmail) classifies your messages as spam.
+You will want to configure DKIM if you are sending through a shared-hosting SMTP server. Your shared-hosting SMTP server should 
+also have SPF configured (no action required on your part). 
+If you are sending through your ISP's SMTP server it may be adding DKIM signing (and SPF) for you (don't configure DKIM here).
+
+For shared-hosting SMTP you may be able to obtain the server's private key from the
+cPanel interface for your account (check in Email Deliverability). 
+Save this key to a user-read-only file, eg, `/home/me/creds_mydomain.com.pem`. 
+Set the `EmailDKIMSelector` as defined on your SMTP server, eg `default` if your server's DKIM Name filed is `default._domainkey.mydomain.com.`.
+
+Add these params to the `creds_SMTP` file:
+
+```
+EmailDKIMDomain     mydomain.com
+EmailDKIMPem        /home/me/creds_mydomain.com.pem
+EmailDKIMSelector   default
+```
 
 
 
@@ -143,7 +163,7 @@ The `subj` field is part of the log message.
 - config_item class instance containing the [SMTP] section and related params
 
 
-### cfg dictionary params in the [SMTP] section
+### cfg dictionary params in the [SMTP] section, in addition to the cfg dictionary params required for snd_email
 `NotifList` (optional)
 - string list of email addresses (whitespace or comma separated).  
 - Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
@@ -152,6 +172,8 @@ default `to` parameter value.
 `DontNotif` (default False)
 - If True, notification messages are not sent. Useful for debug. All email and notification
 messages are also blocked if `DontEmail` is True.
+
+
 
 
 ### Returns
@@ -175,7 +197,9 @@ or a string with one or more email addresses. Using a config param name allows f
 `to` addresses without having to edit the code.
 
 What to send may be a `body` string, the text contents of `filename`, or the HTML-formatted contents
-of `htmlfile`, in this order of precedent.
+of `htmlfile`, in this order of precedent.  MIME multi-part is not supported.
+
+DKIM signing is optionally supported.
 
 Three attempts are made to send the message (see `EmailNTries`, below).
 
@@ -233,8 +257,21 @@ The `subj` field is part of the log message.
 `EmailNTries` (type int, default 3)
 - Number of tries to send email before aborting
 
-`EmailRetryWait` (seconds, type int, float, or timevalue, default 5s)
+`EmailRetryWait` (seconds, type int, float, or timevalue, default 2s)
 - Number of seconds to wait between retry attempts
+- Also used for server connection timeout
+
+`EmailDKIMDomain` (required if using DKIM email signing)
+- The domain of the public-facing SMTP server, eg `mydomain.com`
+- Defining `EmailDKIMDomain` enables DKIM signing, and also requires `EmailDKIMPem` and `EmailDKIMSelector`
+
+`EmailDKIMPem` (required if using DKIM email signing)
+- Full path to the private key file of the public-facing SMTP server at the `EmailDomain`, eg `/home/me/creds_mydomain.com.pem`
+- Make sure this file is readable only to the user
+- You may be able to obtain this key in cPanel for your shared-hosting service
+
+`EmailDKIMSelector` (required if using DKIM email signing)
+- The DKIM selector string, eg 'default'
 
 
 ### Returns
@@ -256,6 +293,7 @@ Some email servers require that the `EmailFrom` address be of the same domain as
 so it may be practical to bundle `EmailFrom` with the server specifics.  Place all of these in 
 `~/creds_SMTP`:
   - `EmailFrom`, `EmailServer`, `EmailServerPort`, `EmailUser`, and `EmailPass`
+  - If DKIM signing is used, also include `EmailDKIMDomain`, `EmailDKIMPem`, and `EmailDKIMSelector`
 - `snd_email()` does not support multi-part MIME (an html send wont have a plain text part).
 - Checking the validity of email addresses is very basic... an email address must contain an '@'.
     

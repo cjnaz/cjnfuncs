@@ -15,7 +15,7 @@ LogLevel =      20
 
 # Email and Notifications params
 [SMTP]
-NotifList =     5205551212@vzwpix.com, 6132125555@vzwpix.com  # Notifications - white space or comma separeated list
+NotifList =     5205551212@vzwpix.com, 6132125555@vzwpix.com  # Notifications - white space or comma separated list
 NotifTech =     8185551212@vzwpix.com  # Notifs for code problems
 EmailSummary =  George123@gmail.com    # Summary reports - white space or comma separated list
 import          creds_SMTP             # Provides EmailServer, EmailServerPort, EmailUser, EmailPass, and EmailFrom
@@ -80,8 +80,28 @@ Deployed  creds_SMTP           to  /home/me/.config/SMTP_ex1/creds_SMTP
            SMTP.snd_notif            -  WARNING:  Notification sent <My first text message> <This is pretty clean interface!>
            SMTP.snd_email            -  WARNING:  Email sent <My first email send>
 ```
-
 Notables:
-- The [SMTP] section of the specified config file holds all of the static email settings, while the individual calls to snd_notif() and snd_email contain the message specifics.
+- The [SMTP] section of the specified config file (eg, `myconfig`) holds all of the static email settings, while the individual calls to snd_notif() and snd_email() contain the message specifics.
 - A SndEmailError is raised for any issues, and should be trapped in the script code.
+
+
+## Sending DKIM signed messages
+
+DKIM signed messages can greatly reduce the chance that the recipient's email server (eg, gmail) classifies your messages as spam.
+You will want to configure DKIM if you are sending through a shared-hosting SMTP server. Your shared-hosting SMTP server should 
+also have SPF configured (no action required on your part). 
+If you are sending through your ISP's SMTP server it may be adding DKIM signing (and SPF) for you (don't configure DKIM here).
+
+For shared-hosting SMTP you may be able to obtain the server's private key from the
+cPanel interface for your account (check in Email Deliverability). 
+Save this key to a user-read-only file, eg, `/home/me/creds_mydomain.com.pem`. 
+Set the `EmailDKIMSelector` as defined on your SMTP server, eg `default` if your server's DKIM Name filed is `default._domainkey.mydomain.com.`.
+
+Add these params to the `creds_SMTP` file:
+
+```
+EmailDKIMDomain     mydomain.com
+EmailDKIMPem        /home/me/creds_mydomain.com.pem
+EmailDKIMSelector   default
+```
 

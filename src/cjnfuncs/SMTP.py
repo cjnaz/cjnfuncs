@@ -11,7 +11,9 @@
 import time
 import smtplib
 from email.mime.text import MIMEText
+from email.utils import formatdate
 from pathlib import Path
+import dkim
 
 from .core      import logging, SndEmailError
 from .mungePath import mungePath
@@ -20,7 +22,7 @@ import cjnfuncs.core as core
 
 # Configs / Constants
 SND_EMAIL_NTRIES       = 3          # Number of tries to send email before aborting
-SND_EMAIL_WAIT         = '5s'       # seconds between retries
+SND_EMAIL_WAIT         = '2s'       # seconds between retries, and server connection timeout
 
 
 #=====================================================================================
@@ -68,7 +70,7 @@ The `subj` field is part of the log message.
 - config_item class instance containing the [SMTP] section and related params
 
 
-### cfg dictionary params in the [SMTP] section
+### cfg dictionary params in the [SMTP] section, in addition to the cfg dictionary params required for snd_email
 `NotifList` (optional)
 - string list of email addresses (whitespace or comma separated).  
 - Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
@@ -77,6 +79,8 @@ default `to` parameter value.
 `DontNotif` (default False)
 - If True, notification messages are not sent. Useful for debug. All email and notification
 messages are also blocked if `DontEmail` is True.
+
+
 
 
 ### Returns
@@ -121,7 +125,9 @@ or a string with one or more email addresses. Using a config param name allows f
 `to` addresses without having to edit the code.
 
 What to send may be a `body` string, the text contents of `filename`, or the HTML-formatted contents
-of `htmlfile`, in this order of precedent.
+of `htmlfile`, in this order of precedent.  MIME multi-part is not supported.
+
+DKIM signing is optionally supported.
 
 Three attempts are made to send the message (see `EmailNTries`, below).
 
@@ -179,8 +185,21 @@ The `subj` field is part of the log message.
 `EmailNTries` (type int, default 3)
 - Number of tries to send email before aborting
 
-`EmailRetryWait` (seconds, type int, float, or timevalue, default 5s)
+`EmailRetryWait` (seconds, type int, float, or timevalue, default 2s)
 - Number of seconds to wait between retry attempts
+- Also used for server connection timeout
+
+`EmailDKIMDomain` (required if using DKIM email signing)
+- The domain of the public-facing SMTP server, eg `mydomain.com`
+- Defining `EmailDKIMDomain` enables DKIM signing, and also requires `EmailDKIMPem` and `EmailDKIMSelector`
+
+`EmailDKIMPem` (required if using DKIM email signing)
+- Full path to the private key file of the public-facing SMTP server at the `EmailDomain`, eg `/home/me/creds_mydomain.com.pem`
+- Make sure this file is readable only to the user
+- You may be able to obtain this key in cPanel for your shared-hosting service
+
+`EmailDKIMSelector` (required if using DKIM email signing)
+- The DKIM selector string, eg 'default'
 
 
 ### Returns
@@ -202,6 +221,7 @@ Some email servers require that the `EmailFrom` address be of the same domain as
 so it may be practical to bundle `EmailFrom` with the server specifics.  Place all of these in 
 `~/creds_SMTP`:
   - `EmailFrom`, `EmailServer`, `EmailServerPort`, `EmailUser`, and `EmailPass`
+  - If DKIM signing is used, also include `EmailDKIMDomain`, `EmailDKIMPem`, and `EmailDKIMSelector`
 - `snd_email()` does not support multi-part MIME (an html send wont have a plain text part).
 - Checking the validity of email addresses is very basic... an email address must contain an '@'.
     """
@@ -260,16 +280,26 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             raise SndEmailError (f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>.")
 
     # Gather, check remaining config params
-    ntries     = smtp_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
-    retry_wait = timevalue(smtp_config.getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float, str], section='SMTP')).seconds
-    email_from = smtp_config.getcfg('EmailFrom', types=str, section='SMTP')
-    cfg_server = smtp_config.getcfg('EmailServer', types=str, section='SMTP')
-    cfg_port   = smtp_config.getcfg('EmailServerPort', types=str, section='SMTP').lower()
+    ntries =            smtp_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
+    retry_wait =        timevalue(smtp_config.getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float, str], section='SMTP')).seconds
+    email_from =        smtp_config.getcfg('EmailFrom', types=str, section='SMTP')
+    cfg_server =        smtp_config.getcfg('EmailServer', types=str, section='SMTP')
+    cfg_port =          smtp_config.getcfg('EmailServerPort', types=str, section='SMTP').lower()
     if cfg_port not in ['p25', 'p465', 'p587', 'p587tls']:
-        raise SndEmailError (f"snd_email - Config EmailServerPort <{smtp_config.getcfg('EmailServerPort', fallback='', section='SMTP')}> is invalid")
-    email_user = str(smtp_config.getcfg('EmailUser', None, types=[str, int, float], section='SMTP'))    # username may be numeric
+        raise SndEmailError (f"snd_email - Config EmailServerPort <{cfg_port}> is invalid")
+
+    email_user =        str(smtp_config.getcfg('EmailUser', None, types=[str, int, float], section='SMTP')) # username may be numeric - optional
     if email_user:
-        email_pass = str(smtp_config.getcfg('EmailPass', types=[str, int, float], section='SMTP'))      # password may be numeric
+        email_pass =    str(smtp_config.getcfg('EmailPass', types=[str, int, float], section='SMTP'))      # password may be numeric - required if EmailUser provided
+
+    dkim_domain =       smtp_config.getcfg('EmailDKIMDomain', None, types=str, section='SMTP')
+    if dkim_domain:
+        dkim_pem =      smtp_config.getcfg('EmailDKIMPem', None, types=str, section='SMTP')
+        if not dkim_pem:
+            raise SndEmailError (f"snd_email - Config <EmailDKIMPem> is required for SMTP DKIM signing")
+        dkim_selector = smtp_config.getcfg('EmailDKIMSelector', None, types=str, section='SMTP')
+        if not dkim_selector:
+            raise SndEmailError (f"snd_email - Config <EmailDKIMSelector> is required for SMTP DKIM signing")
 
     if smtp_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
         if log:
@@ -278,6 +308,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             logging.debug (f"Email NOT sent <{subj}>")
         return
 
+
     # Send the message, with retries
     for trynum in range(ntries):
         try:
@@ -285,21 +316,41 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             msg['Subject'] = subj
             msg['From'] = email_from
             msg['To'] = ", ".join(To)
+            msg["Date"] = formatdate(localtime=True)
 
+            # Add DKIM signature if EmailDKIMDomain is specified
+            if dkim_domain:
+                privateKey = Path(dkim_pem).read_text()
+                sig = dkim.sign(message=msg.as_bytes(),
+                                selector=   bytes(dkim_selector, 'UTF8'),
+                                domain=     bytes(dkim_domain, 'UTF8'),
+                                privkey=    bytes(privateKey, 'UTF8'),
+                                include_headers= ['from', 'to', 'subject', 'date'])
+                sig = sig.decode()
+                msg['DKIM-Signature'] = sig[len("DKIM-Signature: "):]
+
+            logging.debug (f"Initialize the SMTP server connection for port <{cfg_port}>")
             if cfg_port == "p25":
-                server = smtplib.SMTP(cfg_server, 25)
+                server = smtplib.SMTP(cfg_server, 25, timeout=retry_wait)
             elif cfg_port == "p465":
-                server = smtplib.SMTP_SSL(cfg_server, 465)
-            elif cfg_port == "p587":
-                server = smtplib.SMTP(cfg_server, 587)
-            else: # cfg_port == "P587TLS":
-                server = smtplib.SMTP(cfg_server, 587)
+                server = smtplib.SMTP_SSL(cfg_server, 465, timeout=retry_wait)
+            else: # cfg_port == "p587" or "p587tls"
+                server = smtplib.SMTP(cfg_server, 587, timeout=retry_wait)
+
+            if smtp_config.getcfg("EmailVerbose", False, types=[bool], section='SMTP'):
+                logging.debug ("Set SMTP connection debuglevel(1)")
+                server.set_debuglevel(1)
+
+            if cfg_port == "p587tls":
+                logging.debug ("Start TLS")
                 server.starttls()
 
-            if email_user:
+            # if email_user:
+            if cfg_port.startswith('p587'):
+                logging.debug (f"Logging into SMTP server")
                 server.login (email_user, email_pass)
-            if smtp_config.getcfg("EmailVerbose", False, types=[bool], section='SMTP'):
-                server.set_debuglevel(1)
+
+            logging.debug (f"Sending message <{subj}>")
             server.sendmail(email_from, To, msg.as_string())
             server.quit()
 
@@ -311,7 +362,8 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
         except Exception as e:
             last_error = e
-            logging.debug(f"Email send try {trynum} failed:\n  <{e}>")
+            if logging.getLogger().level == logging.DEBUG:
+                logging.exception(f"Email send try {trynum} failed:")
             if trynum < ntries -1:
                 time.sleep(retry_wait)
             continue
