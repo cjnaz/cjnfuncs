@@ -93,4 +93,4 @@ Notables:
 
 ## check_path_exists() eliminates hangs
 
-Executing pathlib.Path(/path/not/currently/available/myfile) may result in a many second hang.  `check_path_exists()` is a simple function that wraps Path.exists() with timeout enforcement.  This function is used within the mungePath class, and is exposed for use by script code.
+Executing `pathlib.Path(/network_path_not_currently_available/myfile).exists()` may result in a many second hang.  `check_path_exists()` is a simple function that wraps Path.exists() with timeout enforcement.  This function is used within the mungePath class, and is exposed for use by script code.

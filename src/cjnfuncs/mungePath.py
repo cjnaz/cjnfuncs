@@ -34,7 +34,9 @@ User (`~user/`) and environment vars (`$HOME/`) are supported and expanded.
 ### Parameters
 `in_path` (default '')
 - An absolute or relative path to a file or directory, such as `mydir/myfile.txt`
-- If `in_path` is an absolute path then `base_path` is disregarded.
+- If `in_path` is an absolute path then the `base_path` is disregarded.
+- If `in_path` starts with `./` then the absolute path to the current working directory (cwd) is prepended 
+to `in_path`, and the `base_path` is disregarded.  See Special handling note, below.
 
 `base_path` (default '')
 - An absolute or relative path to a directory, such as `~/.config/mytool`
@@ -69,7 +71,23 @@ Attribute | Type | Description
 - If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
 - If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
 the shell cwd.
-- If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
+- If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is disregarded.
+- **Special handling for `in_path` starting with `./`:**  Normally, paths starting with `.` are relative paths.
+mungePath interprets `in_path` starting with `./` as an absolute path reference to the shell current working 
+directory (cwd).
+Often in a tool script a user path input is passed to the `in_path` parameter.  Using the `./` prefix, a file in 
+the shell cwd may be
+referenced, eg `./myfile`.  _Covering the cases, assuming the shell cwd is `/home/me`:_
+
+    in_path | base_path | .full_path resolves to
+    -- | -- | --
+    myfile          | /tmp  | /tmp/myfile
+    ./myfile        | /tmp  | /home/me/myfile
+    ../myfile       | /tmp  | /tmp/../myfile
+    ./../myfile     | /tmp  | /home/me/../myfile
+    xyz/myfile      | /tmp  | /tmp/xyz/myfile
+    ./xyz/myfile    | /tmp  | /home/me/xyz/myfile
+
 - `in_path` and `base_path` may be type str(), Path(), or PurePath().
 - Symlinks are followed (not resolved).
 - User and environment vars are expanded, eg `~/.config` >> `/home/me/.config`, as does `$HOME/.config`.
@@ -82,8 +100,11 @@ is raised if you attempt to mkdir on top of an existing file.
 - See [GitHub repo](https://github.com/cjnaz/cjnfuncs) tests/demo-mungePath.py for numerous application examples.
         """
 
-        self.in_path = str(in_path)
-        self.base_path = str(base_path)
+        in_path = str(in_path)
+        base_path = str(base_path)
+
+        if in_path.startswith('./'):
+            in_path = Path.cwd() / in_path
 
         in_path_pp = PurePath(os.path.expandvars(os.path.expanduser(str(in_path))))
 
@@ -105,15 +126,17 @@ is raised if you attempt to mkdir on top of an existing file.
         self.full_path = Path(in_path_pp)
 
         self.name = self.full_path.name
-        self.exists = check_path_exists(self.full_path)
-        self.is_absolute = self.full_path.is_absolute()
-        self.is_relative = not self.is_absolute
-        try:
-            self.is_dir =  self.full_path.is_dir()
-            self.is_file = self.full_path.is_file()
-        except:     # Trap if the path does not exist
-            self.is_dir =  False
-            self.is_file = False
+        self.refresh_stats()
+        # self.exists = check_path_exists(self.full_path)
+        # self.exists = True
+        # self.is_absolute = self.full_path.is_absolute()
+        # self.is_relative = not self.is_absolute
+        # try:
+        #     self.is_dir =  self.full_path.is_dir()
+        #     self.is_file = self.full_path.is_file()
+        # except:     # Trap if the path does not exist
+        #     self.is_dir =  False
+        #     self.is_file = False
 
 
 #=====================================================================================
@@ -166,7 +189,7 @@ happen on the filesystem.  Call refresh_stats() as needed.
 #=====================================================================================
 #=====================================================================================
 
-def check_path_exists(path, timeout=1):
+def check_path_exists(inpath, timeout=1):
     """
 ## check_path_exists (path, timeout=1) - With enforced timeout (no hang)
 
@@ -188,12 +211,22 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
 - True if the path exists
 - False if the path does not exist or the timeout is reached
     """
-    path = Path(path)
-    executor = ThreadPoolExecutor(max_workers=1)
-    future = executor.submit(path.exists)
-    try:
-        return future.result(timeout)
-    except TimeoutError:
-        return False
+
+    _path = Path(inpath)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(_path.exists)
+        try:
+            return future.result(timeout)
+        except TimeoutError:
+            return False
+
+
+    # path = Path(path)
+    # executor = ThreadPoolExecutor(max_workers=1)
+    # future = executor.submit(path.exists)
+    # try:
+    #     return future.result(timeout)
+    # except TimeoutError:
+    #     return False
 
 

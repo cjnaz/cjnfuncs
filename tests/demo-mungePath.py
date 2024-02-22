@@ -50,7 +50,7 @@ wrapper ("", "",                                            note="02 - No base_p
 wrapper ("file.txt",                                        note="03 - No base_path - Returns relative path from shell cwd - same dir")
 wrapper ("xyz/file.txt",                                    note="04 - No base_path - Returns relative path from shell cwd - below")
 wrapper ("../file.txt",                                     note="05 - No base_path - Returns relative path from shell cwd - above")
-wrapper ("newdir", mkdir=True,                              note="05a- No base_path - Make dir at shell cwd)")
+wrapper ("newdir", mkdir=True,                              note="05a- No base_path - Make dir at shell cwd, returns relative path")
 wrapper ("", ".",                                           note="06 - Returns absolute full path to shell cwd")
 wrapper ("", "~",                                           note="07 - User expanded")
 wrapper ("xyz/file.txt", "$HOME",                           note="08 - Env vars expanded")
@@ -102,3 +102,10 @@ except Exception as e:
 
 print ("\n\n***** Referencing the tool script dir")
 wrapper ("xyz/file.txt", core.tool.main_dir,                note="27 - Returns absolute path to script dir")
+
+print ("\n\n***** Referencing file in shell cwd, overriding base_path")
+wrapper ("./file.txt", '/tmp',                              note="28 - Returns absolute path to <cwd>/file")
+wrapper ("./../file.txt", '/tmp',                           note="29 - Returns absolute path to <cwd>/../file")
+wrapper ("./xyz/file.txt", '/tmp',                          note="30 - Returns absolute path to <cwd>/xyz/file")
+
+wrapper ("./xyz/wxy", '/tmp',   mkdir=True,                 note="31 - mkdir <cwd>/xyz/wxy")

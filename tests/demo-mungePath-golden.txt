@@ -77,7 +77,7 @@ Given:
 .is_file      :  False
 
 
-NOTE:  05a- No base_path - Make dir at shell cwd)
+NOTE:  05a- No base_path - Make dir at shell cwd, returns relative path
 Given:
  in_path   :  <newdir>
  base_path :  <>
@@ -427,5 +427,68 @@ Given:
 .is_relative  :  False
 .exists       :  False
 .is_dir       :  False
+.is_file      :  False
+
+
+
+***** Referencing file in shell cwd, overriding base_path
+
+NOTE:  28 - Returns absolute path to <cwd>/file
+Given:
+ in_path   :  <./file.txt>
+ base_path :  </tmp>
+ mkdir     :  <False>
+.full_path    :  /mnt/share/dev/packages/cjnfuncs/tests/file.txt
+.parent       :  /mnt/share/dev/packages/cjnfuncs/tests
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+
+NOTE:  29 - Returns absolute path to <cwd>/../file
+Given:
+ in_path   :  <./../file.txt>
+ base_path :  </tmp>
+ mkdir     :  <False>
+.full_path    :  /mnt/share/dev/packages/cjnfuncs/tests/../file.txt
+.parent       :  /mnt/share/dev/packages/cjnfuncs/tests/..
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+
+NOTE:  30 - Returns absolute path to <cwd>/xyz/file
+Given:
+ in_path   :  <./xyz/file.txt>
+ base_path :  </tmp>
+ mkdir     :  <False>
+.full_path    :  /mnt/share/dev/packages/cjnfuncs/tests/xyz/file.txt
+.parent       :  /mnt/share/dev/packages/cjnfuncs/tests/xyz
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+
+NOTE:  31 - mkdir <cwd>/xyz/wxy
+Given:
+ in_path   :  <./xyz/wxy>
+ base_path :  </tmp>
+ mkdir     :  <True>
+.full_path    :  /mnt/share/dev/packages/cjnfuncs/tests/xyz/wxy
+.parent       :  /mnt/share/dev/packages/cjnfuncs/tests/xyz
+.name         :  wxy
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  True
 .is_file      :  False
 

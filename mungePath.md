@@ -93,7 +93,7 @@ Notables:
 
 ## check_path_exists() eliminates hangs
 
-Executing pathlib.Path(/path/not/currently/available/myfile) may result in a many second hang.  `check_path_exists()` is a simple function that wraps Path.exists() with timeout enforcement.  This function is used within the mungePath class, and is exposed for use by script code.
+Executing `pathlib.Path(/network_path_not_currently_available/myfile).exists()` may result in a many second hang.  `check_path_exists()` is a simple function that wraps Path.exists() with timeout enforcement.  This function is used within the mungePath class, and is exposed for use by script code.
 
 
 <a id="links"></a>
@@ -128,7 +128,9 @@ User (`~user/`) and environment vars (`$HOME/`) are supported and expanded.
 ### Parameters
 `in_path` (default '')
 - An absolute or relative path to a file or directory, such as `mydir/myfile.txt`
-- If `in_path` is an absolute path then `base_path` is disregarded.
+- If `in_path` is an absolute path then the `base_path` is disregarded.
+- If `in_path` starts with `./` then the absolute path to the current working directory (cwd) is prepended 
+to `in_path`, and the `base_path` is disregarded.  See Special handling note, below.
 
 `base_path` (default '')
 - An absolute or relative path to a directory, such as `~/.config/mytool`
@@ -163,7 +165,23 @@ Attribute | Type | Description
 - If `in_path` is a relative path (eg, `mydir/myfile.txt`) portion then the `base_path` is prepended.  
 - If both `in_path` and `base_path` are relative then the combined path will also be relative, usually to
 the shell cwd.
-- If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is ignored.
+- If `in_path` is an absolute path (eg, `/tmp/mydir/myfile.txt`) then the `base_path` is disregarded.
+- **Special handling for `in_path` starting with `./`:**  Normally, paths starting with `.` are relative paths.
+mungePath interprets `in_path` starting with `./` as an absolute path reference to the shell current working 
+directory (cwd).
+Often in a tool script a user path input is passed to the `in_path` parameter.  Using the `./` prefix, a file in 
+the shell cwd may be
+referenced, eg `./myfile`.  _Covering the cases, assuming the shell cwd is `/home/me`:_
+
+    in_path | base_path | .full_path resolves to
+    -- | -- | --
+    myfile          | /tmp  | /tmp/myfile
+    ./myfile        | /tmp  | /home/me/myfile
+    ../myfile       | /tmp  | /tmp/../myfile
+    ./../myfile     | /tmp  | /home/me/../myfile
+    xyz/myfile      | /tmp  | /tmp/xyz/myfile
+    ./xyz/myfile    | /tmp  | /home/me/xyz/myfile
+
 - `in_path` and `base_path` may be type str(), Path(), or PurePath().
 - Symlinks are followed (not resolved).
 - User and environment vars are expanded, eg `~/.config` >> `/home/me/.config`, as does `$HOME/.config`.

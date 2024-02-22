@@ -38,6 +38,7 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 <br/>
 
 ## Revision history
+- 2.3 240221 - Added mungePath ./ support, resolved check_path_exists() memory leak.
 - 2.2 240119 - Added SMTP DKIM support.  Set SMTP server connect timeout to EmailRetryWait.
 - 2.1 240104 - Partitioned to separate modules.
   Added modify_configfile. 
