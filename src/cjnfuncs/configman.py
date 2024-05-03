@@ -290,7 +290,8 @@ output:
             flush_on_reload     = False,
             force_flush_reload  = False,
             isimport            = False,
-            tolerate_missing    = False):
+            tolerate_missing    = False,
+            prereload_callback  = None):
         """
 ## loadconfig () - Load a configuration file into the cfg dictionary
 ```
@@ -301,7 +302,8 @@ loadconfig(
     flush_on_reload     = False,
     force_flush_reload  = False,
     isimport            = False,
-    tolerate_missing    = False)        
+    tolerate_missing    = False,
+    prereload_callback  = None)        
 ```
 ***config_item() class member function***
 
@@ -338,6 +340,8 @@ regardless of whether the config file timestamp has changed
 `tolerate_missing` (default False)
 - Used in a tool script service loop, return `-1` rather than raising `ConfigError` if the config file is inaccessible
 
+`prereload_callback` (default None)
+- Allows user services to be managed (paused/terminated) before the config is reloaded and logging is reset.
 
 ### Returns
 - `1` if the config files WAS reloaded
@@ -446,6 +450,9 @@ a ConfigError if the config file cannot be accessed.
             if force_flush_reload:
                 logging.getLogger().setLevel(ldcfg_ll)  # logging within loadconfig is always done at ldcfg_ll
                 logging.info(f"Config  <{self.config_file}>  force flushed (force_flush_reload)")
+                if prereload_callback:
+                    logging.info("Pre-reload call user function called")
+                    prereload_callback()
                 self.clear()
                 self.config_timestamp = 0               # Force reload of the config file
 
@@ -473,6 +480,9 @@ a ConfigError if the config file cannot be accessed.
             # It's an initial load call, or config file has changed.  Do (re)load.
             self.config_timestamp = current_timestamp
             logging.getLogger().setLevel(ldcfg_ll)      # Set logging level for remainder of loadconfig call
+            if prereload_callback:
+                logging.info("Pre-reload user function called")
+                prereload_callback()
             logging.info (f"Config  <{self.config_file}>  file timestamp: {current_timestamp}")
 
             if flush_on_reload:

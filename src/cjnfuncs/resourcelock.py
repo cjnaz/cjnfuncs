@@ -61,7 +61,7 @@ such as in your interrupt-trapped cleanup code.
 
 ### Parameters
 `lockname`
-- All processes sharing the given resource must use the same lockname.
+- All processes sharing a given resource must use the same lockname.
     """
 
     def __init__ (self, lockname):
@@ -78,7 +78,7 @@ such as in your interrupt-trapped cleanup code.
 #=====================================================================================
 #=====================================================================================
 
-    def get_lock(self, timeout=1):
+    def get_lock(self, timeout=1, same_process_ok=False):
         """
 ## get_lock (timeout=1) - Request the resource lock
 
@@ -86,20 +86,28 @@ such as in your interrupt-trapped cleanup code.
 
 Attempt to acquire/get the lock while waiting up to `timeout` time.  
 
-If the lock was previously acquired by this script (process) then get_lock() immediately returns True.
-This allows the script code to not have to track state to decide if the lock has
-previously been acquired before calling get_lock() again, leading to cleaner code.
+By default, get_lock() waits for the lock if it is currently set, whether the lock was set by this
+or another script/job/process.
+
+By setting `same_process_ok=True`, then if the lock was previously acquired by this same script/process
+then get_lock() immediately returns True.  This allows the script code to not have to track state to 
+decide if the lock has previously been acquired before calling get_lock() again, leading to cleaner code.
 
 ### Parameters
 `timeout` (default 1 second)
 - The max time, in seconds, to wait to acquire the lock
 - None is no timeout - wait forever (Hang forever.  Unwise.)
 
+`same_process_ok` (default False)
+- If True, then if the current process currently has the lock then get_lock() immediately returns True.
+- If False, then if the lock is currently set by the same process or another process then get_lock() blocks
+with timeout.
+
 ### Returns
 - True:  Lock successfully acquired, timeout time not exceeded
 - False: Lock request failed, timed out
         """
-        if self.I_have_the_lock == True:
+        if same_process_ok  and  self.I_have_the_lock == True:
             return True
 
         try:
