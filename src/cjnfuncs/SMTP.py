@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2018-2024
 #
 #==========================================================
 
@@ -22,7 +22,8 @@ import cjnfuncs.core as core
 
 # Configs / Constants
 SND_EMAIL_NTRIES       = 3          # Number of tries to send email before aborting
-SND_EMAIL_WAIT         = '2s'       # seconds between retries, and server connection timeout
+RETRY_WAIT             = '2s'       # seconds between retries
+SERVER_TIMEOUT         = '2s'       # server connection timeout
 
 
 #=====================================================================================
@@ -47,26 +48,26 @@ Three attempts are made to send the message.
 
     
 ### Parameters
-`subj` (default 'Notification message')
+`subj` (str, default 'Notification message')
 - Text message subject field
 - Some SMS/MMS apps display the subj field in bold, some in raw form, and some not at all.
 
-`msg` (default ' ')
+`msg` (str, default ' ')
 - Text message body
 
-`to` (default 'NotifList')
+`to` (str, default 'NotifList')
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name (also listing one
 or more whitespace or comma separated email addresses).  If the `to` parameter does not
 contain an '@' it is assumed to be a config param.
 - Define `NotifList` in the config file to use the default `to` value.
 
-`log` (default False)
+`log` (bool, default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
 at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
-`smtp_config` (required)
+`smtp_config` (config_item class instance)
 - config_item class instance containing the [SMTP] section and related params
 
 
@@ -133,30 +134,30 @@ Three attempts are made to send the message (see `EmailNTries`, below).
 
 
 ### Parameters
-`subj`
+`subj` (str)
 - Email subject text
 
-`to`
+`to` (str)
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name in the [SMTP] section (also listing one
 or more whitespace or comma separated email addresses).  If the `to` parameter does not
 contain an '@' it is assumed to be a config param.
 
-`body` (default None)
+`body` (str, default None)
 - A string message to be sent
 
-`filename` (default None)
+`filename` (str, default None)
 - A str or Path to the file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
 
-`htmlfile` (default None)
+`htmlfile` (str, default None)
 - A str or Path to the html formatted file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
 
-`log` (default False)
+`log` (bool, default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
 at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
-`smtp_config` (required)
+`smtp_config` (config_item class instance)
 - config_item class instance containing the [SMTP] section and related params
 
 
@@ -187,7 +188,9 @@ The `subj` field is part of the log message.
 
 `EmailRetryWait` (seconds, type int, float, or timevalue, default 2s)
 - Number of seconds to wait between retry attempts
-- Also used for server connection timeout
+
+`EmailServerTimeout` (seconds, type int, float, or timevalue, default 2s)
+- Server connection timeout
 
 `EmailDKIMDomain` (required if using DKIM email signing)
 - The domain of the public-facing SMTP server, eg `mydomain.com`
@@ -281,7 +284,8 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
     # Gather, check remaining config params
     ntries =            smtp_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
-    retry_wait =        timevalue(smtp_config.getcfg('EmailRetryWait', SND_EMAIL_WAIT, types=[int, float, str], section='SMTP')).seconds
+    retry_wait =        timevalue(smtp_config.getcfg('EmailRetryWait', RETRY_WAIT, types=[int, float, str], section='SMTP')).seconds
+    server_timeout =    timevalue(smtp_config.getcfg('EmailServerTimeout', SERVER_TIMEOUT, types=[int, float, str], section='SMTP')).seconds
     email_from =        smtp_config.getcfg('EmailFrom', types=str, section='SMTP')
     cfg_server =        smtp_config.getcfg('EmailServer', types=str, section='SMTP')
     cfg_port =          smtp_config.getcfg('EmailServerPort', types=str, section='SMTP').lower()
@@ -331,11 +335,11 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
             logging.debug (f"Initialize the SMTP server connection for port <{cfg_port}>")
             if cfg_port == "p25":
-                server = smtplib.SMTP(cfg_server, 25, timeout=retry_wait)
+                server = smtplib.SMTP(cfg_server, 25, timeout=server_timeout)
             elif cfg_port == "p465":
-                server = smtplib.SMTP_SSL(cfg_server, 465, timeout=retry_wait)
+                server = smtplib.SMTP_SSL(cfg_server, 465, timeout=server_timeout)
             else: # cfg_port == "p587" or "p587tls"
-                server = smtplib.SMTP(cfg_server, 587, timeout=retry_wait)
+                server = smtplib.SMTP(cfg_server, 587, timeout=server_timeout)
 
             if smtp_config.getcfg("EmailVerbose", False, types=[bool], section='SMTP'):
                 logging.debug ("Set SMTP connection debuglevel(1)")
@@ -362,9 +366,10 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
         except Exception as e:
             last_error = e
-            if logging.getLogger().level == logging.DEBUG:
-                logging.exception(f"Email send try {trynum} failed:")
+            # if logging.getLogger().level == logging.DEBUG:
+            #     logging.exception(f"Email send try {trynum} failed:")
             if trynum < ntries -1:
+                logging.debug(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec>:\n  <{e}>")
                 time.sleep(retry_wait)
             continue
 

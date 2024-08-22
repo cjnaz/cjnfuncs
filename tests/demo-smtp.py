@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 """Demo/test for cjnfuncs snd_notif & snd_email functions
+
+Produce / compare to golden results:
+    ./demo-smtp.py --setup-user
+    Customize the installed config files
+
+    ./demo-smtp.py
+        Compare to demo-smtp-golden.txt
+
+    Should receive emails 1, 2, 3, 4, 5, 11
+    Should receive text notifications 9, 10
 """
 
 #==========================================================
 #
-#  Chris Nelson, 2023
+#  Chris Nelson, 2024
 #
 #==========================================================
 
@@ -29,6 +39,8 @@ parser.add_argument('-t', '--test', type=int, default=0,
                     help="Test number to run (default 0 = all).")
 parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
                     help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory.")
+parser.add_argument('--dry-run', '-d', action='store_true',
+                    help=f"Disable email sends (set DontEmail).")
 parser.add_argument('--setup-user', action='store_true',
                     help=f"Install starter files in user space.")
 parser.add_argument('--cleanup', action='store_true',
@@ -63,8 +75,9 @@ if args.cleanup:
 try:
     config = config_item(args.config_file)
     print (f"\nLoad config {config.config_full_path}")
-    config.loadconfig(ldcfg_ll=10)
-    print (config.dump())
+    config.loadconfig()
+    # config.loadconfig(ldcfg_ll=10)    # Avoid logging credentials
+    # print (config.dump())
 except Exception as e:
     print ("No user or site setup found.  Run with <--setup-user> to set up the environment.")
     print (f"Then customize mail params in {CONFIG_FILE} and creds_SMTP as needed.")
@@ -72,29 +85,29 @@ except Exception as e:
     print (f"  {e}")
     sys.exit()
 
+if args.dry_run:
+    config.read_dict({'DontEmail':True}, section_name='SMTP')
+
+
 if args.test == 0  or  args.test == 1:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 1:  body to EmailTo  =====")
     test_desc = '1:  body to EmailTo'
     try:    # This first send will fail with <[Errno -2] Name or service not known> if smtp server params are not valid
         snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
     except Exception:
         logging.exception (f"Test failed:  <{test_desc}>. The config files need to be customized?")
-        # print (f"snd_email failed:  {e}")
-        # print ("The config files probably need to be customized.")
         sys.exit()
 
 if args.test == 0  or  args.test == 2:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 2:  body to EmailTo - not logged  =====")
     test_desc = '2:  body to EmailTo - not logged'
     try:
         snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", smtp_config=config)
     except Exception:
         logging.exception (f"Test failed:  <{test_desc}>")
-    # except SndEmailError as e:
-    #     print (f"snd_email failed:  {e}")
 
 if args.test == 0  or  args.test == 3:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 3:  filename to EmailTo - not logged  =====")
 
     test_desc = '3:  filename to EmailTo - not logged'
     try:
@@ -103,7 +116,7 @@ if args.test == 0  or  args.test == 3:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 4:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 4:  htmlfile to EmailTo  =====")
 
     test_desc = '4:  htmlfile to EmailTo'
     try:
@@ -112,7 +125,7 @@ if args.test == 0  or  args.test == 4:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 5:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 5:  body to EmailToMulti  =====")
 
     test_desc = '5:  body to EmailToMulti'
     try:
@@ -121,7 +134,7 @@ if args.test == 0  or  args.test == 5:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 6:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 6:  No such file nofile.txt  =====")
 
     test_desc = '6:  No such file nofile.txt'
     try:
@@ -130,7 +143,7 @@ if args.test == 0  or  args.test == 6:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 7:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 7:  No to=  =====")
 
     test_desc = '7:  No to='
     try:
@@ -139,7 +152,7 @@ if args.test == 0  or  args.test == 7:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 8:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 8:  Invalid to=  =====")
 
     test_desc = '8:  Invalid to='
     try:
@@ -148,7 +161,7 @@ if args.test == 0  or  args.test == 8:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 9:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 9:  This is a test subject - not logged  =====")
 
     test_desc = '9:  This is a test subject - not logged'
     try:
@@ -157,7 +170,7 @@ if args.test == 0  or  args.test == 9:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 10:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 10: This is another test subject  =====")
 
     test_desc = '10: This is another test subject'
     try:
@@ -166,7 +179,7 @@ if args.test == 0  or  args.test == 10:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 11:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 11: snd_notif with to='EmailTo'  =====")
 
     test_desc = "11: snd_notif with to='EmailTo'"
     try:
@@ -175,7 +188,7 @@ if args.test == 0  or  args.test == 11:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 12:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 12: No body, filename, or htmlfile  =====")
 
     test_desc = '12: No body, filename, or htmlfile'
     try:
@@ -184,7 +197,7 @@ if args.test == 0  or  args.test == 12:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 13:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 13: Empty to=  =====")
 
     test_desc = '13: Empty to='
     try:
@@ -193,7 +206,7 @@ if args.test == 0  or  args.test == 13:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 14:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 14: Invalid to='inval@i^*#d  =====")
 
     test_desc = "14: Invalid to='inval@i^*#d"
     try:
@@ -202,7 +215,7 @@ if args.test == 0  or  args.test == 14:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 15:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 15:  Failed email server  =====")
 
     test_desc = '15:  Failed email server'
     config.cfg['SMTP']['EmailServer'] = 'nosuchserver.nosuchmail.com'
@@ -212,23 +225,25 @@ if args.test == 0  or  args.test == 15:
         logging.exception (f"Test failed:  <{test_desc}>")
 
 if args.test == 0  or  args.test == 16:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 16:  Bad server port  =====")
 
     test_desc = '16:  Bad server port'
+    orig_port = config.getcfg('EmailServerPort', section='SMTP')
     config.read_dict({'EmailServerPort':'badport'}, section_name='SMTP')
     try:
         snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
     except Exception:
         logging.exception (f"Test failed:  <{test_desc}>")
+    config.read_dict({'EmailServerPort':orig_port}, section_name='SMTP')
+    
 
 if args.test == 0  or  args.test == 17:
-    print ("\n\n=====================================================================")
+    print ("\n\n=====  Test 17:  snd_notif Failed email server  =====")
 
     test_desc = '17:  snd_notif Failed email server'
     config.cfg['SMTP']['EmailServer'] = 'nosuchserver.nosuchmail.com'
     try:
         snd_notif (subj=test_desc, msg='This is the message body', smtp_config=config)
-        # snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
     except Exception:
         logging.exception (f"Test failed:  <{test_desc}>")
 

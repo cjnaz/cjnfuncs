@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Demo/test for mungePath
+
+Produce / compare to golden results:
+    ./demo-mungePath.py
 """
 #==========================================================
 #
-#  Chris Nelson, 2023
+#  Chris Nelson, 2024
 #
 #   NOTE:  This demo file leaves a remnant dir: /tmp/mungepath
 #    

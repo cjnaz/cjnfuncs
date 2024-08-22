@@ -259,8 +259,8 @@ found then user-specific is assumed.  No directories are created.
 
 
 ### Parameter
-`toolname`
-- Name of the tool, type str
+`toolname` (str)
+- Name of the tool
 
 
 ### Returns
@@ -308,25 +308,25 @@ the log file declared in the config file:
 
     
 ### Parameters
-`call_logfile` (default None)
+`call_logfile` (str, default None)
 - Potential log file passed typically from the tool script.  Selected by `call_logfile_wins = True`.
 call_logfile may be an absolute path or relative to the `core.tool.log_dir_base` directory.  
 - `None` specifies the console.
 
-`call_logfile_wins` (default False)
+`call_logfile_wins` (bool, default False)
 - If True, the `call_logfile` is selected.  If False, the `config_logfile` is selected.
 
-`config_logfile` (default None)
+`config_logfile` (str, default None)
 - Potential log file passed typically from loadconfig() if there is a `LogFile` param in the 
 loaded config.  Selected by `call_logfile_wins = False`.
 config_logfile may be an absolute path or relative to the `core.tool.log_dir_base` directory.  
 - `None` specifies the console.
 
-`ConsoleLogFormat` (default None)
+`ConsoleLogFormat` (str, default None)
 - Overrides the default console logging format: `{module:>15}.{funcName:20} - {levelname:>8}:  {message}`.
 - loadconfig() passes `ConsoleLogFormat` from the primary config file, if defined.
 
-`FileLogFormat` (default None)
+`FileLogFormat` (str, default None)
 - Overrides the default file logging format: `{asctime} {module:>15}.{funcName:20} {levelname:>8}:  {message}`.
 - loadconfig() passes `FileLogFormat` from the primary config file, if defined.
 

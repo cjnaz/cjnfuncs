@@ -35,7 +35,7 @@ Inspect the created directories/files for proper content and permissions per the
 ***** Test 1:  User cannot write on site dir
 demo-deployfiles.<module>             -    ERROR:  deploy_files() failed.
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 100, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 103, in <module>
     deploy_files([
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 126, in deploy_files
     target_dir = resolve_target(item["target_dir"], mkdir=True)
@@ -43,7 +43,7 @@ Traceback (most recent call last):
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 92, in resolve_target
     xx = mungePath(_targ, base_path, mkdir=mkdir)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 109, in __init__
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 119, in __init__
     Path(in_path_pp).mkdir(parents=True, exist_ok=True)
   File "/usr/local/lib/python3.11/pathlib.py", line 1116, in mkdir
     os.mkdir(self, mode)
@@ -71,7 +71,7 @@ demo-deployfiles.<module>             -  WARNING:  deploy_files() failed.
 ***** Test 4:  Try copy non-existing source file
 demo-deployfiles.<module>             -    ERROR:  deploy_files() failed.
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 134, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 137, in <module>
     deploy_files([
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 156, in deploy_files
     raise FileNotFoundError (f"Can't deploy <{source.name}>.  Item not found.")
@@ -93,7 +93,7 @@ demo-deployfiles.<module>             -  WARNING:  deploy_files() failed.
 ***** Test 6:  Destination is an existing file
 demo-deployfiles.<module>             -    ERROR:  deploy_files() failed.
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 160, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 163, in <module>
     deploy_files([
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 126, in deploy_files
     target_dir = resolve_target(item["target_dir"], mkdir=True)
@@ -101,7 +101,7 @@ Traceback (most recent call last):
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 92, in resolve_target
     xx = mungePath(_targ, base_path, mkdir=mkdir)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 109, in __init__
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 119, in __init__
     Path(in_path_pp).mkdir(parents=True, exist_ok=True)
   File "/usr/local/lib/python3.11/pathlib.py", line 1116, in mkdir
     os.mkdir(self, mode)
@@ -112,7 +112,7 @@ FileExistsError: [Errno 17] File exists: '/tmp/deployfile_T6'
 ***** Test 7:  Destination is an existing file, overwrite but no permission
 demo-deployfiles.<module>             -    ERROR:  deploy_files() failed.
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 173, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py", line 176, in <module>
     deploy_files([
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 132, in deploy_files
     with outfile.open('w') as ofile:

@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2018-2024
 #
 #==========================================================
 
@@ -44,7 +44,7 @@ Distribution files and directory trees are hosted in `<module_root>/deployment_f
 
 
 ### Parameters
-`files_list`
+`files_list` (list of dictionaries)
 - A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
   - `source` - Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
     No wildcard support.
@@ -56,11 +56,11 @@ Distribution files and directory trees are hosted in `<module_root>/deployment_f
   - `file_stat` - Permissions set on each created file (default 0o664)
   - `dir_stat` - Permissions set on each created directory (if not already existing, default 0o775)
 
-`overwrite`
+`overwrite` (bool, default False)
 - If overwrite=False (default) then only missing files will be copied.  If overwrite=True then all files will be overwritten 
 if they exist - data may be lost!
 
-`missing_ok`
+`missing_ok` (bool, default False)
 - If missing_ok=True then a missing source file or directory is tolerated (non-fatal).  This feature is used for testing.
 
 

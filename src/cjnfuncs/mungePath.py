@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2018-2024
 #
 #==========================================================
 
@@ -32,21 +32,21 @@ User (`~user/`) and environment vars (`$HOME/`) are supported and expanded.
 
 
 ### Parameters
-`in_path` (default '')
+`in_path` (Path or str, default '')
 - An absolute or relative path to a file or directory, such as `mydir/myfile.txt`
 - If `in_path` is an absolute path then the `base_path` is disregarded.
 - If `in_path` starts with `./` then the absolute path to the current working directory (cwd) is prepended 
 to `in_path`, and the `base_path` is disregarded.  See Special handling note, below.
 
-`base_path` (default '')
+`base_path` (Path or str, default '')
 - An absolute or relative path to a directory, such as `~/.config/mytool`
 - `base_path` is prepended to `in_path` if `in_path` is a relative path
 - `base_path = ''` (the default) results in a relative path based on the shell current working directory (cwd)
 - `base_path = '.'` results in an absolute path based on the shell cwd
 - `base_path = core.tool.main_dir` results in an absolute path based on the tool script directory
 
-`mkdir`
-- Force-make a full directory path.  `in_path` / `base_path` is understood to be to a directory.
+`mkdir` (bool, default False)
+- Force-make a full directory path.  `base_path` / `in_path` is understood to be to a directory.
 
 
 ### Returns
@@ -94,7 +94,7 @@ referenced, eg `./myfile`.  _Covering the cases, assuming the shell cwd is `/hom
 - The `.parent` is the directory containing (above) the `.full_path`.  If the object `.is_file` then `.parent` is the
 directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
 `.parent` is the directory above the end-point directory.
-- When using `mkdir=True` the combined `in_path` / `base_path` is understood to be a directory path (not
+- When using `mkdir=True` the combined `base_path` / `in_path` is understood to be a directory path (not
 to a file), and will be created if it does not already exist. (Uses `pathlib.Path.mkdir()`).  A FileExistsError 
 is raised if you attempt to mkdir on top of an existing file.
 - See [GitHub repo](https://github.com/cjnaz/cjnfuncs) tests/demo-mungePath.py for numerous application examples.
@@ -117,26 +117,12 @@ is raised if you attempt to mkdir on top of an existing file.
 
         if mkdir:
             Path(in_path_pp).mkdir(parents=True, exist_ok=True)
-            # try:
-            #     Path(in_path_pp).mkdir(parents=True, exist_ok=True)
-            # except Exception as e:
-            #     raise FileExistsError (e)
 
         self.parent = Path(in_path_pp.parent)
         self.full_path = Path(in_path_pp)
 
         self.name = self.full_path.name
         self.refresh_stats()
-        # self.exists = check_path_exists(self.full_path)
-        # self.exists = True
-        # self.is_absolute = self.full_path.is_absolute()
-        # self.is_relative = not self.is_absolute
-        # try:
-        #     self.is_dir =  self.full_path.is_dir()
-        #     self.is_file = self.full_path.is_file()
-        # except:     # Trap if the path does not exist
-        #     self.is_dir =  False
-        #     self.is_file = False
 
 
 #=====================================================================================
@@ -200,10 +186,10 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
 
 
 ### Parameters
-`path`
-- A pathlib.Path or str type
+`path` (Path or str)
+- Path to a file or directory
 
-`timeout` (default 1 second)
+`timeout` (int or float, default 1 second)
 - resolution seconds
 
 
@@ -219,14 +205,3 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
             return future.result(timeout)
         except TimeoutError:
             return False
-
-
-    # path = Path(path)
-    # executor = ThreadPoolExecutor(max_workers=1)
-    # future = executor.submit(path.exists)
-    # try:
-    #     return future.result(timeout)
-    # except TimeoutError:
-    #     return False
-
-

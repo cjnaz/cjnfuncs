@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2018-2024
 #
 #==========================================================
 
@@ -27,8 +27,8 @@ Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks
 
 
 ### Parameters
-`orig_val`
-- The original, passed-in value of type str, int, or float
+`orig_val` (str, int, or float)
+- The original, passed-in value
 
 
 ### Returns
@@ -101,10 +101,10 @@ def retime(time_sec, unitC):
 
 
 ### Parameters
-`time_sec`
-- Time value in resolution seconds, type int or float.
+`time_sec` (int or float)
+- The time value in resolution seconds to be converted
 
-`unitC`
+`unitC` (str)
 - Target time resolution: "s", "m", "h", "d", or "w" (case insensitive)
 
 

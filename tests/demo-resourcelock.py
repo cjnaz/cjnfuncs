@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 """Demo/test for cjnfuncs resourcelock functions
+
+Produce / compare to golden results:
+    ./demo-resourcelock.py
+        Compare to demo-resourcelock-initial-unlocked-golden.txt
+        (Test comments are for this case)
+
+    resourcelock test_lock get
+    ./demo-resourcelock.py
+        Compare to demo-resourcelock-initial-locked-golden.txt
 """
 
 #==========================================================
 #
-#  Chris Nelson, 2023
+#  Chris Nelson, 2024
 #
 #==========================================================
 
@@ -31,8 +40,13 @@ print (f"get_lock:   {my_lock.get_lock(timeout=0.1)} - <True> if lock request is
 my_lock.is_locked()
 my_lock.lock_value()
 
-print ("\n***** Get the lock a second time")
-print (f"get_lock:   {my_lock.get_lock(timeout=0.1)} - Repeated lock requests from same process return <True>")
+print ("\n***** Get the lock a second time, same_process_ok=False")
+print (f"get_lock:   {my_lock.get_lock(timeout=0.1)} - <False> Repeated lock request fails")
+my_lock.is_locked()
+my_lock.lock_value()
+
+print ("\n***** Get the lock a third time, same_process_ok=True")
+print (f"get_lock:   {my_lock.get_lock(timeout=0.1, same_process_ok=True)} - <True> Repeated lock request passes with switch")
 my_lock.is_locked()
 my_lock.lock_value()
 

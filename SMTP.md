@@ -140,26 +140,26 @@ Three attempts are made to send the message.
 
     
 ### Parameters
-`subj` (default 'Notification message')
+`subj` (str, default 'Notification message')
 - Text message subject field
 - Some SMS/MMS apps display the subj field in bold, some in raw form, and some not at all.
 
-`msg` (default ' ')
+`msg` (str, default ' ')
 - Text message body
 
-`to` (default 'NotifList')
+`to` (str, default 'NotifList')
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name (also listing one
 or more whitespace or comma separated email addresses).  If the `to` parameter does not
 contain an '@' it is assumed to be a config param.
 - Define `NotifList` in the config file to use the default `to` value.
 
-`log` (default False)
+`log` (bool, default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
 at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
-`smtp_config` (required)
+`smtp_config` (config_item class instance)
 - config_item class instance containing the [SMTP] section and related params
 
 
@@ -205,30 +205,30 @@ Three attempts are made to send the message (see `EmailNTries`, below).
 
 
 ### Parameters
-`subj`
+`subj` (str)
 - Email subject text
 
-`to`
+`to` (str)
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name in the [SMTP] section (also listing one
 or more whitespace or comma separated email addresses).  If the `to` parameter does not
 contain an '@' it is assumed to be a config param.
 
-`body` (default None)
+`body` (str, default None)
 - A string message to be sent
 
-`filename` (default None)
+`filename` (str, default None)
 - A str or Path to the file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
 
-`htmlfile` (default None)
+`htmlfile` (str, default None)
 - A str or Path to the html formatted file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
 
-`log` (default False)
+`log` (bool, default False)
 - If True, logs that the message was sent at the WARNING level. If False, logs 
 at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
-`smtp_config` (required)
+`smtp_config` (config_item class instance)
 - config_item class instance containing the [SMTP] section and related params
 
 
@@ -259,7 +259,9 @@ The `subj` field is part of the log message.
 
 `EmailRetryWait` (seconds, type int, float, or timevalue, default 2s)
 - Number of seconds to wait between retry attempts
-- Also used for server connection timeout
+
+`EmailServerTimeout` (seconds, type int, float, or timevalue, default 2s)
+- Server connection timeout
 
 `EmailDKIMDomain` (required if using DKIM email signing)
 - The domain of the public-facing SMTP server, eg `mydomain.com`

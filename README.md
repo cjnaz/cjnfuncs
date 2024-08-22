@@ -1,6 +1,6 @@
 # cjnfuncs - A framework and collection of utility functions for script writing
 
-## cjnfuncs is comprised of several modules (links to respective documentation)
+## cjnfuncs is comprised of several modules (follow links to respective documentation)
 
 NOTE:  Since relative links to other .md files do not work on PyPI, please go to the [cjnfuncs GitHub repo](https://github.com/cjnaz/cjnfuncs) to read the documentation. 
 

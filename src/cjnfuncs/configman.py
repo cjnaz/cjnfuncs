@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2023
+#  Chris Nelson, 2018-2024
 #
 #==========================================================
 
@@ -46,18 +46,18 @@ The config_item() class provides handling of one or more config file instances. 
 
 
 ### Instantiation parameters
-`config_file` (default None)
+`config_file` (str, default None)
 - Path to the configuration file, relative to the `core.tool.config_dir` directory, or an absolute path.
 - `None` may be used if the config will be loaded programmatically via `read_string()` or `read_dict()`.
 
-`remap_logdirbase` (default True)
+`remap_logdirbase` (bool, default True)
 - If `remap_logdirbase=True` and the tool script is running in _user_ mode (not site mode) 
 then the `core.tool.log_dir_base` will be set to `core.tool.config_dir`.
 
-`force_str` (default False)
+`force_str` (bool, default False)
 - Causes all params to be loaded as type `str`, overriding the default type identification.
 
-`secondary_config` (default False)
+`secondary_config` (bool, default False)
 - Set to `True` when loading additional config files.  Disables logging setup related changes.
 - The primary config file should be loaded first before any secondary_config loads, so that logging 
 is properly set up.
@@ -208,7 +208,7 @@ output:
 ***config_item() class member function***
 
 ### Parameters
-`section` (default '')
+`section` (str, default '')
 - `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
 - `section = '<section_name>'` clears just that section
 - `section = 'DEFAULT'` clears just the DEFAULT section
@@ -317,30 +317,30 @@ feature, and intermittent loss of access to the config file.
     
 
 ### Parameters
-`ldcfg_ll` (default 30/WARNING)
+`ldcfg_ll` (int, default 30 (WARNING))
 - Logging level used within `loadconfig()` code for debugging loadconfig() itself
 
-`call_logfile` (default None)
+`call_logfile` (str, default None)
 - An absolute path or relative to the `core.tool.log_dir_base` directory
 
-`call_logfile_wins` (default False)
+`call_logfile_wins` (bool, default False)
 - If True, the `call_logfile` overrides any `LogFile` in the config file
 
-`flush_on_reload` (default False)
+`flush_on_reload` (bool, default False)
 - If the config file will be reloaded (due to a changed timestamp) then clean out the 
 `cfg` dictionary first
 
-`force_flush_reload` (default False)
+`force_flush_reload` (bool, default False)
 - Forces the `cfg` dictionary to be cleaned out and the config file to be reloaded, 
 regardless of whether the config file timestamp has changed
 
-`isimport` (default False)
+`isimport` (bool, default False)
 - Internally set True when handling imports.  Not used by tool script calls.
 
-`tolerate_missing` (default False)
+`tolerate_missing` (bool, default False)
 - Used in a tool script service loop, return `-1` rather than raising `ConfigError` if the config file is inaccessible
 
-`prereload_callback` (default None)
+`prereload_callback` (function, default None)
 - Allows user services to be managed (paused/terminated) before the config is reloaded and logging is reset.
 
 ### Returns
@@ -450,9 +450,6 @@ a ConfigError if the config file cannot be accessed.
             if force_flush_reload:
                 logging.getLogger().setLevel(ldcfg_ll)  # logging within loadconfig is always done at ldcfg_ll
                 logging.info(f"Config  <{self.config_file}>  force flushed (force_flush_reload)")
-                if prereload_callback:
-                    logging.info("Pre-reload call user function called")
-                    prereload_callback()
                 self.clear()
                 self.config_timestamp = 0               # Force reload of the config file
 
@@ -477,11 +474,11 @@ a ConfigError if the config file cannot be accessed.
             if self.config_timestamp == current_timestamp:
                 return 0                                # 0 indicates that the config file was NOT (re)loaded
 
-            # It's an initial load call, or config file has changed.  Do (re)load.
+            # It's an initial load call, or config file has changed, or force_flush_reload...  Do (re)load
             self.config_timestamp = current_timestamp
             logging.getLogger().setLevel(ldcfg_ll)      # Set logging level for remainder of loadconfig call
             if prereload_callback:
-                logging.info("Pre-reload user function called")
+                logging.debug("Pre-reload callback user function called")
                 prereload_callback()
             logging.info (f"Config  <{self.config_file}>  file timestamp: {current_timestamp}")
 
@@ -551,13 +548,13 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
 
 ### Parameters
-`str_blob`
+`str_blob` (str)
 - String containing the lines of config data
 
-`ldcfg_ll` (default 30/WARNING)
+`ldcfg_ll` (int, default 30 (WARNING))
 - Logging level used within `read_string()` code for debugging read_string() itself
 
-`isimport` (default False)
+`isimport` (bool, default False)
 - Internally set True when handling imports.  Not used by tool script calls.
 
 
@@ -637,10 +634,10 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 Loaded content is added to and/or modifies any previously loaded content.
 
 ### Parameters
-`param_dict`
+`param_dict` (dict)
 - dictionary to be loaded
 
-`section_name` (default '' - top level)
+`section_name` (str, default '' (top level))
 - section to load the param_dict into.
 - The section will be created if not yet existing.
 - Content can only be loaded into one section per call to read_dict().
@@ -723,18 +720,18 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 
 
 ### Parameters
-`param`
+`param` (str)
 - String name of param to be fetched from cfg
 
-`fallback` (default None)
+`fallback` (as-expected type, default None)
 - if provided, is returned if `param` does not exist in cfg
 
-`types` (default '[]' empty list)
+`types` (single or list of as-expected types, default '[]' (any type accepted))
 - if provided, a ConfigError is raised if the param's value type is not in the list of expected types
 - `types` may be a single type (eg, `types=int`) or a list of types (eg, `types=[int, float]`)
 - Supported types: [str, int, float, bool, list, tuple, dict]
 
-`section` (default '' - top-level)
+`section` (str, default '' (top-level))
 - Select the section from which to get the param value.
 
 
@@ -813,22 +810,22 @@ reload call to avoid multiple config reloads.
 
 
 ### Parameters
-`param` (default ' ')
+`param` (str, default ' ')
 - The param name, if modifying an existing param or adding a new param
 
-`value` (default ' ')
+`value` (as-expected type, default ' ')
 - The new value to be applied to an existing param, or an added param
 - Any comment text (after a '#') in the new value will be prepended to any existing comment text
 
-`remove` (default False)
+`remove` (bool, default False)
 - If True, the `param` config file line is removed from the config file
 
-`add_if_not_existing` (default False)
+`add_if_not_existing` (bool, default False)
 - Modify an existing param line, or add at the bottom of the config file if it is not existing
 - To add a blank line leave out both `param` and `value`, or set both the `""`
 - To add a comment line specify the comment in the `param` field (eg, `my_config.modify_configfile("# My comment")`)
 
-`save` (default False)
+`save` (bool, default False)
 - Write the modified config file content back to the file
 - `save=True` may be specified on the last modification call or an a standalone call.
 
@@ -903,8 +900,8 @@ reload call to avoid multiple config reloads.
 
 ### Parameter
 
-`savefile`
-- Path to the output file.  Path or str type.
+`savefile` (Path or str)
+- Path to the output file.
 - The config data will be written to an absolute path, or relative to the `core.tool.config_dir`
 
 

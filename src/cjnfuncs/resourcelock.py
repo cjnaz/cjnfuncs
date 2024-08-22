@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, Copyright 2023
+#  Chris Nelson, Copyright 2024
 #
 #==========================================================
 
@@ -60,7 +60,7 @@ currently 0 (indicating locked), so it is ***recommended*** to have (possibly ex
 such as in your interrupt-trapped cleanup code.
 
 ### Parameters
-`lockname`
+`lockname` (str)
 - All processes sharing a given resource must use the same lockname.
     """
 
@@ -80,7 +80,7 @@ such as in your interrupt-trapped cleanup code.
 
     def get_lock(self, timeout=1, same_process_ok=False):
         """
-## get_lock (timeout=1) - Request the resource lock
+## get_lock (timeout=1, same_process_ok=False) - Request the resource lock
 
 ***resource_lock() class member function***
 
@@ -94,11 +94,11 @@ then get_lock() immediately returns True.  This allows the script code to not ha
 decide if the lock has previously been acquired before calling get_lock() again, leading to cleaner code.
 
 ### Parameters
-`timeout` (default 1 second)
+`timeout` (int or float, default 1 second)
 - The max time, in seconds, to wait to acquire the lock
 - None is no timeout - wait forever (Hang forever.  Unwise.)
 
-`same_process_ok` (default False)
+`same_process_ok` (bool, default False)
 - If True, then if the current process currently has the lock then get_lock() immediately returns True.
 - If False, then if the lock is currently set by the same process or another process then get_lock() blocks
 with timeout.
@@ -139,7 +139,7 @@ in the same unset state.
 unless `force=True`.
 
 ### Parameter
-`force` (default False)
+`force` (bool, default False)
 - Release the lock regardless of whether or not this process acquired it.
 - Useful for forced cleanup, for example, by the CLI interface.
 - Dangerous if another process had acquired the lock.  Be careful.

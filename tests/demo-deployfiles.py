@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Demo/test for cjnfuncs environment/deployfiles classes/functions
+
+Produce / compare to golden results:
+    ./demo-deployfiles.py --setup-user
 """
 
 #==========================================================
 #
-#  Chris Nelson, 2023
+#  Chris Nelson, 2024
 #
 #==========================================================
 

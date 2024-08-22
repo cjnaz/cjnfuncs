@@ -10,7 +10,7 @@ Current log file:              __console__
 
 ----- T1.2:  LogFile=None, call_logfile=None, call_logfile_wins=True >>>>  Log file: __console__
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1702837130
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
@@ -19,7 +19,7 @@ Current log file:              __console__
 
 ----- T1.3:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__ (override cfg_logfile)
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1702837130
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
@@ -29,7 +29,7 @@ Current log file:              __console__
 
 ----- T1.4:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  call_logfile
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1702837130
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
@@ -156,7 +156,7 @@ Based on found user or site dirs:
 
 ----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1702837130
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
@@ -165,7 +165,7 @@ Current log file:              __console__
 
 ----- T1.13: Modified console logging format >>>>  Log file:  __console__
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1702837130
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
@@ -175,7 +175,7 @@ Current log file:              __console__
 
 ----- T1.14: Modified file logging format >>>>  Log file:  call_logfile
     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-    INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1702837130
+    INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
@@ -189,7 +189,7 @@ Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_
 
 ----- T2.1:  Initial load.  Default logging level 30
 (Re)loaded             :  1
-Config file timestamp  :  1702837130
+Config file timestamp  :  1724300072
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -199,7 +199,7 @@ Current log file       :  __console__
 
 ----- T2.2:  No config change >>>>  Not reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1702837130
+Config file timestamp  :  1724300072
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -208,14 +208,14 @@ Current log file       :  __console__
     demo-config.print_stats          -  WARNING:  Warning level message
 
 ----- T2.3:  LogLevel=10, ldcfg_ll=10 >>>>  loadconfig logging, Logging DEBUG, INFO, and WARNING messages
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1702837131
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300073
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  flushed due to changed file (flush_on_reload)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <10>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <10>
 (Re)loaded             :  1
-Config file timestamp  :  1702837131
+Config file timestamp  :  1724300073
 Config LogLevel        :  10
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -227,7 +227,7 @@ Current log file       :  __console__
 
 ----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No loadconfig logging, Logging DEBUG, INFO, and WARNING messages
 (Re)loaded             :  1
-Config file timestamp  :  1702837132
+Config file timestamp  :  1724300074
 Config LogLevel        :  10
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -239,7 +239,7 @@ Current log file       :  __console__
 
 ----- T2.5:  LogLevel=30, ldcfg_ll=30 (default),  >>>>  Log only WARNING
 (Re)loaded             :  1
-Config file timestamp  :  1702837134
+Config file timestamp  :  1724300075
 Config LogLevel        :  30
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -248,13 +248,13 @@ Current log file       :  __console__
     demo-config.print_stats          -  WARNING:  Warning level message
 
 ----- T2.6:  ldcfg_ll=10, No LogLevel >>>>  Restore preexisting level (30)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1702837135
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300076
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  flushed due to changed file (flush_on_reload)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.loadconfig           -     INFO:  Logging level set to preexisting level <30>
 (Re)loaded             :  1
-Config file timestamp  :  1702837135
+Config file timestamp  :  1724300076
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -264,7 +264,7 @@ Current log file       :  __console__
 
 ----- T2.7:  ldcfg_ll=30 (default), No changes >>>>  NOT Reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1702837135
+Config file timestamp  :  1724300076
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -274,7 +274,7 @@ Current log file       :  __console__
 
 ----- T2.8:  ldcfg_ll=10, flush_on_reload >>>>  NOT Reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1702837135
+Config file timestamp  :  1724300076
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -284,12 +284,12 @@ Current log file       :  __console__
 
 ----- T2.9:  ldcfg_ll=10, force_flush_reload >>>>  Loadconfig logging
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1702837135
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300076
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.loadconfig           -     INFO:  Logging level set to preexisting level <30>
 (Re)loaded             :  1
-Config file timestamp  :  1702837135
+Config file timestamp  :  1724300076
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -299,14 +299,14 @@ Current log file       :  __console__
 
 ----- T2.10:  ldcfg_ll=10, LogLevel=20, var2 added >>>>  Reloaded
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1702837136
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300077
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded var2 = <Hello>  (<class 'str'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 (Re)loaded             :  1
-Config file timestamp  :  1702837136
+Config file timestamp  :  1724300077
 Config LogLevel        :  20
 Current Logging level  :  20
 testvar                :  True  <class 'bool'>
@@ -316,13 +316,13 @@ Current log file       :  __console__
     demo-config.print_stats          -     INFO:  Info    level message
 
 ----- T2.11: ldcfg_ll=10, LogLevel=40, var2 removed from config >>>>  var2 still defined, no logging
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1702837137
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300079
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <40>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <40>
 (Re)loaded             :  1
-Config file timestamp  :  1702837137
+Config file timestamp  :  1724300079
 Config LogLevel        :  40
 Current Logging level  :  40
 testvar                :  True  <class 'bool'>
@@ -331,13 +331,13 @@ Current log file       :  __console__
 
 ----- T2.12: ldcfg_ll=10, LogLevel=30, force_flush_reload=True >>>>  var2 gone
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1702837137
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300079
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 (Re)loaded             :  1
-Config file timestamp  :  1702837137
+Config file timestamp  :  1724300079
 Config LogLevel        :  30
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -347,12 +347,12 @@ Current log file       :  __console__
 
 ----- T2.13: Externally set log level = 20
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1702837138
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300080
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.loadconfig           -     INFO:  Logging level set to preexisting level <20>
 (Re)loaded             :  1
-Config file timestamp  :  1702837138
+Config file timestamp  :  1724300080
 Config LogLevel        :  None
 Current Logging level  :  20
 testvar                :  True  <class 'bool'>
@@ -363,12 +363,12 @@ Current log file       :  __console__
 
 ----- T2.14: Externally set log level = 10
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1702837138
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300080
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.loadconfig           -     INFO:  Logging level set to preexisting level <10>
 (Re)loaded             :  1
-Config file timestamp  :  1702837138
+Config file timestamp  :  1724300080
 Config LogLevel        :  None
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -380,7 +380,7 @@ Current log file       :  __console__
 
 ----- T2.15: Externally set log level = 10 with ldcfg_ll=30 (default)
 (Re)loaded             :  1
-Config file timestamp  :  1702837138
+Config file timestamp  :  1724300080
 Config LogLevel        :  None
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -398,7 +398,7 @@ Current log file       :  __console__
     deployfiles.deploy_files         -     INFO:  Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1702837138
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300080
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
@@ -486,7 +486,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1702837138
+.config_timestamp       :  1724300080
 .sections_list          :  ['SMTP', 'Test section 1', 'Test section 2']
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -571,7 +571,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1702837138
+.config_timestamp       :  1724300080
 .sections_list          :  ['SMTP', 'Test section 1', 'Test section 2']
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -587,7 +587,7 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
     demo-config.<module>             -  WARNING:  testvar:          True  <class 'bool'>
     demo-config.<module>             -  WARNING:  another:          None  <class 'NoneType'>
 Current Logging level  :  17
-      configman.loadconfig           -     INFO:  Config  <additional.cfg>  file timestamp: 1702837138
+      configman.loadconfig           -     INFO:  Config  <additional.cfg>  file timestamp: 1724300080
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/additional.cfg>
       configman.read_string          -    DEBUG:  Loaded another = <yes>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded One = <5>  (<class 'int'>)
@@ -599,7 +599,7 @@ Stats for config file <additional.cfg>:
 .config_file            :  additional.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/additional.cfg
-.config_timestamp       :  1702837138
+.config_timestamp       :  1724300080
 .sections_list          :  []
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -647,7 +647,7 @@ ConfigError: Param <[] NotInCfg-NoFB> not in <demo_config.cfg> and no default or
 ConfigError: Param <[nosuchsection] NotInCfg-NoFB> not in <demo_config.cfg> and no default or fallback.
 
 ======================================================================================================
-***** Test number 9: Test flush_on_reload  and  force_flush_reload cases *****
+***** Test number 9: Test flush_on_reload  and  force_flush_reload cases, with callbacks *****
 ======================================================================================================
 
     deployfiles.deploy_files         -     INFO:  Deployed  demo_config.cfg      to  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
@@ -659,7 +659,9 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 
 ----- T9.2:  var dummy in cfg:  True  (should be True because not reloaded)
 
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1702837139
+      configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
+    demo-config.mycallback           -     INFO:  In mycallback()
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300081
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
@@ -720,7 +722,9 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 ----- T9.3:  var dummy in cfg:  True  (should be True because flush_on_reload == False)
 
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1702837140
+      configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
+    demo-config.mycallback           -     INFO:  In mycallback()
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300082
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  flushed due to changed file (flush_on_reload)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
@@ -783,7 +787,9 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 ----- T9.4:  var dummy in cfg:  False  (should be False because flush_on_reload == True)
 
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1702837140
+      configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
+    demo-config.mycallback           -     INFO:  In mycallback()
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300082
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
@@ -936,7 +942,7 @@ Logging level back in the main code:  7
     deployfiles.deploy_files         -     INFO:  Deployed  import_nest_1.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg
     deployfiles.deploy_files         -     INFO:  Deployed  import_nest_2.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg
       configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1702837142
+      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1724300084
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
       configman.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
@@ -974,7 +980,7 @@ Logging level back in the main code:  7
 
 ----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.
       configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1702837142
+      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1724300084
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
       configman.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
@@ -985,7 +991,7 @@ Logging level back in the main code:  7
 
 ----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.
       configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1702837142
+      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1724300084
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
       configman.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
 Exception due to missing imported config file:
@@ -1179,7 +1185,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1702837142
+.config_timestamp       :  1724300084
 .sections_list          :  ['SMTP', 'Test section 1', 'Test section 2']
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -1200,7 +1206,7 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
     deployfiles.deploy_files         -     INFO:  Deployed  import_nest_1.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg
     deployfiles.deploy_files         -     INFO:  Deployed  import_nest_2.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg
       configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1702837142
+      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1724300084
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
       configman.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
@@ -1345,7 +1351,7 @@ ConfigError: Failed attempt to remove non-existing section <Test section> from c
 
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1702837142
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300084
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
@@ -1409,7 +1415,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1702837142
+.config_timestamp       :  1724300084
 .sections_list          :  ['SMTP', 'Test section 1', 'Test section 2']
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -1481,7 +1487,7 @@ x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
     deployfiles.deploy_files         -     INFO:  Deployed  demo_config_T23c.cfg to  /home/cjn/.config/cjnfuncs_testcfg/demo_config_T23c.cfg
 
 ----- T23.1:  Section defined within imported config file
-      configman.loadconfig           -     INFO:  Config  <demo_config_T23a.cfg>  file timestamp: 1702837142
+      configman.loadconfig           -     INFO:  Config  <demo_config_T23a.cfg>  file timestamp: 1724300084
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23a.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23b.cfg>
@@ -1489,29 +1495,29 @@ x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
 ConfigError:  Section within imported file is not supported.
 
 ----- T23.1a:  Section defined within imported config file
-      configman.loadconfig           -     INFO:  Config  <demo_config_T23a.cfg>  file timestamp: 1702837142
+      configman.loadconfig           -     INFO:  Config  <demo_config_T23a.cfg>  file timestamp: 1724300084
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23a.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23b.cfg>
       configman.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
     demo-config.<module>             -    ERROR:  ----- T23.1a:  Section defined within imported config file
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py", line 704, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py", line 709, in <module>
     T23_config.loadconfig(ldcfg_ll=10)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 486, in loadconfig
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 493, in loadconfig
     self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 581, in read_string
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 588, in read_string
     raise e
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 571, in read_string
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 578, in read_string
     imported_config.loadconfig(ldcfg_ll, isimport=True)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 486, in loadconfig
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 493, in loadconfig
     self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 595, in read_string
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 602, in read_string
     raise ConfigError ("Section within imported file is not supported.")
 cjnfuncs.core.ConfigError: Section within imported file is not supported.
 
 ----- T23.2:  Malformed Section name
-      configman.loadconfig           -     INFO:  Config  <demo_config_T23c.cfg>  file timestamp: 1702837142
+      configman.loadconfig           -     INFO:  Config  <demo_config_T23c.cfg>  file timestamp: 1724300084
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23c.cfg>
       configman.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
 ConfigError:  Malformed section line <[section malform        # No closing ']'>

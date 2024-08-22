@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 """Demo/test for cjnfuncs config classes/functions
+
+Produce / compare to golden results:
+    ./demo-config.py -t 0
+        Compare to demo-config-golden.txt
+        Config file timestamps will be different
+
+    ./demo-config.py -t 14
+        diff /home/me/.config/cjnfuncs_testcfg/demo_config.cfg demo-config-T14-golden.cfg
 """
 
 #==========================================================
 #
-#  Chris Nelson, 2023
+#  Chris Nelson, 2024
 #
 #==========================================================
 
@@ -347,27 +355,32 @@ if args.test == 8:
 
 #===============================================================================================
 if args.test == 0  or  args.test == 9:
-    print_test_header (9, "Test flush_on_reload  and  force_flush_reload cases")
+    print_test_header (9, "Test flush_on_reload  and  force_flush_reload cases, with callbacks")
+
+    def mycallback():
+        logging.info("In mycallback()")
+
     do_base_setup()
+
     config.cfg["dummy"] = True
     print (f"\n----- T9.1:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True - Initial state)\n")
 
-    config.loadconfig(flush_on_reload=True, ldcfg_ll=10)
+    config.loadconfig(flush_on_reload=True, ldcfg_ll=10, prereload_callback=mycallback)
     print (f"----- T9.2:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True because not reloaded)\n")
 
 
     time.sleep(1)  # 1 sec timestamp change sensitivity in loadconfig
     config.config_full_path.touch()
-    config.loadconfig(ldcfg_ll=10)
+    config.loadconfig(ldcfg_ll=10, prereload_callback=mycallback)
     print (f"----- T9.3:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True because flush_on_reload == False)\n")
 
     time.sleep(1)
     config.config_full_path.touch()
-    config.loadconfig(flush_on_reload=True, ldcfg_ll=10)
+    config.loadconfig(flush_on_reload=True, ldcfg_ll=10, prereload_callback=mycallback)
     print (f"----- T9.4:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because flush_on_reload == True)\n")
 
     config.cfg["dummy"] = True
-    config.loadconfig(force_flush_reload=True, ldcfg_ll=10)
+    config.loadconfig(force_flush_reload=True, ldcfg_ll=10, prereload_callback=mycallback)
     print (f"----- T9.5:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because force_flush_reload == True)\n")
 
 
