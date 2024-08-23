@@ -2,7 +2,7 @@
 """Demo/test for cjnfuncs environment/deployfiles classes/functions
 
 Produce / compare to golden results:
-    ./demo-deployfiles.py --setup-user
+    ./demo-deployfiles.py --setup-user | diff demo-deployfiles-golden.txt -
 """
 
 #==========================================================

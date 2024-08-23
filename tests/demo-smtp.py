@@ -3,13 +3,11 @@
 
 Produce / compare to golden results:
     ./demo-smtp.py --setup-user
-    Customize the installed config files
+        Customize the installed config files
 
-    ./demo-smtp.py
-        Compare to demo-smtp-golden.txt
-
-    Should receive emails 1, 2, 3, 4, 5, 11
-    Should receive text notifications 9, 10
+    ./demo-smtp.py | diff demo-smtp-golden.txt -
+        Should receive emails 1, 2, 3, 4, 5, 11
+        Should receive text notifications 9, 10
 """
 
 #==========================================================

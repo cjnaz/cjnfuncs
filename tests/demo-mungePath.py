@@ -2,7 +2,7 @@
 """Demo/test for mungePath
 
 Produce / compare to golden results:
-    ./demo-mungePath.py
+    ./demo-mungePath.py | diff demo-mungePath-golden.txt -
 """
 #==========================================================
 #

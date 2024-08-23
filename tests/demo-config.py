@@ -2,12 +2,11 @@
 """Demo/test for cjnfuncs config classes/functions
 
 Produce / compare to golden results:
-    ./demo-config.py -t 0
-        Compare to demo-config-golden.txt
+    ./demo-config.py -t 0 | diff demo-config-golden.txt -
         Config file timestamps will be different
 
     ./demo-config.py -t 14
-        diff /home/me/.config/cjnfuncs_testcfg/demo_config.cfg demo-config-T14-golden.cfg
+    diff /home/me/.config/cjnfuncs_testcfg/demo_config.cfg demo-config-T14-golden.cfg
 """
 
 #==========================================================

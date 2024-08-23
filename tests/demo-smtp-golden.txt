@@ -69,7 +69,7 @@ Load config /home/cjn/.config/cjnfuncs_testsmtp/demo_smtp.cfg
 =====  Test 6:  No such file nofile.txt  =====
       demo-smtp.<module>             -    ERROR:  Test failed:  <6:  No such file nofile.txt>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 143, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 139, in <module>
     snd_email (subj=test_desc, filename="nofile.txt", to="EmailTo", log=True, smtp_config=config)
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/SMTP.py", line 247, in snd_email
     raise SndEmailError (f"snd_email - Message subject <{subj}>:  Failed to load <{xx.full_path}>.\n  {e}") from None
@@ -80,7 +80,7 @@ cjnfuncs.core.SndEmailError: snd_email - Message subject <6:  No such file nofil
 =====  Test 7:  No to=  =====
       demo-smtp.<module>             -    ERROR:  Test failed:  <7:  No to=>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 152, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 148, in <module>
     snd_email (subj=test_desc, body="Hello", smtp_config=config)
 TypeError: snd_email() missing 1 required positional argument: 'to'
 
@@ -88,7 +88,7 @@ TypeError: snd_email() missing 1 required positional argument: 'to'
 =====  Test 8:  Invalid to=  =====
       demo-smtp.<module>             -    ERROR:  Test failed:  <8:  Invalid to=>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 161, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 157, in <module>
     snd_email (subj=test_desc, body="Hello", to="me@example.com, junkAtexample.com", log=True, smtp_config=config)
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/SMTP.py", line 283, in snd_email
     raise SndEmailError (f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>.")
@@ -125,7 +125,7 @@ cjnfuncs.core.SndEmailError: snd_email - Message subject <8:  Invalid to=>:  add
 =====  Test 12: No body, filename, or htmlfile  =====
       demo-smtp.<module>             -    ERROR:  Test failed:  <12: No body, filename, or htmlfile>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 197, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 193, in <module>
     snd_email (subj=test_desc, to="EmailTo", log=True, smtp_config=config)
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/SMTP.py", line 259, in snd_email
     raise SndEmailError (f"snd_email - Message subject <{subj}>:  No body, filename, or htmlfile specified.")
@@ -135,7 +135,7 @@ cjnfuncs.core.SndEmailError: snd_email - Message subject <12: No body, filename,
 =====  Test 13: Empty to=  =====
       demo-smtp.<module>             -    ERROR:  Test failed:  <13: Empty to=>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 206, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 202, in <module>
     snd_email (subj=test_desc, to="", body="Hello", log=True, smtp_config=config)
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/SMTP.py", line 280, in snd_email
     raise SndEmailError (f"snd_email - Message subject <{subj}>:  'to' list must not be empty.")
@@ -148,25 +148,25 @@ cjnfuncs.core.SndEmailError: snd_email - Message subject <13: Empty to=>:  'to' 
            SMTP.snd_email            -    DEBUG:  Logging into SMTP server
            SMTP.snd_email            -    DEBUG:  Sending message <14: Invalid to='inval@i^*#d>
            SMTP.snd_email            -    DEBUG:  Email send try 0 failed.  Retry in <2.0 sec>:
-  <{'inval@i^*#d': (553, b'5.1.3 The recipient address <inval@i^*#d> is not a valid RFC 5321 address.\n5.1.3 For more information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. d9443c01a7336-2038557e74esm16131055ad.66 - gsmtp')}>
+  <{'inval@i^*#d': (553, b'5.1.3 The recipient address <inval@i^*#d> is not a valid RFC 5321 address.\n5.1.3 For more information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. d9443c01a7336-2038557eec1sm19197245ad.91 - gsmtp')}>
            SMTP.snd_email            -    DEBUG:  Initialize the SMTP server connection for port <p587tls>
            SMTP.snd_email            -    DEBUG:  Start TLS
            SMTP.snd_email            -    DEBUG:  Logging into SMTP server
            SMTP.snd_email            -    DEBUG:  Sending message <14: Invalid to='inval@i^*#d>
            SMTP.snd_email            -    DEBUG:  Email send try 1 failed.  Retry in <2.0 sec>:
-  <{'inval@i^*#d': (553, b'5.1.3 The recipient address <inval@i^*#d> is not a valid RFC 5321 address.\n5.1.3 For more information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. d2e1a72fcca58-7143430941bsm1747941b3a.168 - gsmtp')}>
+  <{'inval@i^*#d': (553, b'5.1.3 The recipient address <inval@i^*#d> is not a valid RFC 5321 address.\n5.1.3 For more information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. 41be03b00d2f7-7cd9ad552aasm1781527a12.59 - gsmtp')}>
            SMTP.snd_email            -    DEBUG:  Initialize the SMTP server connection for port <p587tls>
            SMTP.snd_email            -    DEBUG:  Start TLS
            SMTP.snd_email            -    DEBUG:  Logging into SMTP server
            SMTP.snd_email            -    DEBUG:  Sending message <14: Invalid to='inval@i^*#d>
       demo-smtp.<module>             -    ERROR:  Test failed:  <14: Invalid to='inval@i^*#d>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 215, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 211, in <module>
     snd_email (subj=test_desc, to="inval@i^*#d", body="Hello", log=True, smtp_config=config)
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/SMTP.py", line 376, in snd_email
     raise SndEmailError (f"snd_email:  Send failed for <{subj}>:\n  <{last_error}>")
 cjnfuncs.core.SndEmailError: snd_email:  Send failed for <14: Invalid to='inval@i^*#d>:
-  <{'inval@i^*#d': (553, b'5.1.3 The recipient address <inval@i^*#d> is not a valid RFC 5321 address.\n5.1.3 For more information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. d2e1a72fcca58-7143679cd7asm1594358b3a.112 - gsmtp')}>
+  <{'inval@i^*#d': (553, b'5.1.3 The recipient address <inval@i^*#d> is not a valid RFC 5321 address.\n5.1.3 For more information, go to\n5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321\n5.1.3 specifications. 98e67ed59e1d1-2d5eb1fc146sm5083473a91.0 - gsmtp')}>
 
 
 =====  Test 15:  Failed email server  =====
@@ -179,7 +179,7 @@ cjnfuncs.core.SndEmailError: snd_email:  Send failed for <14: Invalid to='inval@
            SMTP.snd_email            -    DEBUG:  Initialize the SMTP server connection for port <p587tls>
       demo-smtp.<module>             -    ERROR:  Test failed:  <15:  Failed email server>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 225, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 221, in <module>
     snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/SMTP.py", line 376, in snd_email
     raise SndEmailError (f"snd_email:  Send failed for <{subj}>:\n  <{last_error}>")
@@ -190,7 +190,7 @@ cjnfuncs.core.SndEmailError: snd_email:  Send failed for <15:  Failed email serv
 =====  Test 16:  Bad server port  =====
       demo-smtp.<module>             -    ERROR:  Test failed:  <16:  Bad server port>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 236, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 232, in <module>
     snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/SMTP.py", line 293, in snd_email
     raise SndEmailError (f"snd_email - Config EmailServerPort <{cfg_port}> is invalid")
@@ -208,7 +208,7 @@ cjnfuncs.core.SndEmailError: snd_email - Config EmailServerPort <badport> is inv
            SMTP.snd_notif            -  WARNING:  Notification send failed <17:  snd_notif Failed email server> <This is the message body>
       demo-smtp.<module>             -    ERROR:  Test failed:  <17:  snd_notif Failed email server>
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 248, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-smtp.py", line 244, in <module>
     snd_notif (subj=test_desc, msg='This is the message body', smtp_config=config)
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/SMTP.py", line 111, in snd_notif
     raise e

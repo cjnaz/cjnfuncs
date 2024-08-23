@@ -2,13 +2,11 @@
 """Demo/test for cjnfuncs resourcelock functions
 
 Produce / compare to golden results:
-    ./demo-resourcelock.py
-        Compare to demo-resourcelock-initial-unlocked-golden.txt
+    ./demo-resourcelock.py | diff demo-resourcelock-initial-unlocked-golden.txt -
         (Test comments are for this case)
 
     resourcelock test_lock get
-    ./demo-resourcelock.py
-        Compare to demo-resourcelock-initial-locked-golden.txt
+    ./demo-resourcelock.py | diff demo-resourcelock-initial-locked-golden.txt -
 """
 
 #==========================================================
