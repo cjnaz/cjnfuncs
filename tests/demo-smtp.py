@@ -16,7 +16,7 @@ Produce / compare to golden results:
 #
 #==========================================================
 
-__version__ = "1.3"
+__version__ = "1.4"
 TOOLNAME =    "cjnfuncs_testsmtp"
 CONFIG_FILE = "demo_smtp.cfg"
 
@@ -29,7 +29,7 @@ from cjnfuncs.core     import set_toolname, SndEmailError, logging
 from cjnfuncs.configman import config_item
 from cjnfuncs.deployfiles import deploy_files
 from cjnfuncs.mungePath import mungePath
-from cjnfuncs.SMTP import snd_email, snd_notif
+from cjnfuncs.SMTP import snd_email, snd_notif, list_to
 import cjnfuncs.core as core
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
@@ -244,4 +244,40 @@ if args.test == 0  or  args.test == 17:
         snd_notif (subj=test_desc, msg='This is the message body', smtp_config=config)
     except Exception:
         logging.exception (f"Test failed:  <{test_desc}>")
+
+
+if args.test == 0  or  args.test == 18:
+    print ("\n\n=====  Test 18:  list_to tests  =====")
+
+    def list_to_test(desc, to, get_type):
+        try:
+            print (f"{desc:40} {list_to(to, get_type, desc, config)}")
+        except Exception as e:
+            print (f"Exception:  {e}")
+
+    list_to_test ('1:   Single email address', 'me@home', 'emails')
+    list_to_test ('2:   Multiple email addresses', 'me@home you@home, me@example.com', 'emails')
+
+    list_to_test ('3:   Single number', '4805551212', 'numbers')
+    list_to_test ('3a:  Single number with cc', '+14805551212', 'numbers')
+    list_to_test ('3b:  Single number int', 4805551212, 'numbers')
+    list_to_test ('4:   Multiple numbers', '4805551212, 4805551213', 'numbers')
+
+    list_to_test ('5:   Email-to-SMS addresses', '4805551212@vzwpix.com, 4805551213@txt.att.net', 'emails')
+    list_to_test ('6:   Numbers from email addresses', '4805551212@vzwpix.com, 4805551213@txt.att.net', 'numbers')
+
+    list_to_test ('7:   Other country code', '+14805551212, +4448055512', 'numbers')
+
+    list_to_test ('8:   Number too short', '+14805551212, 480555121', 'numbers')
+    list_to_test ('8a:  Number too long', '+14805551212, 480222555121', 'numbers')
+    list_to_test ('8b:  Int Number too long', 480222555121, 'numbers')
+    list_to_test ('9:   Invalid phone number', '+14805551212, 480a555121', 'numbers')
+    list_to_test ('10:  No phone number', '', 'numbers')
+    list_to_test ('11:  No email address', '', 'emails')
+    list_to_test ('12:  Invalid mode', '', 'emailsX')
+
+    list_to_test ('20:  README example', '4805551212@vzwpix.com, 4805551213, +14805551214, +44123456', 'numbers')
+
+    
+    
 

@@ -9,6 +9,9 @@
 #==========================================================
 
 import time
+import sys
+import importlib
+import re
 import smtplib
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -16,14 +19,17 @@ from pathlib import Path
 import dkim
 
 from .core      import logging, SndEmailError
-from .mungePath import mungePath
+from .mungePath import mungePath, check_path_exists
 from .timevalue import timevalue
 import cjnfuncs.core as core
 
 # Configs / Constants
-SND_EMAIL_NTRIES       = 3          # Number of tries to send email before aborting
-RETRY_WAIT             = '2s'       # seconds between retries
-SERVER_TIMEOUT         = '2s'       # server connection timeout
+SND_EMAIL_NTRIES =      3           # Number of tries to send email before aborting
+RETRY_WAIT =            '2s'        # seconds between retries
+SERVER_TIMEOUT =        '2s'        # server connection timeout
+
+COUNTRY_CODE =          1           # US/Canada
+PHONE_NUM_LENGTH =      10          # US/Canada
 
 
 #=====================================================================================
@@ -32,7 +38,7 @@ SERVER_TIMEOUT         = '2s'       # server connection timeout
 #=====================================================================================
 #=====================================================================================
 
-def snd_notif(subj='Notification message', msg='', to='NotifList', log=False, smtp_config=None):
+def snd_notif(subj='Notification message', msg='', urls_list=[], to='NotifList', log=False, smtp_config=None):
     """
 ## snd_notif (subj='Notification message', msg=' ', to='NotifList', log=False, smtp_config=None) - Send a text message using info from the config file
 
@@ -71,7 +77,7 @@ The `subj` field is part of the log message.
 - config_item class instance containing the [SMTP] section and related params
 
 
-### cfg dictionary params in the [SMTP] section, in addition to the cfg dictionary params required for snd_email
+### config dictionary params in the [SMTP] section, in addition to the config dictionary params required for snd_email
 `NotifList` (optional)
 - string list of email addresses (whitespace or comma separated).  
 - Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
@@ -81,7 +87,19 @@ default `to` parameter value.
 - If True, notification messages are not sent. Useful for debug. All email and notification
 messages are also blocked if `DontEmail` is True.
 
+`Msg_Handler` (str, absolute path or package.module, default None)
+- If using a messaging service, such as Twilio, this param declares the path to the message sending plugin module.  
+- The module must implement a `sender()` function, which will be called with a `package` dictionary containing `subj`, `msg`, `urls`, and `to` key:value pairs, and
+  a reference to the `smtp_config`.  See the [SMTP.md](https://github.com/cjnaz/cjnfuncs/blob/main/SMTP.md) for an example Msg_Handler module implementation.
+- `Msg_Handler` may be a full absolute path to a Python module (eg, `/path-to-module/twilioSender.py`), or an installed package.module reference (eg, `mypackage.twilioSender`).
 
+`country_code` (int or str, default 1 (US/Canada), required only if `Msg_Handler` is defined in the config [SMTP] section)
+- Number without a preceding '+', eg '1' for US/Canada phone numbers
+- If `get_type='numbers'` then each phone number is prepended with `+` plus `country_code` (eg, '+1'), but only if the number does not already have a country code.
+- If a `to` phone number has a different country code, it is retained.
+
+`number_length` (int, default 10 (US/Canada), required only if `Msg_Handler` is defined in the config [SMTP] section)
+- The number of digits in a valid phone number (not including the country code), eg 10 for US/Canada phone numbers
 
 
 ### Returns
@@ -93,22 +111,61 @@ messages are also blocked if `DontEmail` is True.
 - `snd_notif()` uses `snd_email()` to send the message. See `snd_email()` for related setup.
     """
 
-    if smtp_config.getcfg('DontNotif', fallback=False, section='SMTP')  or  smtp_config.getcfg('DontEmail', fallback=False, section='SMTP'):
+    if smtp_config.getcfg('DontNotif', fallback=False, section='SMTP'): #  or  smtp_config.getcfg('DontEmail', fallback=False, section='SMTP'):
         if log:
             logging.warning (f"Notification NOT sent <{subj}> <{msg}>")
         else:
             logging.debug (f"Notification NOT sent <{subj}> <{msg}>")
         return
 
-    try:
+    msg_handler = smtp_config.getcfg('Msg_Handler', fallback=None, section='SMTP')
+
+    if msg_handler:
+        # # Deal with the 'to' param
+        # to_list = list_items(to, 'numbers', subj=subj, smtp_config=smtp_config)
+
+        # Import the messaging service handler
+        if msg_handler.startswith('/'):                 # Absolute path case
+            if not check_path_exists(msg_handler):
+                raise FileNotFoundError (f"Can't find SMS/MMS message handler <{msg_handler}>")
+            if msg_handler.endswith('.py'):
+                msg_handler = msg_handler[:-3]
+            xx = mungePath(msg_handler)
+            xx_parent = str(xx.parent)
+            if xx_parent not in sys.path:
+                sys.path.append(xx_parent)
+            try:
+                logging.info (xx)
+                sender_plugin = __import__(xx.name)
+            except Exception as e:
+                raise ImportError (f"Can't import SMS/MMS message handler <{msg_handler}>\n  {e}")
+            logging.debug (f"Imported message sender plugin <{msg_handler}>, version <{sender_plugin.__version__}>")
+
+        else:                                           # package.module case
+            try:
+                sender_plugin = importlib.import_module(msg_handler)
+            except Exception as e:
+                raise ImportError (f"Can't import SMS/MMS message handler <{msg_handler}>\n  {e}")
+            logging.debug (f"Imported message sender plugin <{sender_plugin.__name__}>, version <{sender_plugin.__version__}>")
+
+        package = {'subj':  subj,
+                'msg':  msg,
+                'urls': urls_list,
+                'to':   list_to(to, 'numbers', subj=subj, smtp_config=smtp_config)}
+
+        sender_plugin.sender(package, smtp_config)
+
+    else:   # TODO expand urls into body
         snd_email (subj=subj, body=msg, to=to, smtp_config=smtp_config)
-        if log:
-            logging.warning (f"Notification sent <{subj}> <{msg}>")
-        else:
-            logging.debug (f"Notification sent <{subj}> <{msg}>")
-    except Exception as e:
-        logging.warning (f"Notification send failed <{subj}> <{msg}>")
-        raise e
+
+
+    if log:
+        logging.warning (f"Notification sent <{subj}> <{msg}>")
+    else:
+        logging.debug (f"Notification sent <{subj}> <{msg}>")
+    # except Exception as e:
+    #     logging.warning (f"Notification send failed <{subj}> <{msg}>")
+    #     raise e
 
 
 #=====================================================================================
@@ -161,7 +218,7 @@ The `subj` field is part of the log message.
 - config_item class instance containing the [SMTP] section and related params
 
 
-### cfg dictionary params in the [SMTP] section
+### config dictionary params in the [SMTP] section
 `EmailFrom`
 - An email address, such as `me@myserver.com`
 
@@ -260,27 +317,28 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     m_text += f"\n(sent {time.asctime(time.localtime())})"
 
     # Deal with 'to'
-    def extract_email_addresses(addresses):
-        """Return list of email addresses from comma or whitespace separated string 'addresses'.
-        """
-        if ',' in addresses:
-            tmp = addresses.split(',')
-            addrs = []
-            for addr in tmp:
-                addrs.append(addr.strip())
-        else:
-            addrs = addresses.split()
-        return addrs
+    To = list_to(to, 'emails', subj, smtp_config=smtp_config)
+    # def extract_email_addresses(addresses):
+    #     """Return list of email addresses from comma or whitespace separated string 'addresses'.
+    #     """
+    #     if ',' in addresses:
+    #         tmp = addresses.split(',')
+    #         addrs = []
+    #         for addr in tmp:
+    #             addrs.append(addr.strip())
+    #     else:
+    #         addrs = addresses.split()
+    #     return addrs
 
-    if '@' in to:
-        To = extract_email_addresses(to)
-    else:
-        To = extract_email_addresses(smtp_config.getcfg(to, "", section='SMTP'))
-    if len(To) == 0:
-        raise SndEmailError (f"snd_email - Message subject <{subj}>:  'to' list must not be empty.")
-    for address in To:
-        if '@' not in address:
-            raise SndEmailError (f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>.")
+    # if '@' in to:
+    #     To = extract_items(to)
+    # else:
+    #     To = extract_items(smtp_config.getcfg(to, "", section='SMTP'))
+    # if len(To) == 0:
+    #     raise SndEmailError (f"snd_email - Message subject <{subj}>:  'to' list must not be empty.")
+    # for address in To:
+    #     if '@' not in address:
+    #         raise SndEmailError (f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>.")
 
     # Gather, check remaining config params
     ntries =            smtp_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
@@ -305,12 +363,12 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
         if not dkim_selector:
             raise SndEmailError (f"snd_email - Config <EmailDKIMSelector> is required for SMTP DKIM signing")
 
-    if smtp_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
-        if log:
-            logging.warning (f"Email NOT sent <{subj}>")
-        else:
-            logging.debug (f"Email NOT sent <{subj}>")
-        return
+    # if smtp_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
+    #     if log:
+    #         logging.warning (f"Email NOT sent <{subj}>")
+    #     else:
+    #         logging.debug (f"Email NOT sent <{subj}>")
+    #     return
 
 
     # Send the message, with retries
@@ -321,6 +379,15 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             msg['From'] = email_from
             msg['To'] = ", ".join(To)
             msg["Date"] = formatdate(localtime=True)
+
+            logging.debug (msg)
+
+            if smtp_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
+                if log:
+                    logging.warning (f"Email NOT sent <{subj}>")
+                else:
+                    logging.debug (f"Email NOT sent <{subj}>")
+                return
 
             # Add DKIM signature if EmailDKIMDomain is specified
             if dkim_domain:
@@ -374,3 +441,94 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             continue
 
     raise SndEmailError (f"snd_email:  Send failed for <{subj}>:\n  <{last_error}>")
+
+
+#=====================================================================================
+#=====================================================================================
+#  l i s t _ t o
+#=====================================================================================
+#=====================================================================================
+
+def list_to(raw_in, get_type, subj, smtp_config):
+    """
+### list_to(raw_in, get_type, subj, smtp_config) - Build list of phone numbers or email addresses from raw_in
+
+`list_to` handles several translations, controlled by `get_type` ('numbers' or 'emails'), including dereferencing through
+config param, extracting and constructing a proper phone number list for messaging services (eg, Twilio), and constructing an 
+email address list.
+
+### Parameters
+`raw_in` (str or int (in the case of a single phone number))
+- A string list of phone numbers or email addresses, separated by either whitespace or ','
+- If the value is the name of a param in the smtp_config [SMTP] section then that param's value is used, else `raw_in` is directly parsed
+- Phone numbers may optionally include '+<country_code>', eg +14325551212
+
+`get_type` (str)
+- 'numbers' - a list of 1 or more phone numbers will be returned
+  - '+<country_code>', eg '+1' is prepended to each number, if not provided
+  - If the `raw_in` is one or more email-to-SMS gateway addresses (eg, 4805551212@vzwpix.com), then the local-part (the part before '@') is extracted as a phone number.
+  This feature enables a config parameter containing a list of carrier email-to-SMS gateway addresses to be directly used with a SMS/MMS messaging service such as Twilio.
+- 'emails' - a list of 1 or more email addresses will be returned
+  - Address validity checking is minimal:  Email addresses must contain an '@'.
+
+`subj` (str)
+- The notification or email subject field - used only for raised errors to aid debug tracing
+
+`smtp_config` (config_item class instance)
+- config_item class instance containing the [SMTP] section and related params
+
+
+### config dictionary params in the [SMTP] section
+`country_code` (int or str, default 1 (US/Canada), required only if `get_type='numbers'`)
+- Number without a preceding '+', eg '1' for US/Canada phone numbers
+- If `get_type='numbers'` then each phone number is prepended with `+` plus `country_code` (eg, '+1'), but only if the number does not already have a country code.
+- If a `raw_in` phone number has a different country code, it is retained.
+
+`number_length` (int, default 10 (US/Canada), required only if `get_type= 'numbers'`)
+- The number of digits in a valid phone number (not including the country code) for the given `country_code`, eg 10 for US/Canada phone numbers
+
+### Returns
+- Either a list of phone numbers or a list of email addresses, eg:
+  - ['+14325551212']
+  - ['+14325551212', '+14802345678']
+  - ['4325551212@txt.att.net', '4802345678@vxwpix.com', 'myemail@tmomail.net']
+- Raises SndEmailError on any errors
+    """
+
+    xx = smtp_config.getcfg(raw_in, fallback=None, section='SMTP')
+    if xx:              # raw_in is a config-defined param (of 1 or more phone numbers)
+        raw_in = xx
+
+    items =     re.split(r'[,\s]+', str(raw_in))
+    cc =        None    # Force load once per call
+    to_list =   []
+
+    for item in items:
+        if get_type == 'numbers':
+            if not cc:
+                cc =        '+' + str(smtp_config.getcfg('country_code', COUNTRY_CODE, section='SMTP'))     # '+1'
+                num_len =   smtp_config.getcfg('number_length', PHONE_NUM_LENGTH, section='SMTP')           # 10
+            if '@' in item:
+                num_part = item.split('@')[0]
+            else:
+                num_part = item
+
+            if num_part.startswith(cc):                                 # Strip optional default country code prefix
+                num_part = num_part.replace(cc,'')
+
+            if num_part.startswith('+')  and  num_part[1:].isdigit():   # Non-default country code
+                to_list.append(num_part)
+            elif num_part.isdigit()  and  len(num_part) == num_len:     # No country code prefix remaining
+                to_list.append(cc + num_part)
+            else:
+                raise SndEmailError (f"Message subject <{subj}>:  <{num_part}> is not a valid phone number")
+
+        elif get_type == 'emails':
+            if '@' not in item:
+                raise SndEmailError (f"Message subject <{subj}>:  <{item}> is not a valid email address")
+            to_list.append(item)
+        
+        else:
+            raise SndEmailError (f"Message subject <{subj}>:  <{get_type}> is not a valid get_type for list_to()")
+
+    return (to_list)

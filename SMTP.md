@@ -2,8 +2,13 @@
 
 Skip to [API documentation](#links)
 
-`snd_notif()` and `snd_email()` are convenience functions that rely on configuration file params in the `[SMTP]` section of the designated config file. A notification message is typically a text message sent to a cell phone number via the carrier's email-to-text bridge, such as vzwpix.com, and has the message text specified in-line rather than attached.
+`snd_notif()` and `snd_email()` are convenience functions that rely on configuration file params in the `[SMTP]` section of the designated config file. 
 
+A notification message is typically a text message sent to a cell phone number via the carrier's Email-to-SMS gateway, such as vzwpix.com, and has the message text specified in-line rather than attached.
+
+For sending notifications, SMS/MMS messaging services, such as Twilio, are also supported.  See [Using a Messaging Service, such as Twilio](#ms), below.
+
+<br>
 
 ## A fully working example (enter your own credentials and send-to addresses):
 
@@ -84,6 +89,7 @@ Notables:
 - The [SMTP] section of the specified config file (eg, `myconfig`) holds all of the static email settings, while the individual calls to snd_notif() and snd_email() contain the message specifics.
 - A SndEmailError is raised for any issues, and should be trapped in the script code.
 
+<br>
 
 ## Sending DKIM signed messages
 
@@ -104,6 +110,82 @@ EmailDKIMDomain     mydomain.com
 EmailDKIMPem        /home/me/creds_mydomain.com.pem
 EmailDKIMSelector   default
 ```
+
+
+<a id="ms"></a>
+         
+<br>
+
+## Using a Messaging Service, such as Twilio
+
+snd_notif() supports sending SMS messages either using the phone number carrier's Email-to-SMS gateway (eg, 4805551212@txt.att.net), or
+using an SMS messaging service, such as Twilio.  To configure a messaging service, specify the path to a message sender plugin module 
+via the `Msg_Handler` config param (within the [SMTP] section).  If `Msg_Handler` is defined, then the plugin's sender() function will be called
+instead of sending the message via snd_email().
+
+### Example twilioSender.py plugin:
+
+```
+__version__ = '1.0'
+
+from twilio.rest import Client
+import logging
+
+DEFAULT_LOGLEVEL =  30
+
+
+def sender (package, config):
+    logging.debug (package)
+
+    account_sid =   config.getcfg('account_sid', section='SMTP')
+    auth_token =    config.getcfg('auth_token', section='SMTP')
+    ms_sid =        config.getcfg('messaging_service_sid', section='SMTP'),
+
+    # Twilio REST API generates tons of INFO level logging, thus a separate Twilio_LogLevel control
+    preexisting_loglevel = logging.getLogger().level
+    logging.getLogger().setLevel(config.getcfg('Twilio_LogLevel', DEFAULT_LOGLEVEL, section='SMTP'))
+
+    client = Client(account_sid, auth_token)
+    for to_number in package['to']:
+        message = client.messages.create(
+            to =                    to_number,
+            messaging_service_sid = ms_sid,
+            media_url =             package['urls'],
+            body =                  f"Subject: {package['subj']}\n{package['msg']}")
+
+        logging.debug (message.body)
+    
+    logging.getLogger().setLevel(preexisting_loglevel)
+```
+
+### Example creds_twilio file:
+
+Messaging service credentials should be stored in a private, secured file, and imported into script's config SMTP section.
+In this example, all messaging service related params are being declared in the credential file:
+
+```
+Msg_Handler =           /<abs-path-to>/twilioSender.py
+# country_code =          1       # No leading '+', default 1
+# number_length =         10      # Default 10
+# Twilio_LogLevel =       10      # Log level within twilloSender, default 30
+
+account_sid =           AC9b0ad6...
+auth_token =            05975652...
+messaging_service_sid = MG3a225f...
+```
+
+### Notables
+
+- If using a messaging service, such as Twilio, the config `Msg_Handler` param declares the path to the message sending plugin module.  The module must implement a `sender()`
+function, which will be called with a `package` dictionary containing `subj`, `msg`, `urls`, and `to` key:value pairs, and a reference to the `smtp_config` (the user script 
+config that contains the [SMTP] section).
+- snd_notif() and snd_email() use the `list_to()` helper function (see `SMTP.py`) for parsing and translating phone numbers and email addresses.  `list_to()` supports:
+  - Extracting phone numbers from Email-to-SMS gateway email addresses (eg, 48045551212@vzwpix.com)
+  - Prepending the country code, if not provided for a number
+  - Basic validity checking of the phone number (all digits and proper length for the specified country code)
+  - Dereferencing numbers/email addresses thru config params (eg, `NotifList`)
+  - Building a list of numbers for the plugin handler to iterate thru
+  - Example:  Given `'4805551212@vzwpix.com 4805551213 +14805551214, +44123456'`, list_to() returns:  `['+14805551212', '+14805551213', '+14805551214', '+44123456']`
 
 
 
@@ -163,7 +245,7 @@ The `subj` field is part of the log message.
 - config_item class instance containing the [SMTP] section and related params
 
 
-### cfg dictionary params in the [SMTP] section, in addition to the cfg dictionary params required for snd_email
+### config dictionary params in the [SMTP] section, in addition to the config dictionary params required for snd_email
 `NotifList` (optional)
 - string list of email addresses (whitespace or comma separated).  
 - Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
@@ -173,7 +255,19 @@ default `to` parameter value.
 - If True, notification messages are not sent. Useful for debug. All email and notification
 messages are also blocked if `DontEmail` is True.
 
+`Msg_Handler` (str, absolute path or package.module, default None)
+- If using a messaging service, such as Twilio, this param declares the path to the message sending plugin module.  
+- The module must implement a `sender()` function, which will be called with a `package` dictionary containing `subj`, `msg`, `urls`, and `to` key:value pairs, and
+  a reference to the `smtp_config`.  See the [SMTP.md](https://github.com/cjnaz/cjnfuncs/blob/main/SMTP.md) for an example Msg_Handler module implementation.
+- `Msg_Handler` may be a full absolute path to a Python module (eg, `/path-to-module/twilioSender.py`), or an installed package.module reference (eg, `mypackage.twilioSender`).
 
+`country_code` (int or str, default 1 (US/Canada), required only if `Msg_Handler` is defined in the config [SMTP] section)
+- Number without a preceding '+', eg '1' for US/Canada phone numbers
+- If `get_type='numbers'` then each phone number is prepended with `+` plus `country_code` (eg, '+1'), but only if the number does not already have a country code.
+- If a `to` phone number has a different country code, it is retained.
+
+`number_length` (int, default 10 (US/Canada), required only if `Msg_Handler` is defined in the config [SMTP] section)
+- The number of digits in a valid phone number (not including the country code), eg 10 for US/Canada phone numbers
 
 
 ### Returns
@@ -232,7 +326,7 @@ The `subj` field is part of the log message.
 - config_item class instance containing the [SMTP] section and related params
 
 
-### cfg dictionary params in the [SMTP] section
+### config dictionary params in the [SMTP] section
 `EmailFrom`
 - An email address, such as `me@myserver.com`
 
