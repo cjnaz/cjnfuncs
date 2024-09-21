@@ -1,11 +1,12 @@
 [build-system]
-requires = ["setuptools"] #, "setuptools-scm"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 
 [project]
 name = "cjnfuncs"
 version = "2.4b1"
+    # 2.4b1 - Added Twilio support to snd_notif
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
 requires-python = ">=3.6"       # Centos 7 uses 3.6.8
