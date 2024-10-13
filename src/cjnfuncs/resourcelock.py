@@ -78,7 +78,7 @@ such as in your interrupt-trapped cleanup code.
 #=====================================================================================
 #=====================================================================================
 
-    def get_lock(self, timeout=1, same_process_ok=False):
+    def get_lock(self, timeout=1, same_process_ok=False, where=''):
         """
 ## get_lock (timeout=1, same_process_ok=False) - Request the resource lock
 
@@ -103,6 +103,9 @@ decide if the lock has previously been acquired before calling get_lock() again,
 - If False, then if the lock is currently set by the same process or another process then get_lock() blocks
 with timeout.
 
+`where` (str, default ' ')
+- Comment string in the debug log
+
 ### Returns
 - True:  Lock successfully acquired, timeout time not exceeded
 - False: Lock request failed, timed out
@@ -113,10 +116,10 @@ with timeout.
         try:
             self.lock.acquire(timeout)
             self.I_have_the_lock = True
-            logging.debug (f"<{self.lockname[1:]}> lock request successful (Semaphore = {self.lock.value})")
+            logging.debug (f"<{self.lockname[1:]}> lock request successful <{where}> (Semaphore = {self.lock.value})")
             return True
         except posix_ipc.BusyError:
-            logging.debug (f"<{self.lockname[1:]}> lock request timed out  (Semaphore = {self.lock.value})")
+            logging.debug (f"<{self.lockname[1:]}> lock request timed out <{where}>  (Semaphore = {self.lock.value})")
             return False
 
 
@@ -126,7 +129,7 @@ with timeout.
 #=====================================================================================
 #=====================================================================================
 
-    def unget_lock(self, force=False):
+    def unget_lock(self, force=False, where=''):
         """
 ## unget_lock (force=False) - Release the resource lock
 
@@ -144,6 +147,9 @@ unless `force=True`.
 - Useful for forced cleanup, for example, by the CLI interface.
 - Dangerous if another process had acquired the lock.  Be careful.
 
+`where` (str, default ' ')
+- Comment string in the debug log
+
 ### Returns
 - True:  Lock successfully released
 - False: Lock not currently set (redundant unget_lock() call), or lock was not acquired by the current process
@@ -152,18 +158,18 @@ unless `force=True`.
             if self.I_have_the_lock:
                 self.lock.release()
                 self.I_have_the_lock = False
-                logging.debug (f"<{self.lockname[1:]}> lock released (Semaphore = {self.lock.value})")
+                logging.debug (f"<{self.lockname[1:]}> lock released <{where}> (Semaphore = {self.lock.value})")
                 return True
             else:
                 if force:
                     self.lock.release()
-                    logging.debug (f"<{self.lockname[1:]}> lock force released (Semaphore = {self.lock.value})")
+                    logging.debug (f"<{self.lockname[1:]}> lock force released <{where}> (Semaphore = {self.lock.value})")
                     return True
                 else:
-                    logging.debug (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process (Semaphore = {self.lock.value})")
+                    logging.debug (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process <{where}> (Semaphore = {self.lock.value})")
                     return False
         else:
-            logging.debug (f"<{self.lockname[1:]}> Extraneous lock unget request ignored (Semaphore = {self.lock.value})")
+            logging.debug (f"<{self.lockname[1:]}> Extraneous lock unget request ignored <{where}> (Semaphore = {self.lock.value})")
             return False
 
 

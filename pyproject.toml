@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.4b1"
+version = "2.4b2"
+    # 2.4b2 - Added where to resource lock for debugging aid
     # 2.4b1 - Added Twilio support to snd_notif
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
