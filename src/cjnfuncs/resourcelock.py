@@ -11,6 +11,10 @@
 import signal
 import sys
 import posix_ipc
+import mmap
+import os
+import datetime
+# from pathlib import Path
 from .core import logging
 
 try:
@@ -44,7 +48,8 @@ process completes its work, and then acquire the I2C bus lock so that other proc
 - As many different/independent locks as needed may be created.
 - There is no need to dispose of a lock. While posix-ipc.Semaphore has an unlink() method, resource_lock does
 not call it. Lock flags are persistent until the system is rebooted.
-- Lock names in the posix_ipc module have `/` prefixes.  resource_lock() prepends the `/` if `lockname`
+- Semaphores (lock names) and shared memory segments (used for the `lock_info` string) in the posix_ipc module 
+must have `/` prefixes.  resource_lock() prepends the `/` if `lockname`
 doesn't start with a `/`, and hides the `/` prefix.
 
 resource_lock() requires the `posix_ipc` module (installed with cjnfuncs) from PyPI. 
@@ -59,9 +64,18 @@ counter (non-zero is unlocked). `unget_lock()` wont increment the counter unless
 currently 0 (indicating locked), so it is ***recommended*** to have (possibly extraneous) `unget_lock()` calls, 
 such as in your interrupt-trapped cleanup code.
 
+
 ### Parameters
 `lockname` (str)
 - All processes sharing a given resource must use the same lockname.
+
+### Class attributes
+`lockname` (str)
+- As specified when the resource_lock was instantiated
+
+`I_have_the_lock` (bool)
+- True if the current process has set the lock.  Useful for conditionally ungetting the lock in cleanup code.
+
     """
 
     def __init__ (self, lockname):
@@ -71,6 +85,14 @@ such as in your interrupt-trapped cleanup code.
         self.I_have_the_lock = False
         self.lock = posix_ipc.Semaphore(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, initial_value=1)
 
+        # self.shared_memory_pl = Path(posix_ipc.SharedMemory(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, size=4096).fd)
+        memory = posix_ipc.SharedMemory(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, size=4096)
+        self.mapfile = mmap.mmap(memory.fd, memory.size)
+        os.close(memory.fd)
+        if not self.is_locked():
+            self._set_lock_info('')
+        # self.shared_memory_pl.write_text('')
+
 
 #=====================================================================================
 #=====================================================================================
@@ -78,9 +100,9 @@ such as in your interrupt-trapped cleanup code.
 #=====================================================================================
 #=====================================================================================
 
-    def get_lock(self, timeout=1, same_process_ok=False, where=''):
+    def get_lock(self, timeout=1, same_process_ok=False, lock_info=''):
         """
-## get_lock (timeout=1, same_process_ok=False) - Request the resource lock
+## get_lock (timeout=1, same_process_ok=False, lock_info=' ') - Request the resource lock
 
 ***resource_lock() class member function***
 
@@ -103,23 +125,30 @@ decide if the lock has previously been acquired before calling get_lock() again,
 - If False, then if the lock is currently set by the same process or another process then get_lock() blocks
 with timeout.
 
-`where` (str, default ' ')
-- Comment string in the debug log
+`lock_info` (str, default ' ')
+- Optional debugging info string for indicating when and by whom the lock was set.  Logged at the debug level.
+- The datetime is prepended to lock_info.
+- A useful lock_info string format might be `<module_name>.<function_name> <get_lock_call_instance_number>`, eg, 
+`tempmon.measure_loop #3`.
+- This string remains in place after an unget() call (`is_locked() == False`) for lock history purposes while debugging.
 
 ### Returns
 - True:  Lock successfully acquired, timeout time not exceeded
 - False: Lock request failed, timed out
         """
         if same_process_ok  and  self.I_have_the_lock == True:
+            logging.debug (f"<{self.lockname[1:]}> lock already acquired   - Prior grant     <{self._get_lock_info()}>")
             return True
 
         try:
             self.lock.acquire(timeout)
+            lock_text = f"{datetime.datetime.now()} - {lock_info}"
+            self._set_lock_info(lock_text)
             self.I_have_the_lock = True
-            logging.debug (f"<{self.lockname[1:]}> lock request successful <{where}> (Semaphore = {self.lock.value})")
+            logging.debug (f"<{self.lockname[1:]}> lock request successful - Granted         <{lock_text}>")
             return True
         except posix_ipc.BusyError:
-            logging.debug (f"<{self.lockname[1:]}> lock request timed out <{where}>  (Semaphore = {self.lock.value})")
+            logging.debug (f"<{self.lockname[1:]}> lock request timed out  - Current owner   <{self._get_lock_info()}>")
             return False
 
 
@@ -129,9 +158,9 @@ with timeout.
 #=====================================================================================
 #=====================================================================================
 
-    def unget_lock(self, force=False, where=''):
+    def unget_lock(self, force=False, where_called=''):
         """
-## unget_lock (force=False) - Release the resource lock
+## unget_lock (force=False, where_called=' ') - Release the resource lock
 
 ***resource_lock() class member function***
 
@@ -147,8 +176,8 @@ unless `force=True`.
 - Useful for forced cleanup, for example, by the CLI interface.
 - Dangerous if another process had acquired the lock.  Be careful.
 
-`where` (str, default ' ')
-- Comment string in the debug log
+`where_called` (str, default ' ')
+- Debugging aid string for indicating what code released the lock.  Logged at the debug level.
 
 ### Returns
 - True:  Lock successfully released
@@ -158,18 +187,18 @@ unless `force=True`.
             if self.I_have_the_lock:
                 self.lock.release()
                 self.I_have_the_lock = False
-                logging.debug (f"<{self.lockname[1:]}> lock released <{where}> (Semaphore = {self.lock.value})")
+                logging.debug (f"<{self.lockname[1:]}> lock released  <{where_called}>")
                 return True
             else:
                 if force:
                     self.lock.release()
-                    logging.debug (f"<{self.lockname[1:]}> lock force released <{where}> (Semaphore = {self.lock.value})")
+                    logging.debug (f"<{self.lockname[1:]}> lock force released  <{where_called}>")
                     return True
                 else:
-                    logging.debug (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process <{where}> (Semaphore = {self.lock.value})")
+                    logging.debug (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process  <{where_called}>")
                     return False
         else:
-            logging.debug (f"<{self.lockname[1:]}> Extraneous lock unget request ignored <{where}> (Semaphore = {self.lock.value})")
+            logging.debug (f"<{self.lockname[1:]}> Extraneous lock unget request ignored  <{where_called}>")
             return False
 
 
@@ -188,8 +217,8 @@ unless `force=True`.
 ### Returns
 - True if currently locked, else False
         """
-        locked = True if self.lock.value == 0 else False
-        logging.debug (f"<{self.lockname[1:]}> is currently locked? {locked}")
+        locked = True  if self.lock.value == 0  else False
+        logging.debug (f"<{self.lockname[1:]}> is currently locked?  <{locked}>  Prior info  <{self._get_lock_info()}>")
         return locked
 
 
@@ -211,6 +240,54 @@ unless `force=True`.
         _value = self.lock.value
         logging.debug (f"<{self.lockname[1:]}> semaphore = {_value}")
         return _value
+
+
+#=====================================================================================
+#=====================================================================================
+#  c l o s e
+#=====================================================================================
+#=====================================================================================
+
+    def close(self):
+        """
+## close () - Release this process' access to the semaphore and the memory-mapped shared memory segment
+
+***resource_lock() class member function***
+
+### Returns
+- None
+        """
+        self.lock.close()
+        self.mapfile.close()
+        logging.debug (f"<{self.lockname[1:]}> semaphore closed")
+
+
+#=====================================================================================
+#=====================================================================================
+#  Support funcs
+#=====================================================================================
+#=====================================================================================
+
+    def _set_lock_info(self, desc):
+        # While the shared memory segment and memory mapped block are 4k bytes log, the actual 
+        # lock_info description is terminated by a null character (0x00)
+        self.mapfile.seek(0)
+        desc += '\0'
+        self.mapfile.write(desc.encode())
+
+
+    def _get_lock_info(self):
+        self.mapfile.seek(0)
+        s = []
+        c = self.mapfile.read_byte()
+        while c != 0:    # NULL_CHAR
+            s.append(c)
+            c = self.mapfile.read_byte()
+
+        s = ''.join([chr(c) for c in s])
+
+        return s
+        
 
 
 #=====================================================================================
@@ -249,6 +326,8 @@ def cli():
                         help="Command choices")
     parser.add_argument('-t', '--get-timeout', type=float, default=GET_TIMEOUT,
                         help=f"Timeout value for a get call (default {GET_TIMEOUT} sec, -1 for no timeout)")
+    parser.add_argument('-m', '--message', default='cli',
+                        help=f"Lock get/unget debug message text (default 'cli')")
     parser.add_argument('-a', '--auto-unget', type=float,
                         help="After a successful get, unget the lock in (float) sec")
     parser.add_argument('-u', '--update', type=float, default=TRACE_INTERVAL,
@@ -263,14 +342,14 @@ def cli():
         _timeout = args.get_timeout
         if _timeout == -1:
             _timeout = None
-        get_status = lock.get_lock(timeout=_timeout)
+        get_status = lock.get_lock(timeout=_timeout, lock_info=args.message)
         if get_status and args.auto_unget:
                 print (f"Release lock after <{args.auto_unget}> sec delay")
                 sleep(args.auto_unget)
-                lock.unget_lock()
+                lock.unget_lock(where_called=f'{args.message} - auto unget')
 
     elif args.Cmd == "unget":
-        lock.unget_lock(force=True)
+        lock.unget_lock(force=True, where_called=args.message)
 
     elif args.Cmd == "state":
         lock.is_locked()
