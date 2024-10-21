@@ -137,7 +137,7 @@ with timeout.
 - False: Lock request failed, timed out
         """
         if same_process_ok  and  self.I_have_the_lock == True:
-            logging.debug (f"<{self.lockname[1:]}> lock already acquired   - Prior grant     <{self._get_lock_info()}>")
+            logging.debug (f"<{self.lockname[1:]}> lock already acquired   - Prior grant     <{self.get_lock_info()}>")
             return True
 
         try:
@@ -148,7 +148,7 @@ with timeout.
             logging.debug (f"<{self.lockname[1:]}> lock request successful - Granted         <{lock_text}>")
             return True
         except posix_ipc.BusyError:
-            logging.debug (f"<{self.lockname[1:]}> lock request timed out  - Current owner   <{self._get_lock_info()}>")
+            logging.debug (f"<{self.lockname[1:]}> lock request timed out  - Current owner   <{self.get_lock_info()}>")
             return False
 
 
@@ -218,7 +218,7 @@ unless `force=True`.
 - True if currently locked, else False
         """
         locked = True  if self.lock.value == 0  else False
-        logging.debug (f"<{self.lockname[1:]}> is currently locked?  <{locked}>  Prior info  <{self._get_lock_info()}>")
+        logging.debug (f"<{self.lockname[1:]}> is currently locked?  <{locked}>  Prior info  <{self.get_lock_info()}>")
         return locked
 
 
@@ -264,19 +264,19 @@ unless `force=True`.
 
 #=====================================================================================
 #=====================================================================================
-#  Support funcs
+#  g e t _ l o c k _ i n f o
 #=====================================================================================
 #=====================================================================================
 
-    def _set_lock_info(self, desc):
-        # While the shared memory segment and memory mapped block are 4k bytes log, the actual 
-        # lock_info description is terminated by a null character (0x00)
-        self.mapfile.seek(0)
-        desc += '\0'
-        self.mapfile.write(desc.encode())
+    def get_lock_info(self):
+        """
+## get_lock_info () - Returns the lock_info string from previous get_lock call
 
+***resource_lock() class member function***
 
-    def _get_lock_info(self):
+### Returns
+- lock_info string
+        """
         self.mapfile.seek(0)
         s = []
         c = self.mapfile.read_byte()
@@ -287,7 +287,21 @@ unless `force=True`.
         s = ''.join([chr(c) for c in s])
 
         return s
-        
+
+
+#=====================================================================================
+#=====================================================================================
+#  _ s e t _ l o c k _ i n f o   (private function)
+#=====================================================================================
+#=====================================================================================
+
+    def _set_lock_info(self, desc):
+        # While the shared memory segment and memory mapped block are 4k bytes log, the actual 
+        # lock_info description is terminated by a null character (0x00)
+        self.mapfile.seek(0)
+        desc += '\0'
+        self.mapfile.write(desc.encode())
+       
 
 
 #=====================================================================================
