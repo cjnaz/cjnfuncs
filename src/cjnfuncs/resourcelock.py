@@ -76,13 +76,17 @@ such as in your interrupt-trapped cleanup code.
 `I_have_the_lock` (bool)
 - True if the current process has set the lock.  Useful for conditionally ungetting the lock in cleanup code.
 
+`closed` (bool)
+- False once instantiated and set True if `close()` is called in script cleanup code, so that the lock can 
+checked and re-instantiate if needed.
     """
 
     def __init__ (self, lockname):
         if not lockname.startswith('/'):
             lockname = '/'+lockname         # lockname is required to start with '/'
-        self.lockname = lockname
-        self.I_have_the_lock = False
+        self.lockname =         lockname
+        self.closed =           False
+        self.I_have_the_lock =  False
         self.lock = posix_ipc.Semaphore(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, initial_value=1)
 
         # self.shared_memory_pl = Path(posix_ipc.SharedMemory(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, size=4096).fd)
@@ -259,6 +263,7 @@ unless `force=True`.
         """
         self.lock.close()
         self.mapfile.close()
+        self.closed = True
         logging.debug (f"<{self.lockname[1:]}> semaphore closed")
 
 

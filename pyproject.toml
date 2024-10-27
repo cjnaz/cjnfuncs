@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.4b3"
+version = "2.4b4"
+    # 2.4b4 - resourcelock closed attribute
     # 2.4b3 - Added lock_info to resource_lock
     # 2.4b2 - Added where_called to resource_lock unget for debugging aid
     # 2.4b1 - Added Twilio support to snd_notif
