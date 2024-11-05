@@ -10,7 +10,8 @@
 
 import os.path
 from pathlib import Path, PurePath
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from concurrent.futures import ThreadPoolExecutor #, TimeoutError
+from cjnfuncs.core import logging
 
 
 #=====================================================================================
@@ -22,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError
 class mungePath():
     def __init__(self, in_path='', base_path='', mkdir=False):
         """
-## Class mungePath (in_path=' ', base_path=' ', mkdir=False) - A clean interface for dealing with filesystem paths
+## Class mungePath (in_path='', base_path='', mkdir=False) - A clean interface for dealing with filesystem paths
 
 `mungePath()` is based on pathlib, producing Path type attributes and status booleans which may be used with all
 pathlib.Path methods, such as .open().  `mungePath()` accepts paths in two parts - the tool script specific
@@ -203,5 +204,6 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
         future = executor.submit(_path.exists)
         try:
             return future.result(timeout)
-        except TimeoutError:
+        except Exception as e: #TimeoutError:
+            logging.debug(f"Exception - {e}")
             return False

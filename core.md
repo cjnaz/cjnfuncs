@@ -291,7 +291,7 @@ also to the `.site_data_dir`.
 
 ---
 
-# setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None) - Set up the root logger
+# setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None, ConsoleLogFormat=None, FileLogFormat=None) - Set up the root logger
 
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
 is called the current/active log file (or console) may be reassigned.

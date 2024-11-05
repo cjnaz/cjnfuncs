@@ -38,6 +38,7 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 <br/>
 
 ## Revision history
+- 2.4 241105 - Twilio support in snd_notif, resource_lock trace/debug features, check_path_exists exception fix
 - 2.3 240821 - Added mungePath ./ support.
   Resolved check_path_exists() memory leak.
   Added `same_process_ok` to resourcelock.getlock()

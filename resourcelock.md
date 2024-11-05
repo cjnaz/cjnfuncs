@@ -284,6 +284,7 @@ options:
 - [is_locked](#is_locked)
 - [lock_value](#lock_value)
 - [close](#close)
+- [get_lock_info](#get_lock_info)
 
 
 
@@ -303,8 +304,9 @@ process completes its work, and then acquire the I2C bus lock so that other proc
 - Resource locks are on the honor system.  Any process can unget a lock, but should not if it didn't get the lock.
 - This lock mechanism is just as effective across threads within a process.
 - As many different/independent locks as needed may be created.
-- There is no need to dispose of a lock. While posix-ipc.Semaphore has an unlink() method, resource_lock does
-not call it. Lock flags are persistent until the system is rebooted.
+- It is recommended (in order to avoid a minor memory leak) to `close()` the lock in the tool script cleanup code.
+Calling `close()` sets the `closed` attribute to True so that any following code can detect and re-instantiate the 
+lock if needed.
 - Semaphores (lock names) and shared memory segments (used for the `lock_info` string) in the posix_ipc module 
 must have `/` prefixes.  resource_lock() prepends the `/` if `lockname`
 doesn't start with a `/`, and hides the `/` prefix.
@@ -333,6 +335,9 @@ such as in your interrupt-trapped cleanup code.
 `I_have_the_lock` (bool)
 - True if the current process has set the lock.  Useful for conditionally ungetting the lock in cleanup code.
 
+`closed` (bool)
+- False once instantiated and set True if `close()` is called in script cleanup code, so that the lock can 
+checked and re-instantiate if needed.
     
 <br/>
 
@@ -340,7 +345,7 @@ such as in your interrupt-trapped cleanup code.
 
 ---
 
-# get_lock (timeout=1, same_process_ok=False, lock_info=' ') - Request the resource lock
+# get_lock (timeout=1, same_process_ok=False, lock_info='') - Request the resource lock
 
 ***resource_lock() class member function***
 
@@ -363,7 +368,7 @@ decide if the lock has previously been acquired before calling get_lock() again,
 - If False, then if the lock is currently set by the same process or another process then get_lock() blocks
 with timeout.
 
-`lock_info` (str, default ' ')
+`lock_info` (str, default '')
 - Optional debugging info string for indicating when and by whom the lock was set.  Logged at the debug level.
 - The datetime is prepended to lock_info.
 - A useful lock_info string format might be `<module_name>.<function_name> <get_lock_call_instance_number>`, eg, 
@@ -380,7 +385,7 @@ with timeout.
 
 ---
 
-# unget_lock (force=False, where_called=' ') - Release the resource lock
+# unget_lock (force=False, where_called='') - Release the resource lock
 
 ***resource_lock() class member function***
 
@@ -396,7 +401,7 @@ unless `force=True`.
 - Useful for forced cleanup, for example, by the CLI interface.
 - Dangerous if another process had acquired the lock.  Be careful.
 
-`where_called` (str, default ' ')
+`where_called` (str, default '')
 - Debugging aid string for indicating what code released the lock.  Logged at the debug level.
 
 ### Returns
@@ -441,4 +446,17 @@ unless `force=True`.
 
 ### Returns
 - None
+        
+<br/>
+
+<a id="get_lock_info"></a>
+
+---
+
+# get_lock_info () - Returns the lock_info string from previous get_lock call
+
+***resource_lock() class member function***
+
+### Returns
+- lock_info string
         

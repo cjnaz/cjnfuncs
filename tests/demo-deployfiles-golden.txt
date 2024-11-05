@@ -43,7 +43,7 @@ Traceback (most recent call last):
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 92, in resolve_target
     xx = mungePath(_targ, base_path, mkdir=mkdir)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 119, in __init__
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 120, in __init__
     Path(in_path_pp).mkdir(parents=True, exist_ok=True)
   File "/usr/local/lib/python3.11/pathlib.py", line 1116, in mkdir
     os.mkdir(self, mode)
@@ -101,7 +101,7 @@ Traceback (most recent call last):
   File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/deployfiles.py", line 92, in resolve_target
     xx = mungePath(_targ, base_path, mkdir=mkdir)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 119, in __init__
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/mungePath.py", line 120, in __init__
     Path(in_path_pp).mkdir(parents=True, exist_ok=True)
   File "/usr/local/lib/python3.11/pathlib.py", line 1116, in mkdir
     os.mkdir(self, mode)

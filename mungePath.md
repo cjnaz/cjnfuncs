@@ -116,7 +116,7 @@ Executing `pathlib.Path(/network_path_not_currently_available/myfile).exists()` 
 
 ---
 
-# Class mungePath (in_path=' ', base_path=' ', mkdir=False) - A clean interface for dealing with filesystem paths
+# Class mungePath (in_path='', base_path='', mkdir=False) - A clean interface for dealing with filesystem paths
 
 `mungePath()` is based on pathlib, producing Path type attributes and status booleans which may be used with all
 pathlib.Path methods, such as .open().  `mungePath()` accepts paths in two parts - the tool script specific

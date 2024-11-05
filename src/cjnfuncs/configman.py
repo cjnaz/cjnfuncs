@@ -203,7 +203,7 @@ output:
 
     def clear(self, section=''):
         """
-## clear (section=' ') - Purge a portion of the cfg dictionary
+## clear (section='') - Purge a portion of the cfg dictionary
 
 ***config_item() class member function***
 
@@ -627,7 +627,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
     def read_dict(self, param_dict, section_name=''):
         """
-## read_dict (param_dict, section_name=' ') - Load the content of a dictionary into the cfg dictionary
+## read_dict (param_dict, section_name='') - Load the content of a dictionary into the cfg dictionary
 
 ***config_item() class member function***
 
@@ -699,7 +699,7 @@ Loaded content is added to and/or modifies any previously loaded content.
 
     def getcfg(self, param, fallback='_nofallback', types=[], section=''):
         """
-## getcfg (param, fallback=None, types=[ ], section=' ') - Get a param's value from the cfg dictionary
+## getcfg (param, fallback=None, types=[ ], section='') - Get a param's value from the cfg dictionary
 
 ***config_item() class member function***
 
@@ -787,7 +787,7 @@ This can lead to cleaner tool script code.  Either access method may be used, al
         # TODO Add section select parameter for selective changes.  Also all mode
         # TODO Add a section label
         """
-## modify_configfile (param=' ', value=' ', remove=False, add_if_not_existing=False, save=False) - Make edits to the config file
+## modify_configfile (param='', value='', remove=False, add_if_not_existing=False, save=False) - Make edits to the config file
 
 ***config_item() class member function***
 
@@ -810,10 +810,10 @@ reload call to avoid multiple config reloads.
 
 
 ### Parameters
-`param` (str, default ' ')
+`param` (str, default '')
 - The param name, if modifying an existing param or adding a new param
 
-`value` (as-expected type, default ' ')
+`value` (as-expected type, default '')
 - The new value to be applied to an existing param, or an added param
 - Any comment text (after a '#') in the new value will be prepended to any existing comment text
 

@@ -208,9 +208,9 @@ config that contains the [SMTP] section).
 
 ---
 
-# snd_notif (subj='Notification message', msg=' ', to='NotifList', log=False, smtp_config=None) - Send a text message using info from the config file
+# snd_notif (subj='Notification message', msg='', urls_list=[], to='NotifList', log=False, smtp_config=None) - Send a text message using info from the config file
 
-Intended for use of your mobile provider's email-to-text bridge email address, eg, 
+Intended for use the mobile provider's (carrier's) email-to-SMS gateway email address, eg, 
 `5405551212@vzwtxt.com` for Verizon, but any email address will work.
 
 The `to` string may be the name of a config param (who's value is one or more email addresses, default 
@@ -226,8 +226,13 @@ Three attempts are made to send the message.
 - Text message subject field
 - Some SMS/MMS apps display the subj field in bold, some in raw form, and some not at all.
 
-`msg` (str, default ' ')
+`msg` (str, default '')
 - Text message body
+
+`urls_list` (list, default [])
+- A list of url strings to be passed to the message sending plugin module, which should pass them to the messaging service.
+- This list is discarded by `snd_notif()` if not using a messaging service.  If you want to send a message with
+urls then included them in the `msg` body text.
 
 `to` (str, default 'NotifList')
 - To whom to send the message. `to` may be either an explicit string list of email addresses
@@ -252,8 +257,9 @@ The `subj` field is part of the log message.
 default `to` parameter value.
 
 `DontNotif` (default False)
-- If True, notification messages are not sent. Useful for debug. All email and notification
-messages are also blocked if `DontEmail` is True.
+- If True, notification messages are not sent. `log` is still honored. Useful for debug.
+- Setting `DontEmail` True also blocks sending notification messages if using a carrier email-to-SMS gateway 
+(not using a messaging service).  If using a messaging service then `DontEmail` has no effect.
 
 `Msg_Handler` (str, absolute path or package.module, default None)
 - If using a messaging service, such as Twilio, this param declares the path to the message sending plugin module.  

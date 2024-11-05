@@ -40,9 +40,9 @@ PHONE_NUM_LENGTH =      10          # US/Canada
 
 def snd_notif(subj='Notification message', msg='', urls_list=[], to='NotifList', log=False, smtp_config=None):
     """
-## snd_notif (subj='Notification message', msg=' ', to='NotifList', log=False, smtp_config=None) - Send a text message using info from the config file
+## snd_notif (subj='Notification message', msg='', urls_list=[], to='NotifList', log=False, smtp_config=None) - Send a text message using info from the config file
 
-Intended for use of your mobile provider's email-to-text bridge email address, eg, 
+Intended for use the mobile provider's (carrier's) email-to-SMS gateway email address, eg, 
 `5405551212@vzwtxt.com` for Verizon, but any email address will work.
 
 The `to` string may be the name of a config param (who's value is one or more email addresses, default 
@@ -58,8 +58,13 @@ Three attempts are made to send the message.
 - Text message subject field
 - Some SMS/MMS apps display the subj field in bold, some in raw form, and some not at all.
 
-`msg` (str, default ' ')
+`msg` (str, default '')
 - Text message body
+
+`urls_list` (list, default [])
+- A list of url strings to be passed to the message sending plugin module, which should pass them to the messaging service.
+- This list is discarded by `snd_notif()` if not using a messaging service.  If you want to send a message with
+urls then included them in the `msg` body text.
 
 `to` (str, default 'NotifList')
 - To whom to send the message. `to` may be either an explicit string list of email addresses
@@ -84,8 +89,9 @@ The `subj` field is part of the log message.
 default `to` parameter value.
 
 `DontNotif` (default False)
-- If True, notification messages are not sent. Useful for debug. All email and notification
-messages are also blocked if `DontEmail` is True.
+- If True, notification messages are not sent. `log` is still honored. Useful for debug.
+- Setting `DontEmail` True also blocks sending notification messages if using a carrier email-to-SMS gateway 
+(not using a messaging service).  If using a messaging service then `DontEmail` has no effect.
 
 `Msg_Handler` (str, absolute path or package.module, default None)
 - If using a messaging service, such as Twilio, this param declares the path to the message sending plugin module.  
@@ -111,7 +117,7 @@ messages are also blocked if `DontEmail` is True.
 - `snd_notif()` uses `snd_email()` to send the message. See `snd_email()` for related setup.
     """
 
-    if smtp_config.getcfg('DontNotif', fallback=False, section='SMTP'): #  or  smtp_config.getcfg('DontEmail', fallback=False, section='SMTP'):
+    if smtp_config.getcfg('DontNotif', fallback=False, section='SMTP'):
         if log:
             logging.warning (f"Notification NOT sent <{subj}> <{msg}>")
         else:
@@ -121,9 +127,6 @@ messages are also blocked if `DontEmail` is True.
     msg_handler = smtp_config.getcfg('Msg_Handler', fallback=None, section='SMTP')
 
     if msg_handler:
-        # # Deal with the 'to' param
-        # to_list = list_items(to, 'numbers', subj=subj, smtp_config=smtp_config)
-
         # Import the messaging service handler
         if msg_handler.startswith('/'):                 # Absolute path case
             if not check_path_exists(msg_handler):
@@ -140,7 +143,6 @@ messages are also blocked if `DontEmail` is True.
             except Exception as e:
                 raise ImportError (f"Can't import SMS/MMS message handler <{msg_handler}>\n  {e}")
             logging.debug (f"Imported message sender plugin <{msg_handler}>, version <{sender_plugin.__version__}>")
-
         else:                                           # package.module case
             try:
                 sender_plugin = importlib.import_module(msg_handler)
@@ -148,14 +150,14 @@ messages are also blocked if `DontEmail` is True.
                 raise ImportError (f"Can't import SMS/MMS message handler <{msg_handler}>\n  {e}")
             logging.debug (f"Imported message sender plugin <{sender_plugin.__name__}>, version <{sender_plugin.__version__}>")
 
-        package = {'subj':  subj,
-                'msg':  msg,
-                'urls': urls_list,
-                'to':   list_to(to, 'numbers', subj=subj, smtp_config=smtp_config)}
+        package = {'subj': subj,
+                   'msg':  msg,
+                   'urls': urls_list,
+                   'to':   list_to(to, 'numbers', subj=subj, smtp_config=smtp_config) }
 
         sender_plugin.sender(package, smtp_config)
 
-    else:   # TODO expand urls into body
+    else:
         snd_email (subj=subj, body=msg, to=to, smtp_config=smtp_config)
 
 
@@ -163,9 +165,6 @@ messages are also blocked if `DontEmail` is True.
         logging.warning (f"Notification sent <{subj}> <{msg}>")
     else:
         logging.debug (f"Notification sent <{subj}> <{msg}>")
-    # except Exception as e:
-    #     logging.warning (f"Notification send failed <{subj}> <{msg}>")
-    #     raise e
 
 
 #=====================================================================================
@@ -318,27 +317,6 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
     # Deal with 'to'
     To = list_to(to, 'emails', subj, smtp_config=smtp_config)
-    # def extract_email_addresses(addresses):
-    #     """Return list of email addresses from comma or whitespace separated string 'addresses'.
-    #     """
-    #     if ',' in addresses:
-    #         tmp = addresses.split(',')
-    #         addrs = []
-    #         for addr in tmp:
-    #             addrs.append(addr.strip())
-    #     else:
-    #         addrs = addresses.split()
-    #     return addrs
-
-    # if '@' in to:
-    #     To = extract_items(to)
-    # else:
-    #     To = extract_items(smtp_config.getcfg(to, "", section='SMTP'))
-    # if len(To) == 0:
-    #     raise SndEmailError (f"snd_email - Message subject <{subj}>:  'to' list must not be empty.")
-    # for address in To:
-    #     if '@' not in address:
-    #         raise SndEmailError (f"snd_email - Message subject <{subj}>:  address in 'to' list is invalid: <{address}>.")
 
     # Gather, check remaining config params
     ntries =            smtp_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
@@ -363,24 +341,16 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
         if not dkim_selector:
             raise SndEmailError (f"snd_email - Config <EmailDKIMSelector> is required for SMTP DKIM signing")
 
-    # if smtp_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
-    #     if log:
-    #         logging.warning (f"Email NOT sent <{subj}>")
-    #     else:
-    #         logging.debug (f"Email NOT sent <{subj}>")
-    #     return
-
-
     # Send the message, with retries
     for trynum in range(ntries):
         try:
             msg = MIMEText(m_text, msg_type)
             msg['Subject'] = subj
-            msg['From'] = email_from
-            msg['To'] = ", ".join(To)
-            msg["Date"] = formatdate(localtime=True)
+            msg['From']    = email_from
+            msg['To']      = ", ".join(To)
+            msg["Date"]    = formatdate(localtime=True)
 
-            logging.debug (msg)
+            # logging.debug (msg)
 
             if smtp_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
                 if log:
@@ -433,8 +403,6 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
         except Exception as e:
             last_error = e
-            # if logging.getLogger().level == logging.DEBUG:
-            #     logging.exception(f"Email send try {trynum} failed:")
             if trynum < ntries -1:
                 logging.debug(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec>:\n  <{e}>")
                 time.sleep(retry_wait)

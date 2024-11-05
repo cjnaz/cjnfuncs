@@ -5,7 +5,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.4b4"
+version = "2.4"
+    # 2.4 - release
+    # 2.4rc2 - check_path_exists() exception fix for unmounted network path (OSError: [Errno 19] No such device)
+    # 2.4rc1 - doc fix on setuplogging()
     # 2.4b4 - resourcelock closed attribute
     # 2.4b3 - Added lock_info to resource_lock
     # 2.4b2 - Added where_called to resource_lock unget for debugging aid

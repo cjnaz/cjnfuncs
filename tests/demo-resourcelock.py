@@ -3,10 +3,11 @@
 
 Produce / compare to golden results:
     ./demo-resourcelock.py | diff demo-resourcelock-initial-unlocked-golden.txt -
-        (Test comments are for this case)
+        (Test comments are for this case.  Timestamps will be different.)
 
     resourcelock test_lock get
     ./demo-resourcelock.py | diff demo-resourcelock-initial-locked-golden.txt -
+    (Timestamps will be different.)
 """
 
 #==========================================================
