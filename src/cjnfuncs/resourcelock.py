@@ -90,10 +90,16 @@ checked and re-instantiate if needed.
         self.I_have_the_lock =  False
         self.lock = posix_ipc.Semaphore(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, initial_value=1)
 
-        memory = posix_ipc.SharedMemory(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, size=4096)
+        preexisting = False
+        try:
+            memory = posix_ipc.SharedMemory(self.lockname, flags=0)
+            preexisting = True
+        except posix_ipc.ExistentialError:
+            memory = posix_ipc.SharedMemory(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, size=4096)
+
         self.mapfile = mmap.mmap(memory.fd, memory.size)
         os.close(memory.fd)
-        if not self.is_locked():
+        if not preexisting:
             self._set_lock_info('')
 
 
