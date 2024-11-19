@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.4.1
+version = "2.4.1"
     # 2.4.1 - resource_lock only init lock_info if not existing
     # 2.4.1b1 - resource_lock only init lock_info if not existing
     # 2.4 - release
