@@ -304,6 +304,8 @@ process completes its work, and then acquire the I2C bus lock so that other proc
 - Resource locks are on the honor system.  Any process can unget a lock, but should not if it didn't get the lock.
 - This lock mechanism is just as effective across threads within a process.
 - As many different/independent locks as needed may be created.
+- The first time a lock is created (on the current computer since reboot) the lock info string (accessible via `get_lock_info()`)
+is set to '', else it retains the value set by the most recent get_lock() call.
 - It is recommended (in order to avoid a minor memory leak) to `close()` the lock in the tool script cleanup code.
 Calling `close()` sets the `closed` attribute to True so that any following code can detect and re-instantiate the 
 lock if needed.
