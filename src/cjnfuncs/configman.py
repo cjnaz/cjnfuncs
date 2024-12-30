@@ -46,7 +46,7 @@ The config_item() class provides handling of one or more config file instances. 
 
 
 ### Instantiation parameters
-`config_file` (str, default None)
+`config_file` (Path or str, default None)
 - Path to the configuration file, relative to the `core.tool.config_dir` directory, or an absolute path.
 - `None` may be used if the config will be loaded programmatically via `read_string()` or `read_dict()`.
 
@@ -61,6 +61,18 @@ then the `core.tool.log_dir_base` will be set to `core.tool.config_dir`.
 - Set to `True` when loading additional config files.  Disables logging setup related changes.
 - The primary config file should be loaded first before any secondary_config loads, so that logging 
 is properly set up.
+
+
+### Useful class attributes
+`.config_file` (Path or str, or None)
+- The `config_file` as passed in at instantiation
+
+`.config_full_path` (Path or None)
+- The full expanduser/expandvars path to the config file, relative to core.tool.config_dir if 
+instantiation `config_file` is a relative path (uses mungePath)
+
+`.config_dir` (Path or None)
+- The directory above  `.config_full_path`
 
 
 ### Returns

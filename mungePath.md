@@ -83,10 +83,10 @@ Removing the file
 ```
 
 Notables:
-1. The `myfile` mungePath instance gets created. 
-2. Printing the instance shows all its stats.  `myfile.exists` indicates whether the file exists _at the time the instance was created_.
-3. The `myfile.parent` directory is created, if it doesn't yet exist.
-4. A mungePath instance holds a set of status booleans (not methods) that are handy for coding.
+1. The `my_mP` mungePath instance gets created. 
+2. Printing the instance shows all its stats.  `my_mP.exists` indicates whether the file exists _at the time the instance was created_.
+3. The `my_mP.parent` directory is created, if it doesn't yet exist.
+4. A mungePath instance holds a set of status booleans (attributes, not methods) that are handy for coding.
 5. `.full_path` and `.parent` are pathlib.Path types, so all of the Path methods may be used.
 6. If the mungePath instance booleans may be stale, a call to `.refresh_stats()` is needed.
 7. `.refresh_stats()` returns the instance handle, so it may be called in-line with boolean checks, etc.
