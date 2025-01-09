@@ -43,12 +43,12 @@ And the obvious output is...
 
 
 Notables:
-1. The config file is structured as lines of `param` - `value` pairs, with supported separators of whitespace, `=` or `:`.  Each pair is on a single line.  Comments are supported on lines by themselves or on the end of param lines.
+1. The config file is structured as lines of `param` - `value` pairs, with supported separators of whitespace, `=` or `:`.  Each pair is typically on a single line.  Comments are supported on lines by themselves or on the end of param lines.
 1. A config file is loaded using `configman.loadconfig()`. The param values are loaded based on their parsed types. Most all types are supported...  `str`, `int`, `bool`, `float`, `list`, `dict`, `tuple`.  Types support makes for clean script code.
 1. Params are accessed in script code using `configman.getcfg()`.  getcfg() supports fallback values and type checking.
 
 ***Note***: configman relies on the environment set up by `set_toolname()`, which creates a set of application path variables such as `core.tool.config_dir`.  In the case of a user-mode script, the .config_dir is set to `~/.config/<toolname>`, so by default that is the directory that configman will look in for `configman_ex1.cfg`.  For these examples we have overridden the default config directory to be the directory that we are running the example script from (`.`).
-Alternately, the full path to the config file may be passed to the `config_item()` call.
+Alternately, the full path to the config file may be passed to the `config_item()` instantiation call.
 See the `cjnfuncs.core` module for more details.
 
 <br>
@@ -82,6 +82,7 @@ again:true                  # ':' separator, with or without whitespace
 
 # **** NOTE 3
 a_str     =     6 * 7       # configman does not support calculations, so this is loaded as a str
+TODO add quoted string ex
 a_int           7
 a_bool    :     False       # True and false values not case sensitive, stored as bools
 a_float         42.0
@@ -225,9 +226,9 @@ bad_float:     52.3.5
 ```
 
 Notables (See **** NOTE # in the above example config file and code):
-1. loadconfig() looks for `LogLevel` abd `LogFile` and sets the root logger accordingly.  If you want to
+1. loadconfig() looks for `LogLevel` and `LogFile` and sets the root logger accordingly.  If you want to
 change the console or file logging format you may also define `ConsoleLogFormat` or `FileLogFormat`, respectively.  Logging setups only apply for the primary/master config (`config_item(secondary_config = False)`).  The logging level _within_ loadconfig() is set using the `ldcfg_ll` switch (default WARNING level).
-2. loadconfig() accepts most any character in a param name, except the comment character `#`, or the param-value separator characters whitespace, `=`, or `:`.  
+2. loadconfig() accepts most any character in a param name, except the comment delimiter (default `#`), or the param-value separator characters whitespace, `=`, or `:`.  
 3. loadconfig() attempts to load a value as a type `int`, `bool`, `float`, `list`, `dict`, or `tuple`, if the value has the correct syntax for that type.  The fallback is to type `str`.  Loading all params as type `str` can be forced:  `my_config = config_item('configman_ex2.cfg', force_str=True)`.
 4. Sections are supported, and are accessed as `my_config.getcfg('NotifList', section='SMTP')`.  Only 
 one section depth level is allowed (no nested sections).  Section `[]` resets to the top-level; for example, `LogLevel` and `more_top_level` are in the same `[]` section.  Whitespace is allowed within section names, and leading and trailing whitespace is stripped - sections `[ Bad params ]`, `[Bad params ]`, `[Bad params]` are all the same section.
@@ -399,8 +400,8 @@ Notables:
   Case sensitive params | Yes (always) | Default No, customizable
   Param/value delimiter | whitespace, ':', or '=' fixed | ':' or '=', customizable
   Param only (no value) | Yes (stored as True) | Yes
-  Multi-line values | No | Yes
-  Comment prefix | '#' fixed (thus '#' can't be part of the param or value) | '#' or ';', customizable
+  Multi-line values | Yes ('\\' line continuation char) | Yes
+  Comment prefix | '#' fixed (thus '#' can't be part of the param; can be part of a value string if quoted.) | '#' or ';', customizable
   Interpolation | No | Yes
   Mapping Protocol Access | No | Yes
   Save to file | Yes | Yes

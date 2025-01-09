@@ -28,9 +28,9 @@ IO_RETRY_COUNT         = 3
 #=====================================================================================
 
 initial_logging_setup_done = False   # Global since more than one config can be loaded
-CFGLINE =  re.compile(r"([^\s=:]+)[\s=:]*(.*)")                 # used in load_config() for param:value lines
+# CFGLINE =  re.compile(r"([^\s=:]+)[\s=:]*(.*)")                 # used in load_config() for param:value lines
 CFGLINE2 = re.compile(r"(\s*)([^\s=:]+)([\s=:]+)([^#]+)(.*)")   # used in modify_configfile()
-SECLINE =  re.compile(r"\[(.*)\]")                              # used for getting section names
+# SECLINE =  re.compile(r"\[(.*)\]")                              # used for getting section names
 
 
 class config_item():
@@ -44,6 +44,7 @@ The config_item() class provides handling of one or more config file instances. 
  - Programmatically modifiying the config file content - `modify_configfile()`
  - Getting instance status - `__repr__()`, `section()`, `dump()`
 
+See the loadconfig() documentation for details on config file formatting and rules.
 
 ### Instantiation parameters
 `config_file` (Path or str, default None)
@@ -64,11 +65,23 @@ is properly set up.
 
 
 ### Useful class attributes
+The current values of all public class attributes may be printed using `print(my_config)`.
+
+`.cfg` (dict)
+- Holds all loaded params.  May be access directly.  Sections are stored as sub-dictionaries of .cfg.
+- The contents of the .cfg dictionary may be printed using `print(my_config.dump())`
+
+`.defaults` (dict)
+- Default params are stored here.
+
+.sections_list (list)
+- A list of string names for all defined sections.
+
 `.config_file` (Path or str, or None)
 - The `config_file` as passed in at instantiation
 
 `.config_full_path` (Path or None)
-- The full expanduser/expandvars path to the config file, relative to core.tool.config_dir if 
+- The full expanduser/expandvars path to the config file, relative to core.tool.config_dir if the
 instantiation `config_file` is a relative path (uses mungePath)
 
 `.config_dir` (Path or None)
@@ -84,7 +97,7 @@ instantiation `config_file` is a relative path (uses mungePath)
 - More than one `config_item()` may be created and loaded.  This allows for configuration data to be partitioned 
 as desired.  Each defined config is loaded to its own instance-specific `cfg` dictionary. Only one config_item()
 instance should be considered the primary, while other instances should be tagged with `secondary_config=True`. 
-Logging setups are controlled only the primary instance.
+Logging setups are controlled only by the primary instance.
 Also see the loadconfig() `import` feature.
 - Initially in _user_ mode, after the `set_toolname()` call, `core.tool.log_dir_base` 
 (the log directory) is set to the `core.tool.user_data_dir`.
@@ -100,7 +113,7 @@ path after the `set_toolname()` call and before the `config_item()` call, for ex
 path after the `set_toolname()` call and before the `config_item()` call, for example 
 `core.tool.config_dir = core.tool.main_dir`, which sets the config dir to the same as the tool script's 
 directory.  With `remap_logdirbase=True`, the log dir will also be set to the tool script's directory.
-- Details of the configuration instance may be printed, eg, `print (my_config)`.
+- Details of the configuration instance may be printed, eg, `print(my_config)`.
     """
 
     def __init__(self, config_file=None, remap_logdirbase=True, force_str=False, secondary_config=False):
@@ -142,42 +155,52 @@ directory.  With `remap_logdirbase=True`, the log dir will also be set to the to
             self.cfg[section_name][key] = value
 
 
-    def _parse_value(self, value_str):
-        if self.force_str:
-            return value_str
+    # def parse_value(self, value_str):
+    #     if self.force_str:
+    #         if  (value_str.startswith('"') and value_str.endswith('"'))  or \
+    #             (value_str.startswith("'") and value_str.endswith("'")):
+    #                 value_str = value_str[1:-1]
+    #         if  (value_str.startswith('"""') and value_str.endswith('"""'))  or \
+    #             (value_str.startswith("'''") and value_str.endswith("'''")):
+    #                 value_str = value_str[3:-3]
+    #         return value_str
         
-        try:                                                # Integer
-            return int(value_str) 
-        except:
-            pass
-        try:                                                # Float
-            return float(value_str)
-        except:
-            pass
-        if value_str.lower() == "true":                     # Boolean True
-            return True
-        if value_str.lower() == "false":                    # Boolean False
-            return False
-        try:
-            if  (value_str.startswith('[') and value_str.endswith(']'))  or \
-                (value_str.startswith('{') and value_str.endswith('}'))  or \
-                (value_str.startswith('(') and value_str.endswith(')')):
-                    return ast.literal_eval(value_str)      # List, Dictionary, or Tuple
-        except:
-            pass
-        return value_str                                    # String
+    #     try:                                                # Integer
+    #         return int(value_str) 
+    #     except:
+    #         pass
+    #     try:                                                # Float
+    #         return float(value_str)
+    #     except:
+    #         pass
+    #     if value_str.lower() == "true":                     # Boolean True
+    #         return True
+    #     if value_str.lower() == "false":                    # Boolean False
+    #         return False
+    #     try:
+    #         if  (value_str.startswith('[') and value_str.endswith(']'))  or \
+    #             (value_str.startswith('{') and value_str.endswith('}'))  or \
+    #             (value_str.startswith('(') and value_str.endswith(')'))  or \
+    #             (value_str.startswith('"') and value_str.endswith('"'))  or \
+    #             (value_str.startswith("'") and value_str.endswith("'"))  or \
+    #             (value_str.startswith('"""') and value_str.endswith('"""'))  or \
+    #             (value_str.startswith("'''") and value_str.endswith("'''")):
+    #                 return ast.literal_eval(value_str)      # List, Dictionary, or Tuple
+    #     except:
+    #         pass
+    #     return value_str                                    # String
 
 
-    def _check_section(self, xyz):
-        out = SECLINE.match(xyz)
-        if out:
-            section_name = out.group(1).strip()
-            if section_name != ''  and  section_name not in self.sections_list  and  section_name != 'DEFAULT':
-                self.cfg[section_name] = {}
-                self.sections_list.append(section_name)
-            return section_name
-        else:
-            return None
+    # def _check_section(self, xyz):
+    #     out = SECLINE.match(xyz)
+    #     if out:
+    #         section_name = out.group(1).strip()
+    #         if section_name != ''  and  section_name not in self.sections_list  and  section_name != 'DEFAULT':
+    #             self.cfg[section_name] = {}
+    #             self.sections_list.append(section_name)
+    #         return section_name
+    #     else:
+    #         return None
 
 
 #=====================================================================================
@@ -578,57 +601,186 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 ### Behaviors and rules
 - See loadconfig() for config loading Behaviors and rules.
         """
+        continuation_line = False
+        split_line_re =    re.compile(r"([^\s=:#]+)[\s=:]*(.*)")        # Identify param - value (with possible comment)
+        xx = fr"""
+            ('''|\""")                      # Match opening triple quotes
+            (?:\\.|(?!\1).)*?\1             # Match content inside triple quotes until matching closing
+            |                               # OR
+            (["'])(?:\\.|(?!\2).)*?\2       # Match single or double quotes with matching pairs
+            |                               # OR
+            (\#)                            # Match unquoted # (group 3)
+        """
+        find_comment_re = re.compile(xx, re.VERBOSE)                    # Find unquoted '#'
+        section_name_re =  re.compile(r"\[(.*)\]")                      # Get section name
+
 
         for line in str_blob.split('\n'):
 
-            # Is an import line
-            if line.strip().lower().startswith("import"):
-                line = line.split("#", maxsplit=1)[0].strip()
-                target = mungePath(line.split(maxsplit=1)[1], self.config_dir)
-                try:
-                    imported_config = config_item(target.full_path)
-                    imported_config.loadconfig(ldcfg_ll, isimport=True)
-                    for key in imported_config.cfg:
-                        if self.current_section_name == '':
-                            self.cfg[key] = imported_config.cfg[key]
-                        elif self.current_section_name == 'DEFAULT':
-                            self.defaults[key] = imported_config.cfg[key]
-                        else:
-                            self.cfg[self.current_section_name][key] = imported_config.cfg[key]
-                except Exception as e:
+            if line.strip().startswith('['):                            # Section
+                section_name = None
+                out = section_name_re.match(line)
+                if out:
+                    section_name = out.group(1).strip()
+                    if section_name != ''  and  section_name not in self.sections_list  and  section_name != 'DEFAULT':
+                        self.cfg[section_name] = {}
+                        self.sections_list.append(section_name)
+                if section_name is None:
                     logging.getLogger().setLevel(preexisting_loglevel)
-                    raise e
+                    raise ConfigError (f"Malformed section line <{line}>")
+                else:
+                    if isimport:
+                        logging.getLogger().setLevel(preexisting_loglevel)
+                        raise ConfigError ("Section within imported file is not supported.")
+                    self.current_section_name = section_name
+                continue
 
-            # Is a param/value line or a [section] line
+            if not continuation_line:
+                param_name = value_portion = ''
+                out = split_line_re.match(line.strip())
+                if out:
+                    param_name    = out.group(1)
+                    value_portion = out.group(2)
             else:
-                _line = line.split("#", maxsplit=1)[0].strip()  # line without comment and leading/trailing whitespace
-                if len(_line) > 0:
-                    if _line.startswith('['):                   # Section
-                        xx = self._check_section(_line)
-                        if xx is None:
-                            logging.getLogger().setLevel(preexisting_loglevel)
-                            raise ConfigError (f"Malformed section line <{line}>")
-                        else:
-                            if isimport:
-                                logging.getLogger().setLevel(preexisting_loglevel)
-                                raise ConfigError ("Section within imported file is not supported.")
-                            self.current_section_name = xx
+                value_portion += ' ' + line.strip()
+                continuation_line = False
 
-                    else:                                       # param/value
-                        out = CFGLINE.match(_line)
-                        if out:
-                            param = out.group(1)
-                            rol   = out.group(2)        # rest of line (value portion)
+            if value_portion is not '':
+                # Remove after first '#' outside of quotes
+                for match in find_comment_re.finditer(value_portion):
+                    if match.group(3):
+                        value_portion = value_portion[:match.start(3)].strip()
+                        break
 
-                            if rol == '':               # param with no value stored as True
-                                value = True
+            if value_portion.endswith('\\'):                            # Continuation line
+                value_portion = value_portion[:-1].strip()
+                continuation_line = True
+                continue
+
+            if param_name is not '':
+                if param_name.lower().startswith("import"):             # import line
+                    target = mungePath(value_portion, self.config_dir)
+                    try:
+                        imported_config = config_item(target.full_path)
+                        imported_config.loadconfig(ldcfg_ll, isimport=True)
+                        for key in imported_config.cfg:
+                            if self.current_section_name == '':
+                                self.cfg[key] = imported_config.cfg[key]
+                            elif self.current_section_name == 'DEFAULT':
+                                self.defaults[key] = imported_config.cfg[key]
                             else:
-                                value = self._parse_value(rol)
-                            self._add_key(param, value, self.current_section_name)
-                            logging.debug (f"Loaded {param} = <{value}>  ({type(value)})")
-                        else: 
-                            line = line.replace('\n','')
-                            logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
+                                self.cfg[self.current_section_name][key] = imported_config.cfg[key]
+                    except Exception as e:
+                        logging.getLogger().setLevel(preexisting_loglevel)
+                        raise e
+                else:                                                   # param - value line
+                    if value_portion.lower() == 'true':
+                        value_portion = 'True'
+                    if value_portion.lower() == 'false':
+                        value_portion = 'False'
+                    if value_portion == '':
+                        value_portion = 'True'
+                    if not self.force_str:
+                    #     value = value_portion
+                    # else:
+                        try:
+                            value_portion = ast.literal_eval(value_portion)
+                        except:
+                            pass
+                            # value = value_portion       # default to str
+                    self._add_key(param_name, value_portion, self.current_section_name)
+                    logging.debug (f"Loaded {param_name} = <{value_portion}>  ({type(value_portion)})")
+
+                    # if value_portion == '':
+                    #     value = True
+                    # else:
+                    #     if value_portion.lower() == 'true':
+                    #         value = True
+                    #     elif value_portion.lower() == 'false':
+                    #         value = False
+                    #     else:
+                    #         if self.force_str:
+                    #             value = value_portion
+                    #         else:
+                    #             try:
+                    #                 value = ast.literal_eval(value_portion)
+                    #             except:
+                    #                 value = value_portion       # default to str
+                    # self._add_key(param_name, value, self.current_section_name)
+                    # logging.debug (f"Loaded {param_name} = <{value}>  ({type(value)})")
+
+
+#         line_part = ''
+#         continuation_line = False
+
+#         for line in str_blob.split('\n'):
+
+#             # Is an import line
+#             if line.strip().lower().startswith("import"):
+# #                line = line.split("#", maxsplit=1)[0].strip()
+#                 line = line.split(self.comment_delim, maxsplit=1)[0].strip()
+#                 target = mungePath(line.split(maxsplit=1)[1], self.config_dir)
+#                 try:
+#                     imported_config = config_item(target.full_path)
+#                     imported_config.loadconfig(ldcfg_ll, isimport=True)
+#                     for key in imported_config.cfg:
+#                         if self.current_section_name == '':
+#                             self.cfg[key] = imported_config.cfg[key]
+#                         elif self.current_section_name == 'DEFAULT':
+#                             self.defaults[key] = imported_config.cfg[key]
+#                         else:
+#                             self.cfg[self.current_section_name][key] = imported_config.cfg[key]
+#                 except Exception as e:
+#                     logging.getLogger().setLevel(preexisting_loglevel)
+#                     raise e
+
+#             # Is a param/value line or a [section] line
+#             else:
+#                 # _line = line.split("#", maxsplit=1)[0].strip()  # line without comment and leading/trailing whitespace
+#                 # _line = line.split(self.comment_delim, maxsplit=1)[0].strip()  # line without comment and leading/trailing whitespace
+#                 # _line = text_before_first_unquoted_hash(line)
+
+#                 working_line = line.strip()
+#                 for match in self.extract_value_re.finditer(line):  # Remove after first comment_delim outside of quotes
+#                     if match.group(3):
+#                         working_line = line[:match.start(3)].strip()
+#                         break
+
+#                 if len(working_line) > 0:
+#                     if continuation_line:
+#                         working_line = line_part + working_line
+#                         continuation_line = False
+#                     if working_line.endswith('\\'):                     # Continuation line
+#                         continuation_line = True
+#                         line_part = working_line[:-1].strip() + ' '
+
+#                     else:
+#                         if working_line.startswith('['):                # Section line
+#                             sec_name = self._check_section(working_line)
+#                             if sec_name is None:
+#                                 logging.getLogger().setLevel(preexisting_loglevel)
+#                                 raise ConfigError (f"Malformed section line <{line}>")
+#                             else:
+#                                 if isimport:
+#                                     logging.getLogger().setLevel(preexisting_loglevel)
+#                                     raise ConfigError ("Section within imported file is not supported.")
+#                                 self.current_section_name = sec_name
+
+#                         else:                                           # param/value line
+#                             out = CFGLINE.match(working_line)
+#                             if out:
+#                                 param_name    = out.group(1)
+#                                 value_portion = out.group(2)
+
+#                                 if value_portion == '':     # param with no value is stored as True
+#                                     value = True
+#                                 else:
+#                                     value = self.parse_value(value_portion)
+#                                 self._add_key(param_name, value, self.current_section_name)
+#                                 logging.debug (f"Loaded {param_name} = <{value}>  ({type(value)})")
+#                             else: 
+#                                 line = line.replace('\n','')
+#                                 logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
 
 
 #=====================================================================================
@@ -816,10 +968,6 @@ all changes have been applied the final call to modify_configfile() must have `s
 cause the memory version to be written out to the config file.  If the script code checks for
 modifications of the config file then the modified content will be reloaded into the cfg dictionary.
 
-NOTE:  In some circumstances the OS-reported timestamp for the modified config file may be erratic.
-It may be necessary to add a time.sleep(0.5) delay between saving the modified config and the loadconfig()
-reload call to avoid multiple config reloads.
-
 
 ### Parameters
 `param` (str, default '')
@@ -845,6 +993,16 @@ reload call to avoid multiple config reloads.
 ### Returns
 - No return value
 - Warning messages are logged for attempting to modify or remove a non-existing param.
+
+
+### Behaviors and rules
+- **How modify_config works with multi-line params -**If a multi-line param is modified, the new value is
+written out on a single line, and the continuation lines for the original definition remain in place.
+This effectively turns the continuation lines into a new param definition, which is usually benign.  Check
+for param name conflicts.
+- NOTE:  In some circumstances the OS-reported timestamp for the modified config file may be erratic.
+It may be necessary to add a `time.sleep(0.5)` delay between saving the modified config and the loadconfig()
+reload call to avoid multiple config reloads.
         """
 
         if self.config_file is None:
@@ -930,7 +1088,10 @@ reload call to avoid multiple config reloads.
         cfg_list = ''
         for key in self.cfg:
             if key not in self.sections_list:
-                cfg_list += f"{key:20} = {self.cfg[key]}\n"
+                if type(self.cfg[key]) is str  and  '#' in self.cfg[key]:
+                    cfg_list += f"{key:20} = '''{self.cfg[key]}'''\n"
+                else:
+                    cfg_list += f"{key:20} = {self.cfg[key]}\n"
         cfg_list += f"\n[DEFAULT]\n"
         for key in self.defaults:
             cfg_list += f"{key:20} = {self.defaults[key]}\n"
@@ -949,4 +1110,3 @@ reload call to avoid multiple config reloads.
                 logging.debug(f"Failed try {ntry} to write config {self.config_file} to file {outfile}\n  {e}")
 
         raise ConfigError (f"Failed to write config {self.config_file} to file {outfile}\n  {_e}")
-    

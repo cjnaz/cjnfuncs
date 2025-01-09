@@ -11,11 +11,11 @@ Produce / compare to golden results:
 
 #==========================================================
 #
-#  Chris Nelson, 2024
+#  Chris Nelson, 2024-2025
 #
 #==========================================================
 
-__version__ = "1.3"
+__version__ = "1.4"
 TOOLNAME    = "cjnfuncs_testcfg"
 CONFIG_FILE = "demo_config.cfg"
 
@@ -488,6 +488,7 @@ if args.test == 0  or  args.test == 14:
     config.modify_configfile("x_int",                   12)
     config.modify_configfile("x_list",                  ["hello", 3.14, {"abc":42}])
     config.modify_configfile("x_dict",                  {"one":6, "two":7.0})
+    config.modify_configfile("multi_line2",             [{"new":6, "list":7.0, "with dict":True}])
 
     config.modify_configfile("", "",                    add_if_not_existing=True)       # Blank line
     config.modify_configfile("George", "was here",      add_if_not_existing=True)       # New param
@@ -765,6 +766,34 @@ if args.test == 0  or  args.test == 25:
     xx = config_item(outfile)
     xx.loadconfig()
     print (f"Getting a value from the written then loaded <{outfile}>:  <a_tuple> = {xx.getcfg('a_tuple')}")
+    print (f"Getting a value from the written then loaded <{outfile}>:  <bad_list> = {xx.getcfg('bad_list')}")
 
+    print ("Comparing dumps of original and written configs...")
     if config.dump() == xx.dump():
         print ("They match!")
+
+
+#===============================================================================================
+if args.test == 50:
+    print_test_header (50, "development")
+
+    # def dump_file(filepath):
+    #     _file = mungePath(filepath, core.tool.config_dir)
+    #     print (f"\n***** File <{_file.full_path}> content:")
+    #     print (_file.full_path.read_text())
+
+    set_toolname(TOOLNAME)
+    # logging.getLogger().setLevel(10)
+    # deploy_files([
+    #     { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
+    #     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
+    #     ], overwrite=True )
+    config = config_item('./junk.cfg')
+    print (f"\nLoad config {config.config_full_path}")
+    config.loadconfig(ldcfg_ll=10)
+
+    # print(core.tool)
+    print(config)
+    print(config.dump())
+    # print(config.sections_list)
+    # print(config.sections())

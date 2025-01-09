@@ -10,7 +10,7 @@ Current log file:              __console__
 
 ----- T1.2:  LogFile=None, call_logfile=None, call_logfile_wins=True >>>>  Log file: __console__
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1736401074
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
@@ -19,7 +19,7 @@ Current log file:              __console__
 
 ----- T1.3:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__ (override cfg_logfile)
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1736401074
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
@@ -29,7 +29,7 @@ Current log file:              __console__
 
 ----- T1.4:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  call_logfile
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1736401074
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
@@ -156,7 +156,7 @@ Based on found user or site dirs:
 
 ----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1736401074
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
@@ -165,7 +165,7 @@ Current log file:              __console__
 
 ----- T1.13: Modified console logging format >>>>  Log file:  __console__
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1736401074
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
@@ -175,7 +175,7 @@ Current log file:              __console__
 
 ----- T1.14: Modified file logging format >>>>  Log file:  call_logfile
     INFO:  Config  <demo_config_T1.cfg>  force flushed (force_flush_reload)
-    INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1724300072
+    INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1736401074
     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
@@ -189,7 +189,7 @@ Current log file:              /home/cjn/.config/cjnfuncs_testcfg/mylogdir/call_
 
 ----- T2.1:  Initial load.  Default logging level 30
 (Re)loaded             :  1
-Config file timestamp  :  1724300072
+Config file timestamp  :  1736401074
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -199,7 +199,7 @@ Current log file       :  __console__
 
 ----- T2.2:  No config change >>>>  Not reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1724300072
+Config file timestamp  :  1736401074
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -208,14 +208,14 @@ Current log file       :  __console__
     demo-config.print_stats          -  WARNING:  Warning level message
 
 ----- T2.3:  LogLevel=10, ldcfg_ll=10 >>>>  loadconfig logging, Logging DEBUG, INFO, and WARNING messages
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300073
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1736401075
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  flushed due to changed file (flush_on_reload)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <10>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <10>
 (Re)loaded             :  1
-Config file timestamp  :  1724300073
+Config file timestamp  :  1736401075
 Config LogLevel        :  10
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -227,7 +227,7 @@ Current log file       :  __console__
 
 ----- T2.4:  LogLevel=10, ldcfg_ll=30 (default) >>>>  No loadconfig logging, Logging DEBUG, INFO, and WARNING messages
 (Re)loaded             :  1
-Config file timestamp  :  1724300074
+Config file timestamp  :  1736401076
 Config LogLevel        :  10
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -239,7 +239,7 @@ Current log file       :  __console__
 
 ----- T2.5:  LogLevel=30, ldcfg_ll=30 (default),  >>>>  Log only WARNING
 (Re)loaded             :  1
-Config file timestamp  :  1724300075
+Config file timestamp  :  1736401077
 Config LogLevel        :  30
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -248,13 +248,13 @@ Current log file       :  __console__
     demo-config.print_stats          -  WARNING:  Warning level message
 
 ----- T2.6:  ldcfg_ll=10, No LogLevel >>>>  Restore preexisting level (30)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300076
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1736401078
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  flushed due to changed file (flush_on_reload)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.loadconfig           -     INFO:  Logging level set to preexisting level <30>
 (Re)loaded             :  1
-Config file timestamp  :  1724300076
+Config file timestamp  :  1736401078
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -264,7 +264,7 @@ Current log file       :  __console__
 
 ----- T2.7:  ldcfg_ll=30 (default), No changes >>>>  NOT Reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1724300076
+Config file timestamp  :  1736401078
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -274,7 +274,7 @@ Current log file       :  __console__
 
 ----- T2.8:  ldcfg_ll=10, flush_on_reload >>>>  NOT Reloaded
 (Re)loaded             :  0
-Config file timestamp  :  1724300076
+Config file timestamp  :  1736401078
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -284,12 +284,12 @@ Current log file       :  __console__
 
 ----- T2.9:  ldcfg_ll=10, force_flush_reload >>>>  Loadconfig logging
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300076
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1736401078
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.loadconfig           -     INFO:  Logging level set to preexisting level <30>
 (Re)loaded             :  1
-Config file timestamp  :  1724300076
+Config file timestamp  :  1736401078
 Config LogLevel        :  None
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -299,14 +299,14 @@ Current log file       :  __console__
 
 ----- T2.10:  ldcfg_ll=10, LogLevel=20, var2 added >>>>  Reloaded
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300077
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1736401079
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded var2 = <Hello>  (<class 'str'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 (Re)loaded             :  1
-Config file timestamp  :  1724300077
+Config file timestamp  :  1736401079
 Config LogLevel        :  20
 Current Logging level  :  20
 testvar                :  True  <class 'bool'>
@@ -316,13 +316,13 @@ Current log file       :  __console__
     demo-config.print_stats          -     INFO:  Info    level message
 
 ----- T2.11: ldcfg_ll=10, LogLevel=40, var2 removed from config >>>>  var2 still defined, no logging
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300079
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1736401080
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <40>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <40>
 (Re)loaded             :  1
-Config file timestamp  :  1724300079
+Config file timestamp  :  1736401080
 Config LogLevel        :  40
 Current Logging level  :  40
 testvar                :  True  <class 'bool'>
@@ -331,13 +331,13 @@ Current log file       :  __console__
 
 ----- T2.12: ldcfg_ll=10, LogLevel=30, force_flush_reload=True >>>>  var2 gone
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300079
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1736401080
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 (Re)loaded             :  1
-Config file timestamp  :  1724300079
+Config file timestamp  :  1736401080
 Config LogLevel        :  30
 Current Logging level  :  30
 testvar                :  True  <class 'bool'>
@@ -347,12 +347,12 @@ Current log file       :  __console__
 
 ----- T2.13: Externally set log level = 20
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300080
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1736401081
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.loadconfig           -     INFO:  Logging level set to preexisting level <20>
 (Re)loaded             :  1
-Config file timestamp  :  1724300080
+Config file timestamp  :  1736401081
 Config LogLevel        :  None
 Current Logging level  :  20
 testvar                :  True  <class 'bool'>
@@ -363,12 +363,12 @@ Current log file       :  __console__
 
 ----- T2.14: Externally set log level = 10
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1724300080
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1736401081
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.loadconfig           -     INFO:  Logging level set to preexisting level <10>
 (Re)loaded             :  1
-Config file timestamp  :  1724300080
+Config file timestamp  :  1736401081
 Config LogLevel        :  None
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -380,7 +380,7 @@ Current log file       :  __console__
 
 ----- T2.15: Externally set log level = 10 with ldcfg_ll=30 (default)
 (Re)loaded             :  1
-Config file timestamp  :  1724300080
+Config file timestamp  :  1736401081
 Config LogLevel        :  None
 Current Logging level  :  10
 testvar                :  True  <class 'bool'>
@@ -398,20 +398,21 @@ Current log file       :  __console__
     deployfiles.deploy_files         -     INFO:  Deployed  creds_SMTP           to  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300080
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736401081
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
-      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
-      configman.read_string          -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
+      configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
+      configman.read_string          -    DEBUG:  Loaded a_tuple = <('Im a #tuple', 7.0)>  (<class 'tuple'>)
       configman.read_string          -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
-      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"ab#c":42.}]>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
@@ -456,6 +457,16 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded c = <42>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded e = <20>  (<class 'int'>)
+      configman.read_string          -    DEBUG:  Loaded \ = <hel\lo>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded \123 = <h\ello2>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 123\123 = <Hel\lo3>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line = <['hello', 'goodbye', 'another line#', 5, True]>  (<class 'list'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line2 = <Hello, my name is George Tirebiter. You can't get there from here.>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded "quoted" = <Hello my name is # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote1 = <Hello my name is also # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded """quot"ed = <Hello my name was # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded '''quo'''ted = <Hello my name isn't # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote2 = <'Quoted string with>  (<class 'str'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 
 Stats for set_toolname <cjnfuncs_testcfg>:
@@ -486,7 +497,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1724300080
+.config_timestamp       :  1736401081
 .sections_list          :  ['SMTP', 'Test section 1', 'Test section 2']
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -495,14 +506,15 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
       param_no_value = True  <class 'bool'>
              testvar = True  <class 'bool'>
            Test.Bool = False  <class 'bool'>
- 7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+ 7893&(%$,.nasf||\a@ = Hello:  <class 'str'>
+     Equals_in_value = Look! an = equals!  <class 'str'>
                again = True  <class 'bool'>
              a_float = 42.0  <class 'float'>
         a_float_calc = 6 * 7.0  <class 'str'>
-              a_list = ['hello', 3.14, {'abc': 42.0}]  <class 'list'>
-             a_tuple = ('Im a tuple', 7.0)  <class 'tuple'>
+              a_list = ['he#llo', 3.14, {'abc': 42.0}]  <class 'list'>
+             a_tuple = ('Im a #tuple', 7.0)  <class 'tuple'>
               a_dict = {'six': 6, 3: 3.0}  <class 'dict'>
-            bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
+            bad_list = ["hello", 3.14 {"ab#c":42.}]  <class 'str'>
            bad_tuple = (Im a tuple, 7.0)  <class 'str'>
             bad_dict = {"six":6, 3:3.0, milk:3}  <class 'str'>
            bad_float = 52.3.5  <class 'str'>
@@ -529,6 +541,16 @@ x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
                    a = In top level  <class 'str'>
                    b = 12  <class 'int'>
                    e = 20  <class 'int'>
+                   \ = hel\lo  <class 'str'>
+                \123 = h\ello2  <class 'str'>
+             123\123 = Hel\lo3  <class 'str'>
+          multi_line = ['hello', 'goodbye', 'another line#', 5, True]  <class 'list'>
+         multi_line2 = Hello, my name is George Tirebiter. You can't get there from here.  <class 'str'>
+            "quoted" = Hello my name is # George  <class 'str'>
+              quote1 = Hello my name is also # George  <class 'str'>
+          """quot"ed = Hello my name was # George  <class 'str'>
+        '''quo'''ted = Hello my name isn't # George  <class 'str'>
+              quote2 = 'Quoted string with  <class 'str'>
 ***** Section [SMTP] *****
            EmailFrom = me@myserver.com  <class 'str'>
            NotifList = 4809991234@vzwpix.com  <class 'str'>
@@ -571,7 +593,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1724300080
+.config_timestamp       :  1736401081
 .sections_list          :  ['SMTP', 'Test section 1', 'Test section 2']
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -587,7 +609,7 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
     demo-config.<module>             -  WARNING:  testvar:          True  <class 'bool'>
     demo-config.<module>             -  WARNING:  another:          None  <class 'NoneType'>
 Current Logging level  :  17
-      configman.loadconfig           -     INFO:  Config  <additional.cfg>  file timestamp: 1724300080
+      configman.loadconfig           -     INFO:  Config  <additional.cfg>  file timestamp: 1736401081
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/additional.cfg>
       configman.read_string          -    DEBUG:  Loaded another = <yes>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded One = <5>  (<class 'int'>)
@@ -599,7 +621,7 @@ Stats for config file <additional.cfg>:
 .config_file            :  additional.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/additional.cfg
-.config_timestamp       :  1724300080
+.config_timestamp       :  1736401081
 .sections_list          :  []
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -661,20 +683,21 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 
       configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
     demo-config.mycallback           -     INFO:  In mycallback()
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300081
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736401082
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
-      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
-      configman.read_string          -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
+      configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
+      configman.read_string          -    DEBUG:  Loaded a_tuple = <('Im a #tuple', 7.0)>  (<class 'tuple'>)
       configman.read_string          -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
-      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"ab#c":42.}]>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
@@ -719,26 +742,37 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded c = <42>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded e = <20>  (<class 'int'>)
+      configman.read_string          -    DEBUG:  Loaded \ = <hel\lo>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded \123 = <h\ello2>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 123\123 = <Hel\lo3>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line = <['hello', 'goodbye', 'another line#', 5, True]>  (<class 'list'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line2 = <Hello, my name is George Tirebiter. You can't get there from here.>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded "quoted" = <Hello my name is # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote1 = <Hello my name is also # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded """quot"ed = <Hello my name was # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded '''quo'''ted = <Hello my name isn't # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote2 = <'Quoted string with>  (<class 'str'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 ----- T9.3:  var dummy in cfg:  True  (should be True because flush_on_reload == False)
 
       configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
     demo-config.mycallback           -     INFO:  In mycallback()
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300082
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736401083
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  flushed due to changed file (flush_on_reload)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
-      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
-      configman.read_string          -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
+      configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
+      configman.read_string          -    DEBUG:  Loaded a_tuple = <('Im a #tuple', 7.0)>  (<class 'tuple'>)
       configman.read_string          -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
-      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"ab#c":42.}]>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
@@ -783,26 +817,37 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded c = <42>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded e = <20>  (<class 'int'>)
+      configman.read_string          -    DEBUG:  Loaded \ = <hel\lo>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded \123 = <h\ello2>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 123\123 = <Hel\lo3>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line = <['hello', 'goodbye', 'another line#', 5, True]>  (<class 'list'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line2 = <Hello, my name is George Tirebiter. You can't get there from here.>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded "quoted" = <Hello my name is # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote1 = <Hello my name is also # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded """quot"ed = <Hello my name was # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded '''quo'''ted = <Hello my name isn't # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote2 = <'Quoted string with>  (<class 'str'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 ----- T9.4:  var dummy in cfg:  False  (should be False because flush_on_reload == True)
 
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  force flushed (force_flush_reload)
       configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
     demo-config.mycallback           -     INFO:  In mycallback()
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300082
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736401083
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'bool'>)
-      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded a_list = <['hello', 3.14, {'abc': 42.0}]>  (<class 'list'>)
-      configman.read_string          -    DEBUG:  Loaded a_tuple = <('Im a tuple', 7.0)>  (<class 'tuple'>)
+      configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
+      configman.read_string          -    DEBUG:  Loaded a_tuple = <('Im a #tuple', 7.0)>  (<class 'tuple'>)
       configman.read_string          -    DEBUG:  Loaded a_dict = <{'six': 6, 3: 3.0}>  (<class 'dict'>)
-      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"ab#c":42.}]>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
@@ -847,6 +892,16 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded c = <42>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded e = <20>  (<class 'int'>)
+      configman.read_string          -    DEBUG:  Loaded \ = <hel\lo>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded \123 = <h\ello2>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 123\123 = <Hel\lo3>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line = <['hello', 'goodbye', 'another line#', 5, True]>  (<class 'list'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line2 = <Hello, my name is George Tirebiter. You can't get there from here.>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded "quoted" = <Hello my name is # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote1 = <Hello my name is also # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded """quot"ed = <Hello my name was # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded '''quo'''ted = <Hello my name isn't # George>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote2 = <'Quoted string with>  (<class 'str'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 ----- T9.5:  var dummy in cfg:  False  (should be False because force_flush_reload == True)
 
@@ -942,7 +997,7 @@ Logging level back in the main code:  7
     deployfiles.deploy_files         -     INFO:  Deployed  import_nest_1.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg
     deployfiles.deploy_files         -     INFO:  Deployed  import_nest_2.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg
       configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1724300084
+      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1736401085
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
       configman.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
@@ -980,7 +1035,7 @@ Logging level back in the main code:  7
 
 ----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.
       configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1724300084
+      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1736401085
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
       configman.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
@@ -991,7 +1046,7 @@ Logging level back in the main code:  7
 
 ----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.
       configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1724300084
+      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1736401085
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
       configman.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
 Exception due to missing imported config file:
@@ -1013,14 +1068,15 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       param_no_value = new value  <class 'str'>
              testvar = True  <class 'bool'>
            Test.Bool = False  <class 'bool'>
- 7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+ 7893&(%$,.nasf||\a@ = Hello:  <class 'str'>
+     Equals_in_value = Look! an = equals!  <class 'str'>
                again = True  <class 'bool'>
              a_float = 42.0  <class 'float'>
         a_float_calc = 6 * 7.0  <class 'str'>
-              a_list = ['hello', 3.14, {'abc': 42.0}]  <class 'list'>
-             a_tuple = ('Im a tuple', 7.0)  <class 'tuple'>
+              a_list = ['he#llo', 3.14, {'abc': 42.0}]  <class 'list'>
+             a_tuple = ('Im a #tuple', 7.0)  <class 'tuple'>
               a_dict = {'six': 6, 3: 3.0}  <class 'dict'>
-            bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
+            bad_list = ["hello", 3.14 {"ab#c":42.}]  <class 'str'>
            bad_tuple = (Im a tuple, 7.0)  <class 'str'>
             bad_dict = {"six":6, 3:3.0, milk:3}  <class 'str'>
            bad_float = 52.3.5  <class 'str'>
@@ -1046,6 +1102,17 @@ x_7893&(%$,.nasf||\a@ = Goodbye!  <class 'str'>
                    a = Modify all occurrences  <class 'str'>
                    b = 12  <class 'int'>
                    e = 20  <class 'int'>
+                   \ = True  <class 'bool'>
+                \123 = h\ello2  <class 'str'>
+             123\123 = Hel\lo3  <class 'str'>
+          multi_line = ['hello', 'goodbye', 'another line#', 5, True]  <class 'list'>
+         multi_line2 = [{'new': 6, 'list': 7.0, 'with dict': True}]  <class 'list'>
+          Tirebiter. =  You can't get there from here."  <class 'str'>
+            "quoted" = Hello my name is # George  <class 'str'>
+              quote1 = Hello my name is also # George  <class 'str'>
+          """quot"ed = Hello my name was # George  <class 'str'>
+        '''quo'''ted = Hello my name isn't # George  <class 'str'>
+              quote2 = 'Quoted string with  <class 'str'>
               George = was here  <class 'str'>
   new_param_no_value = True  <class 'bool'>
                Bjorn = was here too  <class 'str'>
@@ -1090,7 +1157,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 Param <Tint> value <10>, type <<class 'int'>>, expected types <[<class 'int'>, <class 'float'>]>
 Param <Tint> value <10>, type <<class 'int'>>, expected types <<class 'int'>>
-Param <a_list> value <['hello', 3.14, {'abc': 42.0}]>, type <<class 'list'>>, expected types <[<class 'list'>]>
+Param <a_list> value <['he#llo', 3.14, {'abc': 42.0}]>, type <<class 'list'>>, expected types <[<class 'list'>]>
 Param <Tsec> value <5s>, type <<class 'str'>>, expected types <[<class 'int'>, <class 'str'>]>
 Param <y> value <2.54>, type <<class 'float'>>, expected types <<class 'float'>>
 Param <y> not expected type:
@@ -1098,7 +1165,7 @@ Param <y> not expected type:
 Param <Tint> not expected type:
   Config parameter <[] Tint> value <10> type <class 'int'> not of expected type(s): [<class 'float'>, <class 'list'>, <class 'tuple'>, <class 'dict'>, <class 'bool'>, <class 'str'>]
 Param <a_list> not expected type:
-  Config parameter <[] a_list> value <['hello', 3.14, {'abc': 42.0}]> type <class 'list'> not of expected type(s): [<class 'int'>, <class 'float'>, <class 'tuple'>, <class 'dict'>, <class 'bool'>, <class 'str'>]
+  Config parameter <[] a_list> value <['he#llo', 3.14, {'abc': 42.0}]> type <class 'list'> not of expected type(s): [<class 'int'>, <class 'float'>, <class 'tuple'>, <class 'dict'>, <class 'bool'>, <class 'str'>]
 Param <a_dict> not expected type:
   Config parameter <[] a_dict> value <{'six': 6, 3: 3.0}> type <class 'dict'> not of expected type(s): [<class 'int'>, <class 'float'>, <class 'list'>, <class 'tuple'>, <class 'bool'>, <class 'str'>]
 Param <Tsec> not expected type:
@@ -1127,14 +1194,15 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       param_no_value = True  <class 'bool'>
              testvar = True  <class 'bool'>
            Test.Bool = False  <class 'bool'>
- 7893&(%$,.nasf||\a@ = Hello  <class 'str'>
+ 7893&(%$,.nasf||\a@ = Hello:  <class 'str'>
+     Equals_in_value = Look! an = equals!  <class 'str'>
                again = True  <class 'bool'>
              a_float = 42.0  <class 'float'>
         a_float_calc = 6 * 7.0  <class 'str'>
-              a_list = ['hello', 3.14, {'abc': 42.0}]  <class 'list'>
-             a_tuple = ('Im a tuple', 7.0)  <class 'tuple'>
+              a_list = ['he#llo', 3.14, {'abc': 42.0}]  <class 'list'>
+             a_tuple = ('Im a #tuple', 7.0)  <class 'tuple'>
               a_dict = {'six': 6, 3: 3.0}  <class 'dict'>
-            bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
+            bad_list = ["hello", 3.14 {"ab#c":42.}]  <class 'str'>
            bad_tuple = (Im a tuple, 7.0)  <class 'str'>
             bad_dict = {"six":6, 3:3.0, milk:3}  <class 'str'>
            bad_float = 52.3.5  <class 'str'>
@@ -1161,6 +1229,16 @@ x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
                    a = In top level  <class 'str'>
                    b = 12  <class 'int'>
                    e = 20  <class 'int'>
+                   \ = hel\lo  <class 'str'>
+                \123 = h\ello2  <class 'str'>
+             123\123 = Hel\lo3  <class 'str'>
+          multi_line = ['hello', 'goodbye', 'another line#', 5, True]  <class 'list'>
+         multi_line2 = Hello, my name is George Tirebiter. You can't get there from here.  <class 'str'>
+            "quoted" = Hello my name is # George  <class 'str'>
+              quote1 = Hello my name is also # George  <class 'str'>
+          """quot"ed = Hello my name was # George  <class 'str'>
+        '''quo'''ted = Hello my name isn't # George  <class 'str'>
+              quote2 = 'Quoted string with  <class 'str'>
 ***** Section [SMTP] *****
            EmailFrom = me@myserver.com  <class 'str'>
            NotifList = 4809991234@vzwpix.com  <class 'str'>
@@ -1185,7 +1263,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1724300084
+.config_timestamp       :  1736401085
 .sections_list          :  ['SMTP', 'Test section 1', 'Test section 2']
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
@@ -1206,7 +1284,7 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
     deployfiles.deploy_files         -     INFO:  Deployed  import_nest_1.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg
     deployfiles.deploy_files         -     INFO:  Deployed  import_nest_2.cfg    to  /home/cjn/.config/cjnfuncs_testcfg/import_nest_2.cfg
       configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  force flushed (force_flush_reload)
-      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1724300084
+      configman.loadconfig           -     INFO:  Config  <import_nest_top.cfg>  file timestamp: 1736401085
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_top.cfg>
       configman.read_string          -    DEBUG:  Loaded nest_top_a = <0>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/import_nest_1.cfg>
@@ -1351,20 +1429,21 @@ ConfigError: Failed attempt to remove non-existing section <Test section> from c
 
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1724300084
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736401085
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
+      configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded Test.Bool = <false>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded again = <true>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded Test.Bool = <False>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded a_list = <["hello", 3.14, {"abc":42.}]>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded a_tuple = <("Im a tuple", 7.0)>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded a_list = <["he#llo", 3.14, {"abc":42.}]>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded a_tuple = <("Im a #tuple", 7.0)>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_dict = <{"six":6, 3:3.0}>  (<class 'str'>)
-      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"abc":42.}]>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded bad_list = <["hello", 3.14 {"ab#c":42.}]>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_tuple = <(Im a tuple, 7.0)>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_dict = <{"six":6, 3:3.0, milk:3}>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded bad_float = <52.3.5>  (<class 'str'>)
@@ -1409,29 +1488,40 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded c = <42>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a = <In top level>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded e = <20>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded \ = <hel\lo>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded \123 = <h\ello2>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded 123\123 = <Hel\lo3>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line = <['hello', 'goodbye', """another line#""", 5, True ]>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded multi_line2 = <"Hello, my name is George Tirebiter. You can't get there from here.">  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded "quoted" = <"Hello my name is # George">  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote1 = <'Hello my name is also # George'>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded """quot"ed = <"""Hello my name was # George""">  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded '''quo'''ted = <'''Hello my name isn't # George'''>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded quote2 = <'Quoted string with>  (<class 'str'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 
 Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1724300084
+.config_timestamp       :  1736401085
 .sections_list          :  ['SMTP', 'Test section 1', 'Test section 2']
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg/mylogdir
 
 ***** Section [] *****
             LogLevel = 20  <class 'str'>
-      param_no_value = True  <class 'bool'>
+      param_no_value = True  <class 'str'>
              testvar = True  <class 'str'>
-           Test.Bool = false  <class 'str'>
- 7893&(%$,.nasf||\a@ = Hello  <class 'str'>
-               again = true  <class 'str'>
+           Test.Bool = False  <class 'str'>
+ 7893&(%$,.nasf||\a@ = Hello:  <class 'str'>
+     Equals_in_value = Look! an = equals!  <class 'str'>
+               again = True  <class 'str'>
              a_float = 42.0  <class 'str'>
         a_float_calc = 6 * 7.0  <class 'str'>
-              a_list = ["hello", 3.14, {"abc":42.}]  <class 'str'>
-             a_tuple = ("Im a tuple", 7.0)  <class 'str'>
+              a_list = ["he#llo", 3.14, {"abc":42.}]  <class 'str'>
+             a_tuple = ("Im a #tuple", 7.0)  <class 'str'>
               a_dict = {"six":6, 3:3.0}  <class 'str'>
-            bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
+            bad_list = ["hello", 3.14 {"ab#c":42.}]  <class 'str'>
            bad_tuple = (Im a tuple, 7.0)  <class 'str'>
             bad_dict = {"six":6, 3:3.0, milk:3}  <class 'str'>
            bad_float = 52.3.5  <class 'str'>
@@ -1458,6 +1548,16 @@ x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
                    a = In top level  <class 'str'>
                    b = 12  <class 'str'>
                    e = 20  <class 'str'>
+                   \ = hel\lo  <class 'str'>
+                \123 = h\ello2  <class 'str'>
+             123\123 = Hel\lo3  <class 'str'>
+          multi_line = ['hello', 'goodbye', """another line#""", 5, True ]  <class 'str'>
+         multi_line2 = "Hello, my name is George Tirebiter. You can't get there from here."  <class 'str'>
+            "quoted" = "Hello my name is # George"  <class 'str'>
+              quote1 = 'Hello my name is also # George'  <class 'str'>
+          """quot"ed = """Hello my name was # George"""  <class 'str'>
+        '''quo'''ted = '''Hello my name isn't # George'''  <class 'str'>
+              quote2 = 'Quoted string with  <class 'str'>
 ***** Section [SMTP] *****
            EmailFrom = me@myserver.com  <class 'str'>
            NotifList = 4809991234@vzwpix.com  <class 'str'>
@@ -1487,7 +1587,7 @@ x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
     deployfiles.deploy_files         -     INFO:  Deployed  demo_config_T23c.cfg to  /home/cjn/.config/cjnfuncs_testcfg/demo_config_T23c.cfg
 
 ----- T23.1:  Section defined within imported config file
-      configman.loadconfig           -     INFO:  Config  <demo_config_T23a.cfg>  file timestamp: 1724300084
+      configman.loadconfig           -     INFO:  Config  <demo_config_T23a.cfg>  file timestamp: 1736401085
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23a.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23b.cfg>
@@ -1495,32 +1595,32 @@ x_7893&(%$,.nasf||\a@ = Hello  <class 'str'>
 ConfigError:  Section within imported file is not supported.
 
 ----- T23.1a:  Section defined within imported config file
-      configman.loadconfig           -     INFO:  Config  <demo_config_T23a.cfg>  file timestamp: 1724300084
+      configman.loadconfig           -     INFO:  Config  <demo_config_T23a.cfg>  file timestamp: 1736401085
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23a.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23b.cfg>
       configman.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
     demo-config.<module>             -    ERROR:  ----- T23.1a:  Section defined within imported config file
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py", line 709, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py", line 717, in <module>
     T23_config.loadconfig(ldcfg_ll=10)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 493, in loadconfig
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 515, in loadconfig
     self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 588, in read_string
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 662, in read_string
     raise e
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 578, in read_string
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 652, in read_string
     imported_config.loadconfig(ldcfg_ll, isimport=True)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 493, in loadconfig
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 515, in loadconfig
     self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 602, in read_string
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 621, in read_string
     raise ConfigError ("Section within imported file is not supported.")
 cjnfuncs.core.ConfigError: Section within imported file is not supported.
 
 ----- T23.2:  Malformed Section name
-      configman.loadconfig           -     INFO:  Config  <demo_config_T23c.cfg>  file timestamp: 1724300084
+      configman.loadconfig           -     INFO:  Config  <demo_config_T23c.cfg>  file timestamp: 1736401085
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T23c.cfg>
       configman.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
-ConfigError:  Malformed section line <[section malform        # No closing ']'>
+ConfigError:  Malformed section line <[section malform            # No closing bracket>
 
 ======================================================================================================
 ***** Test number 24: Remap core.tool.config_dir and core.tool.log_dir_base *****
@@ -1641,14 +1741,15 @@ LogLevel             = 20
 param_no_value       = True
 testvar              = True
 Test.Bool            = False
-7893&(%$,.nasf||\a@  = Hello
+7893&(%$,.nasf||\a@  = Hello:
+Equals_in_value      = Look! an = equals!
 again                = True
 a_float              = 42.0
 a_float_calc         = 6 * 7.0
-a_list               = ['hello', 3.14, {'abc': 42.0}]
-a_tuple              = ('Im a tuple', 7.0)
+a_list               = ['he#llo', 3.14, {'abc': 42.0}]
+a_tuple              = ('Im a #tuple', 7.0)
 a_dict               = {'six': 6, 3: 3.0}
-bad_list             = ["hello", 3.14 {"abc":42.}]
+bad_list             = '''["hello", 3.14 {"ab#c":42.}]'''
 bad_tuple            = (Im a tuple, 7.0)
 bad_dict             = {"six":6, 3:3.0, milk:3}
 bad_float            = 52.3.5
@@ -1675,6 +1776,16 @@ x_dict               = xyz
 a                    = In top level
 b                    = 12
 e                    = 20
+\                    = hel\lo
+\123                 = h\ello2
+123\123              = Hel\lo3
+multi_line           = ['hello', 'goodbye', 'another line#', 5, True]
+multi_line2          = Hello, my name is George Tirebiter. You can't get there from here.
+"quoted"             = '''Hello my name is # George'''
+quote1               = '''Hello my name is also # George'''
+"""quot"ed           = '''Hello my name was # George'''
+'''quo'''ted         = '''Hello my name isn't # George'''
+quote2               = 'Quoted string with
 
 [DEFAULT]
 my_def_param         = my_def_value
@@ -1699,5 +1810,7 @@ b                    = 25
 x                    = 42
 y                    = 2.54
 
-Getting a value from the written then loaded <T25config.cfg>:  <a_tuple> = ('Im a tuple', 7.0)
+Getting a value from the written then loaded <T25config.cfg>:  <a_tuple> = ('Im a #tuple', 7.0)
+Getting a value from the written then loaded <T25config.cfg>:  <bad_list> = ["hello", 3.14 {"ab#c":42.}]
+Comparing dumps of original and written configs...
 They match!
