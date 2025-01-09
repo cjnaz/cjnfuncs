@@ -538,8 +538,8 @@ if args.test == 0  or  args.test == 16:
     dump("Tint",   types=int)
     dump("a_list", types=[list])
     dump("Tsec",   types=[int, str])
-    dump("y",      types=float,    section='Test section 2')
-    dump("y",      types=bool,     section='Test section 2')
+    dump("y",      types=float,    section='Test #section 2')
+    dump("y",      types=bool,     section='Test #section 2')
     dump("Tint",   types=[     float, list, tuple, dict, bool, str])
     dump("a_list", types=[int, float,       tuple, dict, bool, str])
     dump("a_dict", types=[int, float, list, tuple,       bool, str])
@@ -783,17 +783,21 @@ if args.test == 50:
     #     print (_file.full_path.read_text())
 
     set_toolname(TOOLNAME)
+    do_base_setup()
+
+    print (config.getcfg('whatever'))
+
     # logging.getLogger().setLevel(10)
     # deploy_files([
     #     { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
     #     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
     #     ], overwrite=True )
-    config = config_item('./junk.cfg')
-    print (f"\nLoad config {config.config_full_path}")
-    config.loadconfig(ldcfg_ll=10)
+    # config = config_item('./junk.cfg')
+    # print (f"\nLoad config {config.config_full_path}")
+    # config.loadconfig(ldcfg_ll=10)
 
     # print(core.tool)
-    print(config)
-    print(config.dump())
+    # print(config)
+    # print(config.dump())
     # print(config.sections_list)
     # print(config.sections())

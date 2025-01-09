@@ -43,8 +43,8 @@ And the obvious output is...
 
 
 Notables:
-1. The config file is structured as lines of `param` - `value` pairs, with supported separators of whitespace, `=` or `:`.  Each pair is on a single line.  Comments are supported on lines by themselves or on the end of param lines.
-1. A config file is loaded using `configman.loadconfig()`. The param values are loaded based on their parsed types. Most all types are supported...  `str`, `int`, `bool`, `float`, `list`, `dict`, `tuple`.  Types support makes for clean script code.
+1. The config file is structured as lines of `param = value` pairs, with supported separators of whitespace, `=` or `:`.  Each pair is typically on a single line.  Comments starting with `#` are supported on lines by themselves or on the end of param lines.
+1. A config file is loaded using `configman.loadconfig()`. The param values are loaded based on their parsed types. All Python types are supported...  `str`, `int`, `bool`, `float`, `list`, `dict`, `tuple`.  Types support makes for clean script code.
 1. Params are accessed in script code using `configman.getcfg()`.  getcfg() supports fallback values and type checking.
 
 ***Note***: configman relies on the environment set up by `set_toolname()`, which creates a set of application path variables such as `core.tool.config_dir`.  In the case of a user-mode script, the .config_dir is set to `~/.config/<toolname>`, so by default that is the directory that configman will look in for `configman_ex1.cfg`.  For these examples we have overridden the default config directory to be the directory that we are running the example script from (`.`).
@@ -58,43 +58,60 @@ See the `cjnfuncs.core` module for more details.
 The config file:
 
 ```
-# configman_ex2.cfg
+# configman_ex2.cfg 
 
 # Demonstrating:
 #   Logging control params
 #   Param naming, Separators, Value types
+#   Multi-line values
 #   Sections, Defaults
 #   Imports
 
 
 # Logging setups
 # **** NOTE 1
-LogLevel=       20                  # Logging module levels: 10:DEBUG, 20:INFO, 30:WARNING (default), 40:ERROR, 50:CRITICAL
-LogFile         configman_ex2.log   # Full path, or relative to core.tool.log_dir_base
+LogLevel=       20                              # Logging module levels: 10:DEBUG, 20:INFO, 30:WARNING (default), 40:ERROR, 50:CRITICAL
+LogFile         configman_ex2.log               # Full path, or relative to core.tool.log_dir_base
 
 
-# Example param definitions - name-value pairs that are whitespace, "=", or ":" separated
-# **** NOTE 2
-I'm_tall!       True        # Most any chars supported in a param name - All but '#' or separators, nor start with '['
-Test.Bool       false       # '.' is not special.  True and false values not case sensitive, stored as bools
-7893&(%$,.nasf||\a@=Hello   # '=' separator, with or without whitespace
-again:true                  # ':' separator, with or without whitespace
-
-# **** NOTE 3
-a_str     =     6 * 7       # configman does not support calculations, so this is loaded as a str
+# Example param definitions - name-value pairs separated by whitespace, '=', or ':'
+# **** NOTE 2, **** NOTE 3
+# All valid chars, except the separators, are allowed in a param name.
+# A param name cannot start with '[', which starts a section name.
+Im_tall!        True                            # Whitespace separator between name-value
+Test.Bool       false                           # '.' is not special.  True and false values not case sensitive, stored as bools
+No_Value_bool                                   # Param with no value becomes a True boolean
+7893&(%$,.nasf||\a@=Hello                       # '=' separator, with or without whitespace
+again:true                                      # ':' separator, with or without whitespace
+a_str     =     6 * 7                           # configman does not support calculations, so this is loaded as a str
+a_quoted_str =  "Value stored without the quotes" # equivalent to unquoted string
 a_int           7
-a_bool    :     False       # True and false values not case sensitive, stored as bools
+a_bool    :     false                           # True and false values not case sensitive, stored as bools
 a_float         42.0
-    a_list:         ["hello", 3.14, {"abc":42.}]    # Indentation is allowed, and ignored
-    a_dict:         {"six":6, 3:3.0, 'pi':3.14}
-    a_tuple=        ("Im a tuple", 7.0)
+a_float_as_str  '42.0'                          # Force load as str
+    a_list:     ["hello", 3.14, {"abc":42.}]    # Indentation (leading whitespace) is allowed, and ignored
+    a_dict:     {"six":6, 3:3.0, 'pi':3.14}
+    a_tuple=    ("Im a tuple", 7.0)
+
+
+# Values may span multiple lines by using the '\' continuation character
+multi_line_list = ['hello',   \                 # continuation line with discarded comment
+    'goodbye',  \
+\   # Full-line comment discarded.  Continuation character on each line.
+\
+                'another line', 5, True\        # Whitespace before/after continuation char is discarded
+                ]
+multi_line_str : Generally, \
+    don't use quotes \
+    within multi-line strings.\
+    Check results carefully.
 
 
 # Sections are supported
 # **** NOTE 3, **** NOTE 4
-[ Bad params ]              # Embedded whitespace retained, leading and trailing whitespace is trimmmed off
+[ Bad params ]              # Embedded whitespace retained, leading and trailing whitespace is trimmed off
 # If loadconfig() can't parse the value as a int/bool/float/list/dict/tuple, then the param is loaded as a str
-# Strings within list/dict/tuple must be quoted with either single of double quotes.
+# Strings within list/dict/tuple must be quoted.
 # All of these are loaded as strings:
 bad_list        ["hello", 3.14 {"abc":42.}]     # Missing comma
 bad_tuple=      (Im a tuple, 7.0)               # String <Im a tuple> missing quotes
@@ -102,16 +119,17 @@ bad_dict:       {"six":6, 3:3.0, milk:3}        # String <milk> missing quotes
 bad_float       52.3.5                          # Not a valid float
 
 
-# The [DEFAULT] section can be declared.  Multiple [DEFAULT] sections are merged by loadconfig()
+# The [DEFAULT] section can be declared.  Multiple [DEFAULT] sections are merged.
 # **** NOTE 5
 [DEFAULT]
 my_def_param    my_def_value
 
 
-# Section name "[]" resets to the top-level section.  Nested sections not supported.
+# Section name "[]" resets to the top-level section.  Nested sections are NOT supported.
 # Any section may be re-opened for adding more params.  loadconfig() merges all params for the given section.
-[  ]
-more_top_level  George      # Strings _not_ in list/dict/tuple are _not_ quoted
+[  ]                                            # Leading/trailing whitespace is trimmed, so equivalent to []
+more_top_level  George was here                 # Strings NOT in list/dict/tuple need not be quoted, but may be.
+another_str     """The original George Tirebiter was a dog in Maine"""
 
 
 # More DEFAULTs
@@ -120,7 +138,7 @@ another_def     false
 
 
 # The SMTP section is used by the cjnfuncs.SMTP module
-[SMTP]
+[SMTP]                                          # comment
 NotifList       4809991234@vzwpix.com
 
 # Import definitions within the referenced file into the current section ([SMTP] in this case)
@@ -176,25 +194,31 @@ Stats for config file <configman_ex2.cfg>:
 .config_file            :  configman_ex2.cfg
 .config_dir             :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex2.cfg
-.config_timestamp       :  1701632145
+.config_timestamp       :  1736462523
 .sections_list          :  ['Bad params', 'SMTP']
-core.tool.log_dir_base  :  /home/me/.config/configman_ex2
+core.tool.log_dir_base  :  .
 
 ***** Section [] *****
             LogLevel = 20  <class 'int'>
              LogFile = configman_ex2.log  <class 'str'>
-           I'm_tall! = True  <class 'bool'>
+            Im_tall! = True  <class 'bool'>
            Test.Bool = False  <class 'bool'>
+       No_Value_bool = True  <class 'bool'>
  7893&(%$,.nasf||\a@ = Hello  <class 'str'>
                again = True  <class 'bool'>
                a_str = 6 * 7  <class 'str'>
+        a_quoted_str = Value stored without the quotes  <class 'str'>
                a_int = 7  <class 'int'>
               a_bool = False  <class 'bool'>
              a_float = 42.0  <class 'float'>
+      a_float_as_str = 42.0  <class 'str'>
               a_list = ['hello', 3.14, {'abc': 42.0}]  <class 'list'>
               a_dict = {'six': 6, 3: 3.0, 'pi': 3.14}  <class 'dict'>
              a_tuple = ('Im a tuple', 7.0)  <class 'tuple'>
-      more_top_level = George  <class 'str'>
+     multi_line_list = ['hello', 'goodbye', 'another line', 5, True]  <class 'list'>
+      multi_line_str = Generally, don't use quotes within multi-line strings. Check results carefully.  <class 'str'>
+      more_top_level = George was here  <class 'str'>
+         another_str = The original George Tirebiter was a dog in Maine  <class 'str'>
    another_top_level = It's only a flesh wound!  <class 'str'>
 ***** Section [Bad params] *****
             bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
@@ -231,9 +255,9 @@ change the console or file logging format you may also define `ConsoleLogFormat`
 3. loadconfig() attempts to load a value as a type `int`, `bool`, `float`, `list`, `dict`, or `tuple`, if the value has the correct syntax for that type.  The fallback is to type `str`.  Loading all params as type `str` can be forced:  `my_config = config_item('configman_ex2.cfg', force_str=True)`.
 4. Sections are supported, and are accessed as `my_config.getcfg('NotifList', section='SMTP')`.  Only 
 one section depth level is allowed (no nested sections).  Section `[]` resets to the top-level; for example, `LogLevel` and `more_top_level` are in the same `[]` section.  Whitespace is allowed within section names, and leading and trailing whitespace is stripped - sections `[ Bad params ]`, `[Bad params ]`, `[Bad params]` are all the same section.
-5. A `[DEFAULT]` section may be defined.  .getcfg() will attempt to get a param from the specified section, and if not found then will look in the DEFAULT section.  Params within the DEFAULT section apply to all sections, including the top-level section.
+5. A `[DEFAULT]` section may be defined.  getcfg() will attempt to get a param from the specified section, and if not found then will look in the DEFAULT section.  Params within the DEFAULT section apply to all sections, including the top-level section.
 6. On imports (the `import` keyword is case insensitive), the specified file is looked for relative to  
-`core.tool.config_dir` (normally `~/.config/configman_ex2`, in this example).  A full/absolute path may also be specified.  NOTE that in this example code `core.tool.config_dir` path has been jammed to `.`.
+`core.tool.config_dir` (normally `~/.config/configman_ex2`, in this example).  A full/absolute path may also be specified.  NOTE that in this example code the `core.tool.config_dir` path has been jammed to `.`.
 7. Any DEFAULT section is not included in the `my_config.sections()` list, consistent with the standard library configparser.
 8. getcfg's search order is:  1) in the specified section, 2) in the DEFAULT section, and 3) the `fallback=` value, if specified.  If the param is not found and no fallback is specified then getcfg raises a ConfigError.
 9. Params may be accessed directly by reaching into the <config>.cfg dictionary; however there is no default or fallback support, and a dictionary access KeyError is raised if the param is not found.
@@ -323,7 +347,7 @@ Notables:
 2. With `loadconfig(tolerate_missing=True)`, `-1` will be returned if the config file is not currently accessible. You will want to add code to output this warning only once, so as to not flood the log.  tolerate_missing=True allows the config file to be placed on a shared file system. 
 3. loadconfig() will return `1` if the config file timestamp has changed (`0` if not changed).  The prior `loadconfig(flush_on_reload=True)` will have purged all cfg data and reloaded it from the file.
 4. If this is a `reloaded` case (versus `first`), then cleanup work may be needed prior to the following resource setups.
-5. Threads and asyncio should use local copies of cfg data so that they don't crash when the cfg data temporarily disappears during the loadconfig() reload.
+5. Threads and asyncio should use local copies of cfg data so that they don't crash when the cfg data temporarily disappears during the loadconfig() reload.  Also see loadconfig's `prereload_callback` parameter.
 
 <br>
 
@@ -346,7 +370,7 @@ config.modify_configfile("# New comment line",  add_if_not_existing=True, save=T
 Notables:
 - modify_configfile() works _directly_ on the config file, not the loaded content in the instance cfg dictionary.  None of the changes are available without reloading the config file.
 - Params may be changed, deleted, or added.
-- All instances of a param in the file receive the change, including in all sections and DEFAULT. (a shortcoming of this implementation.)
+- All instances of a param in the file receive the change, including in all sections and DEFAULT. (a _artifact_ of this implementation.)
 - The formatting of changed lines is closely retained, including comments.
 - Blank lines and comments may be added (always at the end).
 - The final call needs `save=True` in order to push the modifications to the file.
@@ -395,12 +419,12 @@ Notables:
   Section support | Yes | Yes
   Default support | Yes | Yes
   Fallback support | Yes (getcfg(fallback=)) | Yes
-  Whitespace in params | No | Yes
-  Case sensitive params | Yes (always) | Default No, customizable
+  Whitespace in param_names | No | Yes
+  Case sensitive param_names | Yes (always) | Default No, customizable
   Param/value delimiter | whitespace, ':', or '=' fixed | ':' or '=', customizable
   Param only (no value) | Yes (stored as True) | Yes
-  Multi-line values | No | Yes
-  Comment prefix | '#' fixed (thus '#' can't be part of the param or value) | '#' or ';', customizable
+  Multi-line values | Yes ('\\' continuation character) | Yes
+  Comment prefix | '#' fixed (thus '#' can't be part of the param_name) | '#' or ';', customizable
   Interpolation | No | Yes
   Mapping Protocol Access | No | Yes
   Save to file | Yes | Yes

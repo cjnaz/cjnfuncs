@@ -43,12 +43,12 @@ And the obvious output is...
 
 
 Notables:
-1. The config file is structured as lines of `param` - `value` pairs, with supported separators of whitespace, `=` or `:`.  Each pair is typically on a single line.  Comments are supported on lines by themselves or on the end of param lines.
-1. A config file is loaded using `configman.loadconfig()`. The param values are loaded based on their parsed types. Most all types are supported...  `str`, `int`, `bool`, `float`, `list`, `dict`, `tuple`.  Types support makes for clean script code.
+1. The config file is structured as lines of `param = value` pairs, with supported separators of whitespace, `=` or `:`.  Each pair is typically on a single line.  Comments starting with `#` are supported on lines by themselves or on the end of param lines.
+1. A config file is loaded using `configman.loadconfig()`. The param values are loaded based on their parsed types. All Python types are supported...  `str`, `int`, `bool`, `float`, `list`, `dict`, `tuple`.  Types support makes for clean script code.
 1. Params are accessed in script code using `configman.getcfg()`.  getcfg() supports fallback values and type checking.
 
 ***Note***: configman relies on the environment set up by `set_toolname()`, which creates a set of application path variables such as `core.tool.config_dir`.  In the case of a user-mode script, the .config_dir is set to `~/.config/<toolname>`, so by default that is the directory that configman will look in for `configman_ex1.cfg`.  For these examples we have overridden the default config directory to be the directory that we are running the example script from (`.`).
-Alternately, the full path to the config file may be passed to the `config_item()` instantiation call.
+Alternately, the full path to the config file may be passed to the `config_item()` call.
 See the `cjnfuncs.core` module for more details.
 
 <br>
@@ -58,44 +58,60 @@ See the `cjnfuncs.core` module for more details.
 The config file:
 
 ```
-# configman_ex2.cfg
+# configman_ex2.cfg 
 
 # Demonstrating:
 #   Logging control params
 #   Param naming, Separators, Value types
+#   Multi-line values
 #   Sections, Defaults
 #   Imports
 
 
 # Logging setups
 # **** NOTE 1
-LogLevel=       20                  # Logging module levels: 10:DEBUG, 20:INFO, 30:WARNING (default), 40:ERROR, 50:CRITICAL
-LogFile         configman_ex2.log   # Full path, or relative to core.tool.log_dir_base
+LogLevel=       20                              # Logging module levels: 10:DEBUG, 20:INFO, 30:WARNING (default), 40:ERROR, 50:CRITICAL
+LogFile         configman_ex2.log               # Full path, or relative to core.tool.log_dir_base
 
 
-# Example param definitions - name-value pairs that are whitespace, "=", or ":" separated
-# **** NOTE 2
-I'm_tall!       True        # Most any chars supported in a param name - All but '#' or separators, nor start with '['
-Test.Bool       false       # '.' is not special.  True and false values not case sensitive, stored as bools
-7893&(%$,.nasf||\a@=Hello   # '=' separator, with or without whitespace
-again:true                  # ':' separator, with or without whitespace
-
-# **** NOTE 3
-a_str     =     6 * 7       # configman does not support calculations, so this is loaded as a str
-TODO add quoted string ex
+# Example param definitions - name-value pairs separated by whitespace, '=', or ':'
+# **** NOTE 2, **** NOTE 3
+# All valid chars, except the separators, are allowed in a param name.
+# A param name cannot start with '[', which starts a section name.
+Im_tall!        True                            # Whitespace separator between name-value
+Test.Bool       false                           # '.' is not special.  True and false values not case sensitive, stored as bools
+No_Value_bool                                   # Param with no value becomes a True boolean
+7893&(%$,.nasf||\a@=Hello                       # '=' separator, with or without whitespace
+again:true                                      # ':' separator, with or without whitespace
+a_str     =     6 * 7                           # configman does not support calculations, so this is loaded as a str
+a_quoted_str =  "Value stored without the quotes" # equivalent to unquoted string
 a_int           7
-a_bool    :     False       # True and false values not case sensitive, stored as bools
+a_bool    :     false                           # True and false values not case sensitive, stored as bools
 a_float         42.0
-    a_list:         ["hello", 3.14, {"abc":42.}]    # Indentation is allowed, and ignored
-    a_dict:         {"six":6, 3:3.0, 'pi':3.14}
-    a_tuple=        ("Im a tuple", 7.0)
+a_float_as_str  '42.0'                          # Force load as str
+    a_list:     ["hello", 3.14, {"abc":42.}]    # Indentation (leading whitespace) is allowed, and ignored
+    a_dict:     {"six":6, 3:3.0, 'pi':3.14}
+    a_tuple=    ("Im a tuple", 7.0)
+
+
+# Values may span multiple lines by using the '\' continuation character
+multi_line_list = ['hello',   \                 # continuation line with discarded comment
+    'goodbye',  \
+\   # Full-line comment discarded.  Continuation character on each line.
+\
+                'another line', 5, True\        # Whitespace before/after continuation char is discarded
+                ]
+multi_line_str : Generally, \
+    don't use quotes \
+    within multi-line strings.\
+    Check results carefully.
 
 
 # Sections are supported
 # **** NOTE 3, **** NOTE 4
-[ Bad params ]              # Embedded whitespace retained, leading and trailing whitespace is trimmmed off
+[ Bad params ]              # Embedded whitespace retained, leading and trailing whitespace is trimmed off
 # If loadconfig() can't parse the value as a int/bool/float/list/dict/tuple, then the param is loaded as a str
-# Strings within list/dict/tuple must be quoted with either single of double quotes.
+# Strings within list/dict/tuple must be quoted.
 # All of these are loaded as strings:
 bad_list        ["hello", 3.14 {"abc":42.}]     # Missing comma
 bad_tuple=      (Im a tuple, 7.0)               # String <Im a tuple> missing quotes
@@ -103,16 +119,17 @@ bad_dict:       {"six":6, 3:3.0, milk:3}        # String <milk> missing quotes
 bad_float       52.3.5                          # Not a valid float
 
 
-# The [DEFAULT] section can be declared.  Multiple [DEFAULT] sections are merged by loadconfig()
+# The [DEFAULT] section can be declared.  Multiple [DEFAULT] sections are merged.
 # **** NOTE 5
 [DEFAULT]
 my_def_param    my_def_value
 
 
-# Section name "[]" resets to the top-level section.  Nested sections not supported.
+# Section name "[]" resets to the top-level section.  Nested sections are NOT supported.
 # Any section may be re-opened for adding more params.  loadconfig() merges all params for the given section.
-[  ]
-more_top_level  George      # Strings _not_ in list/dict/tuple are _not_ quoted
+[  ]                                            # Leading/trailing whitespace is trimmed, so equivalent to []
+more_top_level  George was here                 # Strings NOT in list/dict/tuple need not be quoted, but may be.
+another_str     """The original George Tirebiter was a dog in Maine"""
 
 
 # More DEFAULTs
@@ -121,7 +138,7 @@ another_def     false
 
 
 # The SMTP section is used by the cjnfuncs.SMTP module
-[SMTP]
+[SMTP]                                          # comment
 NotifList       4809991234@vzwpix.com
 
 # Import definitions within the referenced file into the current section ([SMTP] in this case)
@@ -177,25 +194,31 @@ Stats for config file <configman_ex2.cfg>:
 .config_file            :  configman_ex2.cfg
 .config_dir             :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex2.cfg
-.config_timestamp       :  1701632145
+.config_timestamp       :  1736462523
 .sections_list          :  ['Bad params', 'SMTP']
-core.tool.log_dir_base  :  /home/me/.config/configman_ex2
+core.tool.log_dir_base  :  .
 
 ***** Section [] *****
             LogLevel = 20  <class 'int'>
              LogFile = configman_ex2.log  <class 'str'>
-           I'm_tall! = True  <class 'bool'>
+            Im_tall! = True  <class 'bool'>
            Test.Bool = False  <class 'bool'>
+       No_Value_bool = True  <class 'bool'>
  7893&(%$,.nasf||\a@ = Hello  <class 'str'>
                again = True  <class 'bool'>
                a_str = 6 * 7  <class 'str'>
+        a_quoted_str = Value stored without the quotes  <class 'str'>
                a_int = 7  <class 'int'>
               a_bool = False  <class 'bool'>
              a_float = 42.0  <class 'float'>
+      a_float_as_str = 42.0  <class 'str'>
               a_list = ['hello', 3.14, {'abc': 42.0}]  <class 'list'>
               a_dict = {'six': 6, 3: 3.0, 'pi': 3.14}  <class 'dict'>
              a_tuple = ('Im a tuple', 7.0)  <class 'tuple'>
-      more_top_level = George  <class 'str'>
+     multi_line_list = ['hello', 'goodbye', 'another line', 5, True]  <class 'list'>
+      multi_line_str = Generally, don't use quotes within multi-line strings. Check results carefully.  <class 'str'>
+      more_top_level = George was here  <class 'str'>
+         another_str = The original George Tirebiter was a dog in Maine  <class 'str'>
    another_top_level = It's only a flesh wound!  <class 'str'>
 ***** Section [Bad params] *****
             bad_list = ["hello", 3.14 {"abc":42.}]  <class 'str'>
@@ -226,15 +249,15 @@ bad_float:     52.3.5
 ```
 
 Notables (See **** NOTE # in the above example config file and code):
-1. loadconfig() looks for `LogLevel` and `LogFile` and sets the root logger accordingly.  If you want to
+1. loadconfig() looks for `LogLevel` abd `LogFile` and sets the root logger accordingly.  If you want to
 change the console or file logging format you may also define `ConsoleLogFormat` or `FileLogFormat`, respectively.  Logging setups only apply for the primary/master config (`config_item(secondary_config = False)`).  The logging level _within_ loadconfig() is set using the `ldcfg_ll` switch (default WARNING level).
-2. loadconfig() accepts most any character in a param name, except the comment delimiter (default `#`), or the param-value separator characters whitespace, `=`, or `:`.  
+2. loadconfig() accepts most any character in a param name, except the comment character `#`, or the param-value separator characters whitespace, `=`, or `:`.  
 3. loadconfig() attempts to load a value as a type `int`, `bool`, `float`, `list`, `dict`, or `tuple`, if the value has the correct syntax for that type.  The fallback is to type `str`.  Loading all params as type `str` can be forced:  `my_config = config_item('configman_ex2.cfg', force_str=True)`.
 4. Sections are supported, and are accessed as `my_config.getcfg('NotifList', section='SMTP')`.  Only 
 one section depth level is allowed (no nested sections).  Section `[]` resets to the top-level; for example, `LogLevel` and `more_top_level` are in the same `[]` section.  Whitespace is allowed within section names, and leading and trailing whitespace is stripped - sections `[ Bad params ]`, `[Bad params ]`, `[Bad params]` are all the same section.
-5. A `[DEFAULT]` section may be defined.  .getcfg() will attempt to get a param from the specified section, and if not found then will look in the DEFAULT section.  Params within the DEFAULT section apply to all sections, including the top-level section.
+5. A `[DEFAULT]` section may be defined.  getcfg() will attempt to get a param from the specified section, and if not found then will look in the DEFAULT section.  Params within the DEFAULT section apply to all sections, including the top-level section.
 6. On imports (the `import` keyword is case insensitive), the specified file is looked for relative to  
-`core.tool.config_dir` (normally `~/.config/configman_ex2`, in this example).  A full/absolute path may also be specified.  NOTE that in this example code `core.tool.config_dir` path has been jammed to `.`.
+`core.tool.config_dir` (normally `~/.config/configman_ex2`, in this example).  A full/absolute path may also be specified.  NOTE that in this example code the `core.tool.config_dir` path has been jammed to `.`.
 7. Any DEFAULT section is not included in the `my_config.sections()` list, consistent with the standard library configparser.
 8. getcfg's search order is:  1) in the specified section, 2) in the DEFAULT section, and 3) the `fallback=` value, if specified.  If the param is not found and no fallback is specified then getcfg raises a ConfigError.
 9. Params may be accessed directly by reaching into the <config>.cfg dictionary; however there is no default or fallback support, and a dictionary access KeyError is raised if the param is not found.
@@ -324,7 +347,7 @@ Notables:
 2. With `loadconfig(tolerate_missing=True)`, `-1` will be returned if the config file is not currently accessible. You will want to add code to output this warning only once, so as to not flood the log.  tolerate_missing=True allows the config file to be placed on a shared file system. 
 3. loadconfig() will return `1` if the config file timestamp has changed (`0` if not changed).  The prior `loadconfig(flush_on_reload=True)` will have purged all cfg data and reloaded it from the file.
 4. If this is a `reloaded` case (versus `first`), then cleanup work may be needed prior to the following resource setups.
-5. Threads and asyncio should use local copies of cfg data so that they don't crash when the cfg data temporarily disappears during the loadconfig() reload.
+5. Threads and asyncio should use local copies of cfg data so that they don't crash when the cfg data temporarily disappears during the loadconfig() reload.  Also see loadconfig's `prereload_callback` parameter.
 
 <br>
 
@@ -347,7 +370,7 @@ config.modify_configfile("# New comment line",  add_if_not_existing=True, save=T
 Notables:
 - modify_configfile() works _directly_ on the config file, not the loaded content in the instance cfg dictionary.  None of the changes are available without reloading the config file.
 - Params may be changed, deleted, or added.
-- All instances of a param in the file receive the change, including in all sections and DEFAULT. (a shortcoming of this implementation.)
+- All instances of a param in the file receive the change, including in all sections and DEFAULT. (a _artifact_ of this implementation.)
 - The formatting of changed lines is closely retained, including comments.
 - Blank lines and comments may be added (always at the end).
 - The final call needs `save=True` in order to push the modifications to the file.
@@ -396,12 +419,12 @@ Notables:
   Section support | Yes | Yes
   Default support | Yes | Yes
   Fallback support | Yes (getcfg(fallback=)) | Yes
-  Whitespace in params | No | Yes
-  Case sensitive params | Yes (always) | Default No, customizable
+  Whitespace in param_names | No | Yes
+  Case sensitive param_names | Yes (always) | Default No, customizable
   Param/value delimiter | whitespace, ':', or '=' fixed | ':' or '=', customizable
   Param only (no value) | Yes (stored as True) | Yes
-  Multi-line values | Yes ('\\' line continuation char) | Yes
-  Comment prefix | '#' fixed (thus '#' can't be part of the param; can be part of a value string if quoted.) | '#' or ';', customizable
+  Multi-line values | Yes ('\\' continuation character) | Yes
+  Comment prefix | '#' fixed (thus '#' can't be part of the param_name) | '#' or ';', customizable
   Interpolation | No | Yes
   Mapping Protocol Access | No | Yes
   Save to file | Yes | Yes
@@ -416,15 +439,15 @@ Notables:
 # Links to classes, methods, and functions
 
 - [config_item](#config_item)
-- [sections](#sections)
-- [clear](#clear)
-- [dump](#dump)
 - [loadconfig](#loadconfig)
 - [read_string](#read_string)
 - [read_dict](#read_dict)
 - [getcfg](#getcfg)
 - [modify_configfile](#modify_configfile)
 - [write](#write)
+- [sections](#sections)
+- [clear](#clear)
+- [dump](#dump)
 
 
 
@@ -443,9 +466,10 @@ The config_item() class provides handling of one or more config file instances. 
  - Programmatically modifiying the config file content - `modify_configfile()`
  - Getting instance status - `__repr__()`, `section()`, `dump()`
 
+See the loadconfig() documentation for details on config file formatting and rules.
 
 ### Instantiation parameters
-`config_file` (str, default None)
+`config_file` (Path or str, default None)
 - Path to the configuration file, relative to the `core.tool.config_dir` directory, or an absolute path.
 - `None` may be used if the config will be loaded programmatically via `read_string()` or `read_dict()`.
 
@@ -462,6 +486,30 @@ then the `core.tool.log_dir_base` will be set to `core.tool.config_dir`.
 is properly set up.
 
 
+### Useful class attributes
+The current values of all public class attributes may be printed using `print(my_config)`.
+
+`.cfg` (dict)
+- Holds all loaded params.  May be access directly.  Sections are stored as sub-dictionaries of .cfg.
+- The contents of the .cfg dictionary may be printed using `print(my_config.dump())`
+
+`.defaults` (dict)
+- Default params are stored here.
+
+.sections_list (list)
+- A list of string names for all defined sections.
+
+`.config_file` (Path or str, or None)
+- The `config_file` as passed in at instantiation
+
+`.config_full_path` (Path or None)
+- The full expanduser/expandvars path to the config file, relative to core.tool.config_dir if the
+instantiation `config_file` is a relative path (uses mungePath)
+
+`.config_dir` (Path or None)
+- The directory above  `.config_full_path`
+
+
 ### Returns
 - Handle to the `config_item()` instance
 - Raises a `ConfigError` if the specified config file is not found
@@ -471,7 +519,7 @@ is properly set up.
 - More than one `config_item()` may be created and loaded.  This allows for configuration data to be partitioned 
 as desired.  Each defined config is loaded to its own instance-specific `cfg` dictionary. Only one config_item()
 instance should be considered the primary, while other instances should be tagged with `secondary_config=True`. 
-Logging setups are controlled only the primary instance.
+Logging setups are controlled only by the primary instance.
 Also see the loadconfig() `import` feature.
 - Initially in _user_ mode, after the `set_toolname()` call, `core.tool.log_dir_base` 
 (the log directory) is set to the `core.tool.user_data_dir`.
@@ -487,59 +535,8 @@ path after the `set_toolname()` call and before the `config_item()` call, for ex
 path after the `set_toolname()` call and before the `config_item()` call, for example 
 `core.tool.config_dir = core.tool.main_dir`, which sets the config dir to the same as the tool script's 
 directory.  With `remap_logdirbase=True`, the log dir will also be set to the tool script's directory.
-- Details of the configuration instance may be printed, eg, `print (my_config)`.
+- Details of the configuration instance may be printed, eg, `print(my_config)`.
     
-<br/>
-
-<a id="sections"></a>
-
----
-
-# sections () - Return a list of sections in the cfg dictionary
-
-***config_item() class member function***
-
-For compatibility with the standard library configparser.  Also available via `<config>.sections_list`.
-
-Example:
-```
-code:
-    print (my_config.sections())
-
-output:
-    ['Bad params', 'SMTP']
-```
-        
-<br/>
-
-<a id="clear"></a>
-
----
-
-# clear (section='') - Purge a portion of the cfg dictionary
-
-***config_item() class member function***
-
-### Parameters
-`section` (str, default '')
-- `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
-- `section = '<section_name>'` clears just that section
-- `section = 'DEFAULT'` clears just the DEFAULT section
-
-
-### Returns
-- A ConfigError is raised if attempting to remove a non-existing section
-        
-<br/>
-
-<a id="dump"></a>
-
----
-
-# dump () - Return the formatted content of the cfg dictionary
-
-***config_item() class member function***
-        
 <br/>
 
 <a id="loadconfig"></a>
@@ -560,8 +557,9 @@ loadconfig(
 ```
 ***config_item() class member function***
 
-Param = value lines in the config_item()'s file are loaded to the instance-specific `cfg` dictionary, 
-and can be accessed directly or via `<config_item>.getcfg()`.
+`Param = value` lines in the config_item()'s file are loaded to the instance-specific `cfg` dictionary, 
+and can be accessed via `<config_item>.getcfg()`.  The _value_ is referred to as the _value_portion_ in 
+this documentation.
 
 `loadconfig()` initializes the root logger for logging either to 1) the `LogFile` specified in
 the loaded config file, 2) the `call_logfile` in the `loadconfig()` call, or 3) the console.
@@ -574,6 +572,9 @@ feature, and intermittent loss of access to the config file.
 - Logging level used within `loadconfig()` code for debugging loadconfig() itself
 
 `call_logfile` (str, default None)
+- If `call_logfile` is passed on the loadconfig() call, and `call_logfile_wins=True`, then any `LogFile`
+specified in the config file is overridden.  This feature allows for interactive usage modes where
+logging is directed to the console (with `call_logfile=None`) or an alternate file.
 - An absolute path or relative to the `core.tool.log_dir_base` directory
 
 `call_logfile_wins` (bool, default False)
@@ -581,7 +582,7 @@ feature, and intermittent loss of access to the config file.
 
 `flush_on_reload` (bool, default False)
 - If the config file will be reloaded (due to a changed timestamp) then clean out the 
-`cfg` dictionary first
+`cfg` dictionary first.  See Returns, below.
 
 `force_flush_reload` (bool, default False)
 - Forces the `cfg` dictionary to be cleaned out and the config file to be reloaded, 
@@ -611,19 +612,32 @@ regardless of whether the config file timestamp has changed
   directly accessed as well.
 
 - The format of a config file is param=value pairs.
-  - Separating the param and value may be whitespace, `=` or `:`.  
-  - Param names can contain most all characters, except:  `#` or the separators, and cannot start with `[`.
+  - Separating the param and value_portion may be whitespace, `=` or `:` (multiples allowed).
+  - Param names can contain all valid characters, except the separators or `#`, and cannot start with `[`.
 
 - Sections and a DEFAULT section are supported.  Section name are enclosed in `[ ]`.
   - Leading and trailing whitespace is trimmed off of the section name, and embedded whitespace is retained.
     EG: `[  hello my name  is  Fred  ]` becomes section name `'hello my name  is  Fred'`.
-  - Section names can contain most all characters, except `#` and `]`.
+  - Section names can contain most all characters, except `]`.
 
 - **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
-  type is stored in the `cfg` dictionary if none of the other types can be resolved for a given param value.
+  type is stored in the `cfg` dictionary if none of the other types can be resolved for a given value_portion.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
   for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
-  `getcfg (param, types=[])` parameter for basic type checking.
+  getcfg() `types=[]` parameter for basic type enforcement.
+
+- **Quoted strings** - If a value_portion cannot be resolved to a Python native type then it is loaded as a str,
+  eg `My_name = George` loads George as a str.  A value_portion may be forced to be loaded as a str by using 
+  quotes, eg `Some_number_as_str = "2.54"` forces the value_portion to be loaded as a str rather than a float. Supported
+  quote types:  `"..."`, `'...'`, (tripple-double quotes), and `'''...'''`. `My_name = George`, 
+  `My_name : "George"`, `My_name '''George'''`, etc., are identical when loaded.
+  Quoted strings may contain all valid characters, including '#' which normally starts a comment.  
+
+- **Multi-line values** - A param's value_portion may be specified over multiple lines for readability by placing 
+  the `\` line continuation character as the last non-whitespace character on the line before any comment.
+  The parser strips comments and leading/trailing whitespace, then concatenates the multi-line value_portion segments 
+  into a single line (single space separated) in the loaded config.  Comments may be placed on each line.
+  NOTE: For a multi-line param that will be loaded as a str, avoid using quotes as results may be strange.
 
 - **Logging setup** - `loadconfig()` calls `cjnfuncs.core.setuplogging()`.  The `logging` handle is available for
   import by other modules (`from cjnfuncs.core import logging`).  By default, logging will go to the
@@ -838,10 +852,6 @@ all changes have been applied the final call to modify_configfile() must have `s
 cause the memory version to be written out to the config file.  If the script code checks for
 modifications of the config file then the modified content will be reloaded into the cfg dictionary.
 
-NOTE:  In some circumstances the OS-reported timestamp for the modified config file may be erratic.
-It may be necessary to add a time.sleep(0.5) delay between saving the modified config and the loadconfig()
-reload call to avoid multiple config reloads.
-
 
 ### Parameters
 `param` (str, default '')
@@ -867,6 +877,16 @@ reload call to avoid multiple config reloads.
 ### Returns
 - No return value
 - Warning messages are logged for attempting to modify or remove a non-existing param.
+
+
+### Behaviors and rules
+- **How modify_config works with multi-line params -**If a multi-line param is modified, the new value is
+written out on a single line, and the continuation lines for the original definition remain in place.
+This effectively turns the continuation lines into a new param definition, which is usually benign.  Check
+for param name conflicts.
+- NOTE:  In some circumstances the OS-reported timestamp for the modified config file may be erratic.
+It may be necessary to add a `time.sleep(0.5)` delay between saving the modified config and the loadconfig()
+reload call to avoid multiple config reloads.
         
 <br/>
 
@@ -893,4 +913,55 @@ reload call to avoid multiple config reloads.
 ### Behaviors and rules
 - The created config file is as loaded in memory.  Any imports in the originally loaded config file
  are merged into the top-level.
+        
+<br/>
+
+<a id="sections"></a>
+
+---
+
+# sections () - Return a list of sections in the cfg dictionary
+
+***config_item() class member function***
+
+For compatibility with the standard library configparser.  Also available via `<config>.sections_list`.
+
+Example:
+```
+code:
+    print (my_config.sections())
+
+output:
+    ['Bad params', 'SMTP']
+```
+        
+<br/>
+
+<a id="clear"></a>
+
+---
+
+# clear (section='') - Purge a portion of the cfg dictionary
+
+***config_item() class member function***
+
+### Parameters
+`section` (str, default '')
+- `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
+- `section = '<section_name>'` clears just that section
+- `section = 'DEFAULT'` clears just the DEFAULT section
+
+
+### Returns
+- A ConfigError is raised if attempting to remove a non-existing section
+        
+<br/>
+
+<a id="dump"></a>
+
+---
+
+# dump () - Return the formatted content of the cfg dictionary
+
+***config_item() class member function***
         

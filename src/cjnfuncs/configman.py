@@ -29,7 +29,7 @@ IO_RETRY_COUNT         = 3
 
 initial_logging_setup_done = False   # Global since more than one config can be loaded
 # CFGLINE =  re.compile(r"([^\s=:]+)[\s=:]*(.*)")                 # used in load_config() for param:value lines
-CFGLINE2 = re.compile(r"(\s*)([^\s=:]+)([\s=:]+)([^#]+)(.*)")   # used in modify_configfile()
+CFGLINE2 = re.compile(r"(\s*)([^\s=:]+)([\s=:]+)([^#]+)(.*)")   # used in modify_configfile() TODO move
 # SECLINE =  re.compile(r"\[(.*)\]")                              # used for getting section names
 
 
@@ -155,163 +155,6 @@ directory.  With `remap_logdirbase=True`, the log dir will also be set to the to
             self.cfg[section_name][key] = value
 
 
-    # def parse_value(self, value_str):
-    #     if self.force_str:
-    #         if  (value_str.startswith('"') and value_str.endswith('"'))  or \
-    #             (value_str.startswith("'") and value_str.endswith("'")):
-    #                 value_str = value_str[1:-1]
-    #         if  (value_str.startswith('"""') and value_str.endswith('"""'))  or \
-    #             (value_str.startswith("'''") and value_str.endswith("'''")):
-    #                 value_str = value_str[3:-3]
-    #         return value_str
-        
-    #     try:                                                # Integer
-    #         return int(value_str) 
-    #     except:
-    #         pass
-    #     try:                                                # Float
-    #         return float(value_str)
-    #     except:
-    #         pass
-    #     if value_str.lower() == "true":                     # Boolean True
-    #         return True
-    #     if value_str.lower() == "false":                    # Boolean False
-    #         return False
-    #     try:
-    #         if  (value_str.startswith('[') and value_str.endswith(']'))  or \
-    #             (value_str.startswith('{') and value_str.endswith('}'))  or \
-    #             (value_str.startswith('(') and value_str.endswith(')'))  or \
-    #             (value_str.startswith('"') and value_str.endswith('"'))  or \
-    #             (value_str.startswith("'") and value_str.endswith("'"))  or \
-    #             (value_str.startswith('"""') and value_str.endswith('"""'))  or \
-    #             (value_str.startswith("'''") and value_str.endswith("'''")):
-    #                 return ast.literal_eval(value_str)      # List, Dictionary, or Tuple
-    #     except:
-    #         pass
-    #     return value_str                                    # String
-
-
-    # def _check_section(self, xyz):
-    #     out = SECLINE.match(xyz)
-    #     if out:
-    #         section_name = out.group(1).strip()
-    #         if section_name != ''  and  section_name not in self.sections_list  and  section_name != 'DEFAULT':
-    #             self.cfg[section_name] = {}
-    #             self.sections_list.append(section_name)
-    #         return section_name
-    #     else:
-    #         return None
-
-
-#=====================================================================================
-#=====================================================================================
-#  s e c t i o n s
-#=====================================================================================
-#=====================================================================================
-
-    def sections(self):
-        """
-## sections () - Return a list of sections in the cfg dictionary
-
-***config_item() class member function***
-
-For compatibility with the standard library configparser.  Also available via `<config>.sections_list`.
-
-Example:
-```
-code:
-    print (my_config.sections())
-
-output:
-    ['Bad params', 'SMTP']
-```
-        """
-
-        return self.sections_list
-
-
-#=====================================================================================
-#=====================================================================================
-#  c l e a r
-#=====================================================================================
-#=====================================================================================
-
-    def clear(self, section=''):
-        """
-## clear (section='') - Purge a portion of the cfg dictionary
-
-***config_item() class member function***
-
-### Parameters
-`section` (str, default '')
-- `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
-- `section = '<section_name>'` clears just that section
-- `section = 'DEFAULT'` clears just the DEFAULT section
-
-
-### Returns
-- A ConfigError is raised if attempting to remove a non-existing section
-        """
-
-        if section == '':
-            self.cfg.clear()
-            self.sections_list = []
-            self.defaults.clear()
-        elif section in self.sections_list:
-            self.cfg.pop(section, None)
-            self.sections_list.remove(section)
-        elif section == 'DEFAULT':
-            self.defaults.clear()
-        else:
-            raise ConfigError (f"Failed attempt to remove non-existing section <{section}> from config")
-
-
-#=====================================================================================
-#=====================================================================================
-#  _ _ r e p r _ _
-#=====================================================================================
-#=====================================================================================
-
-    def __repr__(self):
-        stats = ""
-        stats += f"\nStats for config file <{self.config_file}>:\n"
-        stats += f".config_file            :  {self.config_file}\n"
-        stats += f".config_dir             :  {self.config_dir}\n"
-        stats += f".config_full_path       :  {self.config_full_path}\n"
-        stats += f".config_timestamp       :  {self.config_timestamp}\n"
-        stats += f".sections_list          :  {self.sections_list}\n"
-        stats += f"core.tool.log_dir_base  :  {core.tool.log_dir_base}\n"
-        # stats += f"tool.log_full_path  :  {tool.log_full_path}\n"
-        return stats
-
-
-#=====================================================================================
-#=====================================================================================
-#  d u m p
-#=====================================================================================
-#=====================================================================================
-
-    def dump(self):
-        """
-## dump () - Return the formatted content of the cfg dictionary
-
-***config_item() class member function***
-        """
-
-        cfg_list = "***** Section [] *****\n"
-        for key in self.cfg:
-            if key not in self.sections_list:
-                cfg_list += f"{key:>20} = {self.cfg[key]}  {type(self.cfg[key])}\n"
-        for section in self.sections_list:
-            cfg_list += f"***** Section [{section}] *****\n"
-            for key in self.cfg[section]:
-                cfg_list += f"{key:>20} = {self.cfg[section][key]}  {type(self.cfg[section][key])}\n"
-        cfg_list += f"***** Section [DEFAULT] *****\n"
-        for key in self.defaults:
-            cfg_list += f"{key:>20} = {self.defaults[key]}  {type(self.defaults[key])}\n"
-        return cfg_list[:-1]    # drop final '\n'
-
-
 #=====================================================================================
 #=====================================================================================
 #  l o a d c o n f i g
@@ -342,8 +185,9 @@ loadconfig(
 ```
 ***config_item() class member function***
 
-Param = value lines in the config_item()'s file are loaded to the instance-specific `cfg` dictionary, 
-and can be accessed directly or via `<config_item>.getcfg()`.
+`Param = value` lines in the config_item()'s file are loaded to the instance-specific `cfg` dictionary, 
+and can be accessed via `<config_item>.getcfg()`.  The _value_ is referred to as the _value_portion_ in 
+this documentation.
 
 `loadconfig()` initializes the root logger for logging either to 1) the `LogFile` specified in
 the loaded config file, 2) the `call_logfile` in the `loadconfig()` call, or 3) the console.
@@ -356,6 +200,9 @@ feature, and intermittent loss of access to the config file.
 - Logging level used within `loadconfig()` code for debugging loadconfig() itself
 
 `call_logfile` (str, default None)
+- If `call_logfile` is passed on the loadconfig() call, and `call_logfile_wins=True`, then any `LogFile`
+specified in the config file is overridden.  This feature allows for interactive usage modes where
+logging is directed to the console (with `call_logfile=None`) or an alternate file.
 - An absolute path or relative to the `core.tool.log_dir_base` directory
 
 `call_logfile_wins` (bool, default False)
@@ -363,7 +210,7 @@ feature, and intermittent loss of access to the config file.
 
 `flush_on_reload` (bool, default False)
 - If the config file will be reloaded (due to a changed timestamp) then clean out the 
-`cfg` dictionary first
+`cfg` dictionary first.  See Returns, below.
 
 `force_flush_reload` (bool, default False)
 - Forces the `cfg` dictionary to be cleaned out and the config file to be reloaded, 
@@ -393,19 +240,32 @@ regardless of whether the config file timestamp has changed
   directly accessed as well.
 
 - The format of a config file is param=value pairs.
-  - Separating the param and value may be whitespace, `=` or `:`.  
-  - Param names can contain most all characters, except:  `#` or the separators, and cannot start with `[`.
+  - Separating the param and value_portion may be whitespace, `=` or `:` (multiples allowed).
+  - Param names can contain all valid characters, except the separators or `#`, and cannot start with `[`.
 
 - Sections and a DEFAULT section are supported.  Section name are enclosed in `[ ]`.
   - Leading and trailing whitespace is trimmed off of the section name, and embedded whitespace is retained.
     EG: `[  hello my name  is  Fred  ]` becomes section name `'hello my name  is  Fred'`.
-  - Section names can contain most all characters, except `#` and `]`.
+  - Section names can contain most all characters, except `]`.
 
 - **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
-  type is stored in the `cfg` dictionary if none of the other types can be resolved for a given param value.
+  type is stored in the `cfg` dictionary if none of the other types can be resolved for a given value_portion.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
   for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
-  `getcfg (param, types=[])` parameter for basic type checking.
+  getcfg() `types=[]` parameter for basic type enforcement.
+
+- **Quoted strings** - If a value_portion cannot be resolved to a Python native type then it is loaded as a str,
+  eg `My_name = George` loads George as a str.  A value_portion may be forced to be loaded as a str by using 
+  quotes, eg `Some_number_as_str = "2.54"` forces the value_portion to be loaded as a str rather than a float. Supported
+  quote types:  `"..."`, `'...'`, (tripple-double quotes), and `'''...'''`. `My_name = George`, 
+  `My_name : "George"`, `My_name '''George'''`, etc., are identical when loaded.
+  Quoted strings may contain all valid characters, including '#' which normally starts a comment.  
+
+- **Multi-line values** - A param's value_portion may be specified over multiple lines for readability by placing 
+  the `\` line continuation character as the last non-whitespace character on the line before any comment.
+  The parser strips comments and leading/trailing whitespace, then concatenates the multi-line value_portion segments 
+  into a single line (single space separated) in the loaded config.  Comments may be placed on each line.
+  NOTE: For a multi-line param that will be loaded as a str, avoid using quotes as results may be strange.
 
 - **Logging setup** - `loadconfig()` calls `cjnfuncs.core.setuplogging()`.  The `logging` handle is available for
   import by other modules (`from cjnfuncs.core import logging`).  By default, logging will go to the
@@ -612,7 +472,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
             (\#)                            # Match unquoted # (group 3)
         """
         find_comment_re = re.compile(xx, re.VERBOSE)                    # Find unquoted '#'
-        section_name_re =  re.compile(r"\[(.*)\]")                      # Get section name
+        section_name_re =  re.compile(r"\[([^\].]*)\]")                 # Get section name
 
 
         for line in str_blob.split('\n'):
@@ -622,6 +482,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                 out = section_name_re.match(line)
                 if out:
                     section_name = out.group(1).strip()
+                    # print ('>>>', section_name)
                     if section_name != ''  and  section_name not in self.sections_list  and  section_name != 'DEFAULT':
                         self.cfg[section_name] = {}
                         self.sections_list.append(section_name)
@@ -645,7 +506,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                 value_portion += ' ' + line.strip()
                 continuation_line = False
 
-            if value_portion is not '':
+            if value_portion != '':
                 # Remove after first '#' outside of quotes
                 for match in find_comment_re.finditer(value_portion):
                     if match.group(3):
@@ -657,7 +518,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                 continuation_line = True
                 continue
 
-            if param_name is not '':
+            if param_name != '':
                 if param_name.lower().startswith("import"):             # import line
                     target = mungePath(value_portion, self.config_dir)
                     try:
@@ -1110,3 +971,114 @@ reload call to avoid multiple config reloads.
                 logging.debug(f"Failed try {ntry} to write config {self.config_file} to file {outfile}\n  {e}")
 
         raise ConfigError (f"Failed to write config {self.config_file} to file {outfile}\n  {_e}")
+
+
+#=====================================================================================
+#=====================================================================================
+#  s e c t i o n s
+#=====================================================================================
+#=====================================================================================
+
+    def sections(self):
+        """
+## sections () - Return a list of sections in the cfg dictionary
+
+***config_item() class member function***
+
+For compatibility with the standard library configparser.  Also available via `<config>.sections_list`.
+
+Example:
+```
+code:
+    print (my_config.sections())
+
+output:
+    ['Bad params', 'SMTP']
+```
+        """
+
+        return self.sections_list
+
+
+#=====================================================================================
+#=====================================================================================
+#  c l e a r
+#=====================================================================================
+#=====================================================================================
+
+    def clear(self, section=''):
+        """
+## clear (section='') - Purge a portion of the cfg dictionary
+
+***config_item() class member function***
+
+### Parameters
+`section` (str, default '')
+- `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
+- `section = '<section_name>'` clears just that section
+- `section = 'DEFAULT'` clears just the DEFAULT section
+
+
+### Returns
+- A ConfigError is raised if attempting to remove a non-existing section
+        """
+
+        if section == '':
+            self.cfg.clear()
+            self.sections_list = []
+            self.defaults.clear()
+        elif section in self.sections_list:
+            self.cfg.pop(section, None)
+            self.sections_list.remove(section)
+        elif section == 'DEFAULT':
+            self.defaults.clear()
+        else:
+            raise ConfigError (f"Failed attempt to remove non-existing section <{section}> from config")
+
+
+#=====================================================================================
+#=====================================================================================
+#  _ _ r e p r _ _
+#=====================================================================================
+#=====================================================================================
+
+    def __repr__(self):
+        stats = ""
+        stats += f"\nStats for config file <{self.config_file}>:\n"
+        stats += f".config_file            :  {self.config_file}\n"
+        stats += f".config_dir             :  {self.config_dir}\n"
+        stats += f".config_full_path       :  {self.config_full_path}\n"
+        stats += f".config_timestamp       :  {self.config_timestamp}\n"
+        stats += f".sections_list          :  {self.sections_list}\n"
+        stats += f"core.tool.log_dir_base  :  {core.tool.log_dir_base}\n"
+        # stats += f"tool.log_full_path  :  {tool.log_full_path}\n"
+        return stats
+
+
+#=====================================================================================
+#=====================================================================================
+#  d u m p
+#=====================================================================================
+#=====================================================================================
+
+    def dump(self):
+        """
+## dump () - Return the formatted content of the cfg dictionary
+
+***config_item() class member function***
+        """
+
+        cfg_list = "***** Section [] *****\n"
+        for key in self.cfg:
+            if key not in self.sections_list:
+                cfg_list += f"{key:>20} = {self.cfg[key]}  {type(self.cfg[key])}\n"
+        for section in self.sections_list:
+            cfg_list += f"***** Section [{section}] *****\n"
+            for key in self.cfg[section]:
+                cfg_list += f"{key:>20} = {self.cfg[section][key]}  {type(self.cfg[section][key])}\n"
+        cfg_list += f"***** Section [DEFAULT] *****\n"
+        for key in self.defaults:
+            cfg_list += f"{key:>20} = {self.defaults[key]}  {type(self.defaults[key])}\n"
+        return cfg_list[:-1]    # drop final '\n'
+
+
