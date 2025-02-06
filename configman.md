@@ -23,7 +23,7 @@ This config file is loaded and accessed by your script code:
         import cjnfuncs.core as core
 
         set_toolname('configman_ex1')
-        core.tool.config_dir = '.'          # See note below
+        core.tool.config_dir = '.'          # See Note below
 
         my_config = config_item('configman_ex1.cfg')
         my_config.loadconfig()
@@ -43,11 +43,12 @@ And the obvious output is...
 
 
 Notables:
-1. The config file is structured as lines of `param = value` pairs, with supported separators of whitespace, `=` or `:`.  Each pair is typically on a single line.  Comments starting with `#` are supported on lines by themselves or on the end of param lines.
-1. A config file is loaded using `configman.loadconfig()`. The param values are loaded based on their parsed types. All Python types are supported...  `str`, `int`, `bool`, `float`, `list`, `dict`, `tuple`.  Types support makes for clean script code.
-1. Params are accessed in script code using `configman.getcfg()`.  getcfg() supports fallback values and type checking.
+1. The config file is structured as lines of `param = value` pairs, with supported separators of whitespace, `=` or `:`.  Each pair is typically on a single line.  Comments start with `#` and are supported on lines by themselves or on the end of param lines.
+1. A config file is loaded using `my_config.loadconfig()`. The param values are loaded based on their parsed types. All Python types are supported...  `str`, `int`, `bool`, `float`, `list`, `dict`, `tuple`.  Types support makes for cleaner script code.  (Note: `my_config` is the example 
+config_item instance name used throughout this documentation.)
+1. Params are accessed in script code using `my_config.getcfg()`.  getcfg() supports fallback values and type checking.
 
-***Note***: configman relies on the environment set up by `set_toolname()`, which creates a set of application path variables such as `core.tool.config_dir`.  In the case of a user-mode script, the .config_dir is set to `~/.config/<toolname>`, so by default that is the directory that configman will look in for `configman_ex1.cfg`.  For these examples we have overridden the default config directory to be the directory that we are running the example script from (`.`).
+***Note***: configman relies on the environment set up by `set_toolname()`, which creates a set of application path variables such as `core.tool.config_dir`.  In the case of a user-mode script, `core.tool.config_dir` is set to `~/.config/<toolname>`, so by default that is the directory that configman will look in for `configman_ex1.cfg`.  For these examples we have overridden the default config directory to be the directory that we are running the example script from (`.`).
 Alternately, the full path to the config file may be passed to the `config_item()` call.
 See the `cjnfuncs.core` module for more details.
 
@@ -194,8 +195,10 @@ Stats for config file <configman_ex2.cfg>:
 .config_file            :  configman_ex2.cfg
 .config_dir             :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples
 .config_full_path       :  /mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/configman_ex2.cfg
-.config_timestamp       :  1736462523
+.config_timestamp       :  1736462755
 .sections_list          :  ['Bad params', 'SMTP']
+.force_str              :  False
+.secondary_config       :  False
 core.tool.log_dir_base  :  .
 
 ***** Section [] *****
@@ -246,6 +249,7 @@ not_defined:   Using fallback value
 Given radius 42.0, the circle's area is 5538.96
 a_float:       42.0
 bad_float:     52.3.5
+
 ```
 
 Notables (See **** NOTE # in the above example config file and code):
@@ -344,7 +348,7 @@ core.tool.log_dir_base  :  /home/me/.config/configman_ex3
 
 Notables:
 1. At the startup of the service script, with `loadconfig(tolerate_missing=False)`, the config file must be accessible or a `ConfigError` will be raised.  This should be trapped and gracefully handled.
-2. With `loadconfig(tolerate_missing=True)`, `-1` will be returned if the config file is not currently accessible. You will want to add code to output this warning only once, so as to not flood the log.  tolerate_missing=True allows the config file to be placed on a shared file system. 
+2. With `loadconfig(tolerate_missing=True)`, `-1` will be returned if the config file is not currently accessible. You will want to add code to output this warning only once, so as to not flood the log.  tolerate_missing=True allows the config file to be placed on a network file system. 
 3. loadconfig() will return `1` if the config file timestamp has changed (`0` if not changed).  The prior `loadconfig(flush_on_reload=True)` will have purged all cfg data and reloaded it from the file.
 4. If this is a `reloaded` case (versus `first`), then cleanup work may be needed prior to the following resource setups.
 5. Threads and asyncio should use local copies of cfg data so that they don't crash when the cfg data temporarily disappears during the loadconfig() reload.  Also see loadconfig's `prereload_callback` parameter.
@@ -380,7 +384,7 @@ Notables:
 
 ## Using secondary configuration files
 
-In some applications it's appropriate to load configuration data from more than one config file.  This example has three config files in use.  main_cfg is frequently changed as the application evolves and is tuned, while PCBSs_cfg and sensors_cfg are much more static and controlled.
+In some applications it is appropriate to load configuration data from more than one config file.  This example has three config files in use.  main_cfg is frequently changed as the application evolves and is tuned, while PCBSs_cfg and sensors_cfg are much more static and controlled.
 
 ```
 main_cfg = config_item('my_app.cfg')
@@ -463,10 +467,10 @@ The config_item() class provides handling of one or more config file instances. 
  - Config file loading and reloading - `loadconfig()`
  - Loading config data from strings and dictionaries - `read_string()`, `read_dict()`
  - Getting values from the loaded config, with defaults and fallback - `getcfg()`
- - Programmatically modifiying the config file content - `modify_configfile()`
+ - Programmatically modifying the config file content - `modify_configfile()`
  - Getting instance status - `__repr__()`, `section()`, `dump()`
 
-See the loadconfig() documentation for details on config file formatting and rules.
+See the loadconfig() documentation for details on config file syntax and rules.
 
 ### Instantiation parameters
 `config_file` (Path or str, default None)
@@ -496,10 +500,10 @@ The current values of all public class attributes may be printed using `print(my
 `.defaults` (dict)
 - Default params are stored here.
 
-.sections_list (list)
+`.sections_list` (list)
 - A list of string names for all defined sections.
 
-`.config_file` (Path or str, or None)
+`.config_file` (str, or None)
 - The `config_file` as passed in at instantiation
 
 `.config_full_path` (Path or None)
@@ -530,10 +534,10 @@ To disable this remap, in the `config_item()` call set `remap_logdirbase=False`.
 This remapping is not done in site mode.
 - A different log base directory may be set by user code by setting `core.tool.log_dir_base` to a different 
 path after the `set_toolname()` call and before the `config_item()` call, for example 
-`core.tool.log_dir_base = "/var/log"` may be desireable in site mode.
+`core.tool.log_dir_base = "/var/log"` may be desirable in site mode.
 - A different config directory may be set by user code by setting `core.tool.config_dir` to a different 
 path after the `set_toolname()` call and before the `config_item()` call, for example 
-`core.tool.config_dir = core.tool.main_dir`, which sets the config dir to the same as the tool script's 
+`core.tool.config_dir = core.tool.main_dir` sets the config dir to the same as the tool script's 
 directory.  With `remap_logdirbase=True`, the log dir will also be set to the tool script's directory.
 - Details of the configuration instance may be printed, eg, `print(my_config)`.
     
@@ -571,14 +575,14 @@ feature, and intermittent loss of access to the config file.
 `ldcfg_ll` (int, default 30 (WARNING))
 - Logging level used within `loadconfig()` code for debugging loadconfig() itself
 
-`call_logfile` (str, default None)
+`call_logfile` (Path or str, default None)
 - If `call_logfile` is passed on the loadconfig() call, and `call_logfile_wins=True`, then any `LogFile`
 specified in the config file is overridden.  This feature allows for interactive usage modes where
 logging is directed to the console (with `call_logfile=None`) or an alternate file.
 - An absolute path or relative to the `core.tool.log_dir_base` directory
 
 `call_logfile_wins` (bool, default False)
-- If True, the `call_logfile` overrides any `LogFile` in the config file
+- If True, the `call_logfile` overrides any `LogFile` defined in the config file
 
 `flush_on_reload` (bool, default False)
 - If the config file will be reloaded (due to a changed timestamp) then clean out the 
@@ -629,7 +633,7 @@ regardless of whether the config file timestamp has changed
 - **Quoted strings** - If a value_portion cannot be resolved to a Python native type then it is loaded as a str,
   eg `My_name = George` loads George as a str.  A value_portion may be forced to be loaded as a str by using 
   quotes, eg `Some_number_as_str = "2.54"` forces the value_portion to be loaded as a str rather than a float. Supported
-  quote types:  `"..."`, `'...'`, (tripple-double quotes), and `'''...'''`. `My_name = George`, 
+  quote types:  `"..."`, `'...'`, (triple-double quotes), and `'''...'''`. `My_name = George`, 
   `My_name : "George"`, `My_name '''George'''`, etc., are identical when loaded.
   Quoted strings may contain all valid characters, including '#' which normally starts a comment.  
 
@@ -688,12 +692,14 @@ the tool script to do any post-config-load operations.
   reload of the config file. 
   - **Note** that if using threading then a thread should be paused while the config file 
   is being reloaded with `flush_on_reload=True` or `force_flush_reload=True` since the params will disappear briefly.
+  Use the `prereload_callback` mechanism to manage any code dependencies before the cfg dictionary is purged.
   - Changes to imported files are not tracked for changes.
 
 - **Tolerating intermittent config file access** - When implementing a service loop, if `tolerate_missing=True` 
 (default False) then loadconfig() will return `-1` if the config file cannot be accessed, informing the 
-tool script of the problem for appropriate handling. If `tolerate_missing=False` then loadconfig() will raise
-a ConfigError if the config file cannot be accessed.
+tool script of the problem for appropriate handling (typically logging the event then ignoring the problem for
+the current iteration). If `tolerate_missing=False` then loadconfig() will raise a ConfigError if the config file 
+cannot be accessed.
         
 <br/>
 
@@ -812,8 +818,9 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 `param` (str)
 - String name of param to be fetched from cfg
 
-`fallback` (as-expected type, default None)
+`fallback` (any, default effectively `None`, technically '_nofallback')
 - if provided, is returned if `param` does not exist in cfg
+- No type enforcement - the fallback value need not be in the `types` list.
 
 `types` (single or list of as-expected types, default '[]' (any type accepted))
 - if provided, a ConfigError is raised if the param's value type is not in the list of expected types
@@ -857,7 +864,7 @@ modifications of the config file then the modified content will be reloaded into
 `param` (str, default '')
 - The param name, if modifying an existing param or adding a new param
 
-`value` (as-expected type, default '')
+`value` (any, default '')
 - The new value to be applied to an existing param, or an added param
 - Any comment text (after a '#') in the new value will be prepended to any existing comment text
 
@@ -880,7 +887,7 @@ modifications of the config file then the modified content will be reloaded into
 
 
 ### Behaviors and rules
-- **How modify_config works with multi-line params -**If a multi-line param is modified, the new value is
+- **How modify_config works with multi-line params -** If a multi-line param is modified, the new value is
 written out on a single line, and the continuation lines for the original definition remain in place.
 This effectively turns the continuation lines into a new param definition, which is usually benign.  Check
 for param name conflicts.
@@ -964,4 +971,8 @@ output:
 # dump () - Return the formatted content of the cfg dictionary
 
 ***config_item() class member function***
+
+
+### Returns
+- str type pretty formatted content of the cfg dictionary, along with any sections and defaults
         

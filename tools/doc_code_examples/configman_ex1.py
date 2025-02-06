@@ -6,7 +6,7 @@ from cjnfuncs.configman import config_item
 import cjnfuncs.core as core
 
 set_toolname('configman_ex1')
-core.tool.config_dir = '.'          # See note below
+core.tool.config_dir = '.'          # See Note below
 
 my_config = config_item('configman_ex1.cfg')
 my_config.loadconfig()

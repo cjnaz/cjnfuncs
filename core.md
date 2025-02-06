@@ -308,7 +308,7 @@ the log file declared in the config file:
 
     
 ### Parameters
-`call_logfile` (str, default None)
+`call_logfile` (Path or str, default None)
 - Potential log file passed typically from the tool script.  Selected by `call_logfile_wins = True`.
 call_logfile may be an absolute path or relative to the `core.tool.log_dir_base` directory.  
 - `None` specifies the console.

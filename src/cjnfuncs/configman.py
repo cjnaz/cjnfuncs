@@ -8,7 +8,6 @@
 #
 #==========================================================
 
-
 import re
 import ast
 from pathlib import Path
@@ -21,6 +20,7 @@ import cjnfuncs.core as core
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 IO_RETRY_COUNT         = 3
 
+
 #=====================================================================================
 #=====================================================================================
 #  C l a s s   c o n f i g _ i t e m
@@ -28,9 +28,6 @@ IO_RETRY_COUNT         = 3
 #=====================================================================================
 
 initial_logging_setup_done = False   # Global since more than one config can be loaded
-# CFGLINE =  re.compile(r"([^\s=:]+)[\s=:]*(.*)")                 # used in load_config() for param:value lines
-CFGLINE2 = re.compile(r"(\s*)([^\s=:]+)([\s=:]+)([^#]+)(.*)")   # used in modify_configfile() TODO move
-# SECLINE =  re.compile(r"\[(.*)\]")                              # used for getting section names
 
 
 class config_item():
@@ -41,10 +38,10 @@ The config_item() class provides handling of one or more config file instances. 
  - Config file loading and reloading - `loadconfig()`
  - Loading config data from strings and dictionaries - `read_string()`, `read_dict()`
  - Getting values from the loaded config, with defaults and fallback - `getcfg()`
- - Programmatically modifiying the config file content - `modify_configfile()`
+ - Programmatically modifying the config file content - `modify_configfile()`
  - Getting instance status - `__repr__()`, `section()`, `dump()`
 
-See the loadconfig() documentation for details on config file formatting and rules.
+See the loadconfig() documentation for details on config file syntax and rules.
 
 ### Instantiation parameters
 `config_file` (Path or str, default None)
@@ -74,10 +71,10 @@ The current values of all public class attributes may be printed using `print(my
 `.defaults` (dict)
 - Default params are stored here.
 
-.sections_list (list)
+`.sections_list` (list)
 - A list of string names for all defined sections.
 
-`.config_file` (Path or str, or None)
+`.config_file` (str, or None)
 - The `config_file` as passed in at instantiation
 
 `.config_full_path` (Path or None)
@@ -108,10 +105,10 @@ To disable this remap, in the `config_item()` call set `remap_logdirbase=False`.
 This remapping is not done in site mode.
 - A different log base directory may be set by user code by setting `core.tool.log_dir_base` to a different 
 path after the `set_toolname()` call and before the `config_item()` call, for example 
-`core.tool.log_dir_base = "/var/log"` may be desireable in site mode.
+`core.tool.log_dir_base = "/var/log"` may be desirable in site mode.
 - A different config directory may be set by user code by setting `core.tool.config_dir` to a different 
 path after the `set_toolname()` call and before the `config_item()` call, for example 
-`core.tool.config_dir = core.tool.main_dir`, which sets the config dir to the same as the tool script's 
+`core.tool.config_dir = core.tool.main_dir` sets the config dir to the same as the tool script's 
 directory.  With `remap_logdirbase=True`, the log dir will also be set to the tool script's directory.
 - Details of the configuration instance may be printed, eg, `print(my_config)`.
     """
@@ -199,14 +196,14 @@ feature, and intermittent loss of access to the config file.
 `ldcfg_ll` (int, default 30 (WARNING))
 - Logging level used within `loadconfig()` code for debugging loadconfig() itself
 
-`call_logfile` (str, default None)
+`call_logfile` (Path or str, default None)
 - If `call_logfile` is passed on the loadconfig() call, and `call_logfile_wins=True`, then any `LogFile`
 specified in the config file is overridden.  This feature allows for interactive usage modes where
 logging is directed to the console (with `call_logfile=None`) or an alternate file.
 - An absolute path or relative to the `core.tool.log_dir_base` directory
 
 `call_logfile_wins` (bool, default False)
-- If True, the `call_logfile` overrides any `LogFile` in the config file
+- If True, the `call_logfile` overrides any `LogFile` defined in the config file
 
 `flush_on_reload` (bool, default False)
 - If the config file will be reloaded (due to a changed timestamp) then clean out the 
@@ -257,7 +254,7 @@ regardless of whether the config file timestamp has changed
 - **Quoted strings** - If a value_portion cannot be resolved to a Python native type then it is loaded as a str,
   eg `My_name = George` loads George as a str.  A value_portion may be forced to be loaded as a str by using 
   quotes, eg `Some_number_as_str = "2.54"` forces the value_portion to be loaded as a str rather than a float. Supported
-  quote types:  `"..."`, `'...'`, (tripple-double quotes), and `'''...'''`. `My_name = George`, 
+  quote types:  `"..."`, `'...'`, (triple-double quotes), and `'''...'''`. `My_name = George`, 
   `My_name : "George"`, `My_name '''George'''`, etc., are identical when loaded.
   Quoted strings may contain all valid characters, including '#' which normally starts a comment.  
 
@@ -316,12 +313,14 @@ the tool script to do any post-config-load operations.
   reload of the config file. 
   - **Note** that if using threading then a thread should be paused while the config file 
   is being reloaded with `flush_on_reload=True` or `force_flush_reload=True` since the params will disappear briefly.
+  Use the `prereload_callback` mechanism to manage any code dependencies before the cfg dictionary is purged.
   - Changes to imported files are not tracked for changes.
 
 - **Tolerating intermittent config file access** - When implementing a service loop, if `tolerate_missing=True` 
 (default False) then loadconfig() will return `-1` if the config file cannot be accessed, informing the 
-tool script of the problem for appropriate handling. If `tolerate_missing=False` then loadconfig() will raise
-a ConfigError if the config file cannot be accessed.
+tool script of the problem for appropriate handling (typically logging the event then ignoring the problem for
+the current iteration). If `tolerate_missing=False` then loadconfig() will raise a ConfigError if the config file 
+cannot be accessed.
         """
 
         global initial_logging_setup_done
@@ -329,8 +328,8 @@ a ConfigError if the config file cannot be accessed.
 
         if not initial_logging_setup_done:
             # Initial logging will go to the console if no call_logfile is specified (and call_logfile_wins) on the initial loadconfig call.
-            console_lf = self.getcfg("ConsoleLogFormat", None)
-            file_lf = self.getcfg("FileLogFormat", None)
+            console_lf = self.getcfg('ConsoleLogFormat', None)
+            file_lf = self.getcfg('FileLogFormat', None)
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
             initial_logging_setup_done = True
 
@@ -390,22 +389,21 @@ a ConfigError if the config file cannot be accessed.
 
         # Operations only for finishing a top-level call
         if not isimport  and  not self.secondary_config:
-            console_lf = self.getcfg("ConsoleLogFormat", None)
-            file_lf = self.getcfg("FileLogFormat", None)
-            setuplogging(config_logfile=self.getcfg("LogFile", None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
+            console_lf = self.getcfg('ConsoleLogFormat', None)
+            file_lf = self.getcfg('FileLogFormat', None)
+            setuplogging(config_logfile=self.getcfg('LogFile', None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
 
             if 'SMTP' in self.sections_list:
-                if self.getcfg("DontEmail", False, section='SMTP'):
-                    logging.info ('DontEmail is set - Emails and Notifications will NOT be sent')
-                elif self.getcfg("DontNotif", False, section='SMTP'):
-                    logging.info ('DontNotif is set - Notifications will NOT be sent')
+                if self.getcfg('DontEmail', False, section='SMTP'):
+                    logging.info ("DontEmail is set - Emails and Notifications will NOT be sent")
+                elif self.getcfg('DontNotif', False, section='SMTP'):
+                    logging.info ("DontNotif is set - Notifications will NOT be sent")
 
-            config_loglevel = self.getcfg("LogLevel", None)
+            config_loglevel = self.getcfg('LogLevel', None)
             if config_loglevel is not None:
                 try:
                     config_loglevel = int(config_loglevel)  # Handles force_str=True
                 except:
-                # if not isinstance(config_loglevel, int):
                     raise ConfigError (f"Config file <LogLevel> must be integer value (found <{config_loglevel}>)") from None
                 logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
                 logging.getLogger().setLevel(config_loglevel)
@@ -462,7 +460,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 - See loadconfig() for config loading Behaviors and rules.
         """
         continuation_line = False
-        split_line_re =    re.compile(r"([^\s=:#]+)[\s=:]*(.*)")        # Identify param - value (with possible comment)
+        split_line_re =     re.compile(r'([^\s=:#]+)[\s=:]*(.*)')       # Identify param - value (with possible comment)
         xx = fr"""
             ('''|\""")                      # Match opening triple quotes
             (?:\\.|(?!\1).)*?\1             # Match content inside triple quotes until matching closing
@@ -471,8 +469,8 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
             |                               # OR
             (\#)                            # Match unquoted # (group 3)
         """
-        find_comment_re = re.compile(xx, re.VERBOSE)                    # Find unquoted '#'
-        section_name_re =  re.compile(r"\[([^\].]*)\]")                 # Get section name
+        find_comment_re =   re.compile(xx, re.VERBOSE)                  # Find unquoted '#'
+        section_name_re =   re.compile(r'\[([^\].]*)\]')                # Get section name
 
 
         for line in str_blob.split('\n'):
@@ -482,7 +480,6 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                 out = section_name_re.match(line)
                 if out:
                     section_name = out.group(1).strip()
-                    # print ('>>>', section_name)
                     if section_name != ''  and  section_name not in self.sections_list  and  section_name != 'DEFAULT':
                         self.cfg[section_name] = {}
                         self.sections_list.append(section_name)
@@ -519,7 +516,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                 continue
 
             if param_name != '':
-                if param_name.lower().startswith("import"):             # import line
+                if param_name.lower().startswith('import'):             # import line
                     target = mungePath(value_portion, self.config_dir)
                     try:
                         imported_config = config_item(target.full_path)
@@ -542,106 +539,13 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                     if value_portion == '':
                         value_portion = 'True'
                     if not self.force_str:
-                    #     value = value_portion
-                    # else:
                         try:
                             value_portion = ast.literal_eval(value_portion)
                         except:
-                            pass
-                            # value = value_portion       # default to str
+                            pass                                        # default to str
                     self._add_key(param_name, value_portion, self.current_section_name)
                     logging.debug (f"Loaded {param_name} = <{value_portion}>  ({type(value_portion)})")
 
-                    # if value_portion == '':
-                    #     value = True
-                    # else:
-                    #     if value_portion.lower() == 'true':
-                    #         value = True
-                    #     elif value_portion.lower() == 'false':
-                    #         value = False
-                    #     else:
-                    #         if self.force_str:
-                    #             value = value_portion
-                    #         else:
-                    #             try:
-                    #                 value = ast.literal_eval(value_portion)
-                    #             except:
-                    #                 value = value_portion       # default to str
-                    # self._add_key(param_name, value, self.current_section_name)
-                    # logging.debug (f"Loaded {param_name} = <{value}>  ({type(value)})")
-
-
-#         line_part = ''
-#         continuation_line = False
-
-#         for line in str_blob.split('\n'):
-
-#             # Is an import line
-#             if line.strip().lower().startswith("import"):
-# #                line = line.split("#", maxsplit=1)[0].strip()
-#                 line = line.split(self.comment_delim, maxsplit=1)[0].strip()
-#                 target = mungePath(line.split(maxsplit=1)[1], self.config_dir)
-#                 try:
-#                     imported_config = config_item(target.full_path)
-#                     imported_config.loadconfig(ldcfg_ll, isimport=True)
-#                     for key in imported_config.cfg:
-#                         if self.current_section_name == '':
-#                             self.cfg[key] = imported_config.cfg[key]
-#                         elif self.current_section_name == 'DEFAULT':
-#                             self.defaults[key] = imported_config.cfg[key]
-#                         else:
-#                             self.cfg[self.current_section_name][key] = imported_config.cfg[key]
-#                 except Exception as e:
-#                     logging.getLogger().setLevel(preexisting_loglevel)
-#                     raise e
-
-#             # Is a param/value line or a [section] line
-#             else:
-#                 # _line = line.split("#", maxsplit=1)[0].strip()  # line without comment and leading/trailing whitespace
-#                 # _line = line.split(self.comment_delim, maxsplit=1)[0].strip()  # line without comment and leading/trailing whitespace
-#                 # _line = text_before_first_unquoted_hash(line)
-
-#                 working_line = line.strip()
-#                 for match in self.extract_value_re.finditer(line):  # Remove after first comment_delim outside of quotes
-#                     if match.group(3):
-#                         working_line = line[:match.start(3)].strip()
-#                         break
-
-#                 if len(working_line) > 0:
-#                     if continuation_line:
-#                         working_line = line_part + working_line
-#                         continuation_line = False
-#                     if working_line.endswith('\\'):                     # Continuation line
-#                         continuation_line = True
-#                         line_part = working_line[:-1].strip() + ' '
-
-#                     else:
-#                         if working_line.startswith('['):                # Section line
-#                             sec_name = self._check_section(working_line)
-#                             if sec_name is None:
-#                                 logging.getLogger().setLevel(preexisting_loglevel)
-#                                 raise ConfigError (f"Malformed section line <{line}>")
-#                             else:
-#                                 if isimport:
-#                                     logging.getLogger().setLevel(preexisting_loglevel)
-#                                     raise ConfigError ("Section within imported file is not supported.")
-#                                 self.current_section_name = sec_name
-
-#                         else:                                           # param/value line
-#                             out = CFGLINE.match(working_line)
-#                             if out:
-#                                 param_name    = out.group(1)
-#                                 value_portion = out.group(2)
-
-#                                 if value_portion == '':     # param with no value is stored as True
-#                                     value = True
-#                                 else:
-#                                     value = self.parse_value(value_portion)
-#                                 self._add_key(param_name, value, self.current_section_name)
-#                                 logging.debug (f"Loaded {param_name} = <{value}>  ({type(value)})")
-#                             else: 
-#                                 line = line.replace('\n','')
-#                                 logging.warning (f"loadconfig:  Error on line <{line}>.  Line skipped.")
 
 
 #=====================================================================================
@@ -710,8 +614,6 @@ Loaded content is added to and/or modifies any previously loaded content.
                     self.sections_list.append(section_name)
                 for key in param_dict:
                     self.cfg[section_name][key] = param_dict[key]
-        # except Exception as e:
-        #     raise ConfigError (f"Failed loading dictionary into cfg around key <{key}>")
         except Exception:
             raise ConfigError (f"Failed loading dictionary into cfg around key <{key}>")
 
@@ -748,8 +650,9 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 `param` (str)
 - String name of param to be fetched from cfg
 
-`fallback` (as-expected type, default None)
+`fallback` (any, default effectively `None`, technically '_nofallback')
 - if provided, is returned if `param` does not exist in cfg
+- No type enforcement - the fallback value need not be in the `types` list.
 
 `types` (single or list of as-expected types, default '[]' (any type accepted))
 - if provided, a ConfigError is raised if the param's value type is not in the list of expected types
@@ -783,7 +686,7 @@ This can lead to cleaner tool script code.  Either access method may be used, al
                     _value = self.defaults[param]
 
         if _value is None:
-            if fallback != "_nofallback":
+            if fallback != '_nofallback':
                 return fallback
             else:
                 raise ConfigError (f"Param <[{section}] {param}> not in <{self.config_file}> and no default or fallback.")
@@ -834,7 +737,7 @@ modifications of the config file then the modified content will be reloaded into
 `param` (str, default '')
 - The param name, if modifying an existing param or adding a new param
 
-`value` (as-expected type, default '')
+`value` (any, default '')
 - The new value to be applied to an existing param, or an added param
 - Any comment text (after a '#') in the new value will be prepended to any existing comment text
 
@@ -857,7 +760,7 @@ modifications of the config file then the modified content will be reloaded into
 
 
 ### Behaviors and rules
-- **How modify_config works with multi-line params -**If a multi-line param is modified, the new value is
+- **How modify_config works with multi-line params -** If a multi-line param is modified, the new value is
 written out on a single line, and the continuation lines for the original definition remain in place.
 This effectively turns the continuation lines into a new param definition, which is usually benign.  Check
 for param name conflicts.
@@ -866,17 +769,19 @@ It may be necessary to add a `time.sleep(0.5)` delay between saving the modified
 reload call to avoid multiple config reloads.
         """
 
+        line_format_re = re.compile(r'(\s*)([^\s=:]+)([\s=:]+)([^#]+)(.*)')
+
         if self.config_file is None:
             raise ConfigError ("Config file is None. Cannot modify config not loaded from a file.")
 
-        if self.config_content == "":
+        if self.config_content == '':
             self.config_content = self.config_full_path.read_text()
         found_param = False
-        updated_content = ""
+        updated_content = ''
         value = str(value)
 
-        for line in self.config_content.split("\n"):
-            out = CFGLINE2.match(line)
+        for line in self.config_content.split('\n'):
+            out = line_format_re.match(line)
             if out:
                 # print (f"1: <{out.group(1)}>")    # Any leading whitespace
                 # print (f"2: <{out.group(2)}>")    # param
@@ -885,7 +790,7 @@ reload call to avoid multiple config reloads.
                 # print (f"5: <{out.group(5)}>")    # comment
 
                 if out.group(2) != param:
-                    updated_content += line + "\n"
+                    updated_content += line + '\n'
                 else:
                     found_param = True
                     if remove == True:
@@ -898,14 +803,14 @@ reload call to avoid multiple config reloads.
                         len_new_whitespace = 1
                     if len_current_whitespace == 0:
                         len_new_whitespace = 0
-                    updated_content += out.group(1) + out.group(2) + out.group(3) + value + ' '*len_new_whitespace + out.group(5) + "\n"
+                    updated_content += out.group(1) + out.group(2) + out.group(3) + value + ' '*len_new_whitespace + out.group(5) + '\n'
             else:
-                updated_content += line + "\n"
+                updated_content += line + '\n'
 
         if found_param == False:
             if add_if_not_existing == True:
                 updated_content += f"{param}    {value}\n"
-            elif param==""  and  value==""  and save==True: # Save-only call
+            elif param==''  and  value==''  and  save==True: # Save-only call
                 pass
             else:
                 logging.warning (f"Modification of param <{param}> failed - not found in config file.  Modification skipped.")
@@ -913,8 +818,8 @@ reload call to avoid multiple config reloads.
         self.config_content = updated_content[:-1]          # Avoid adding extra \n at end of file
 
         if save:
-            self.config_full_path.write_text(self.config_content) # + "\n")
-            self.config_content = ""
+            self.config_full_path.write_text(self.config_content)
+            self.config_content = ''
 
 
 #=====================================================================================
@@ -953,11 +858,11 @@ reload call to avoid multiple config reloads.
                     cfg_list += f"{key:20} = '''{self.cfg[key]}'''\n"
                 else:
                     cfg_list += f"{key:20} = {self.cfg[key]}\n"
-        cfg_list += f"\n[DEFAULT]\n"
+        cfg_list += '\n[DEFAULT]\n'
         for key in self.defaults:
             cfg_list += f"{key:20} = {self.defaults[key]}\n"
         for section in self.sections_list:
-            cfg_list += f"\n[{section}]\n"
+            cfg_list += f'\n[{section}]\n'
             for key in self.cfg[section]:
                 cfg_list += f"{key:20} = {self.cfg[section][key]}\n"
         
@@ -1050,8 +955,9 @@ output:
         stats += f".config_full_path       :  {self.config_full_path}\n"
         stats += f".config_timestamp       :  {self.config_timestamp}\n"
         stats += f".sections_list          :  {self.sections_list}\n"
+        stats += f".force_str              :  {self.force_str}\n"
+        stats += f".secondary_config       :  {self.secondary_config}\n"
         stats += f"core.tool.log_dir_base  :  {core.tool.log_dir_base}\n"
-        # stats += f"tool.log_full_path  :  {tool.log_full_path}\n"
         return stats
 
 
@@ -1066,6 +972,10 @@ output:
 ## dump () - Return the formatted content of the cfg dictionary
 
 ***config_item() class member function***
+
+
+### Returns
+- str type pretty formatted content of the cfg dictionary, along with any sections and defaults
         """
 
         cfg_list = "***** Section [] *****\n"

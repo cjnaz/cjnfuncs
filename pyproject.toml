@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.5b2"
+version = "2.5rc1"
+    # 2.5rc1 - Final cleanup
     # 2.5b2 - Tuneup, adjust docs.  Pre final cleanup.
     # 2.5b1 - configman config file parser refactor - multi-line, quoted strings support
     # 2.4.2b1 - touched mungePath & configman doc
