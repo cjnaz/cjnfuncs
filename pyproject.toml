@@ -5,20 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.5rc1"
-    # 2.5rc1 - Final cleanup
-    # 2.5b2 - Tuneup, adjust docs.  Pre final cleanup.
-    # 2.5b1 - configman config file parser refactor - multi-line, quoted strings support
-    # 2.4.2b1 - touched mungePath & configman doc
-    # 2.4.1 - resource_lock only init lock_info if not existing
-    # 2.4.1b1 - resource_lock only init lock_info if not existing
-    # 2.4 - release
-    # 2.4rc2 - check_path_exists() exception fix for unmounted network path (OSError: [Errno 19] No such device)
-    # 2.4rc1 - doc fix on setuplogging()
-    # 2.4b4 - resourcelock closed attribute
-    # 2.4b3 - Added lock_info to resource_lock
-    # 2.4b2 - Added where_called to resource_lock unget for debugging aid
-    # 2.4b1 - Added Twilio support to snd_notif
+version = "2.5"
+    # 2.5 - configman config file parser refactor - multi-line, quoted strings support
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
 requires-python = ">=3.6"       # Centos 7 uses 3.6.8
