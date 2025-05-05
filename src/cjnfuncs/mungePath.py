@@ -11,7 +11,9 @@
 import os.path
 from pathlib import Path, PurePath
 from concurrent.futures import ThreadPoolExecutor #, TimeoutError
-from cjnfuncs.core import logging
+# from cjnfuncs.core import logging
+from .core import logging
+from .rwt import run_with_timeout
 
 
 #=====================================================================================
@@ -123,7 +125,9 @@ is raised if you attempt to mkdir on top of an existing file.
         self.full_path = Path(in_path_pp)
 
         self.name = self.full_path.name
+        # print (1, logging.getLogger().level)
         self.refresh_stats()
+        # print (2, logging.getLogger().level)
 
 
 #=====================================================================================
@@ -146,6 +150,7 @@ happen on the filesystem.  Call refresh_stats() as needed.
 - The instance handle is returned so that refresh_stats() may be used in-line.
         """
         self.exists = check_path_exists(self.full_path)
+        # self.exists = run_with_timeout (self.full_path.exists, rwt_timeout=1)
         self.is_absolute = self.full_path.is_absolute()
         self.is_relative = not self.is_absolute
         try:
@@ -200,10 +205,19 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
     """
 
     _path = Path(inpath)
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(_path.exists)
-        try:
-            return future.result(timeout)
-        except Exception as e: #TimeoutError:
-            logging.debug(f"Exception - {e}")
-            return False
+
+    try:
+        return run_with_timeout (_path.exists, rwt_timeout=timeout)
+    except Exception as e: #TimeoutError:
+        logging.debug(f"Exception - {e}")
+        return False
+
+
+    # _path = Path(inpath)
+    # with ThreadPoolExecutor(max_workers=1) as executor:
+    #     future = executor.submit(_path.exists)
+    #     try:
+    #         return future.result(timeout)
+    #     except Exception as e: #TimeoutError:
+    #         logging.debug(f"Exception - {e}")
+    #         return False

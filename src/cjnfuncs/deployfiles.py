@@ -14,7 +14,7 @@ from pathlib import PurePath
 import shutil
 import __main__
 
-from cjnfuncs.core import logging
+from .core import logging
 from .mungePath import mungePath, check_path_exists
 import cjnfuncs.core as core
 

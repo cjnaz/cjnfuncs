@@ -16,8 +16,10 @@ import platform
 from pathlib import Path
 import __main__
 import appdirs
+import datetime
 
-from .mungePath import mungePath
+# from .mungePath import mungePath
+# from .timevalue import timevalue
 
 
 # Configs / Constants
@@ -100,13 +102,15 @@ found then user-specific is assumed.  No directories are created.
 - For a `user` setup, the `.log_dir_base` is initially set to the `.user_data_dir` (a variance from XDG spec).
 If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
-Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
+Thus, for a `user` setup, logging defaults to the configuration directory.  This is a 
 style variance, and can be reset in the tool script by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
-other directory) before calling cjnfuncs.configman.loadconfig() or setuplogging().
+other directory) before a subsequent call to cjnfuncs.configman.loadconfig() or setuplogging().
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
-- The `.log_dir`, `.log_file`, and `.log_full_path` attributes are set by calls to setuplogging() 
-  (or loadconfig() which in turn calls setuplogging()) and are initially set to `None` by set_toolname().
+- The last operation within `set_toolname()` is to call `setuplogging()`, which initializes the root
+logger to log to the console.  The `.log_dir` and `.log_file` attributes are set to `None`, while 
+`.log_full_path` is set to `__console__`.  Having `set_toolname()` call `setuplogging()` ensure that any logging events
+before a user-code call to `setuplogging()` or `loadconfig()` are properly logged.
 
 - For a `site` setup, the `.site_data_dir` is set to `/usr/share/<toolname>`.  The XDG spec states that 
 the `.cache_dir` and `.state_dir` should be in the root user tree; however, set_toolname() sets these two 
@@ -150,8 +154,8 @@ also to the `.site_data_dir`.
             self.cache_dir      = self.user_cache_dir
             self.log_dir_base   = self.user_data_dir
 
-        self.log_file = self.log_dir = self.log_full_path = None
-
+        # self.log_file = self.log_dir = self.log_full_path = None    # TODO immediately whacked by setuplogging call
+        setuplogging()
 
     def __repr__(self):
         stats = ""
@@ -179,7 +183,7 @@ also to the `.site_data_dir`.
         stats +=  f".log_dir_base     :  {self.log_dir_base}\n"
         stats +=  f".log_dir          :  {self.log_dir}\n"
         stats +=  f".log_file         :  {self.log_file}\n"
-        stats +=  f".log_full_path    :  {self.log_full_path}" #\n"
+        stats +=  f".log_full_path    :  {self.log_full_path}"
         return stats
 
 
@@ -235,22 +239,30 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 - NoneType
     """
 
+    from .mungePath import mungePath
+
+
     _lfp = "__console__"
     if call_logfile_wins == False  and  config_logfile:
+        # logging.warning("Before  _lfp = mungePath(config_logfile, tool.log_dir_base)")
         _lfp = mungePath(config_logfile, tool.log_dir_base)
+        # logging.warning("After   _lfp = mungePath(config_logfile, tool.log_dir_base)")
 
     if call_logfile_wins == True   and  call_logfile:
         _lfp = mungePath(call_logfile, tool.log_dir_base)
 
     logger = logging.getLogger()
-    logger.handlers.clear()
+    # print (f"handlers before clear:  {logger.handlers}")
+    # logger.handlers.clear()
 
     if _lfp == "__console__":
+        # logging.warning ("set up console logger")
         _fmt = CONSOLE_LOGGING_FORMAT  if ConsoleLogFormat == None  else  ConsoleLogFormat
         log_format = logging.Formatter(_fmt, style='{')
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(log_format)
+        logger.handlers.clear()
         logger.addHandler(handler)
 
         tool.log_dir = None
@@ -258,14 +270,104 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
         tool.log_full_path = "__console__"
 
     else:
+        # logging.warning ("Before mungePath force make of _lfp.parent")
         mungePath(_lfp.parent, mkdir=True)      # Force make the target dir
+        # logging.warning ("After  mungePath force make of _lfp.parent")
         _fmt = FILE_LOGGING_FORMAT  if FileLogFormat == None  else  FileLogFormat
         log_format = logging.Formatter(_fmt, style='{')
         handler = logging.FileHandler(_lfp.full_path, "a")
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(log_format)
+        logger.handlers.clear()
         logger.addHandler(handler)
     
         tool.log_dir = _lfp.parent
         tool.log_file = _lfp.name
         tool.log_full_path = _lfp.full_path
+
+    # logger.propagate = False
+    # print (f"handlers bottom of  setuplogging:  {logger.handlers}")
+    # logging.warning("Bottom of setuplogging")
+
+
+
+#=====================================================================================
+#=====================================================================================
+#   s e t _ l o g g i n g _ l e v e l ,   r e s t o r e _ l o g g i n g _ l e v e l
+#=====================================================================================
+#=====================================================================================
+
+ll_history = []
+def set_logging_level(new_level):
+    global ll_history
+    ll_history.append(logging.getLogger().level)
+    logging.getLogger().setLevel(new_level)
+
+
+
+def restore_logging_level():
+    global ll_history
+    try:
+        logging.getLogger().setLevel(ll_history.pop())
+    except:
+        logging.getLogger().setLevel(logging.WARNING)
+
+
+
+
+#=====================================================================================
+#=====================================================================================
+#   p e r i o d i c _ l o g
+#=====================================================================================
+#=====================================================================================
+
+cats = {}
+
+class _periodic_log:
+    def __init__(self, log_interval, log_level):
+
+        from .timevalue import timevalue
+
+        self.next_dt = datetime.datetime.now()
+        self.log_interval = datetime.timedelta(seconds=timevalue(log_interval).seconds)
+        self.log_level = log_level
+
+    def plog(self, message, log_level, cat):
+        now_dt = datetime.datetime.now()
+        if now_dt > self.next_dt:
+            if log_level is None:
+                log_level = self.log_level
+            logging.log(log_level, f"[PLog-{cat}] {message}")
+            self.next_dt = now_dt + self.log_interval
+
+
+def periodic_log(message, category='Cat1', log_interval='10m', log_level=None):
+    """## periodic_log(message, category='Cat1', log_interval='10m', log_level=30)
+
+Log a message infrequently, so as to avoid flooding the log
+
+### Args
+
+`message` (str)
+- The message text to be logged, if the log_interval has expired
+
+`category` (int or str, default 'Cat1')
+- Allows for multiple, independent concurrent periodic_log streams
+- `category` should typically int or str.  Used as a dict key.
+
+`log_interval` (timevalue, default '10m')
+- How often this category's messages will be logged.  Only remembered on the first log call
+for this category (ignored of subsequent calls)
+
+`log_level` (int, default set on first call for this category, default logging.WARNING/30)
+- Remembered from first periodic_log call for this category
+- May be overridden on subsequent calls for this category
+      """
+    if category not in cats:
+        if log_level is None:
+            log_level = logging.WARNING
+        xx = _periodic_log(log_interval, log_level)
+        cats[category] = xx
+    
+    p_logger = cats[category]
+    p_logger.plog(message, log_level, category)

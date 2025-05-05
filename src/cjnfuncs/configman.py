@@ -10,6 +10,7 @@
 
 import re
 import ast
+import sys
 from pathlib import Path
 
 from .core      import setuplogging, logging, ConfigError
@@ -19,6 +20,12 @@ import cjnfuncs.core as core
 # Configs / Constants
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 IO_RETRY_COUNT         = 3
+
+def log_handlers():
+    xx = ''
+    for h in logging.getLogger().handlers:
+        xx += f"{h}'\n'"
+    return xx
 
 
 #=====================================================================================
@@ -122,6 +129,16 @@ directory.  With `remap_logdirbase=True`, the log dir will also be set to the to
         self.current_section_name = ''
         self.sections_list = []
         self.defaults = {}
+
+        # if not secondary_config:            # Suppress debug/info logging before setuplogging is called
+        #     logger = logging.getLogger()
+        #     handler = logging.StreamHandler(sys.stdout)
+        #     handler.setLevel(logging.WARNING)
+        #     # handler.setFormatter(log_format)
+        #     logger.handlers.clear()
+        #     logger.addHandler(handler)
+
+            # logging.getLogger().setLevel(logging.WARNING)
 
         if config_file == None:
             self.config_file        = None
@@ -326,12 +343,15 @@ cannot be accessed.
         global initial_logging_setup_done
         global preexisting_loglevel
 
+        # print ("top 1 of loadconfig", log_handlers())
+
         if not initial_logging_setup_done:
             # Initial logging will go to the console if no call_logfile is specified (and call_logfile_wins) on the initial loadconfig call.
             console_lf = self.getcfg('ConsoleLogFormat', None)
             file_lf = self.getcfg('FileLogFormat', None)
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
             initial_logging_setup_done = True
+        # print ("top 2 of loadconfig", log_handlers())
 
         config = self.config_full_path
 
@@ -384,7 +404,11 @@ cannot be accessed.
         # Load the config
         logging.info (f"Loading  <{config}>")
         string_blob = config.read_text()
+        # print ("before read_string", logging.getLogger().level)  # TODO cleanup
+        # print ("before read_string", log_handlers())
         self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
+        # print ("after read_string", logging.getLogger().level)  # TODO cleanup
+        # print ("after read_string", log_handlers())
 
 
         # Operations only for finishing a top-level call
@@ -412,7 +436,7 @@ cannot be accessed.
                 logging.getLogger().setLevel(preexisting_loglevel)
 
         # Secondary configs may not modify the Loglevel
-        if self.secondary_config:
+        if self.secondary_config  and  not isimport:    # TODO
             logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
             logging.getLogger().setLevel(preexisting_loglevel)
 
@@ -517,10 +541,15 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
             if param_name != '':
                 if param_name.lower().startswith('import'):             # import line
+                    # print ("before import mungePath call", log_handlers())
                     target = mungePath(value_portion, self.config_dir)
+                    # print ("after  import mungePath call", log_handlers())
                     try:
-                        imported_config = config_item(target.full_path)
+                        imported_config = config_item(target.full_path, secondary_config=True)
+                        # print ("before  import loadconfig call", log_handlers())
                         imported_config.loadconfig(ldcfg_ll, isimport=True)
+                        # print ("after  import loadconfig call", log_handlers())
+                        # print ("after mP in readstring import", logging.getLogger().level)  # TODO cleanup
                         for key in imported_config.cfg:
                             if self.current_section_name == '':
                                 self.cfg[key] = imported_config.cfg[key]
@@ -545,7 +574,6 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                             pass                                        # default to str
                     self._add_key(param_name, value_portion, self.current_section_name)
                     logging.debug (f"Loaded {param_name} = <{value_portion}>  ({type(value_portion)})")
-
 
 
 #=====================================================================================

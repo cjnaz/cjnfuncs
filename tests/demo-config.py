@@ -257,6 +257,7 @@ if args.test == 0  or  args.test == 2:
 
 def do_base_setup(config_load_ll=30):
     global config
+    set_toolname(TOOLNAME)                  # Reset for every test to ensure same results for -t 0 and -t n
     logging.getLogger().setLevel(20)
     deploy_files([
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
@@ -265,6 +266,7 @@ def do_base_setup(config_load_ll=30):
     config = config_item(CONFIG_FILE)
     print (f"\nLoad config {config.config_full_path}")
     config.loadconfig(ldcfg_ll=config_load_ll)
+    # print ("do_base_setup", logging.getLogger().level)  # TODO cleanup
 
 
 #===============================================================================================

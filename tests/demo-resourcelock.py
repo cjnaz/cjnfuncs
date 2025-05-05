@@ -22,7 +22,7 @@ from cjnfuncs.core import set_toolname, setuplogging, logging
 from cjnfuncs.resourcelock import resource_lock
 
 set_toolname("demo-resourcelock")
-setuplogging()
+# setuplogging()
 logging.getLogger().setLevel(logging.DEBUG)
 
 LOCK_NAME = 'test_lock'

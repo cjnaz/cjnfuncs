@@ -1,61 +1,60 @@
 
 ***** 0 - Lock instantiation
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2024-10-20 16:19:53.372640 - Lock in test #7>
 
 ***** 1 - Check the initial lock state
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2025-05-04 21:00:27.736330 - cli>
 is_lock returned    <False> - Expecting <False> for initial unlocked test case, and <True> for initial locked test case
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
 
 ***** 2 - Get the lock
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2024-10-20 16:20:20.202601 - Lock in test #2>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2025-05-04 21:01:31.066066 - Lock in test #2>
 get_lock returned   <True> - Expecting <True> if lock request is successful
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2024-10-20 16:20:20.202601 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2025-05-04 21:01:31.066066 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
 
 ***** 3 - Get the lock a second time, same_process_ok=False
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request timed out  - Current owner   <2024-10-20 16:20:20.202601 - Lock in test #2>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request timed out  - Current owner   <2025-05-04 21:01:31.066066 - Lock in test #2>
 get_lock returned   <False> - Expecting <False> Repeated lock request fails
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2024-10-20 16:20:20.202601 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2025-05-04 21:01:31.066066 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
 
 ***** 4 - Get the lock a third time, same_process_ok=True
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock already acquired   - Prior grant     <2024-10-20 16:20:20.202601 - Lock in test #2>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock already acquired   - Prior grant     <2025-05-04 21:01:31.066066 - Lock in test #2>
 get_lock returned   <True> - Expecting <True> Repeated lock request passes with switch
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2024-10-20 16:20:20.202601 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2025-05-04 21:01:31.066066 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
 
 ***** 5 - Unget the lock
    resourcelock.unget_lock           -    DEBUG:  <test_lock> lock released  <In test #5>
 unget_lock returned <True> - Expecting <True> if lock is successfully released
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2024-10-20 16:20:20.202601 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2025-05-04 21:01:31.066066 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
 
 ***** 6 - Unget the lock a second time
    resourcelock.unget_lock           -    DEBUG:  <test_lock> Extraneous lock unget request ignored  <In test #6>
 unget_lock returned <False> - Expecting <False> since the lock is not currently set
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2024-10-20 16:20:20.202601 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2025-05-04 21:01:31.066066 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
 
 ***** 7 - Attempt to Unget the lock not owned by current process
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2024-10-20 16:20:20.304476 - Lock in test #7>
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2024-10-20 16:20:20.304476 - Lock in test #7>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2025-05-04 21:01:31.166924 - Lock in test #7>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2025-05-04 21:01:31.166924 - Lock in test #7>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
    resourcelock.unget_lock           -    DEBUG:  <test_lock> lock unget request ignored - lock not owned by current process  <In test #7>
 unget_lock returned <False> - Expecting <False> since lock not obtained by current process
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2024-10-20 16:20:20.304476 - Lock in test #7>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2025-05-04 21:01:31.166924 - Lock in test #7>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
 
 ***** 8 - Force Unget
    resourcelock.unget_lock           -    DEBUG:  <test_lock> lock force released  <In test #8>
 unget_lock returned <True> - Expecting <True> since lock was set and forced unget
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2024-10-20 16:20:20.304476 - Lock in test #7>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2025-05-04 21:01:31.166924 - Lock in test #7>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
 
 ***** 9 - Force Unget when lock not set
    resourcelock.unget_lock           -    DEBUG:  <test_lock> Extraneous lock unget request ignored  <In test #9>
 unget_lock returned <False> - Expecting <False> since lock was not set
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2024-10-20 16:20:20.304476 - Lock in test #7>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2025-05-04 21:01:31.166924 - Lock in test #7>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
    resourcelock.close                -    DEBUG:  <test_lock> semaphore closed
 
