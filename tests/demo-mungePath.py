@@ -18,12 +18,12 @@ import shutil
 import os
 from pathlib import Path, PurePath
 
-from cjnfuncs.core     import set_toolname
+from cjnfuncs.core     import set_toolname, set_logging_level, setuplogging
 from cjnfuncs.mungePath import mungePath
 import cjnfuncs.core as core
 
 set_toolname("mytool")
-
+setuplogging(ConsoleLogFormat="{asctime} {module:>22}.{funcName:20} {levelname:>8}:  {message}")
 
 def touch (file_path):
     file_path.open('w').close()
@@ -46,6 +46,10 @@ def wrapper (in_path="", base_path="", mkdir=False, note=None):
     xx = mungePath(in_path=in_path, base_path=base_path, mkdir=mkdir)
     print(xx)
     return xx
+
+set_logging_level(10)
+wrapper ('/mnt/share/dev/gws/log', '', note="00 - its there")
+exit()
 
 print ("\n\n***** File paths relative to a base path")
 wrapper ("xyz/file.txt", ".",                               note="01 - Returns absolute path to shell cwd")

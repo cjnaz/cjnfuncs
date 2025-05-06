@@ -149,17 +149,50 @@ happen on the filesystem.  Call refresh_stats() as needed.
 ### Returns
 - The instance handle is returned so that refresh_stats() may be used in-line.
         """
-        self.exists = check_path_exists(self.full_path)
-        # self.exists = run_with_timeout (self.full_path.exists, rwt_timeout=1)
-        self.is_absolute = self.full_path.is_absolute()
-        self.is_relative = not self.is_absolute
+        # logging.info ("Start  refresh_stats")
+        # self.exists = check_path_exists(self.full_path)
         try:
-            self.is_dir =  self.full_path.is_dir()
-            self.is_file = self.full_path.is_file()
-        except:     # Trap if the path does not exist
-            self.is_dir =  False
+            self.exists = run_with_timeout (self.full_path.exists, rwt_timeout=1)
+        except Exception as e: #TimeoutError:
+            logging.debug(f"Exception - {e}")
+            self.exists = False
+        self.is_absolute = self.full_path.is_absolute()
+        # logging.info ("After  is_absolute")
+        self.is_relative = not self.is_absolute
+
+        try:
+            self.is_dir = run_with_timeout (self.full_path.is_dir, rwt_timeout=1)
+        except Exception as e: #TimeoutError:
+            logging.debug(f"Exception - {e}")
+            self.is_dir = False
+        # logging.info ("After  is_dir")
+
+        try:
+            self.is_file = run_with_timeout (self.full_path.is_file, rwt_timeout=1)
+        except Exception as e: #TimeoutError:
+            logging.debug(f"Exception - {e}")
             self.is_file = False
+        # logging.info ("After  is_file")
+
+        # logging.info ("Finish refresh_stats")
         return self
+
+        # logging.info ("Start  refresh_stats")
+        # self.exists = check_path_exists(self.full_path)
+        # # self.exists = run_with_timeout (self.full_path.exists, rwt_timeout=1)
+        # self.is_absolute = self.full_path.is_absolute()
+        # logging.info ("After  is_absolute")
+        # self.is_relative = not self.is_absolute
+        # try:
+        #     self.is_dir =  self.full_path.is_dir()
+        #     logging.info ("After  is_dir")
+        #     self.is_file = self.full_path.is_file()
+        #     logging.info ("After  is_file")
+        # except:     # Trap if the path does not exist
+        #     self.is_dir =  False
+        #     self.is_file = False
+        # logging.info ("Finish refresh_stats")
+        # return self
 
 
     def __repr__(self):

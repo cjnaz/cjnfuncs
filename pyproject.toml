@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.6b1"
+version = "2.6b2"
+    # 2.6b2 - all functional and almost stable
     # 2.6b1 - rwt module, set/restore_logging_level and periodic_log added to core
     # 2.5 - configman config file parser refactor - multi-line, quoted strings support
 description = "A collection of core functions for tool script writing"

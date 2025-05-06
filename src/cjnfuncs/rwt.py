@@ -48,7 +48,7 @@ On timeout kill the process by default.
 
 `rwt_debug` Additional kwarg (bool (lose type))
 - Log run_with_timeout call arguments and mode setups
-- False value is bool False, int 0, or None.  Else evaluates True.
+- False value is bool False, int 0, or None.  Else evaluates True. TODO
 
 ### Returns
 - With no timeout or exception, returns the value returned from `func`
@@ -139,6 +139,7 @@ On timeout kill the process by default.
 
     #--------- Top_level ---------
     # logging.debug (f"T0 - {func}, {args}, {kwargs}")
+    # logging.info(f"Start  rwt  {func} {args}")
     _timeout = 1                    # Default
     if 'rwt_timeout' in kwargs:
         _timeout = kwargs['rwt_timeout']
@@ -186,6 +187,7 @@ On timeout kill the process by default.
             if _debug:      # TODO
                 # pass
                 restore_logging_level()
+            # logging.info(f"Finish rwt  {func} {args}  timeout")
             raise TimeoutError (f"Function <{func.__name__}> timed out after {_timeout} seconds (killed)")
         else:
             raise TimeoutError (f"Function <{func.__name__}> timed out after {_timeout} seconds (not killed)")
@@ -193,6 +195,7 @@ On timeout kill the process by default.
     # if _debug:
         # pass
     restore_logging_level()
+    # logging.info(f"Finish rwt  {func} {args}  success")
     if not worker_to_rwt_q.empty():
         status, payload = worker_to_rwt_q.get()
 
