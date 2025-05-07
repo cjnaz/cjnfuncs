@@ -156,10 +156,20 @@ if args.test == 0  or  args.test == tnum:
     dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout < rwt_timeout - Exception subprocess.TimeoutExpired",
         subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=0.5, capture_output=True, text=True, rwt_timeout=3, rwt_debug=debug_flag)
 
+tnum = '4a'
+if args.test == 0  or  args.test == tnum:
+    dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout < rwt_timeout, rwt_ntries=2 - Exception subprocess.TimeoutExpired",
+        subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=0.5, capture_output=True, text=True, rwt_timeout=3, rwt_debug=debug_flag, rwt_ntries=2)
+
 tnum = 5
 if args.test == 0  or  args.test == tnum:
     dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout > rwt_timeout - Exception TimeoutError",
        subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=3, capture_output=True, text=True, rwt_timeout=0.5, rwt_debug=debug_flag)
+
+tnum = '5a'
+if args.test == 0  or  args.test == tnum:
+    dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout > rwt_timeout, rwt_ntries=2 - Exception TimeoutError",
+       subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=3, capture_output=True, text=True, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=2)
 
 tnum = 6
 if args.test == 0  or  args.test == tnum:
@@ -182,13 +192,18 @@ if args.test == 0  or  args.test == tnum:
 
 tnum = 9
 if args.test == 0  or  args.test == tnum:
-    dotest(tnum, "Invalid rwt_timeout - Exception ValueError, File 'FileTouched_2' not created",
-       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_2', rwt_timeout='abc', rwt_kill=False, rwt_debug=debug_flag)
+    dotest(tnum, "Invalid rwt_timeout - Exception ValueError, File 'FileTouched_9' not created",
+       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9', rwt_timeout='abc', rwt_kill=False, rwt_debug=debug_flag)
+
+tnum = '9a'
+if args.test == 0  or  args.test == tnum:
+    dotest(tnum, "Invalid rwt_ntries - Exception ValueError, File 'FileTouched_9a' not created",
+       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9a', rwt_ntries='abc', rwt_debug=debug_flag)
 
 tnum = 10
 if args.test == 0  or  args.test == tnum:
-    dotest(tnum, "Invalid rwt_kill - Exception ValueError, File 'FileTouched_3' not created",
-       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_3', rwt_kill='abc', rwt_debug=debug_flag)
+    dotest(tnum, "Invalid rwt_kill - Exception ValueError, File 'FileTouched_10' not created",
+       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_10', rwt_kill='abc', rwt_debug=debug_flag)
 
 tnum = 11
 if args.test == 0  or  args.test == tnum:
@@ -201,7 +216,7 @@ if args.test == 0  or  args.test == tnum:
     t12a = Path(f'{test_dir}/t12a')
     t12a.touch()
     t12b = Path(f'{test_dir}/t12b')
-    dotest(tnum, "shutil.copy, twt_debug True- ",
+    dotest(tnum, "shutil.copy, rwt_debug True - passes",
         shutil.copy, t12a, t12b, rwt_timeout=1, rwt_debug=debug_flag)
 
 tnum = 13
@@ -209,5 +224,6 @@ if args.test == 0  or  args.test == tnum:
     t13a = Path(f'{test_dir}/t13a')
     t13a.touch()
     t13b = Path(f'{test_dir}/t13b')
-    dotest(tnum, "shutil.copy, rwt_debug False - ",
+    dotest(tnum, "shutil.copy, rwt_debug False - passes",
        shutil.copy, t13a, t13b, rwt_timeout=1)
+
