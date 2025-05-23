@@ -18,7 +18,7 @@ import shutil
 import os
 from pathlib import Path, PurePath
 
-from cjnfuncs.core     import set_toolname, set_logging_level, setuplogging
+from cjnfuncs.core      import set_toolname, set_logging_level, setuplogging
 from cjnfuncs.mungePath import mungePath
 import cjnfuncs.core as core
 
@@ -35,7 +35,7 @@ def remove_tree (path):
     shutil.rmtree(path)
 
 
-def wrapper (in_path="", base_path="", mkdir=False, note=None):
+def wrapper (in_path="", base_path="", mkdir=False, note=None, set_attributes=True):
     """
     Operates exactly the same as mungePath, with the additional note field and results stats.
     """
@@ -43,13 +43,11 @@ def wrapper (in_path="", base_path="", mkdir=False, note=None):
     if note:
         print ("NOTE: ", note)
     print (f"Given:\n in_path   :  <{in_path}>\n base_path :  <{base_path}>\n mkdir     :  <{mkdir}>")
-    xx = mungePath(in_path=in_path, base_path=base_path, mkdir=mkdir)
+    xx = mungePath(in_path=in_path, base_path=base_path, mkdir=mkdir, set_attributes=set_attributes)
     print(xx)
     return xx
 
 set_logging_level(10)
-wrapper ('/mnt/share/dev/gws/log', '', note="00 - its there")
-exit()
 
 print ("\n\n***** File paths relative to a base path")
 wrapper ("xyz/file.txt", ".",                               note="01 - Returns absolute path to shell cwd")
@@ -116,3 +114,6 @@ wrapper ("./../file.txt", '/tmp',                           note="29 - Returns a
 wrapper ("./xyz/file.txt", '/tmp',                          note="30 - Returns absolute path to <cwd>/xyz/file")
 
 wrapper ("./xyz/wxy", '/tmp',   mkdir=True,                 note="31 - mkdir <cwd>/xyz/wxy")
+
+wrapper ('nosuchfile', './',                                note="32 - abs path - attributes not set", set_attributes=False)
+wrapper ('nosuchfile', '',                                  note="33 - rel path - attributes not set", set_attributes=False)

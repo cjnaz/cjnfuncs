@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "2.6b3"
+version = "3.0b1"
+    # 3.0b1 - Added rwt module, set/restore_logging_level and periodic_log added to core, mungePath set_attributes switch
     # 2.6b3 - rwt added ntries
     # 2.6b2 - all functional and almost stable
     # 2.6b1 - rwt module, set/restore_logging_level and periodic_log added to core

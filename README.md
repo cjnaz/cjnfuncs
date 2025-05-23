@@ -6,15 +6,16 @@ NOTE:  Since relative links to other .md files do not work on PyPI, please go to
 
 module | Description/Purpose
 --|--
-[core](core.md)               | Set up the base environment
-[configman](configman.md)     | Feature-rich configuration file toolset
-[timevalue](timevalue.md)     | Handle time values with units, such as '5m' (5 minutes)
-[mungePath](mungePath.md)     | Ease-of-use pathlib extension for constructing and manipulating file paths
-[deployfiles](deployfiles.md) | Push bundled setup files within a package to the proper user/system locations
-[resourcelock](resourcelock.md) | Inter-process resource lock mechanism
-[SMTP](SMTP.md)               | Send notification and email messages
+[core](core.md)                   | Set up the base environment
+[configman](configman.md)         | Feature-rich configuration file toolset
+[timevalue](timevalue.md)         | Handle time values with units, such as '5m' (5 minutes)
+[mungePath](mungePath.md)         | Ease-of-use pathlib extension for constructing and manipulating file paths
+[rwt / run_with_timeout](rwt.md)  | Execute any function with an enforced timeout
+[deployfiles](deployfiles.md)     | Push bundled setup files within a package to the proper user/system locations
+[resourcelock](resourcelock.md)   | Inter-process resource lock mechanism
+[SMTP](SMTP.md)                   | Send notification and email messages
 
-Developed and tested on Python 3.6.8, and supported on all higher Python versions.
+Developed and tested on Python 3.11.9 and supported on all higher Python versions.
 Developed on Linux.  Not supported on Windows (posix-ipc module dependency).
 
 In this documentation, "tool script" refers to a Python project that imports and uses cjnfuncs. Some may be simple scripts, and others may themselves be installed packages.
@@ -38,6 +39,7 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 <br/>
 
 ## Revision history
+- 3.0 250523 - Added run_with_timeout, set_logging_level, restore_logging_level, periodic_logging.  Changes to mungePath.
 - 2.5 250206 - Added multi-line and quoted string support to configman
 - 2.4.1 241118 - resource_lock only init lock_info if not existing
 - 2.4 241105 - Twilio support in snd_notif, resource_lock trace/debug features, check_path_exists exception fix

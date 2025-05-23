@@ -125,7 +125,7 @@ be cleanly used in the tool script code.
 User (`~user/`) and environment vars (`$HOME/`) are supported and expanded.
 
 
-### Parameters
+### Args
 `in_path` (Path or str, default '')
 - An absolute or relative path to a file or directory, such as `mydir/myfile.txt`
 - If `in_path` is an absolute path then the `base_path` is disregarded.
@@ -142,6 +142,14 @@ to `in_path`, and the `base_path` is disregarded.  See Special handling note, be
 `mkdir` (bool, default False)
 - Force-make a full directory path.  `base_path` / `in_path` is understood to be to a directory.
 
+set_attributes (bool, default True)
+- If True, these attributes are set: `.exists`, .is_file`, .is_dir`.
+- If False, those attributes are set to `None`.
+- These attributes are always set: `.full_path`, `.parent`, `.name`, `.is_absolute`, and `.is_relative`.
+- When accessing a remote file system and there are access issues (eg, the remote host is down) then setting `.exists`, `.is_file`, 
+and `.is_dir` can incur 1 second timeout delays each.  If these attributes are not needed by the user script then
+setting set_attributes = False can lead to faster and more stable code. Alternately, any pathlib method or attribute may be 
+directly accessed, or accessed using `run_with_timeout()`, eg `my_mungepath_inst.full_path.exists()`.
 
 ### Returns
 - Handle to `mungePath()` instance
@@ -169,7 +177,7 @@ the shell cwd.
 - **Special handling for `in_path` starting with `./`:**  Normally, paths starting with `.` are relative paths.
 mungePath interprets `in_path` starting with `./` as an absolute path reference to the shell current working 
 directory (cwd).
-Often in a tool script a user path input is passed to the `in_path` parameter.  Using the `./` prefix, a file in 
+Often in a tool script a user path input is passed to the `in_path` arg.  Using the `./` prefix, a file in 
 the shell cwd may be
 referenced, eg `./myfile`.  _Covering the cases, assuming the shell cwd is `/home/me`:_
 
@@ -203,9 +211,14 @@ is raised if you attempt to mkdir on top of an existing file.
 
 ***mungePath() class member function***
 
-The boolean status attributes (.is_absolute, .is_relative, .exists, .is_dir, and .is_file) are set 
-at the time the mungePath is created.  These attributes are not updated automatically as changes
-happen on the filesystem.  Call refresh_stats() as needed.
+The boolean status attributes (`.exists`, `.is_dir`, and `.is_file`) are set 
+at the time the mungePath instance is created (when `set_attributes=True` (the default)). 
+These attributes are not updated automatically as changes happen on the filesystem. 
+Call `refresh_stats()` as needed, or directly access the pathlib methods (or access through
+`run_with_timeout()`), eg `my_mungepath_inst.full_path.exists()`.
+
+NOTE:  `refresh_stats()` utilizes `run_with_timeout()` with `rwt_timeout=1`.  This can result in 
+up to a 3 second _hang_ if there are access issues.
 
 ### Returns
 - The instance handle is returned so that refresh_stats() may be used in-line.
@@ -218,13 +231,11 @@ happen on the filesystem.  Call refresh_stats() as needed.
 
 # check_path_exists (path, timeout=1) - With enforced timeout (no hang)
 
-pathlib.Path.exists() tends to hang for an extended period of time.  
-check_path_exists() wraps pathlib.Path.exists() with a timeout mechanism.
-
-Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-efficiently-implement-a-version-of-path-exists-with-a-timeout-on-window
+pathlib.Path.exists() tends to hang for an extended period of time when there are network access issues.
+check_path_exists() wraps `pathlib.Path.exists()` with a timeout mechanism.
 
 
-### Parameters
+### Args
 `path` (Path or str)
 - Path to a file or directory
 

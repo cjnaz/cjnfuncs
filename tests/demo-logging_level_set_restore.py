@@ -13,7 +13,7 @@ __version__ = "1.0"
 import time
 
 # cjnfuncs.core must be imported before mine, else circular import since mine imports mungePath
-from cjnfuncs.core import set_toolname, setuplogging, logging, set_logging_level, restore_logging_level
+from cjnfuncs.core import set_toolname, setuplogging, logging, set_logging_level, restore_logging_level, get_logging_level_stack
 
 set_toolname('demo_logging_level_set_restore')
 
@@ -28,6 +28,7 @@ def test_logs ():
     logging.info    ("")
     logging.warning ("")
     logging.error   ("")
+    print (f"ll_history: {get_logging_level_stack()}")
 
 
 print_test_header (1, "Initial level WARNING")

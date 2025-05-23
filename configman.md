@@ -472,7 +472,8 @@ The config_item() class provides handling of one or more config file instances. 
 
 See the loadconfig() documentation for details on config file syntax and rules.
 
-### Instantiation parameters
+
+### Instantiation args
 `config_file` (Path or str, default None)
 - Path to the configuration file, relative to the `core.tool.config_dir` directory, or an absolute path.
 - `None` may be used if the config will be loaded programmatically via `read_string()` or `read_dict()`.
@@ -571,7 +572,7 @@ the loaded config file, 2) the `call_logfile` in the `loadconfig()` call, or 3) 
 feature, and intermittent loss of access to the config file.
     
 
-### Parameters
+### Args
 `ldcfg_ll` (int, default 30 (WARNING))
 - Logging level used within `loadconfig()` code for debugging loadconfig() itself
 
@@ -628,7 +629,7 @@ regardless of whether the config file timestamp has changed
   type is stored in the `cfg` dictionary if none of the other types can be resolved for a given value_portion.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
   for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
-  getcfg() `types=[]` parameter for basic type enforcement.
+  getcfg() `types=[]` arg for basic type enforcement.
 
 - **Quoted strings** - If a value_portion cannot be resolved to a Python native type then it is loaded as a str,
   eg `My_name = George` loads George as a str.  A value_portion may be forced to be loaded as a str by using 
@@ -719,7 +720,7 @@ handles the other loading features such as LogLevel, LogFile, logging formatting
 flush_on_reload, force_flush_reload, and tolerate_missing.
 
 
-### Parameters
+### Args
 `str_blob` (str)
 - String containing the lines of config data
 
@@ -750,7 +751,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
 Loaded content is added to and/or modifies any previously loaded content.
 
-### Parameters
+### Args
 `param_dict` (dict)
 - dictionary to be loaded
 
@@ -804,7 +805,7 @@ but with 1) default & fallback support, 2) type checking, and 3) section support
 The search order for a param is 1) from the specified `section`, 2) from the `DEFAULT` section, and 3) from the 
 `fallback` value. If the param is not found in any of these locations then a ConfigError is raised.
 
-Type checking may be performed by listing one or more expected types via the optional `types` parameter.
+Type checking may be performed by listing one or more expected types via the optional `types` arg.
 If the loaded param is not one of the expected types then a ConfigError is raised.  This check may be 
 useful for basic error checking of param values, eg, making sure the return value is a float and not
 a str. (str is the loadconfig() default if the param type cannot be converted to another supported type.)
@@ -814,7 +815,7 @@ Rather, `getcfg()` raises a ConfigError if the param does not exist and no `fall
 This can lead to cleaner tool script code.  Either access method may be used, along with `x = my_config.cfg["param"]`.
 
 
-### Parameters
+### Args
 `param` (str)
 - String name of param to be fetched from cfg
 
@@ -860,7 +861,7 @@ cause the memory version to be written out to the config file.  If the script co
 modifications of the config file then the modified content will be reloaded into the cfg dictionary.
 
 
-### Parameters
+### Args
 `param` (str, default '')
 - The param name, if modifying an existing param or adding a new param
 
@@ -905,8 +906,8 @@ reload call to avoid multiple config reloads.
 
 ***config_item() class member function***
 
-### Parameter
 
+### Arg
 `savefile` (Path or str)
 - Path to the output file.
 - The config data will be written to an absolute path, or relative to the `core.tool.config_dir`
@@ -952,7 +953,7 @@ output:
 
 ***config_item() class member function***
 
-### Parameters
+### Args
 `section` (str, default '')
 - `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
 - `section = '<section_name>'` clears just that section

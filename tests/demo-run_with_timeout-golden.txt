@@ -1,7 +1,7 @@
-2025-05-06 09:09:48,535  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:32,530  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 1 - test desc - expected result
-2025-05-06 09:09:48,535                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:32,531                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   1
@@ -10,310 +10,238 @@ run_with_timeout switches:
   Function:     <built-in function print>
   args:         ('Hello', 'there', 'again')
   kwargs:       {'sep': ' blah ', 'end': ' The end.\n'}
-2025-05-06 09:09:48,538                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:48,540                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224032
-2025-05-06 09:09:48,542                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224032
-2025-05-06 09:09:48,542                    rwt._runner                 DEBUG:  R1 - Starting  2224033
+2025-05-21 23:38:32,531                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:32,542                    rwt._runner                 DEBUG:  R1  - runner_p pid 2913890
 Hello blah there blah again The end.
-2025-05-06 09:09:48,543                    rwt._worker                 DEBUG:  W4 - runner_to_worker_q msg received  2224032
-2025-05-06 09:09:48,543                    rwt._worker                 DEBUG:  W6 - pass up msg, runner_p.join(0.2)  2224032
-2025-05-06 09:09:48,544                    rwt._worker                 DEBUG:  W9 - exiting  2224032
-2025-05-06 09:09:48,545                    rwt.run_with_timeout        DEBUG:  T2 - worker_p exited without timeout
-2025-05-06 09:09:48,545  demo-run_with_timeout.dotest                WARNING:  RETURNED:
+2025-05-21 23:38:32,545                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:32,545                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-05-21 23:38:32,545  demo-run_with_timeout.dotest                WARNING:  RETURNED:
 None
 
 
-2025-05-06 09:09:48,545  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:32,546  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 2 - Subprocess ping known - Return subprocess pass result
-2025-05-06 09:09:48,545                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:32,546                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7f23532bac00>
+  Function:     <function run at 0x7f4ffebbac00>
   args:         (['ping', 'yahoo.com', '-c', '1'],)
   kwargs:       {'timeout': 3, 'capture_output': True, 'text': True}
-2025-05-06 09:09:48,545                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:48,547                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224036
-2025-05-06 09:09:48,548                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224036
-2025-05-06 09:09:48,548                    rwt._runner                 DEBUG:  R1 - Starting  2224037
-2025-05-06 09:09:48,748                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224036
-2025-05-06 09:09:48,749                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224036
-2025-05-06 09:09:48,949                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224036
-2025-05-06 09:09:48,949                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224036
-2025-05-06 09:09:48,959                    rwt._worker                 DEBUG:  W4 - runner_to_worker_q msg received  2224036
-2025-05-06 09:09:48,959                    rwt._worker                 DEBUG:  W6 - pass up msg, runner_p.join(0.2)  2224036
-2025-05-06 09:09:48,960                    rwt._worker                 DEBUG:  W9 - exiting  2224036
-2025-05-06 09:09:48,961                    rwt.run_with_timeout        DEBUG:  T2 - worker_p exited without timeout
-2025-05-06 09:09:48,962  demo-run_with_timeout.dotest                WARNING:  RETURNED:
-CompletedProcess(args=['ping', 'yahoo.com', '-c', '1'], returncode=0, stdout='PING yahoo.com (98.137.11.164) 56(84) bytes of data.\n64 bytes from media-router-fp73.prod.media.vip.gq1.yahoo.com (98.137.11.164): icmp_seq=1 ttl=252 time=83.2 ms\n\n--- yahoo.com ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 83.190/83.190/83.190/0.000 ms\n', stderr='')
+2025-05-21 23:38:32,546                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:32,548                    rwt._runner                 DEBUG:  R1  - runner_p pid 2913894
+2025-05-21 23:38:32,790                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:32,791                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-05-21 23:38:32,792  demo-run_with_timeout.dotest                WARNING:  RETURNED:
+CompletedProcess(args=['ping', 'yahoo.com', '-c', '1'], returncode=0, stdout='PING yahoo.com (74.6.143.26) 56(84) bytes of data.\n64 bytes from media-router-fp74.prod.media.vip.bf1.yahoo.com (74.6.143.26): icmp_seq=1 ttl=252 time=73.5 ms\n\n--- yahoo.com ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 73.469/73.469/73.469/0.000 ms\n', stderr='')
 
 
-2025-05-06 09:09:48,962  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:32,792  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 3 - Subprocess ping unknown - Return subprocess fail result
-2025-05-06 09:09:48,962                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:32,792                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7f23532bac00>
+  Function:     <function run at 0x7f4ffebbac00>
   args:         (['ping', 'dummyunknown.com', '-c', '1'],)
   kwargs:       {'timeout': 1, 'capture_output': True, 'text': True}
-2025-05-06 09:09:48,962                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:48,965                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224043
-2025-05-06 09:09:48,966                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224043
-2025-05-06 09:09:48,967                    rwt._runner                 DEBUG:  R1 - Starting  2224044
-2025-05-06 09:09:48,973                    rwt._worker                 DEBUG:  W4 - runner_to_worker_q msg received  2224043
-2025-05-06 09:09:48,973                    rwt._worker                 DEBUG:  W6 - pass up msg, runner_p.join(0.2)  2224043
-2025-05-06 09:09:48,973                    rwt._worker                 DEBUG:  W9 - exiting  2224043
-2025-05-06 09:09:48,974                    rwt.run_with_timeout        DEBUG:  T2 - worker_p exited without timeout
-2025-05-06 09:09:48,975  demo-run_with_timeout.dotest                WARNING:  RETURNED:
+2025-05-21 23:38:32,793                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:32,800                    rwt._runner                 DEBUG:  R1  - runner_p pid 2913914
+2025-05-21 23:38:32,871                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:32,872                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-05-21 23:38:32,873  demo-run_with_timeout.dotest                WARNING:  RETURNED:
 CompletedProcess(args=['ping', 'dummyunknown.com', '-c', '1'], returncode=2, stdout='', stderr='ping: dummyunknown.com: Name or service not known\n')
 
 
-2025-05-06 09:09:48,975  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:32,873  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 4 - Subprocess ping known/unavailable - subprocess timeout < rwt_timeout - Exception subprocess.TimeoutExpired
-2025-05-06 09:09:48,975                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:32,873                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7f23532bac00>
+  Function:     <function run at 0x7f4ffebbac00>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'timeout': 0.5, 'capture_output': True, 'text': True}
-2025-05-06 09:09:48,975                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:48,977                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224048
-2025-05-06 09:09:48,978                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224048
-2025-05-06 09:09:48,979                    rwt._runner                 DEBUG:  R1 - Starting  2224049
-2025-05-06 09:09:49,179                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224048
-2025-05-06 09:09:49,179                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224048
-2025-05-06 09:09:49,380                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224048
-2025-05-06 09:09:49,380                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224048
-2025-05-06 09:09:49,491                    rwt._worker                 DEBUG:  W4 - runner_to_worker_q msg received  2224048
-2025-05-06 09:09:49,491                    rwt._worker                 DEBUG:  W6 - pass up msg, runner_p.join(0.2)  2224048
-2025-05-06 09:09:49,494                    rwt._worker                 DEBUG:  W9 - exiting  2224048
-2025-05-06 09:09:49,496                    rwt.run_with_timeout        DEBUG:  T2 - worker_p exited without timeout
-2025-05-06 09:09:49,497  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+2025-05-21 23:38:32,874                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:32,881                    rwt._runner                 DEBUG:  R1  - runner_p pid 2913917
+2025-05-21 23:38:33,395                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:33,396                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-05-21 23:38:33,397  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
 TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'
 
 
-2025-05-06 09:09:49,498  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:33,397  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 4a - Subprocess ping known/unavailable - subprocess timeout < rwt_timeout, rwt_ntries=2 - Exception subprocess.TimeoutExpired
-2025-05-06 09:09:49,498                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:33,398                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7f23532bac00>
+  Function:     <function run at 0x7f4ffebbac00>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'timeout': 0.5, 'capture_output': True, 'text': True}
-2025-05-06 09:09:49,498                    rwt.run_with_timeout        DEBUG:  T0 - Try 0
-2025-05-06 09:09:49,499                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:49,502                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224057
-2025-05-06 09:09:49,505                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224057
-2025-05-06 09:09:49,506                    rwt._runner                 DEBUG:  R1 - Starting  2224058
-2025-05-06 09:09:49,706                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224057
-2025-05-06 09:09:49,706                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224057
-2025-05-06 09:09:49,907                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224057
-2025-05-06 09:09:49,907                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224057
-2025-05-06 09:09:50,019                    rwt._worker                 DEBUG:  W4 - runner_to_worker_q msg received  2224057
-2025-05-06 09:09:50,020                    rwt._worker                 DEBUG:  W6 - pass up msg, runner_p.join(0.2)  2224057
-2025-05-06 09:09:50,022                    rwt._worker                 DEBUG:  W9 - exiting  2224057
-2025-05-06 09:09:50,026                    rwt.run_with_timeout        DEBUG:  T2 - worker_p exited without timeout
-2025-05-06 09:09:50,027  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+2025-05-21 23:38:33,398                    rwt.run_with_timeout        DEBUG:  T0 - Try 0
+2025-05-21 23:38:33,398                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:33,404                    rwt._runner                 DEBUG:  R1  - runner_p pid 2913961
+2025-05-21 23:38:33,917                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:33,918                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-05-21 23:38:33,918                    rwt.run_with_timeout        DEBUG:  T0 - Try 1
+2025-05-21 23:38:33,918                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:33,922                    rwt._runner                 DEBUG:  R1  - runner_p pid 2913971
+2025-05-21 23:38:34,428                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:34,428                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-05-21 23:38:34,428  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
 TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'
 
 
-2025-05-06 09:09:50,028  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:34,429  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
-Test 5 - Subprocess ping known/unavailable - subprocess timeout > rwt_timeout - Exception TimeoutError
-2025-05-06 09:09:50,028                    rwt.run_with_timeout        DEBUG:  
+Test 5 - Subprocess ping known/unavailable - rwt_timeout < subprocess timeout - Exception TimeoutError
+2025-05-21 23:38:34,429                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7f23532bac00>
+  Function:     <function run at 0x7f4ffebbac00>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'timeout': 3, 'capture_output': True, 'text': True}
-2025-05-06 09:09:50,030                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:50,037                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224065
-2025-05-06 09:09:50,042                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224065
-2025-05-06 09:09:50,044                    rwt._runner                 DEBUG:  R1 - Starting  2224069
-2025-05-06 09:09:50,244                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224065
-2025-05-06 09:09:50,244                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224065
-2025-05-06 09:09:50,445                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224065
-2025-05-06 09:09:50,445                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224065
-2025-05-06 09:09:50,533                    rwt.run_with_timeout        DEBUG:  T3 - worker_p timed out - Killing worker_p
-2025-05-06 09:09:50,534                    rwt.worker_int_handler      DEBUG:  WH1 - Signal 15 received  2224065
-2025-05-06 09:09:50,534                    rwt.worker_int_handler      DEBUG:  WH2 - Sending terminate to runner_p  2224065
-2025-05-06 09:09:50,535                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received 2224069
-2025-05-06 09:09:50,639                    rwt.worker_int_handler      DEBUG:  WH4 - runner_p.is_alive? False  2224065
-2025-05-06 09:09:50,642  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+2025-05-21 23:38:34,429                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:34,430                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914004
+2025-05-21 23:38:34,930                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-05-21 23:38:34,931                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-05-21 23:38:35,035  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
 TimeoutError: Function <run> timed out after 0.5 seconds (killed)
 
 
-2025-05-06 09:09:50,643  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:35,036  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
-Test 5a - Subprocess ping known/unavailable - subprocess timeout > rwt_timeout, rwt_ntries=2 - Exception TimeoutError
-2025-05-06 09:09:50,643                    rwt.run_with_timeout        DEBUG:  
+Test 5a - Subprocess ping known/unavailable - rwt_timeout < subprocess timeout, rwt_ntries=2 - Exception TimeoutError
+2025-05-21 23:38:35,036                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7f23532bac00>
+  Function:     <function run at 0x7f4ffebbac00>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'timeout': 3, 'capture_output': True, 'text': True}
-2025-05-06 09:09:50,643                    rwt.run_with_timeout        DEBUG:  T0 - Try 0
-2025-05-06 09:09:50,645                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:50,651                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224075
-2025-05-06 09:09:50,656                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224075
-2025-05-06 09:09:50,659                    rwt._runner                 DEBUG:  R1 - Starting  2224076
-2025-05-06 09:09:50,858                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224075
-2025-05-06 09:09:50,858                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224075
-2025-05-06 09:09:51,059                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224075
-2025-05-06 09:09:51,059                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224075
-2025-05-06 09:09:51,148                    rwt.run_with_timeout        DEBUG:  T3 - worker_p timed out - Killing worker_p
-2025-05-06 09:09:51,148                    rwt.worker_int_handler      DEBUG:  WH1 - Signal 15 received  2224075
-2025-05-06 09:09:51,149                    rwt.worker_int_handler      DEBUG:  WH2 - Sending terminate to runner_p  2224075
-2025-05-06 09:09:51,149                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received 2224076
-2025-05-06 09:09:51,253                    rwt.worker_int_handler      DEBUG:  WH4 - runner_p.is_alive? False  2224075
-2025-05-06 09:09:51,256                    rwt.run_with_timeout        DEBUG:  T0 - Try 1
-2025-05-06 09:09:51,258                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:51,264                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224082
-2025-05-06 09:09:51,269                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224082
-2025-05-06 09:09:51,271                    rwt._runner                 DEBUG:  R1 - Starting  2224083
-2025-05-06 09:09:51,471                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224082
-2025-05-06 09:09:51,471                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224082
-2025-05-06 09:09:51,672                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224082
-2025-05-06 09:09:51,672                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224082
-2025-05-06 09:09:51,761                    rwt.run_with_timeout        DEBUG:  T3 - worker_p timed out - Killing worker_p
-2025-05-06 09:09:51,762                    rwt.worker_int_handler      DEBUG:  WH1 - Signal 15 received  2224082
-2025-05-06 09:09:51,762                    rwt.worker_int_handler      DEBUG:  WH2 - Sending terminate to runner_p  2224082
-2025-05-06 09:09:51,763                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received 2224083
-2025-05-06 09:09:51,866                    rwt.worker_int_handler      DEBUG:  WH4 - runner_p.is_alive? False  2224082
-2025-05-06 09:09:51,870  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+2025-05-21 23:38:35,037                    rwt.run_with_timeout        DEBUG:  T0 - Try 0
+2025-05-21 23:38:35,037                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:35,044                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914042
+2025-05-21 23:38:35,541                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-05-21 23:38:35,542                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-05-21 23:38:35,643                    rwt.run_with_timeout        DEBUG:  T0 - Try 1
+2025-05-21 23:38:35,643                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:35,645                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914078
+2025-05-21 23:38:36,145                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-05-21 23:38:36,146                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-05-21 23:38:36,250  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
 TimeoutError: Function <run> timed out after 0.5 seconds (killed)
 
 
-2025-05-06 09:09:51,871  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:36,251  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 6 - Function took too long, killed - Exception TimeoutError, File 'FileNotTouched' not created
-2025-05-06 09:09:51,871                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:36,251                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function test_shell_1 at 0x7f23530a4400>
-  args:         (2, 6, '/tmp/cjnfuncs_rwt/FileNotTouched')
+  Function:     <function test_shell_1 at 0x7f4ffe9a45e0>
+  args:         (2, '6', '/tmp/cjnfuncs_rwt/FileNotTouched')
   kwargs:       {}
-2025-05-06 09:09:51,872                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:51,879                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224088
-2025-05-06 09:09:51,884                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224088
-2025-05-06 09:09:51,887                    rwt._runner                 DEBUG:  R1 - Starting  2224089
-2025-05-06 09:09:52,086                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224088
-2025-05-06 09:09:52,086                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224088
-2025-05-06 09:09:52,286                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224088
-2025-05-06 09:09:52,287                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224088
-2025-05-06 09:09:52,487                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224088
-2025-05-06 09:09:52,487                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224088
-2025-05-06 09:09:52,688                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224088
-2025-05-06 09:09:52,688                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224088
-2025-05-06 09:09:52,876                    rwt.run_with_timeout        DEBUG:  T3 - worker_p timed out - Killing worker_p
-2025-05-06 09:09:52,877                    rwt.worker_int_handler      DEBUG:  WH1 - Signal 15 received  2224088
-2025-05-06 09:09:52,877                    rwt.worker_int_handler      DEBUG:  WH2 - Sending terminate to runner_p  2224088
-2025-05-06 09:09:52,877                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received 2224089
-2025-05-06 09:09:52,980                    rwt.worker_int_handler      DEBUG:  WH4 - runner_p.is_alive? False  2224088
-2025-05-06 09:09:52,983  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
-TimeoutError: Function <test_shell_1> timed out after 1 seconds (killed)
+2025-05-21 23:38:36,251                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:36,257                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914092
+2025-05-21 23:38:36,755                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-05-21 23:38:36,755                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-05-21 23:38:36,857  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+TimeoutError: Function <test_shell_1> timed out after 0.5 seconds (killed)
 
 
-2025-05-06 09:09:52,985  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:36,857  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 7 - Function took too long, not killed - Exception TimeoutError, File 'FileTouched_1' created
-2025-05-06 09:09:53,991  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
-TimeoutError: Function <test_shell_1> timed out after 1 seconds (not killed)
-
-
-2025-05-06 09:09:53,992  demo-run_with_timeout.dotest                WARNING:  
-==============================================================================================
-Test 8 - Sleep took too long - Exception TimeoutError
-2025-05-06 09:09:53,992                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:36,857                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  2
+  rwt_timeout:  0.5
+  rwt_ntries:   1
+  rwt_kill:     False
+  rwt_debug:    True
+  Function:     <function test_shell_1 at 0x7f4ffe9a45e0>
+  args:         (1, '7', PosixPath('/tmp/cjnfuncs_rwt/FileTouched_1'))
+  kwargs:       {}
+2025-05-21 23:38:36,857                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:36,859                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914178
+2025-05-21 23:38:37,360  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+TimeoutError: Function <test_shell_1> timed out after 0.5 seconds (not killed, pid 2914178)
+
+
+2025-05-21 23:38:37,361  demo-run_with_timeout.dotest                WARNING:  
+==============================================================================================
+Test 8 - Sleep took too long, rwt_debug=False - Exception TimeoutError
+2025-05-21 23:38:37,860  demo-run_with_timeout.test_shell_1          WARNING:  Hello there 42 tnum: 7, pid: 2914178
+2025-05-21 23:38:38,967  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+TimeoutError: Function <sleep> timed out after 1.5 seconds (killed)
+
+
+2025-05-21 23:38:38,968  demo-run_with_timeout.dotest                WARNING:  
+==============================================================================================
+Test 8a - Sleep took too long - Exception TimeoutError
+2025-05-21 23:38:38,968                    rwt.run_with_timeout        DEBUG:  
+run_with_timeout switches:
+  rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
   Function:     <built-in function sleep>
   args:         (10,)
   kwargs:       {}
-2025-05-06 09:09:53,994                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:54,000                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224109
-2025-05-06 09:09:54,006                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:54,008                    rwt._runner                 DEBUG:  R1 - Starting  2224110
-2025-05-06 09:09:54,208                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:54,209                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:54,409                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:54,409                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:54,610                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:54,610                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:54,811                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:54,811                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:54,999  demo-run_with_timeout.test_shell_1          WARNING:  Hello there 42 tnum: 7, pid: 2224101
-2025-05-06 09:09:55,012                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:55,012                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:55,212                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:55,212                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:55,413                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:55,413                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:55,614                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:55,614                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:55,815                    rwt._worker                 DEBUG:  W5 - NO runner_to_worker_q msg received  2224109
-2025-05-06 09:09:55,815                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224109
-2025-05-06 09:09:55,998                    rwt.run_with_timeout        DEBUG:  T3 - worker_p timed out - Killing worker_p
-2025-05-06 09:09:55,999                    rwt.worker_int_handler      DEBUG:  WH1 - Signal 15 received  2224109
-2025-05-06 09:09:55,999                    rwt.worker_int_handler      DEBUG:  WH2 - Sending terminate to runner_p  2224109
-2025-05-06 09:09:56,000                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received 2224110
-2025-05-06 09:09:56,101                    rwt.worker_int_handler      DEBUG:  WH4 - runner_p.is_alive? False  2224109
-2025-05-06 09:09:56,102  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
-TimeoutError: Function <sleep> timed out after 2 seconds (killed)
+2025-05-21 23:38:38,968                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:38,970                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914352
+2025-05-21 23:38:39,470                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-05-21 23:38:39,471                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-05-21 23:38:39,574  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+TimeoutError: Function <sleep> timed out after 0.5 seconds (killed)
 
 
-2025-05-06 09:09:56,102  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:39,575  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 9 - Invalid rwt_timeout - Exception ValueError, File 'FileTouched_9' not created
-2025-05-06 09:09:56,102  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+2025-05-21 23:38:39,576  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
 ValueError: rwt_timeout must be type int or float, received <abc>
 
 
-2025-05-06 09:09:56,102  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:39,576  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 9a - Invalid rwt_ntries - Exception ValueError, File 'FileTouched_9a' not created
-2025-05-06 09:09:56,102  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+2025-05-21 23:38:39,576  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
 ValueError: rwt_ntries must be type int, received <abc>
 
 
-2025-05-06 09:09:56,102  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:39,576  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 10 - Invalid rwt_kill - Exception ValueError, File 'FileTouched_10' not created
-2025-05-06 09:09:56,102  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+2025-05-21 23:38:39,576  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
 ValueError: rwt_kill must be type bool, received <abc>
 
 
-2025-05-06 09:09:56,102  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:39,577  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 11 - Delete non-existing file - Exception FileNotFoundError from function runtime
-2025-05-06 09:09:56,102                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:39,577                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  1
   rwt_ntries:   1
@@ -322,46 +250,104 @@ run_with_timeout switches:
   Function:     <bound method Path.unlink of PosixPath('/tmp/cjnfuncs_rwt/nosuchfile')>
   args:         ()
   kwargs:       {}
-2025-05-06 09:09:56,102                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:56,104                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224143
-2025-05-06 09:09:56,104                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224143
-2025-05-06 09:09:56,105                    rwt._runner                 DEBUG:  R1 - Starting  2224144
-2025-05-06 09:09:56,107                    rwt._worker                 DEBUG:  W4 - runner_to_worker_q msg received  2224143
-2025-05-06 09:09:56,107                    rwt._worker                 DEBUG:  W6 - pass up msg, runner_p.join(0.2)  2224143
-2025-05-06 09:09:56,107                    rwt._worker                 DEBUG:  W9 - exiting  2224143
-2025-05-06 09:09:56,108                    rwt.run_with_timeout        DEBUG:  T2 - worker_p exited without timeout
-2025-05-06 09:09:56,108  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+2025-05-21 23:38:39,577                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:39,585                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914390
+2025-05-21 23:38:39,595                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:39,596                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-05-21 23:38:39,596  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
 FileNotFoundError: [Errno 2] No such file or directory: '/tmp/cjnfuncs_rwt/nosuchfile'
 
 
-2025-05-06 09:09:56,108  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:39,597  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 12 - shutil.copy, rwt_debug True - passes
-2025-05-06 09:09:56,108                    rwt.run_with_timeout        DEBUG:  
+2025-05-21 23:38:39,597                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  1
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function copy at 0x7f235320b7e0>
+  Function:     <function copy at 0x7f4ffeb0b7e0>
   args:         (PosixPath('/tmp/cjnfuncs_rwt/t12a'), PosixPath('/tmp/cjnfuncs_rwt/t12b'))
   kwargs:       {}
-2025-05-06 09:09:56,109                    rwt.run_with_timeout        DEBUG:  T1 - starting worker_p
-2025-05-06 09:09:56,110                    rwt._worker                 DEBUG:  W1 - starting runner_p  2224147
-2025-05-06 09:09:56,111                    rwt._worker                 DEBUG:  W3 - Check for runner_to_worker_q msg  2224147
-2025-05-06 09:09:56,111                    rwt._runner                 DEBUG:  R1 - Starting  2224148
-2025-05-06 09:09:56,112                    rwt._worker                 DEBUG:  W4 - runner_to_worker_q msg received  2224147
-2025-05-06 09:09:56,112                    rwt._worker                 DEBUG:  W6 - pass up msg, runner_p.join(0.2)  2224147
-2025-05-06 09:09:56,113                    rwt._worker                 DEBUG:  W9 - exiting  2224147
-2025-05-06 09:09:56,114                    rwt.run_with_timeout        DEBUG:  T2 - worker_p exited without timeout
-2025-05-06 09:09:56,114  demo-run_with_timeout.dotest                WARNING:  RETURNED:
+2025-05-21 23:38:39,598                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:39,605                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914392
+2025-05-21 23:38:39,612                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:39,613                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-05-21 23:38:39,613  demo-run_with_timeout.dotest                WARNING:  RETURNED:
 /tmp/cjnfuncs_rwt/t12b
 
 
-2025-05-06 09:09:56,114  demo-run_with_timeout.dotest                WARNING:  
+2025-05-21 23:38:39,614  demo-run_with_timeout.dotest                WARNING:  
 ==============================================================================================
 Test 13 - shutil.copy, rwt_debug False - passes
-2025-05-06 09:09:56,120  demo-run_with_timeout.dotest                WARNING:  RETURNED:
+2025-05-21 23:38:39,628  demo-run_with_timeout.dotest                WARNING:  RETURNED:
 /tmp/cjnfuncs_rwt/t13b
 
 
+2025-05-21 23:38:39,629  demo-run_with_timeout.dotest                WARNING:  
+==============================================================================================
+Test 14 - Function wont_terminate, requiring os.kill, rwt_ntries=1 - Exception TimeoutError
+2025-05-21 23:38:39,629                    rwt.run_with_timeout        DEBUG:  
+run_with_timeout switches:
+  rwt_timeout:  0.5
+  rwt_ntries:   1
+  rwt_kill:     True
+  rwt_debug:    True
+  Function:     <function wont_terminate at 0x7f4ffe7f00e0>
+  args:         ()
+  kwargs:       {}
+2025-05-21 23:38:39,629                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:39,637                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914396
+2025-05-21 23:38:40,134                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-05-21 23:38:40,134                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-05-21 23:38:40,335                    rwt.run_with_timeout        DEBUG:  T5  - SIGKILL runner_p
+2025-05-21 23:38:40,335  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (killed)
+
+
+2025-05-21 23:38:40,336  demo-run_with_timeout.dotest                WARNING:  
+==============================================================================================
+Test 15 - Function wont_terminate, not killed, rwt_ntries=1 - Exception TimeoutError
+2025-05-21 23:38:40,336                    rwt.run_with_timeout        DEBUG:  
+run_with_timeout switches:
+  rwt_timeout:  0.5
+  rwt_ntries:   1
+  rwt_kill:     False
+  rwt_debug:    True
+  Function:     <function wont_terminate at 0x7f4ffe7f00e0>
+  args:         ()
+  kwargs:       {}
+2025-05-21 23:38:40,336                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:40,344                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914433
+2025-05-21 23:38:40,841  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (not killed, pid 2914433)
+
+
+2025-05-21 23:38:40,842  demo-run_with_timeout.dotest                WARNING:  
+==============================================================================================
+Test 16 - Delete non-existing file, rwt_tries=2 - Debug logging for both tries
+2025-05-21 23:38:40,842                    rwt.run_with_timeout        DEBUG:  
+run_with_timeout switches:
+  rwt_timeout:  1
+  rwt_ntries:   2
+  rwt_kill:     True
+  rwt_debug:    True
+  Function:     <bound method Path.unlink of PosixPath('/tmp/cjnfuncs_rwt/nosuchfile')>
+  args:         ()
+  kwargs:       {}
+2025-05-21 23:38:40,842                    rwt.run_with_timeout        DEBUG:  T0 - Try 0
+2025-05-21 23:38:40,842                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:40,846                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914455
+2025-05-21 23:38:40,852                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:40,853                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-05-21 23:38:40,853                    rwt.run_with_timeout        DEBUG:  T0 - Try 1
+2025-05-21 23:38:40,853                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-05-21 23:38:40,858                    rwt._runner                 DEBUG:  R1  - runner_p pid 2914459
+2025-05-21 23:38:40,863                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-05-21 23:38:40,864                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-05-21 23:38:40,864  demo-run_with_timeout.dotest                  ERROR:  EXCEPTION:
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/cjnfuncs_rwt/nosuchfile'
+
+
+2025-05-21 23:38:40,865  demo-run_with_timeout.<module>              WARNING:  This will be logged

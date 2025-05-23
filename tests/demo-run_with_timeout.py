@@ -27,6 +27,7 @@ import shutil
 import sys
 import subprocess
 import time
+import signal
 from pathlib import Path
 
 from cjnfuncs.core              import set_toolname, setuplogging, logging, set_logging_level #, restore_logging_level
@@ -38,7 +39,7 @@ from cjnfuncs.rwt    import run_with_timeout
 # import cjnfuncs.core as core
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('-t', '--test', type=int, default=0,
+parser.add_argument('-t', '--test', default=0,
                     help="Test number to run (default 0).  0 runs most all tests (not tests with untrapped errors)")
 
 # Include/remove as needed
@@ -113,17 +114,21 @@ if args.cleanup:
 def dotest (testnum, message, func, *args, **kwargs):
     logging.warning (f"\n==============================================================================================\nTest {testnum} - {message}")
     try:
-        logging.warning (f"RETURNED:\n{run_with_timeout(func, *args, **kwargs)}\n\n")
+        result = run_with_timeout(func, *args, **kwargs)
+        logging.warning (f"RETURNED:\n{result}\n\n")
+        return result
+        # logging.warning (f"RETURNED:\n{run_with_timeout(func, *args, **kwargs)}\n\n")
     except Exception as e:
         # logging.exception (f"EXCEPTION:\n{type(e).__name__}: {e}")          # With call stack
         logging.error (f"EXCEPTION:\n{type(e).__name__}: {e}\n\n")          # Just the exception 
+        return e
 
 
 # --------------------------------------------------------------------
 # demo-specific functions and vars
 
 debug_flag = True
-set_logging_level(logging.DEBUG)
+set_logging_level(logging.WARNING)
 
 abc= 42
 
@@ -132,98 +137,125 @@ def test_shell_1(t, tnum, file):
     logging.warning (f"Hello there {abc} tnum: {tnum}, pid: {os.getpid()}")
     Path(file).touch()
 
+def wont_terminate():
+    while 1:
+        try:
+            time.sleep (0.2)
+        except:
+            pass
 
 #===============================================================================================
 
 
-tnum = 1
-if args.test == 0  or  args.test == tnum:
+tnum = '1'
+if args.test == '0'  or  args.test == tnum:
     dotest (tnum, "test desc - expected result",
             print, "Hello", "there", "again", rwt_timeout=3, sep=" blah ", end=" The end.\n", rwt_debug=debug_flag)
 
-tnum = 2
-if args.test == 0  or  args.test == tnum:
+tnum = '2'
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Subprocess ping known - Return subprocess pass result",
         subprocess.run, ['ping', 'yahoo.com', '-c', '1'], rwt_timeout=3, timeout=3, capture_output=True, text=True, rwt_debug=debug_flag)
 
-tnum = 3
-if args.test == 0  or  args.test == tnum:
+tnum = '3'
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Subprocess ping unknown - Return subprocess fail result",
         subprocess.run, ['ping', 'dummyunknown.com', '-c', '1'], rwt_timeout=3, timeout=1, capture_output=True, text=True, rwt_debug=debug_flag)
 
-tnum = 4
-if args.test == 0  or  args.test == tnum:
+tnum = '4'
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout < rwt_timeout - Exception subprocess.TimeoutExpired",
         subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=0.5, capture_output=True, text=True, rwt_timeout=3, rwt_debug=debug_flag)
 
 tnum = '4a'
-if args.test == 0  or  args.test == tnum:
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout < rwt_timeout, rwt_ntries=2 - Exception subprocess.TimeoutExpired",
         subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=0.5, capture_output=True, text=True, rwt_timeout=3, rwt_debug=debug_flag, rwt_ntries=2)
 
-tnum = 5
-if args.test == 0  or  args.test == tnum:
-    dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout > rwt_timeout - Exception TimeoutError",
+tnum = '5'
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Subprocess ping known/unavailable - rwt_timeout < subprocess timeout - Exception TimeoutError",
        subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=3, capture_output=True, text=True, rwt_timeout=0.5, rwt_debug=debug_flag)
 
 tnum = '5a'
-if args.test == 0  or  args.test == tnum:
-    dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout > rwt_timeout, rwt_ntries=2 - Exception TimeoutError",
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Subprocess ping known/unavailable - rwt_timeout < subprocess timeout, rwt_ntries=2 - Exception TimeoutError",
        subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=3, capture_output=True, text=True, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=2)
 
-tnum = 6
-if args.test == 0  or  args.test == tnum:
+tnum = '6'
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Function took too long, killed - Exception TimeoutError, File 'FileNotTouched' not created", 
-       test_shell_1, 2, tnum, f'{test_dir}/FileNotTouched', rwt_timeout=1, rwt_debug=debug_flag)
+       test_shell_1, 2, tnum, f'{test_dir}/FileNotTouched', rwt_timeout=0.5, rwt_debug=debug_flag)
 
-tnum = 7
-# If rwt_kill=True and rwt_debug=True, then the rwt_debug level is in force going forward
-# If using rwt_kill=True, then don't also set rwt_debug=True
-if args.test == 0  or  args.test == tnum:
+tnum = '7'
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Function took too long, not killed - Exception TimeoutError, File 'FileTouched_1' created",
-    #    test_shell_1, 2, tnum, 'FileTouched_1', rwt_timeout=1, rwt_kill=False, rwt_debug=debug_flag)
-       test_shell_1, 2, tnum, Path(f'{test_dir}/FileTouched_1'), rwt_timeout=1, rwt_kill=False)
-    #    test_shell_1, 2, tnum, f'{test_dir}/FileTouched_1', rwt_timeout=1)
+       test_shell_1, 1, tnum, Path(f'{test_dir}/FileTouched_1'), rwt_timeout=0.5, rwt_kill=False, rwt_debug=debug_flag)
 
-tnum = 8
-if args.test == 0  or  args.test == tnum:
+tnum = '8'
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Sleep took too long, rwt_debug=False - Exception TimeoutError",
+       time.sleep, 10, rwt_timeout=1.5)
+
+tnum = '8a'
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Sleep took too long - Exception TimeoutError",
-       time.sleep, 10, rwt_timeout=2, rwt_debug=debug_flag)
+       time.sleep, 10, rwt_timeout=0.5, rwt_debug=debug_flag)
 
-tnum = 9
-if args.test == 0  or  args.test == tnum:
+tnum = '9'
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Invalid rwt_timeout - Exception ValueError, File 'FileTouched_9' not created",
        test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9', rwt_timeout='abc', rwt_kill=False, rwt_debug=debug_flag)
 
 tnum = '9a'
-if args.test == 0  or  args.test == tnum:
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Invalid rwt_ntries - Exception ValueError, File 'FileTouched_9a' not created",
        test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9a', rwt_ntries='abc', rwt_debug=debug_flag)
 
-tnum = 10
-if args.test == 0  or  args.test == tnum:
+tnum = '10'
+if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Invalid rwt_kill - Exception ValueError, File 'FileTouched_10' not created",
        test_shell_1, 2, tnum, f'{test_dir}/FileTouched_10', rwt_kill='abc', rwt_debug=debug_flag)
 
-tnum = 11
-if args.test == 0  or  args.test == tnum:
+tnum = '11'
+if args.test == '0'  or  args.test == tnum:
     nosuchfile = Path(f'{test_dir}//nosuchfile')
     dotest(tnum, "Delete non-existing file - Exception FileNotFoundError from function runtime",
        nosuchfile.unlink, rwt_debug=debug_flag)
 
-tnum = 12
-if args.test == 0  or  args.test == tnum:
+tnum = '12'
+if args.test == '0'  or  args.test == tnum:
     t12a = Path(f'{test_dir}/t12a')
     t12a.touch()
     t12b = Path(f'{test_dir}/t12b')
     dotest(tnum, "shutil.copy, rwt_debug True - passes",
         shutil.copy, t12a, t12b, rwt_timeout=1, rwt_debug=debug_flag)
 
-tnum = 13
-if args.test == 0  or  args.test == tnum:
+tnum = '13'
+if args.test == '0'  or  args.test == tnum:
     t13a = Path(f'{test_dir}/t13a')
     t13a.touch()
     t13b = Path(f'{test_dir}/t13b')
     dotest(tnum, "shutil.copy, rwt_debug False - passes",
        shutil.copy, t13a, t13b, rwt_timeout=1)
+
+tnum = '14'
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Function wont_terminate, requiring os.kill, rwt_ntries=1 - Exception TimeoutError",
+       wont_terminate, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=1) #, rwt_kill=False)
+
+tnum = '15'
+if args.test == '0'  or  args.test == tnum:
+    xx = dotest(tnum, "Function wont_terminate, not killed, rwt_ntries=1 - Exception TimeoutError",
+       wont_terminate, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=1, rwt_kill=False)
+    runner_pid = int(str(xx).split('pid ')[1][:-1])
+    os.kill(runner_pid, signal.SIGKILL)
+
+tnum = '16'
+if args.test == '0'  or  args.test == tnum:
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "Delete non-existing file, rwt_tries=2 - Debug logging for both tries",
+       nosuchfile.unlink, rwt_ntries=2, rwt_debug=debug_flag)
+    logging.debug ("This wont be logged")
+    logging.warning ("This will be logged")
 

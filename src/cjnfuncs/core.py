@@ -88,7 +88,7 @@ config and/or data directories are looked for at `/etc/xdg/<toolname>` and/or
 found then user-specific is assumed.  No directories are created.
 
 
-### Parameter
+### Args
 `toolname` (str)
 - Name of the tool
 
@@ -104,12 +104,12 @@ If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
 Thus, for a `user` setup, logging defaults to the configuration directory.  This is a 
 style variance, and can be reset in the tool script by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
-other directory) before a subsequent call to cjnfuncs.configman.loadconfig() or setuplogging().
+other directory) before a subsequent call to `loadconfig()` or `setuplogging()`.
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
 - The last operation within `set_toolname()` is to call `setuplogging()`, which initializes the root
 logger to log to the console.  The `.log_dir` and `.log_file` attributes are set to `None`, while 
-`.log_full_path` is set to `__console__`.  Having `set_toolname()` call `setuplogging()` ensure that any logging events
+`.log_full_path` is set to `__console__`.  Having `set_toolname()` call `setuplogging()` ensures that any logging events
 before a user-code call to `setuplogging()` or `loadconfig()` are properly logged.
 
 - For a `site` setup, the `.site_data_dir` is set to `/usr/share/<toolname>`.  The XDG spec states that 
@@ -201,7 +201,7 @@ Logging may be directed to the console (stdout), or to a file.  Each time setupl
 is called the current/active log file (or console) may be reassigned.
 
 setuplogging() works standalone or in conjunction with `cjnfuncs.configman.loadconfig()`.
-If a loaded config file has a `LogFile` parameter then loadconfig() passes it thru
+If a loaded config file has a `LogFile` parameter then loadconfig() passes it's value thru
 `config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
 that were passed to loadconfig() from the tool script.  This mechanism allows the tool script
 to override any config `LogFile`, such as for directing output to the console for a tool script's 
@@ -211,7 +211,7 @@ the log file declared in the config file:
     setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')
 
     
-### Parameters
+### Args
 `call_logfile` (Path or str, default None)
 - Potential log file passed typically from the tool script.  Selected by `call_logfile_wins = True`.
 call_logfile may be an absolute path or relative to the `core.tool.log_dir_base` directory.  
@@ -298,14 +298,47 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 #=====================================================================================
 
 ll_history = []
-def set_logging_level(new_level):
+def set_logging_level(new_level, clear=False):
+    """
+## set_logging_level (new_level, clear=False) - Save the current logging level and set the new_level
+
+The current logging level is saved on a stack and can be restored by a call to restore_logging_level.
+
+
+### Args
+`new_level` (int)
+- The new logging level to be set.  Values may be set to the logging module defined levels, or their integer 
+equivalents (or to any integer value that makes sense):  logging.DEBUG (10), logging.INFO (20), logging.WARNING (30), 
+logging.ERROR (40), or logging.CRITICAL (50).
+
+`clear` (bool, default False)
+- If True, the logging level history stack is cleared.
+- If False, the current logging level is saved on the stack.
+
+
+### Returns
+- NoneType
+    """     # TODO clear stack
     global ll_history
-    ll_history.append(logging.getLogger().level)
+    if clear:
+        ll_history = []
+    else:
+        ll_history.append(logging.getLogger().level)
     logging.getLogger().setLevel(new_level)
 
 
 
 def restore_logging_level():
+    """
+## restore_logging_level () - Restore the prior logging level from the stack
+
+The prior saved logging level (from the prior set_logging_level call) is popped from the stack and set as the current logging level.
+If the stack is empty then the logging level is set to logging.WARNING (30).
+
+
+### Returns
+- NoneType
+    """
     global ll_history
     try:
         logging.getLogger().setLevel(ll_history.pop())
@@ -313,6 +346,17 @@ def restore_logging_level():
         logging.getLogger().setLevel(logging.WARNING)
 
 
+def get_logging_level_stack():
+    """
+## get_logging_level_stack () - Return the content of the stack
+
+Useful for debug.  The stack may be cleared with a call to `set_logging_level()`.
+
+
+### Returns
+- A list of the prior saved logging levels.
+"""
+    return ll_history
 
 
 #=====================================================================================
@@ -344,24 +388,30 @@ class _periodic_log:
 def periodic_log(message, category='Cat1', log_interval='10m', log_level=None):
     """## periodic_log(message, category='Cat1', log_interval='10m', log_level=30)
 
-Log a message infrequently, so as to avoid flooding the log
+Log a message infrequently, so as to avoid flooding the log.  The `category` arg provides for independent
+log intervals for different types of logging events.
 
 ### Args
 
+
 `message` (str)
-- The message text to be logged, if the log_interval has expired
+- The message text to be logged, if the first time for this `category` or the log_interval has expired
 
 `category` (int or str, default 'Cat1')
 - Allows for multiple, independent concurrent periodic_log streams
-- `category` should typically int or str.  Used as a dict key.
+- `category` should typically be an int or str.  Used as a dict key.
 
 `log_interval` (timevalue, default '10m')
 - How often this category's messages will be logged.  Only remembered on the first log call
 for this category (ignored of subsequent calls)
 
-`log_level` (int, default set on first call for this category, default logging.WARNING/30)
-- Remembered from first periodic_log call for this category
-- May be overridden on subsequent calls for this category
+`log_level` (int, default logging.WARNING/30)
+- The default for this category is set on first call
+- This default value may be overridden on subsequent calls for this category
+
+
+### Returns
+- NoneType
       """
     if category not in cats:
         if log_level is None:

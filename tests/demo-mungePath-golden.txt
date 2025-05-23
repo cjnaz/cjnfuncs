@@ -492,3 +492,33 @@ Given:
 .is_dir       :  True
 .is_file      :  False
 
+
+NOTE:  32 - abs path - attributes not set
+Given:
+ in_path   :  <nosuchfile>
+ base_path :  <./>
+ mkdir     :  <False>
+.full_path    :  /mnt/share/dev/packages/cjnfuncs/tests/nosuchfile
+.parent       :  /mnt/share/dev/packages/cjnfuncs/tests
+.name         :  nosuchfile
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  None
+.is_dir       :  None
+.is_file      :  None
+
+
+NOTE:  33 - rel path - attributes not set
+Given:
+ in_path   :  <nosuchfile>
+ base_path :  <>
+ mkdir     :  <False>
+.full_path    :  nosuchfile
+.parent       :  .
+.name         :  nosuchfile
+.is_absolute  :  False
+.is_relative  :  True
+.exists       :  None
+.is_dir       :  None
+.is_file      :  None
+

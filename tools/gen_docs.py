@@ -17,6 +17,7 @@ modules = [
     {'outfile':'../configman.md',   'head':'./configman_head.md',   'source':'../src/cjnfuncs/configman.py'},
     {'outfile':'../timevalue.md',   'head':'./timevalue_head.md',   'source':'../src/cjnfuncs/timevalue.py'},
     {'outfile':'../mungePath.md',   'head':'./mungePath_head.md',   'source':'../src/cjnfuncs/mungePath.py'},
+    {'outfile':'../rwt.md',         'head':'./rwt_head.md',         'source':'../src/cjnfuncs/rwt.py'},
     {'outfile':'../deployfiles.md', 'head':'./deployfiles_head.md', 'source':'../src/cjnfuncs/deployfiles.py'},
     {'outfile':'../resourcelock.md','head':'./resourcelock_head.md','source':'../src/cjnfuncs/resourcelock.py'},
     {'outfile':'../SMTP.md',        'head':'./SMTP_head.md',        'source':'../src/cjnfuncs/SMTP.py'},

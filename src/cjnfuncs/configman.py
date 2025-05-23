@@ -4,13 +4,12 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2024
+#  Chris Nelson, 2018-2025
 #
 #==========================================================
 
 import re
 import ast
-import sys
 from pathlib import Path
 
 from .core      import setuplogging, logging, ConfigError
@@ -21,11 +20,11 @@ import cjnfuncs.core as core
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 IO_RETRY_COUNT         = 3
 
-def log_handlers():
-    xx = ''
-    for h in logging.getLogger().handlers:
-        xx += f"{h}'\n'"
-    return xx
+# def log_handlers():
+#     xx = ''
+#     for h in logging.getLogger().handlers:
+#         xx += f"{h}'\n'"
+#     return xx
 
 
 #=====================================================================================
@@ -50,7 +49,8 @@ The config_item() class provides handling of one or more config file instances. 
 
 See the loadconfig() documentation for details on config file syntax and rules.
 
-### Instantiation parameters
+
+### Instantiation args
 `config_file` (Path or str, default None)
 - Path to the configuration file, relative to the `core.tool.config_dir` directory, or an absolute path.
 - `None` may be used if the config will be loaded programmatically via `read_string()` or `read_dict()`.
@@ -130,16 +130,6 @@ directory.  With `remap_logdirbase=True`, the log dir will also be set to the to
         self.sections_list = []
         self.defaults = {}
 
-        # if not secondary_config:            # Suppress debug/info logging before setuplogging is called
-        #     logger = logging.getLogger()
-        #     handler = logging.StreamHandler(sys.stdout)
-        #     handler.setLevel(logging.WARNING)
-        #     # handler.setFormatter(log_format)
-        #     logger.handlers.clear()
-        #     logger.addHandler(handler)
-
-            # logging.getLogger().setLevel(logging.WARNING)
-
         if config_file == None:
             self.config_file        = None
             self.config_dir         = None
@@ -209,7 +199,7 @@ the loaded config file, 2) the `call_logfile` in the `loadconfig()` call, or 3) 
 feature, and intermittent loss of access to the config file.
     
 
-### Parameters
+### Args
 `ldcfg_ll` (int, default 30 (WARNING))
 - Logging level used within `loadconfig()` code for debugging loadconfig() itself
 
@@ -266,7 +256,7 @@ regardless of whether the config file timestamp has changed
   type is stored in the `cfg` dictionary if none of the other types can be resolved for a given value_portion.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
   for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
-  getcfg() `types=[]` parameter for basic type enforcement.
+  getcfg() `types=[]` arg for basic type enforcement.
 
 - **Quoted strings** - If a value_portion cannot be resolved to a Python native type then it is loaded as a str,
   eg `My_name = George` loads George as a str.  A value_portion may be forced to be loaded as a str by using 
@@ -343,15 +333,12 @@ cannot be accessed.
         global initial_logging_setup_done
         global preexisting_loglevel
 
-        # print ("top 1 of loadconfig", log_handlers())
-
-        if not initial_logging_setup_done:
+        if not initial_logging_setup_done:      #TODO
             # Initial logging will go to the console if no call_logfile is specified (and call_logfile_wins) on the initial loadconfig call.
             console_lf = self.getcfg('ConsoleLogFormat', None)
             file_lf = self.getcfg('FileLogFormat', None)
             setuplogging (call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
             initial_logging_setup_done = True
-        # print ("top 2 of loadconfig", log_handlers())
 
         config = self.config_full_path
 
@@ -359,7 +346,7 @@ cannot be accessed.
         if not isimport:
 
             # Save externally set / prior log level for later restore
-            preexisting_loglevel = logging.getLogger().level
+            preexisting_loglevel = logging.getLogger().level            #TODO use set_logging_level
 
             if force_flush_reload:
                 logging.getLogger().setLevel(ldcfg_ll)  # logging within loadconfig is always done at ldcfg_ll
@@ -370,7 +357,7 @@ cannot be accessed.
             # Check if config file is available and has changed
             _exists = False
             for _ in range(IO_RETRY_COUNT):
-                if check_path_exists(config):
+                if check_path_exists(config):       # TODO rwt
                     _exists = True
                     break
 
@@ -404,11 +391,7 @@ cannot be accessed.
         # Load the config
         logging.info (f"Loading  <{config}>")
         string_blob = config.read_text()
-        # print ("before read_string", logging.getLogger().level)  # TODO cleanup
-        # print ("before read_string", log_handlers())
         self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
-        # print ("after read_string", logging.getLogger().level)  # TODO cleanup
-        # print ("after read_string", log_handlers())
 
 
         # Operations only for finishing a top-level call
@@ -464,7 +447,7 @@ handles the other loading features such as LogLevel, LogFile, logging formatting
 flush_on_reload, force_flush_reload, and tolerate_missing.
 
 
-### Parameters
+### Args
 `str_blob` (str)
 - String containing the lines of config data
 
@@ -541,15 +524,10 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
             if param_name != '':
                 if param_name.lower().startswith('import'):             # import line
-                    # print ("before import mungePath call", log_handlers())
                     target = mungePath(value_portion, self.config_dir)
-                    # print ("after  import mungePath call", log_handlers())
                     try:
                         imported_config = config_item(target.full_path, secondary_config=True)
-                        # print ("before  import loadconfig call", log_handlers())
                         imported_config.loadconfig(ldcfg_ll, isimport=True)
-                        # print ("after  import loadconfig call", log_handlers())
-                        # print ("after mP in readstring import", logging.getLogger().level)  # TODO cleanup
                         for key in imported_config.cfg:
                             if self.current_section_name == '':
                                 self.cfg[key] = imported_config.cfg[key]
@@ -590,7 +568,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
 Loaded content is added to and/or modifies any previously loaded content.
 
-### Parameters
+### Args
 `param_dict` (dict)
 - dictionary to be loaded
 
@@ -664,7 +642,7 @@ but with 1) default & fallback support, 2) type checking, and 3) section support
 The search order for a param is 1) from the specified `section`, 2) from the `DEFAULT` section, and 3) from the 
 `fallback` value. If the param is not found in any of these locations then a ConfigError is raised.
 
-Type checking may be performed by listing one or more expected types via the optional `types` parameter.
+Type checking may be performed by listing one or more expected types via the optional `types` arg.
 If the loaded param is not one of the expected types then a ConfigError is raised.  This check may be 
 useful for basic error checking of param values, eg, making sure the return value is a float and not
 a str. (str is the loadconfig() default if the param type cannot be converted to another supported type.)
@@ -674,7 +652,7 @@ Rather, `getcfg()` raises a ConfigError if the param does not exist and no `fall
 This can lead to cleaner tool script code.  Either access method may be used, along with `x = my_config.cfg["param"]`.
 
 
-### Parameters
+### Args
 `param` (str)
 - String name of param to be fetched from cfg
 
@@ -761,7 +739,7 @@ cause the memory version to be written out to the config file.  If the script co
 modifications of the config file then the modified content will be reloaded into the cfg dictionary.
 
 
-### Parameters
+### Args
 `param` (str, default '')
 - The param name, if modifying an existing param or adding a new param
 
@@ -862,8 +840,8 @@ reload call to avoid multiple config reloads.
 
 ***config_item() class member function***
 
-### Parameter
 
+### Arg
 `savefile` (Path or str)
 - Path to the output file.
 - The config data will be written to an absolute path, or relative to the `core.tool.config_dir`
@@ -897,7 +875,7 @@ reload call to avoid multiple config reloads.
         outfile = mungePath(savefile, core.tool.config_dir).full_path
         for ntry in range(IO_RETRY_COUNT):
             try:
-                Path(outfile).write_text(cfg_list)
+                Path(outfile).write_text(cfg_list)      # TODO rwt
                 return
             except Exception as e:
                 _e = e
@@ -945,7 +923,7 @@ output:
 
 ***config_item() class member function***
 
-### Parameters
+### Args
 `section` (str, default '')
 - `section = ''` clears the entire cfg dictionary, including all sections and DEFAULT
 - `section = '<section_name>'` clears just that section

@@ -10,8 +10,6 @@
 
 import os.path
 from pathlib import Path, PurePath
-from concurrent.futures import ThreadPoolExecutor #, TimeoutError
-# from cjnfuncs.core import logging
 from .core import logging
 from .rwt import run_with_timeout
 
@@ -23,7 +21,7 @@ from .rwt import run_with_timeout
 #=====================================================================================
 
 class mungePath():
-    def __init__(self, in_path='', base_path='', mkdir=False):
+    def __init__(self, in_path='', base_path='', mkdir=False, set_attributes=True):
         """
 ## Class mungePath (in_path='', base_path='', mkdir=False) - A clean interface for dealing with filesystem paths
 
@@ -34,7 +32,7 @@ be cleanly used in the tool script code.
 User (`~user/`) and environment vars (`$HOME/`) are supported and expanded.
 
 
-### Parameters
+### Args
 `in_path` (Path or str, default '')
 - An absolute or relative path to a file or directory, such as `mydir/myfile.txt`
 - If `in_path` is an absolute path then the `base_path` is disregarded.
@@ -51,6 +49,14 @@ to `in_path`, and the `base_path` is disregarded.  See Special handling note, be
 `mkdir` (bool, default False)
 - Force-make a full directory path.  `base_path` / `in_path` is understood to be to a directory.
 
+set_attributes (bool, default True)
+- If True, these attributes are set: `.exists`, .is_file`, .is_dir`.
+- If False, those attributes are set to `None`.
+- These attributes are always set: `.full_path`, `.parent`, `.name`, `.is_absolute`, and `.is_relative`.
+- When accessing a remote file system and there are access issues (eg, the remote host is down) then setting `.exists`, `.is_file`, 
+and `.is_dir` can incur 1 second timeout delays each.  If these attributes are not needed by the user script then
+setting set_attributes = False can lead to faster and more stable code. Alternately, any pathlib method or attribute may be 
+directly accessed, or accessed using `run_with_timeout()`, eg `my_mungepath_inst.full_path.exists()`.
 
 ### Returns
 - Handle to `mungePath()` instance
@@ -78,7 +84,7 @@ the shell cwd.
 - **Special handling for `in_path` starting with `./`:**  Normally, paths starting with `.` are relative paths.
 mungePath interprets `in_path` starting with `./` as an absolute path reference to the shell current working 
 directory (cwd).
-Often in a tool script a user path input is passed to the `in_path` parameter.  Using the `./` prefix, a file in 
+Often in a tool script a user path input is passed to the `in_path` arg.  Using the `./` prefix, a file in 
 the shell cwd may be
 referenced, eg `./myfile`.  _Covering the cases, assuming the shell cwd is `/home/me`:_
 
@@ -121,13 +127,16 @@ is raised if you attempt to mkdir on top of an existing file.
         if mkdir:
             Path(in_path_pp).mkdir(parents=True, exist_ok=True)
 
-        self.parent = Path(in_path_pp.parent)
-        self.full_path = Path(in_path_pp)
+        self.parent =       Path(in_path_pp.parent)
+        self.full_path =    Path(in_path_pp)
+        self.name =         self.full_path.name
+        self.is_absolute =  self.full_path.is_absolute()
+        self.is_relative =  not self.is_absolute
 
-        self.name = self.full_path.name
-        # print (1, logging.getLogger().level)
-        self.refresh_stats()
-        # print (2, logging.getLogger().level)
+        if set_attributes:
+            self.refresh_stats()
+        else:
+            self.exists = self.is_file = self.is_dir = None
 
 
 #=====================================================================================
@@ -142,58 +151,44 @@ is raised if you attempt to mkdir on top of an existing file.
 
 ***mungePath() class member function***
 
-The boolean status attributes (.is_absolute, .is_relative, .exists, .is_dir, and .is_file) are set 
-at the time the mungePath is created.  These attributes are not updated automatically as changes
-happen on the filesystem.  Call refresh_stats() as needed.
+The boolean status attributes (`.exists`, `.is_dir`, and `.is_file`) are set 
+at the time the mungePath instance is created (when `set_attributes=True` (the default)). 
+These attributes are not updated automatically as changes happen on the filesystem. 
+Call `refresh_stats()` as needed, or directly access the pathlib methods (or access through
+`run_with_timeout()`), eg `my_mungepath_inst.full_path.exists()`.
+
+NOTE:  `refresh_stats()` utilizes `run_with_timeout()` with `rwt_timeout=1`.  This can result in 
+up to a 3 second _hang_ if there are access issues.
 
 ### Returns
 - The instance handle is returned so that refresh_stats() may be used in-line.
         """
-        # logging.info ("Start  refresh_stats")
-        # self.exists = check_path_exists(self.full_path)
         try:
             self.exists = run_with_timeout (self.full_path.exists, rwt_timeout=1)
-        except Exception as e: #TimeoutError:
+        except Exception as e:
             logging.debug(f"Exception - {e}")
             self.exists = False
-        self.is_absolute = self.full_path.is_absolute()
-        # logging.info ("After  is_absolute")
-        self.is_relative = not self.is_absolute
 
         try:
             self.is_dir = run_with_timeout (self.full_path.is_dir, rwt_timeout=1)
-        except Exception as e: #TimeoutError:
+        except Exception as e:
             logging.debug(f"Exception - {e}")
             self.is_dir = False
-        # logging.info ("After  is_dir")
 
         try:
             self.is_file = run_with_timeout (self.full_path.is_file, rwt_timeout=1)
-        except Exception as e: #TimeoutError:
+        except Exception as e:
             logging.debug(f"Exception - {e}")
             self.is_file = False
-        # logging.info ("After  is_file")
 
-        # logging.info ("Finish refresh_stats")
         return self
 
-        # logging.info ("Start  refresh_stats")
-        # self.exists = check_path_exists(self.full_path)
-        # # self.exists = run_with_timeout (self.full_path.exists, rwt_timeout=1)
-        # self.is_absolute = self.full_path.is_absolute()
-        # logging.info ("After  is_absolute")
-        # self.is_relative = not self.is_absolute
-        # try:
-        #     self.is_dir =  self.full_path.is_dir()
-        #     logging.info ("After  is_dir")
-        #     self.is_file = self.full_path.is_file()
-        #     logging.info ("After  is_file")
-        # except:     # Trap if the path does not exist
-        #     self.is_dir =  False
-        #     self.is_file = False
-        # logging.info ("Finish refresh_stats")
-        # return self
 
+#=====================================================================================
+#=====================================================================================
+#  _ _ r e p r _ _
+#=====================================================================================
+#=====================================================================================
 
     def __repr__(self):
         stats = ""
@@ -218,13 +213,11 @@ def check_path_exists(inpath, timeout=1):
     """
 ## check_path_exists (path, timeout=1) - With enforced timeout (no hang)
 
-pathlib.Path.exists() tends to hang for an extended period of time.  
-check_path_exists() wraps pathlib.Path.exists() with a timeout mechanism.
-
-Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-efficiently-implement-a-version-of-path-exists-with-a-timeout-on-window
+pathlib.Path.exists() tends to hang for an extended period of time when there are network access issues.
+check_path_exists() wraps `pathlib.Path.exists()` with a timeout mechanism.
 
 
-### Parameters
+### Args
 `path` (Path or str)
 - Path to a file or directory
 
@@ -241,16 +234,6 @@ Implementation stolen from https://stackoverflow.com/questions/67819869/how-to-e
 
     try:
         return run_with_timeout (_path.exists, rwt_timeout=timeout)
-    except Exception as e: #TimeoutError:
+    except Exception as e:
         logging.debug(f"Exception - {e}")
         return False
-
-
-    # _path = Path(inpath)
-    # with ThreadPoolExecutor(max_workers=1) as executor:
-    #     future = executor.submit(_path.exists)
-    #     try:
-    #         return future.result(timeout)
-    #     except Exception as e: #TimeoutError:
-    #         logging.debug(f"Exception - {e}")
-    #         return False

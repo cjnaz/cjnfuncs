@@ -239,6 +239,9 @@ script running as a service.
 
 - [set_toolname](#set_toolname)
 - [setuplogging](#setuplogging)
+- [set_logging_level](#set_logging_level)
+- [restore_logging_level](#restore_logging_level)
+- [get_logging_level_stack](#get_logging_level_stack)
 
 
 
@@ -258,7 +261,7 @@ config and/or data directories are looked for at `/etc/xdg/<toolname>` and/or
 found then user-specific is assumed.  No directories are created.
 
 
-### Parameter
+### Args
 `toolname` (str)
 - Name of the tool
 
@@ -272,13 +275,15 @@ found then user-specific is assumed.  No directories are created.
 - For a `user` setup, the `.log_dir_base` is initially set to the `.user_data_dir` (a variance from XDG spec).
 If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
-Thus, for a `user` setup, logging is done to the default configuration directory.  This is a 
+Thus, for a `user` setup, logging defaults to the configuration directory.  This is a 
 style variance, and can be reset in the tool script by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
-other directory) before calling cjnfuncs.configman.loadconfig() or setuplogging().
+other directory) before a subsequent call to `loadconfig()` or `setuplogging()`.
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
-- The `.log_dir`, `.log_file`, and `.log_full_path` attributes are set by calls to setuplogging() 
-  (or loadconfig() which in turn calls setuplogging()) and are initially set to `None` by set_toolname().
+- The last operation within `set_toolname()` is to call `setuplogging()`, which initializes the root
+logger to log to the console.  The `.log_dir` and `.log_file` attributes are set to `None`, while 
+`.log_full_path` is set to `__console__`.  Having `set_toolname()` call `setuplogging()` ensures that any logging events
+before a user-code call to `setuplogging()` or `loadconfig()` are properly logged.
 
 - For a `site` setup, the `.site_data_dir` is set to `/usr/share/<toolname>`.  The XDG spec states that 
 the `.cache_dir` and `.state_dir` should be in the root user tree; however, set_toolname() sets these two 
@@ -297,7 +302,7 @@ Logging may be directed to the console (stdout), or to a file.  Each time setupl
 is called the current/active log file (or console) may be reassigned.
 
 setuplogging() works standalone or in conjunction with `cjnfuncs.configman.loadconfig()`.
-If a loaded config file has a `LogFile` parameter then loadconfig() passes it thru
+If a loaded config file has a `LogFile` parameter then loadconfig() passes it's value thru
 `config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
 that were passed to loadconfig() from the tool script.  This mechanism allows the tool script
 to override any config `LogFile`, such as for directing output to the console for a tool script's 
@@ -307,7 +312,7 @@ the log file declared in the config file:
     setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')
 
     
-### Parameters
+### Args
 `call_logfile` (Path or str, default None)
 - Potential log file passed typically from the tool script.  Selected by `call_logfile_wins = True`.
 call_logfile may be an absolute path or relative to the `core.tool.log_dir_base` directory.  
@@ -334,3 +339,56 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 ### Returns
 - NoneType
     
+<br/>
+
+<a id="set_logging_level"></a>
+
+---
+
+# set_logging_level (new_level, clear=False) - Save the current logging level and set the new_level
+
+The current logging level is saved on a stack and can be restored by a call to restore_logging_level.
+
+
+### Args
+`new_level` (int)
+- The new logging level to be set.  Values may be set to the logging module defined levels, or their integer 
+equivalents (or to any integer value that makes sense):  logging.DEBUG (10), logging.INFO (20), logging.WARNING (30), 
+logging.ERROR (40), or logging.CRITICAL (50).
+
+`clear` (bool, default False)
+- If True, the logging level history stack is cleared.
+- If False, the current logging level is saved on the stack.
+
+
+### Returns
+- NoneType
+    
+<br/>
+
+<a id="restore_logging_level"></a>
+
+---
+
+# restore_logging_level () - Restore the prior logging level from the stack
+
+The prior saved logging level (from the prior set_logging_level call) is popped from the stack and set as the current logging level.
+If the stack is empty then the logging level is set to logging.WARNING (30).
+
+
+### Returns
+- NoneType
+    
+<br/>
+
+<a id="get_logging_level_stack"></a>
+
+---
+
+# get_logging_level_stack () - Return the content of the stack
+
+Useful for debug.  The stack may be cleared with a call to `set_logging_level()`.
+
+
+### Returns
+- A list of the prior saved logging levels.
