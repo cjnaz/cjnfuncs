@@ -298,7 +298,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 #=====================================================================================
 
 ll_history = []
-def set_logging_level(new_level, clear=False):
+def set_logging_level(new_level, clear=False, save=True):
     """
 ## set_logging_level (new_level, clear=False) - Save the current logging level and set the new_level
 
@@ -313,7 +313,11 @@ logging.ERROR (40), or logging.CRITICAL (50).
 
 `clear` (bool, default False)
 - If True, the logging level history stack is cleared.
-- If False, the current logging level is saved on the stack.
+
+`save` (bool, default True)
+- If True, the current logging level is saved to the stack
+- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level
+
 
 
 ### Returns
@@ -322,7 +326,7 @@ logging.ERROR (40), or logging.CRITICAL (50).
     global ll_history
     if clear:
         ll_history = []
-    else:
+    if save:
         ll_history.append(logging.getLogger().level)
     logging.getLogger().setLevel(new_level)
 

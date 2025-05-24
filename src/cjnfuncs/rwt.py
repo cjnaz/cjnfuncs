@@ -11,7 +11,7 @@
 # import shutil
 # import __main__
 
-from .core import logging, set_logging_level, restore_logging_level
+from .core import logging, set_logging_level, restore_logging_level #, get_logging_level_stack
 # from .mungePath import mungePath, check_path_exists
 # import cjnfuncs.core as core
 
@@ -48,14 +48,14 @@ raise a TimeoutError exception.
 - Enforced timeout in seconds
 
 `rwt_ntries` Additional kwarg (int, default 1)
-- Number of attempts to run `func` if `func` times out or raises an exception
+- Number of attempts to run `func` if rwt_timeout is exceeded or `func` raises an exception
 
 `rwt_kill` Additional kwarg (bool, default True)
 - If True, on timeout kill the process
 - If False, on timeout let the process continue to run.  It will be orphaned - see Behavior notes, below.
 
 `rwt_debug` Additional kwarg (bool, default False)
-- Log run_with_timeout call arguments and mode setups
+- Intended for regression testing.  Logs rwt internal status and trace info.
 
 
 ### Returns
@@ -64,9 +64,10 @@ raise a TimeoutError exception.
 - If rwt_timeout is exceeded, returns TimeoutError
 - Exceptions raised for invalid rwt_timeout, rwt_ntries, rwt_kill, or rwt_debug values
 
+
 ### Behaviors and rules
-- The logging level is set to INFO for the called `func` by default.  To achieve debug level logging
-for the called `func` set `rwt_debug=True`. TODO leave logging level alone unless its set to DEBUG?
+- Logging within the called `func` is done at the logging level in effect when run_with_timeout is called. 
+rwt_debug=True enables additional status and trace info.
 - If func is a subprocess call then include `timeout=` in the subprocess args  TODO confirm.  Why?
 - subprocess.TimeoutExpired is producing an odd exception on Python 3.11.9: 
 `TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'`
@@ -83,15 +84,22 @@ lists the process pid of the last try.
 
     def _runner(q, func, args, kwargs):
         def runner_int_handler(sig, frame):
-            logging.debug(f"RH1 - Signal {sig} received")
-            time.sleep(0.01)                                     # allow time for logging
+            if _debug:
+                set_logging_level(logging.DEBUG)
+                logging.debug(f"RH1 - Signal {sig} received")
+                time.sleep(0.01)                                # allow time for logging
             sys.exit()
         
         signal.signal(signal.SIGTERM, runner_int_handler)       # kill    (15)
         
         # os.setpgrp()    # Force to run in separate process group so that kill doesn't also kill the calling process
+        # logging.warning (f"_runner entry logging level: {logging.getLogger().level}")
         logging.debug(f"R1  - runner_p pid {os.getpid()}")
         try:
+            # logging.warning (f"Pre-func call logging level stack: {get_logging_level_stack()}")
+            restore_logging_level()                             # normal logging level restored
+            # logging.warning (f"After runner restore_logging_level stack: {get_logging_level_stack()}")
+            # logging.warning (f"Pre-func call logging level: {logging.getLogger().level}")
             result = func(*args, **kwargs)
             q.put(("result", result))
         except Exception as e:
@@ -99,48 +107,79 @@ lists the process pid of the last try.
 
 
     #--------- Top_level ---------
+
+    # logging.warning (f"Top_level entry logging level: {logging.getLogger().level}")
     _timeout = 1                    # Default
     if 'rwt_timeout' in kwargs:
         _timeout = kwargs['rwt_timeout']
         del kwargs['rwt_timeout']
-    if not isinstance(_timeout, (int, float)):
-        raise ValueError (f"rwt_timeout must be type int or float, received <{_timeout}>")
+        if not isinstance(_timeout, (int, float)):
+            raise ValueError (f"rwt_timeout must be type int or float, received <{_timeout}>")
 
     _ntries = 1                     # Default
     if 'rwt_ntries' in kwargs:
         _ntries = kwargs['rwt_ntries']
         del kwargs['rwt_ntries']
-    if not isinstance(_ntries, (int)):
-        raise ValueError (f"rwt_ntries must be type int, received <{_ntries}>")
+        if not isinstance(_ntries, (int)):
+            raise ValueError (f"rwt_ntries must be type int, received <{_ntries}>")
 
     _kill = True                    # Default
     if 'rwt_kill' in kwargs:
         _kill = kwargs['rwt_kill']
         del kwargs['rwt_kill']
-    if not isinstance(_kill, bool):
-        raise ValueError (f"rwt_kill must be type bool, received <{_kill}>")
+        if not isinstance(_kill, bool):
+            raise ValueError (f"rwt_kill must be type bool, received <{_kill}>")
 
-    if _debug := kwargs.get('rwt_debug', False):
+    _debug = False
+    if 'rwt_debug' in kwargs:
+        _debug = kwargs['rwt_debug']
         del kwargs['rwt_debug']
+    # if _debug := kwargs.get('rwt_debug', False):
+    #     del kwargs['rwt_debug']
         if not isinstance(_debug, bool):
             raise ValueError (f"rwt_debug must be type bool, received <{_debug}>")
-        set_logging_level(logging.DEBUG)
-        xx =  f"\nrun_with_timeout switches:\n  rwt_timeout:  {_timeout}\n  rwt_ntries:   {_ntries}\n  rwt_kill:     {_kill}\n  rwt_debug:    {_debug}"
-        xx += f"\n  Function:     {func}\n  args:         {args}\n  kwargs:       {kwargs}"
-        logging.debug (xx)
-    else:
-        set_logging_level(logging.INFO)         # Debug level logging in called function is suppressed.  TODO only if level is currently debug ??
+        # set_logging_level(logging.DEBUG)
+        # xx =  f"\nrun_with_timeout switches:\n  rwt_timeout:  {_timeout}\n  rwt_ntries:   {_ntries}\n  rwt_kill:     {_kill}\n  rwt_debug:    {_debug}"
+        # xx += f"\n  Function:     {func}\n  args:         {args}\n  kwargs:       {kwargs}"
+        # logging.debug (xx)
+    # else:
+    #     set_logging_level(logging.INFO)         # Debug level logging in called function is suppressed.  TODO only if level is currently debug ??
 
+    # logging.warning (f"Pre ntries loop logging level stack: {get_logging_level_stack()}")
+    # logging.warning (f"Pre ntries loop logging level: {logging.getLogger().level}")
 
     for ntry in range(_ntries):
+        if _debug:
+            set_logging_level(logging.DEBUG)
+        else:
+            set_logging_level(logging.INFO)         # No logging from rwt
+
+        # logging.warning (f"After set_ll top of ntries loop logging level stack: {get_logging_level_stack()}")
+        # logging.warning (f"After set_ll top of loop logging level: {logging.getLogger().level}")
+
+        if ntry == 0:
+            xx =  f"\nrun_with_timeout switches:\n  rwt_timeout:  {_timeout}\n  rwt_ntries:   {_ntries}\n  rwt_kill:     {_kill}\n  rwt_debug:    {_debug}"
+            xx += f"\n  Function:     {func}\n  args:         {args}\n  kwargs:       {kwargs}"
+            logging.debug (xx)
+
         if _ntries > 1:
             logging.debug (f"T0 - Try {ntry}")
 
         logging.debug (f"T1  - Starting runner_p")
         runner_to_toplevel_q = multiprocessing.Queue()
         runner_p = multiprocessing.Process(target=_runner, args=(runner_to_toplevel_q, func, args, kwargs), daemon=False, name=f'rwt_{func}')
+        # logging.warning (f"Pre-runner call logging level stack: {get_logging_level_stack()}")
+
         runner_p.start()
         runner_p.join(timeout=_timeout)
+
+        # logging.warning (f"After runner_p.join logging level stack: {get_logging_level_stack()}")
+        # logging.warning (f"After runner_p.join logging level: {logging.getLogger().level}")
+
+        if _debug:
+            set_logging_level(logging.DEBUG, save=False)
+        else:
+            set_logging_level(logging.INFO, save=False)
 
         if not runner_p.is_alive():             # runner_p completed without timeout - normal exit
             logging.debug (f"T2  - runner_p exited before rwt_timeout")

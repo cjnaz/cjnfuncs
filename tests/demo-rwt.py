@@ -112,15 +112,18 @@ if args.cleanup:
 # --------------------------------------------------------------------
 
 def dotest (testnum, message, func, *args, **kwargs):
-    logging.warning (f"\n==============================================================================================\nTest {testnum} - {message}")
+    # logging.warning (f"\n==============================================================================================\nTest {testnum} - {message}")
+    logging.warning (f"\n\n==============================================================================================\nTest {testnum} - {message}")
     try:
         result = run_with_timeout(func, *args, **kwargs)
-        logging.warning (f"RETURNED:\n{result}\n\n")
+        # logging.warning (f"RETURNED:\n{result}\n\n")
+        logging.warning (f"RETURNED:\n{result}")
         return result
         # logging.warning (f"RETURNED:\n{run_with_timeout(func, *args, **kwargs)}\n\n")
     except Exception as e:
         # logging.exception (f"EXCEPTION:\n{type(e).__name__}: {e}")          # With call stack
-        logging.error (f"EXCEPTION:\n{type(e).__name__}: {e}\n\n")          # Just the exception 
+        # logging.error (f"EXCEPTION:\n{type(e).__name__}: {e}\n\n")          # Just the exception 
+        logging.error (f"EXCEPTION:\n{type(e).__name__}: {e}")          # Just the exception 
         return e
 
 
@@ -128,7 +131,7 @@ def dotest (testnum, message, func, *args, **kwargs):
 # demo-specific functions and vars
 
 debug_flag = True
-set_logging_level(logging.WARNING)
+set_logging_level(logging.WARNING, save=False)
 
 abc= 42
 
@@ -143,6 +146,11 @@ def wont_terminate():
             time.sleep (0.2)
         except:
             pass
+
+def log_each_level():
+    logging.debug ('debug')
+    logging.info ('info')
+    logging.warning ('warning')
 
 #===============================================================================================
 
@@ -258,4 +266,32 @@ if args.test == '0'  or  args.test == tnum:
        nosuchfile.unlink, rwt_ntries=2, rwt_debug=debug_flag)
     logging.debug ("This wont be logged")
     logging.warning ("This will be logged")
+
+tnum = '17a'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.WARNING, save=False)
+    dotest(tnum, "Initial logging level WARNING, rwt_debug=True - log_each_test logs WARNING",
+       log_each_level, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '17b'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.INFO, save=False)
+    dotest(tnum, "Initial logging level INFO, rwt_debug=True - log_each_test logs WARNING, INFO",
+       log_each_level, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '17c'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.DEBUG, save=False)
+    dotest(tnum, "Initial logging level DEBUG, rwt_debug=True - log_each_test logs WARNING, INFO, DEBUG",
+       log_each_level, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '17d'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.DEBUG, save=False)
+    dotest(tnum, "Initial logging level DEBUG, rwt_debug=False - log_each_test logs WARNING, INFO, DEBUG",
+       log_each_level, rwt_debug=False)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
