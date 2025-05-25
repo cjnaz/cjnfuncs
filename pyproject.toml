@@ -5,8 +5,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "3.0b2"
-    # 3.0b2 - rwt_debug switch functionality
+version = "3.0b3"
+    # 3.0b3 - rwt final
+    # 3.0b2 - rwt_debug switch functionality, set_logging_level save switch
     # 3.0b1 - Added rwt module, set/restore_logging_level and periodic_log added to core, mungePath set_attributes switch
     # 2.6b3 - rwt added ntries
     # 2.6b2 - all functional and almost stable

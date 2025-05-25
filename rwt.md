@@ -126,13 +126,59 @@ $ ./rwt_ex2.py
 
 Notables:
 1. Logging to the console with timestamps is used in this example to show the enforced timeout in Test 3.
-2. A user-defined function has at least read access the vars, functions, classes, etc that are available in the main thread.
+2. A function executed by run_with_timeout has read/write access to a _copy_ of the vars, functions, classes, etc that are available in the main thread.
 3. A direct call to my_func is executed in the main thread, and changes to global variables are applied.
 4. When calling my_func with run_with_timeout, leave off the `()` off of the `my_func` reference, and include my_func's args and keyword args exactly as with a direct call to my_func.  Add run_with_timeout's keyword args, as needed.  The default rwt_timeout value is 1.0 sec.
 5. Since run_with_timeout gets a _copy_ of the global vars, the change made within my_func is not applied to the main thread's globals.
 6. All calls to run_with_timeout should handle the possible TimeoutError exception.  Note that there is an addition 10ms delay in the process
 termination handling for rwt debug logging.
 
+<br>
+
+## Using rwt_kill=False and manually killing orphaned processes
+
+This example creates three orphaned processes who's pids are returned in the timeout exception raised by
+run_with_timeout.  The code extracts the pids and kills the processes.
+
+Code:
+```
+#!/usr/bin/env python3
+# ***** rwt_ex3.py *****
+
+import time
+import os
+import signal
+
+from cjnfuncs.core      import set_toolname, logging
+from cjnfuncs.rwt       import run_with_timeout
+
+set_toolname('rwt_ex3')
+
+
+def wont_terminate():
+    # This function is hard to kill.  SIGTERM doesn't break the loop.
+    while 1:
+        try:
+            time.sleep (0.2)
+        except:
+            pass
+
+
+try:
+    run_with_timeout(wont_terminate, rwt_timeout=0.5, rwt_kill=False, rwt_ntries=3)
+except Exception as e:
+    logging.error (f"EXCEPTION received:  {type(e).__name__}: {e}")
+
+    # Kill the orphaned processes.
+    runner_pids = str(e).split('orphaned pids: ')[1].split(' ')
+    for runner_pid in runner_pids:
+        os.kill(int(runner_pid), signal.SIGKILL)
+```
+
+Output from the exception log:
+```
+rwt_ex3.<module>             -    ERROR:  EXCEPTION received:  TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (not killed) orphaned pids: 2069926 2069931 2069969
+```
 
 <a id="links"></a>
          
@@ -154,14 +200,16 @@ termination handling for rwt debug logging.
 
 # run_with_timeout (func, *args, **kwargs, rwt_timeout=1, rwt_ntries=1, rwt_kill=True, rwt_debug=False) - Run a function in a separate process with an enforced timeout.
 
-For a non-timeout run, return what the `func` returns or any exception raised.  On timeout kill the process (by default) and
-raise a TimeoutError exception.
+`run_with_timeout` uses the multiprocessing module, and works by running the specified `func` in a managed external process than can be reliably killed on timeout.
+For a non-timeout run, `run_with_timeout` returns what the `func` returns or any exception raised. 
+On timeout, the process is killed (by default) and a TimeoutError exception is raised.
 
 
 ### Args
 
 `func` (callable)
 - The function to run
+- May be any function - built-in, standard library, supplied by an installed package, or user-written.
 
 `*args` (0+)
 - Positional args required by func
@@ -169,18 +217,18 @@ raise a TimeoutError exception.
 `**kwargs` (0+)
 - Keyword args to be passed to func
 
-`rwt_timeout` Additional kwarg (int or float, default 1)
+`rwt_timeout` additional kwarg (int or float, default 1)
 - Enforced timeout in seconds
 
-`rwt_ntries` Additional kwarg (int, default 1)
-- Number of attempts to run `func` if `func` times out or raises an exception
+`rwt_ntries` additional kwarg (int, default 1)
+- Number of attempts to run `func` if rwt_timeout is exceeded or `func` raises an exception
 
-`rwt_kill` Additional kwarg (bool, default True)
+`rwt_kill` additional kwarg (bool, default True)
 - If True, on timeout kill the process
 - If False, on timeout let the process continue to run.  It will be orphaned - see Behavior notes, below.
 
-`rwt_debug` Additional kwarg (bool, default False)
-- Log run_with_timeout call arguments and mode setups
+`rwt_debug` additional kwarg (bool, default False)
+- Intended for regression testing.  Logs rwt internal status and trace info.
 
 
 ### Returns
@@ -189,18 +237,19 @@ raise a TimeoutError exception.
 - If rwt_timeout is exceeded, returns TimeoutError
 - Exceptions raised for invalid rwt_timeout, rwt_ntries, rwt_kill, or rwt_debug values
 
+
 ### Behaviors and rules
-- The logging level is set to INFO for the called `func` by default.  To achieve debug level logging
-for the called `func` set `rwt_debug=True`. TODO leave logging level alone unless its set to DEBUG?
-- If func is a subprocess call then include `timeout=` in the subprocess args  TODO confirm.  Why?
-- subprocess.TimeoutExpired is producing an odd exception on Python 3.11.9: 
-`TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'`
+- Logging within the called `func` is done at the logging level in effect when run_with_timeout is called. 
+rwt_debug=True enables additional status and trace info, intended for debug and regression testing.
+- If making a subprocess call and the subprocess timeout limit is triggered, a
+subprocess.TimeoutExpired exception is produce with an odd error message on Python 3.11.9: 
+`TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'`. Generally, don't use
+the subprocess timeout arg when using run_with_timeout.
 - If `rwt_kill=False` then the spawned process will not be killed, and if the process doesn't exit by itself 
 then the tool script will hang on exit, waiting for the orphan process to terminate.
 To solve this the tool script needs to kill any orphaned processes created by run_with_timeout before exiting. 
-The pid of the orphaned process is listed in the TimeoutError exception when `rwt_kill=False`, and can
-be captured for explicitly killing any unterminated orphaned processes before exiting the tool script, eg: 
-`os.kill (pid, signal.OSKILL)`.  See the `demo-run_with_timeout.py` test 15 for a working example.
+The pids of the orphaned processes are listed in the TimeoutError exception when `rwt_kill=False`, and can
+be captured for explicitly killing of any unterminated orphaned processes before exiting the tool script, eg: 
+`os.kill (pid, signal.OSKILL)`.  See `rwt.md` for a working example.
 Note that if `rwt_ntries` is greater than 1 and `rwt_kill=False`, then potentially several processes may 
-be created and orphaned, all attempting to doing the same work.  The final TimeoutError exception only 
-lists the process pid of the last try.
+be created and orphaned, all attempting to doing the same work.

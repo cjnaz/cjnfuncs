@@ -2,13 +2,13 @@
 """Demo/test for cjnfuncs.runwithtimeout
 
 Produce / compare to golden results:
-    ./demo-run_with_timeout.py --setup-user
+    ./demo-rwt.py --setup-user
 
-    ./demo-run_with_timeout.py | diff demo-run_with_timeout-golden.txt -
+    ./demo-rwt.py | diff demo-rwt-golden.txt -
         Or use bcompare
-        Differences will be timestamps and pids
+        Differences will be timestamps, pids, and yahoo.com IP address
 
-    ./demo-run_with_timeout.py --cleanup
+    ./demo-rwt.py --cleanup
 """
 
 #==========================================================
@@ -57,6 +57,7 @@ set_toolname(TOOLNAME)
 setuplogging(ConsoleLogFormat="{asctime} {module:>22}.{funcName:20} {levelname:>8}:  {message}")
 
 
+# THIS DEMO TEST FILE IS A TEMPLATE FOR OTHER TESTS, THUS LOTS OF EXTRANEOUS STUFF IS RETAINED.
 # --------------------------------------------------------------------
 test_dir = f'/tmp/{TOOLNAME}'
 if args.setup_user:
@@ -112,17 +113,13 @@ if args.cleanup:
 # --------------------------------------------------------------------
 
 def dotest (testnum, message, func, *args, **kwargs):
-    # logging.warning (f"\n==============================================================================================\nTest {testnum} - {message}")
     logging.warning (f"\n\n==============================================================================================\nTest {testnum} - {message}")
     try:
         result = run_with_timeout(func, *args, **kwargs)
-        # logging.warning (f"RETURNED:\n{result}\n\n")
         logging.warning (f"RETURNED:\n{result}")
         return result
-        # logging.warning (f"RETURNED:\n{run_with_timeout(func, *args, **kwargs)}\n\n")
     except Exception as e:
         # logging.exception (f"EXCEPTION:\n{type(e).__name__}: {e}")          # With call stack
-        # logging.error (f"EXCEPTION:\n{type(e).__name__}: {e}\n\n")          # Just the exception 
         logging.error (f"EXCEPTION:\n{type(e).__name__}: {e}")          # Just the exception 
         return e
 
@@ -132,13 +129,13 @@ def dotest (testnum, message, func, *args, **kwargs):
 
 debug_flag = True
 set_logging_level(logging.WARNING, save=False)
-
 abc= 42
 
 def test_shell_1(t, tnum, file):
     time.sleep (t)
-    logging.warning (f"Hello there {abc} tnum: {tnum}, pid: {os.getpid()}")
+    logging.info (f"Hello there {abc}.  Log from unkilled Test {tnum}, pid: {os.getpid()}")
     Path(file).touch()
+
 
 def wont_terminate():
     while 1:
@@ -146,6 +143,7 @@ def wont_terminate():
             time.sleep (0.2)
         except:
             pass
+
 
 def log_each_level():
     logging.debug ('debug')
@@ -170,60 +168,83 @@ if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Subprocess ping unknown - Return subprocess fail result",
         subprocess.run, ['ping', 'dummyunknown.com', '-c', '1'], rwt_timeout=3, timeout=1, capture_output=True, text=True, rwt_debug=debug_flag)
 
-tnum = '4'
-if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout < rwt_timeout - Exception subprocess.TimeoutExpired",
-        subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=0.5, capture_output=True, text=True, rwt_timeout=3, rwt_debug=debug_flag)
 
+# Test 4 series - Check subprocess calls with subprocess timeout arg < and > rwt_timeout
 tnum = '4a'
 if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Subprocess ping known/unavailable - subprocess timeout < rwt_timeout, rwt_ntries=2 - Exception subprocess.TimeoutExpired",
+    dotest(tnum, "Subprocess ping known/unavailable. subprocess timeout < rwt_timeout - Exception subprocess.TimeoutExpired",
+        subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=0.5, capture_output=True, text=True, rwt_timeout=3, rwt_debug=debug_flag)
+
+tnum = '4b'
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Subprocess ping known/unavailable, subprocess timeout < rwt_timeout, rwt_ntries=2 - Exception subprocess.TimeoutExpired",
         subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=0.5, capture_output=True, text=True, rwt_timeout=3, rwt_debug=debug_flag, rwt_ntries=2)
 
-tnum = '5'
+tnum = '4c'
 if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Subprocess ping known/unavailable - rwt_timeout < subprocess timeout - Exception TimeoutError",
+    dotest(tnum, "Subprocess ping known/unavailable, rwt_timeout < subprocess timeout - Exception TimeoutError",
        subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=3, capture_output=True, text=True, rwt_timeout=0.5, rwt_debug=debug_flag)
 
-tnum = '5a'
+tnum = '4d'
 if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Subprocess ping known/unavailable - rwt_timeout < subprocess timeout, rwt_ntries=2 - Exception TimeoutError",
+    dotest(tnum, "Subprocess ping known/unavailable, rwt_timeout < subprocess timeout, rwt_ntries=2 - Exception TimeoutError",
        subprocess.run, ['ping', 'testhostx', '-c', '1'], timeout=3, capture_output=True, text=True, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=2)
 
-tnum = '6'
+tnum = '4e'
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Subprocess ping known/unavailable, No subprocess timeout - Exception TimeoutError",
+        subprocess.run, ['ping', 'testhostx', '-c', '1'], capture_output=True, text=True, rwt_timeout=0.5, rwt_debug=debug_flag)
+
+tnum = '4f'
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Subprocess ping known/unavailable, No subprocess timeout, rwt_ntries=2 - Exception TimeoutError",
+        subprocess.run, ['ping', 'testhostx', '-c', '1'], capture_output=True, text=True, rwt_timeout=0.5, rwt_ntries=2, rwt_debug=debug_flag)
+
+
+# Test 6 series - Exercise rwt_kill=False
+tnum = '6a'
 if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Function took too long, killed - Exception TimeoutError, File 'FileNotTouched' not created", 
        test_shell_1, 2, tnum, f'{test_dir}/FileNotTouched', rwt_timeout=0.5, rwt_debug=debug_flag)
 
-tnum = '7'
+tnum = '6b'
 if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Function took too long, not killed - Exception TimeoutError, File 'FileTouched_1' created",
+    set_logging_level(logging.INFO, save=False)
+    dotest(tnum, "INFO external log level, Function took too long, not killed - Exception TimeoutError, File 'FileTouched_1' created, message logged during Test 6c",
        test_shell_1, 1, tnum, Path(f'{test_dir}/FileTouched_1'), rwt_timeout=0.5, rwt_kill=False, rwt_debug=debug_flag)
 
-tnum = '8'
+tnum = '6c'
 if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Sleep took too long, rwt_debug=False - Exception TimeoutError",
+    set_logging_level(logging.WARNING, save=False)
+    dotest(tnum, "WARNING external log level, Sleep took too long, rwt_debug=False - Exception TimeoutError, Test 6b INFO log",
        time.sleep, 10, rwt_timeout=1.5)
 
-tnum = '8a'
+tnum = '6d'
 if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Sleep took too long - Exception TimeoutError",
        time.sleep, 10, rwt_timeout=0.5, rwt_debug=debug_flag)
 
-tnum = '9'
-if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Invalid rwt_timeout - Exception ValueError, File 'FileTouched_9' not created",
-       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9', rwt_timeout='abc', rwt_kill=False, rwt_debug=debug_flag)
 
+# Test 9 series - Check rwt kwargs check logic
 tnum = '9a'
 if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Invalid rwt_ntries - Exception ValueError, File 'FileTouched_9a' not created",
-       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9a', rwt_ntries='abc', rwt_debug=debug_flag)
+    dotest(tnum, "Invalid rwt_timeout - Exception ValueError",
+       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9a', rwt_timeout='abc', rwt_debug=debug_flag)
 
-tnum = '10'
+tnum = '9b'
 if args.test == '0'  or  args.test == tnum:
-    dotest(tnum, "Invalid rwt_kill - Exception ValueError, File 'FileTouched_10' not created",
-       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_10', rwt_kill='abc', rwt_debug=debug_flag)
+    dotest(tnum, "Invalid rwt_ntries - Exception ValueError",
+       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9b', rwt_ntries='abc', rwt_debug=debug_flag)
+
+tnum = '9c'
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Invalid rwt_kill - Exception ValueError",
+       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9c', rwt_kill='abc', rwt_debug=debug_flag)
+
+tnum = '9d'
+if args.test == '0'  or  args.test == tnum:
+    dotest(tnum, "Invalid rwt_debug - Exception ValueError",
+       test_shell_1, 2, tnum, f'{test_dir}/FileTouched_9d', rwt_debug='abc')
 
 tnum = '11'
 if args.test == '0'  or  args.test == tnum:
@@ -247,51 +268,151 @@ if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "shutil.copy, rwt_debug False - passes",
        shutil.copy, t13a, t13b, rwt_timeout=1)
 
-tnum = '14'
+
+# Test 14 series - Process wont exit, kill scenarios
+tnum = '14a'
 if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Function wont_terminate, requiring os.kill, rwt_ntries=1 - Exception TimeoutError",
-       wont_terminate, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=1) #, rwt_kill=False)
+       wont_terminate, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=1)
 
-tnum = '15'
+tnum = '14b'
 if args.test == '0'  or  args.test == tnum:
-    xx = dotest(tnum, "Function wont_terminate, not killed, rwt_ntries=1 - Exception TimeoutError",
+    xx = dotest(tnum, "Function wont_terminate, not killed, rwt_ntries=1 - Exception TimeoutError, pid listed",
        wont_terminate, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=1, rwt_kill=False)
-    runner_pid = int(str(xx).split('pid ')[1][:-1])
-    os.kill(runner_pid, signal.SIGKILL)
+    runner_pids = str(xx).split('orphaned pids: ')[1].split(' ')
+    for runner_pid in runner_pids:
+        os.kill(int(runner_pid), signal.SIGKILL)
 
-tnum = '16'
+tnum = '14c'
 if args.test == '0'  or  args.test == tnum:
-    nosuchfile = Path(f'{test_dir}//nosuchfile')
-    dotest(tnum, "Delete non-existing file, rwt_tries=2 - Debug logging for both tries",
-       nosuchfile.unlink, rwt_ntries=2, rwt_debug=debug_flag)
-    logging.debug ("This wont be logged")
-    logging.warning ("This will be logged")
+    xx = dotest(tnum, "Function wont_terminate, not killed, rwt_ntries=4 - Exception TimeoutError, pids listed",
+       wont_terminate, rwt_timeout=0.5, rwt_debug=debug_flag, rwt_ntries=4, rwt_kill=False)
+    runner_pids = str(xx).split('orphaned pids: ')[1].split(' ')
+    for runner_pid in runner_pids:
+        os.kill(int(runner_pid), signal.SIGKILL)
 
+
+# Test 16 series - Check logging level handling with exception raised by function
+tnum = '16a'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.WARNING, save=False)
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "WARNING external log level, rwt_ntries=1, rwt_debug=True - Exception FileNotFoundError, Post test logging level:  30",
+       nosuchfile.unlink, rwt_ntries=1, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '16b'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.INFO, save=False)
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "INFO external log level, rwt_ntries=1, rwt_debug=True - Exception FileNotFoundError, Post test logging level:  20",
+       nosuchfile.unlink, rwt_ntries=1, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '16c'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.DEBUG, save=False)
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "DEBUG external log level, rwt_ntries=1, rwt_debug=True - Exception FileNotFoundError, Post test logging level:  10",
+       nosuchfile.unlink, rwt_ntries=1, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '16d'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.DEBUG, save=False)
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "DEBUG external log level, rwt_ntries=1, rwt_debug=False - Exception FileNotFoundError, Post test logging level:  10",
+       nosuchfile.unlink, rwt_ntries=1, rwt_debug=False)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '16e'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.WARNING, save=False)
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "WARNING external log level, rwt_ntries=2, rwt_debug=True - Exception FileNotFoundError, Post test logging level:  30",
+       nosuchfile.unlink, rwt_ntries=2, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '16f'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.INFO, save=False)
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "INFO external log level, rwt_ntries=2, rwt_debug=True - Exception FileNotFoundError, Post test logging level:  20",
+       nosuchfile.unlink, rwt_ntries=2, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '16g'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.DEBUG, save=False)
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "DEBUG external log level, rwt_ntries=2, rwt_debug=True - Exception FileNotFoundError, Post test logging level:  10",
+       nosuchfile.unlink, rwt_ntries=2, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '16h'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.DEBUG, save=False)
+    nosuchfile = Path(f'{test_dir}//nosuchfile')
+    dotest(tnum, "DEBUG external log level, rwt_ntries=2, rwt_debug=False - Exception FileNotFoundError, Post test logging level:  10",
+       nosuchfile.unlink, rwt_ntries=2, rwt_debug=False)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+
+
+# Test 17 series - Check logging level handling with normal exit by function
 tnum = '17a'
 if args.test == '0'  or  args.test == tnum:
     set_logging_level(logging.WARNING, save=False)
-    dotest(tnum, "Initial logging level WARNING, rwt_debug=True - log_each_test logs WARNING",
-       log_each_level, rwt_debug=True)
+    dotest(tnum, "WARNING external log level, rwt_ntries=1, rwt_debug=True - log_each_level logs WARNING, Post test logging level:  30",
+       log_each_level, rwt_ntries=1, rwt_debug=True)
     logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
 tnum = '17b'
 if args.test == '0'  or  args.test == tnum:
     set_logging_level(logging.INFO, save=False)
-    dotest(tnum, "Initial logging level INFO, rwt_debug=True - log_each_test logs WARNING, INFO",
-       log_each_level, rwt_debug=True)
+    dotest(tnum, "INFO external log level, rwt_ntries=1, rwt_debug=True - log_each_level logs WARNING, INFO, Post test logging level:  20",
+       log_each_level, rwt_ntries=1, rwt_debug=True)
     logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
 tnum = '17c'
 if args.test == '0'  or  args.test == tnum:
     set_logging_level(logging.DEBUG, save=False)
-    dotest(tnum, "Initial logging level DEBUG, rwt_debug=True - log_each_test logs WARNING, INFO, DEBUG",
-       log_each_level, rwt_debug=True)
+    dotest(tnum, "DEBUG external log level, rwt_ntries=1, rwt_debug=True - log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10",
+       log_each_level, rwt_ntries=1, rwt_debug=True)
     logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
 tnum = '17d'
 if args.test == '0'  or  args.test == tnum:
     set_logging_level(logging.DEBUG, save=False)
-    dotest(tnum, "Initial logging level DEBUG, rwt_debug=False - log_each_test logs WARNING, INFO, DEBUG",
-       log_each_level, rwt_debug=False)
+    dotest(tnum, "DEBUG external log level, rwt_ntries=1, rwt_debug=False - log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10",
+       log_each_level, rwt_ntries=1, rwt_debug=False)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '17e'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.WARNING, save=False)
+    dotest(tnum, "WARNING external log level, rwt_ntries=2, rwt_debug=True - log_each_level logs WARNING, Post test logging level:  30",
+       log_each_level, rwt_ntries=2, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '17f'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.INFO, save=False)
+    dotest(tnum, "INFO external log level, rwt_ntries=2, rwt_debug=True - log_each_level logs WARNING, INFO, Post test logging level:  20",
+       log_each_level, rwt_ntries=2, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '17g'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.DEBUG, save=False)
+    dotest(tnum, "DEBUG external log level, rwt_ntries=2, rwt_debug=True - log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10",
+       log_each_level, rwt_ntries=2, rwt_debug=True)
+    logging.warning (f"Post test logging level:  {logging.getLogger().level}")
+
+tnum = '17h'
+if args.test == '0'  or  args.test == tnum:
+    set_logging_level(logging.DEBUG, save=False)
+    dotest(tnum, "DEBUG external log level, rwt_ntries=2, rwt_debug=False - log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10",
+       log_each_level, rwt_ntries=2, rwt_debug=False)
     logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 

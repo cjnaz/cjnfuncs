@@ -358,7 +358,10 @@ logging.ERROR (40), or logging.CRITICAL (50).
 
 `clear` (bool, default False)
 - If True, the logging level history stack is cleared.
-- If False, the current logging level is saved on the stack.
+
+`save` (bool, default True)
+- If True, the current logging level is saved to the stack
+- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level
 
 
 ### Returns

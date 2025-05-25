@@ -126,9 +126,56 @@ $ ./rwt_ex2.py
 
 Notables:
 1. Logging to the console with timestamps is used in this example to show the enforced timeout in Test 3.
-2. A user-defined function has at least read access the vars, functions, classes, etc that are available in the main thread.
+2. A function executed by run_with_timeout has read/write access to a _copy_ of the vars, functions, classes, etc that are available in the main thread.
 3. A direct call to my_func is executed in the main thread, and changes to global variables are applied.
 4. When calling my_func with run_with_timeout, leave off the `()` off of the `my_func` reference, and include my_func's args and keyword args exactly as with a direct call to my_func.  Add run_with_timeout's keyword args, as needed.  The default rwt_timeout value is 1.0 sec.
 5. Since run_with_timeout gets a _copy_ of the global vars, the change made within my_func is not applied to the main thread's globals.
 6. All calls to run_with_timeout should handle the possible TimeoutError exception.  Note that there is an addition 10ms delay in the process
 termination handling for rwt debug logging.
+
+<br>
+
+## Using rwt_kill=False and manually killing orphaned processes
+
+This example creates three orphaned processes who's pids are returned in the timeout exception raised by
+run_with_timeout.  The code extracts the pids and kills the processes.
+
+Code:
+```
+#!/usr/bin/env python3
+# ***** rwt_ex3.py *****
+
+import time
+import os
+import signal
+
+from cjnfuncs.core      import set_toolname, logging
+from cjnfuncs.rwt       import run_with_timeout
+
+set_toolname('rwt_ex3')
+
+
+def wont_terminate():
+    # This function is hard to kill.  SIGTERM doesn't break the loop.
+    while 1:
+        try:
+            time.sleep (0.2)
+        except:
+            pass
+
+
+try:
+    run_with_timeout(wont_terminate, rwt_timeout=0.5, rwt_kill=False, rwt_ntries=3)
+except Exception as e:
+    logging.error (f"EXCEPTION received:  {type(e).__name__}: {e}")
+
+    # Kill the orphaned processes
+    runner_pids = str(e).split('orphaned pids: ')[1].split(' ')
+    for runner_pid in runner_pids:
+        os.kill(int(runner_pid), signal.SIGKILL)
+```
+
+Output from the exception log:
+```
+rwt_ex3.<module>             -    ERROR:  EXCEPTION received:  TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (not killed) orphaned pids: 2069926 2069931 2069969
+```

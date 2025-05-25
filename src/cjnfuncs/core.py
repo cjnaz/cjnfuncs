@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2024
+#  Chris Nelson, 2018-2025
 #
 # TODO Identification of the main module / tool script file may be wrong if a script imports a script that then imports cjnfuncs.
 #==========================================================
@@ -17,9 +17,6 @@ from pathlib import Path
 import __main__
 import appdirs
 import datetime
-
-# from .mungePath import mungePath
-# from .timevalue import timevalue
 
 
 # Configs / Constants
@@ -154,7 +151,6 @@ also to the `.site_data_dir`.
             self.cache_dir      = self.user_cache_dir
             self.log_dir_base   = self.user_data_dir
 
-        # self.log_file = self.log_dir = self.log_full_path = None    # TODO immediately whacked by setuplogging call
         setuplogging()
 
     def __repr__(self):
@@ -244,19 +240,14 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
     _lfp = "__console__"
     if call_logfile_wins == False  and  config_logfile:
-        # logging.warning("Before  _lfp = mungePath(config_logfile, tool.log_dir_base)")
         _lfp = mungePath(config_logfile, tool.log_dir_base)
-        # logging.warning("After   _lfp = mungePath(config_logfile, tool.log_dir_base)")
 
     if call_logfile_wins == True   and  call_logfile:
         _lfp = mungePath(call_logfile, tool.log_dir_base)
 
     logger = logging.getLogger()
-    # print (f"handlers before clear:  {logger.handlers}")
-    # logger.handlers.clear()
 
     if _lfp == "__console__":
-        # logging.warning ("set up console logger")
         _fmt = CONSOLE_LOGGING_FORMAT  if ConsoleLogFormat == None  else  ConsoleLogFormat
         log_format = logging.Formatter(_fmt, style='{')
         handler = logging.StreamHandler(sys.stdout)
@@ -270,9 +261,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
         tool.log_full_path = "__console__"
 
     else:
-        # logging.warning ("Before mungePath force make of _lfp.parent")
         mungePath(_lfp.parent, mkdir=True)      # Force make the target dir
-        # logging.warning ("After  mungePath force make of _lfp.parent")
         _fmt = FILE_LOGGING_FORMAT  if FileLogFormat == None  else  FileLogFormat
         log_format = logging.Formatter(_fmt, style='{')
         handler = logging.FileHandler(_lfp.full_path, "a")
@@ -284,11 +273,6 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
         tool.log_dir = _lfp.parent
         tool.log_file = _lfp.name
         tool.log_full_path = _lfp.full_path
-
-    # logger.propagate = False
-    # print (f"handlers bottom of  setuplogging:  {logger.handlers}")
-    # logging.warning("Bottom of setuplogging")
-
 
 
 #=====================================================================================
@@ -317,7 +301,6 @@ logging.ERROR (40), or logging.CRITICAL (50).
 `save` (bool, default True)
 - If True, the current logging level is saved to the stack
 - If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level
-
 
 
 ### Returns
@@ -395,8 +378,8 @@ def periodic_log(message, category='Cat1', log_interval='10m', log_level=None):
 Log a message infrequently, so as to avoid flooding the log.  The `category` arg provides for independent
 log intervals for different types of logging events.
 
-### Args
 
+### Args
 
 `message` (str)
 - The message text to be logged, if the first time for this `category` or the log_interval has expired
