@@ -5,7 +5,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "3.0b3"
+version = "3.0b5"
+    # 3.0b5 - restructured rwt
+    # 3.0b4 - rwt handle possible No such process for os.kill
     # 3.0b3 - rwt final
     # 3.0b2 - rwt_debug switch functionality, set_logging_level save switch
     # 3.0b1 - Added rwt module, set/restore_logging_level and periodic_log added to core, mungePath set_attributes switch

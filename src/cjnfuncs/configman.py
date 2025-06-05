@@ -137,7 +137,7 @@ directory.  With `remap_logdirbase=True`, the log dir will also be set to the to
             self.config_timestamp   = 0
             self.config_content     = ''        # Used by modify_configfile()
         else:
-            config = mungePath(config_file, core.tool.config_dir)
+            config = mungePath(config_file, core.tool.config_dir)   # TODO rename config_mp
             if config.is_file:
                 self.config_file        = config.name
                 self.config_dir         = config.parent
@@ -524,8 +524,8 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
             if param_name != '':
                 if param_name.lower().startswith('import'):             # import line
-                    target = mungePath(value_portion, self.config_dir)
-                    try:
+                    target = mungePath(value_portion, self.config_dir)  # TODO rename target_mp
+                    try:        # TODO config_item hangable??
                         imported_config = config_item(target.full_path, secondary_config=True)
                         imported_config.loadconfig(ldcfg_ll, isimport=True)
                         for key in imported_config.cfg:
@@ -872,7 +872,7 @@ reload call to avoid multiple config reloads.
             for key in self.cfg[section]:
                 cfg_list += f"{key:20} = {self.cfg[section][key]}\n"
         
-        outfile = mungePath(savefile, core.tool.config_dir).full_path
+        outfile = mungePath(savefile, core.tool.config_dir).full_path   # TODO rename outfile_fp
         for ntry in range(IO_RETRY_COUNT):
             try:
                 Path(outfile).write_text(cfg_list)      # TODO rwt

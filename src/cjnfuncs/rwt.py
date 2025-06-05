@@ -78,12 +78,11 @@ be created and orphaned, all attempting to doing the same work.
             if _debug:
                 set_logging_level(logging.DEBUG)
                 logging.debug(f"RH1 - Signal {sig} received")
-                time.sleep(0.01)                            # allow time for logging
+                time.sleep(0.01)                            # allow time for logging before terminating
             sys.exit()
         
         signal.signal(signal.SIGTERM, runner_int_handler)   # kill (15)
         
-        # os.setpgrp()    # Force to run in separate process group so that kill doesn't also kill the calling process
         logging.debug(f"R1  - runner_p pid {os.getpid()}")
         try:
             restore_logging_level()                         # External logging level restored for running target function
@@ -129,7 +128,7 @@ be created and orphaned, all attempting to doing the same work.
     if _debug:
         set_logging_level(logging.DEBUG)                    # External value saved on stack, restored by runner and on exit
     else:
-        set_logging_level(logging.INFO)                     # External value saved on stack, restored by runner and on exit
+        set_logging_level(logging.INFO)
 
 
     for ntry in range(_ntries):
@@ -150,36 +149,46 @@ be created and orphaned, all attempting to doing the same work.
         if _debug:
             set_logging_level(logging.DEBUG, save=False)
         else:
-            set_logging_level(logging.INFO, save=False)     # No logging from rwt itself
+            set_logging_level(logging.INFO, save=False)     # Disable logging from rwt itself
 
-        if not runner_p.is_alive():                         # runner_p completed without timeout - normal exit
-            logging.debug (f"T2  - runner_p exited before rwt_timeout")
-            status, payload = runner_to_toplevel_q.get(timeout=0.2)     # runner_p always returns status 'result' or 'exception'
-            logging.debug (f"T3  - <{status}> msg received from runner_p")
 
-            if status == "result":
-                restore_logging_level()                     # Restore External value before exit
-                return payload
-            elif status == "exception":
-                if ntry == _ntries-1:
-                    restore_logging_level()                 # Restore External value before exit
-                    ex_type, ex_msg, ex_trace = payload     # ex_trace retained for possible future debug/use
-                    raise ex_type(f"{ex_msg}")
-
-        else:                                               # runner_p is still running - hung
-            if _kill:
+        if runner_p.is_alive():
+            if _kill:                                       # runner_p is alive.  Kill it.
                 logging.debug (f"T4  - terminate runner_p")
                 runner_p.terminate()
                 runner_p.join(timeout=0.2)
                 if runner_p.is_alive():
                     logging.debug (f"T5  - SIGKILL runner_p")
-                    os.kill (runner_p.pid, signal.SIGKILL)
+                    try:
+                        os.kill (runner_p.pid, signal.SIGKILL)
+                    except Exception as e:
+                        if 'No such process' in str(e):     # Corner case of runner_p either ended normally, or the terminate finally happened
+                            pass
+                        else:
+                            if ntry == _ntries-1:
+                                restore_logging_level()     # Restore External logging level before exit
+                                raise
                 if ntry == _ntries-1:
-                    restore_logging_level()                 # Restore External value before exit
+                    restore_logging_level()
                     raise TimeoutError (f"Function <{func.__name__}> timed out after {_timeout} seconds (killed)")
-            else:
+            else:                                           # runner_p is alive, and DON'T kill it
                 pid_list.append(str(runner_p.pid))
                 if ntry == _ntries-1:
-                    restore_logging_level()                 # Restore External value before exit
+                    restore_logging_level()
                     raise TimeoutError (f"Function <{func.__name__}> timed out after {_timeout} seconds (not killed) orphaned pids: {' '.join(pid_list)}")
 
+        else:
+            logging.debug (f"T2  - runner_p exited before rwt_timeout")
+
+
+        if not runner_to_toplevel_q.empty():                # On exit, runner_p returns either status='result' or ='exception'
+            status, payload = runner_to_toplevel_q.get()
+            logging.debug (f"T3  - <{status}> msg received from runner_p")
+            if status == "result":
+                restore_logging_level()
+                return payload
+            elif status == "exception":
+                if ntry == _ntries-1:
+                    restore_logging_level()
+                    ex_type, ex_msg, ex_trace = payload     # ex_trace retained for possible future debug/use
+                    raise ex_type(f"{ex_msg}")

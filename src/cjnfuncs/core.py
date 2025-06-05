@@ -240,7 +240,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
     _lfp = "__console__"
     if call_logfile_wins == False  and  config_logfile:
-        _lfp = mungePath(config_logfile, tool.log_dir_base)
+        _lfp = mungePath(config_logfile, tool.log_dir_base)     # TODO rename to _lfp_mp?
 
     if call_logfile_wins == True   and  call_logfile:
         _lfp = mungePath(call_logfile, tool.log_dir_base)
@@ -261,7 +261,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
         tool.log_full_path = "__console__"
 
     else:
-        mungePath(_lfp.parent, mkdir=True)      # Force make the target dir
+        mungePath(_lfp.parent, mkdir=True)      # Force make the target dir     TODO hangable?  rwt?
         _fmt = FILE_LOGGING_FORMAT  if FileLogFormat == None  else  FileLogFormat
         log_format = logging.Formatter(_fmt, style='{')
         handler = logging.FileHandler(_lfp.full_path, "a")
