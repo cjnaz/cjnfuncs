@@ -8,7 +8,7 @@ module | Description/Purpose
 --|--
 [core](core.md)                   | Set up the base environment
 [configman](configman.md)         | Feature-rich configuration file toolset
-[timevalue](timevalue.md)         | Handle time values with units, such as '5m' (5 minutes)
+[timevalue](timevalue.md)         | Handle time values with units, such as '5m' (5 minutes), and schedule future operations
 [mungePath](mungePath.md)         | Ease-of-use pathlib extension for constructing and manipulating file paths
 [rwt / run_with_timeout](rwt.md)  | Execute any function with an enforced timeout
 [deployfiles](deployfiles.md)     | Push bundled setup files within a package to the proper user/system locations
@@ -39,7 +39,7 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 <br/>
 
 ## Revision history
-- 3.0 250523 - Added run_with_timeout, set_logging_level, restore_logging_level, periodic_logging.  Changes to mungePath.
+- 3.0 250620 - Added run_with_timeout, set_logging_level, restore_logging_level, periodic_logging, get_next_dt.  Changes to mungePath.
 - 2.5 250206 - Added multi-line and quoted string support to configman
 - 2.4.1 241118 - resource_lock only init lock_info if not existing
 - 2.4 241105 - Twilio support in snd_notif, resource_lock trace/debug features, check_path_exists exception fix

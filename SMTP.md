@@ -217,11 +217,11 @@ The `to` string may be the name of a config param (who's value is one or more em
 "NotifList"), or a string with one or more email addresses. Using a config param name allows for customizing the
 `to` addresses without having to edit the code.
 
-The message to send is passed in the `msg` parameter as a text string.
+The message to send is passed in the `msg` arg as a text string.
 Three attempts are made to send the message.
 
     
-### Parameters
+### Args
 `subj` (str, default 'Notification message')
 - Text message subject field
 - Some SMS/MMS apps display the subj field in bold, some in raw form, and some not at all.
@@ -237,7 +237,7 @@ urls then included them in the `msg` body text.
 `to` (str, default 'NotifList')
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name (also listing one
-or more whitespace or comma separated email addresses).  If the `to` parameter does not
+or more whitespace or comma separated email addresses).  If the `to` arg does not
 contain an '@' it is assumed to be a config param.
 - Define `NotifList` in the config file to use the default `to` value.
 
@@ -251,10 +251,11 @@ The `subj` field is part of the log message.
 
 
 ### config dictionary params in the [SMTP] section, in addition to the config dictionary params required for snd_email
+
 `NotifList` (optional)
 - string list of email addresses (whitespace or comma separated).  
 - Defining `NotifList` in the config is only required if any call to `snd_notif()` uses this
-default `to` parameter value.
+default `to` arg value.
 
 `DontNotif` (default False)
 - If True, notification messages are not sent. `log` is still honored. Useful for debug.
@@ -304,14 +305,14 @@ DKIM signing is optionally supported.
 Three attempts are made to send the message (see `EmailNTries`, below).
 
 
-### Parameters
+### Args
 `subj` (str)
 - Email subject text
 
 `to` (str)
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name in the [SMTP] section (also listing one
-or more whitespace or comma separated email addresses).  If the `to` parameter does not
+or more whitespace or comma separated email addresses).  If the `to` arg does not
 contain an '@' it is assumed to be a config param.
 
 `body` (str, default None)

@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "3.0b5"
+version = "3.0b6"
+    # 3.0b6 - get_next_dt added
     # 3.0b5 - restructured rwt
     # 3.0b4 - rwt handle possible No such process for os.kill
     # 3.0b3 - rwt final

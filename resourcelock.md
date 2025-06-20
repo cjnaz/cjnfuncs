@@ -326,7 +326,7 @@ currently 0 (indicating locked), so it is ***recommended*** to have (possibly ex
 such as in your interrupt-trapped cleanup code.
 
 
-### Parameters
+### Args
 `lockname` (str)
 - All processes sharing a given resource must use the same lockname.
 
@@ -360,7 +360,7 @@ By setting `same_process_ok=True`, then if the lock was previously acquired by t
 then get_lock() immediately returns True.  This allows the script code to not have to track state to 
 decide if the lock has previously been acquired before calling get_lock() again, leading to cleaner code.
 
-### Parameters
+### Args
 `timeout` (int or float, default 1 second)
 - The max time, in seconds, to wait to acquire the lock
 - None is no timeout - wait forever (Hang forever.  Unwise.)
@@ -397,7 +397,7 @@ in the same unset state.
 - If the lock is currently set but _not_ acquired by this process then don't release the lock,
 unless `force=True`.
 
-### Parameter
+### Arg
 `force` (bool, default False)
 - Release the lock regardless of whether or not this process acquired it.
 - Useful for forced cleanup, for example, by the CLI interface.

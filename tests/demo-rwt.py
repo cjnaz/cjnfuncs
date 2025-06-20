@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Demo/test for cjnfuncs.runwithtimeout
+"""Demo/test for cjnfuncs.rwt run_with_timeout()
 
 Produce / compare to golden results:
     ./demo-rwt.py -t 0 | diff demo-rwt-golden.txt -
@@ -118,12 +118,13 @@ Path(test_dir).mkdir(exist_ok=True)
 
 # --------------------------------------------------------------------
 
-# def dotest (testnum, message, expect, *args, **kwargs):
-#     logging.warning (f"\n\n==============================================================================================\nTest {testnum} - {message}" + \
-#         f"\n  Given:  {args}, {kwargs}\n  Expect:  <{expect}>")
-
 def dotest (testnum, desc, expect, func, *args, **kwargs):
-    logging.warning (f"\n\n==============================================================================================\nTest {testnum} - {desc}  EXPECT: {expect}")
+    logging.warning (f"\n\n==============================================================================================\n" +
+                     f"Test {testnum} - {desc}" +
+                     f"  EXPECT: {expect}")
+                    #  f"Test {testnum} - {desc}\n" +
+                    #  f"  Given:      {args}, {kwargs}\n"
+                    #  f"  EXPECT:     {expect}")
     try:
         result = run_with_timeout(func, *args, **kwargs)
         logging.warning (f"RETURNED:\n{result}")

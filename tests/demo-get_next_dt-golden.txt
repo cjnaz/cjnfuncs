@@ -1,0 +1,256 @@
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 1 - Find next time within day 3
+  Given:      (['02:15', '10:25', '18:55'], [1, 3, 4, 7]), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-27 18:55:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 18:55:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 1a - Find next time within day 3, usec_resolution ignored
+  Given:      (['02:15', '10:25', '18:55'], [1, 3, 4, 7], True), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-27 18:55:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 18:55:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 2 - Find next time within day 4
+  Given:      (['02:15', '10:25', '18:55'], [1, 3, 4, 7]), {'test_dt': datetime.datetime(2023, 12, 28, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-28 18:55:00, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-28 18:55:00, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 3 - Find day 7
+  Given:      (['02:15', '10:25', '18:55'], [1, 3, 4, 7]), {'test_dt': datetime.datetime(2023, 12, 29, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-31 02:15:00, day # 7
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-31 02:15:00, day # 7
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 4 - Find day 1
+  Given:      (['02:15', '10:25', '18:55'], [1, 3, 4]), {'test_dt': datetime.datetime(2023, 12, 29, 10, 43, 12, 123456)}
+  EXPECT:     2024-01-01 02:15:00, day # 1
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-01-01 02:15:00, day # 1
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 5 - Find first time in day 4
+  Given:      (['02:15', '10:25', '18:55'], [1, 3, 4, 7]), {'test_dt': datetime.datetime(2023, 12, 27, 19, 43, 12, 123456)}
+  EXPECT:     2023-12-28 02:15:00, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-28 02:15:00, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 6 - Find first time in day 3
+  Given:      (['02:15', '10:25', '18:55'], 0), {'test_dt': datetime.datetime(2023, 12, 27, 1, 43, 12, 123456)}
+  EXPECT:     2023-12-27 02:15:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 02:15:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 7 - Find second time in day 3
+  Given:      (['02:15', '10:25', '18:55'], 0), {'test_dt': datetime.datetime(2023, 12, 27, 3, 43, 12, 123456)}
+  EXPECT:     2023-12-27 10:25:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 10:25:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 8 - Find third time in day 3
+  Given:      (['02:15', '10:25', '18:55'], 0), {'test_dt': datetime.datetime(2023, 12, 27, 12, 43, 12, 123456)}
+  EXPECT:     2023-12-27 18.55:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 18:55:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 9 - Find first time in day 4
+  Given:      (['02:15', '10:25', '18:55'], 0), {'test_dt': datetime.datetime(2023, 12, 27, 19, 43, 12, 123456)}
+  EXPECT:     2023-12-28 02:15:00, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-28 02:15:00, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 10 - Find first time in day 2
+  Given:      (['02:15', '10:25', '18:55'], 2), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-01-02 02:15:00, day # 2
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-01-02 02:15:00, day # 2
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 11 - Single time not in list, with seconds
+  Given:      ('14:59:29', 2), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-01-02 14:59:29, day # 2
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-01-02 14:59:29, day # 2
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 12 - Single str day
+  Given:      ('14:00', 'Tuesday'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-01-02 14:00:00, day # 2
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-01-02 14:00:00, day # 2
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 13 - Single day list
+  Given:      ('14:00', ['Tuesday']), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-01-02 14:00:00, day # 2
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-01-02 14:00:00, day # 2
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 14 - Multi-day list
+  Given:      ('14:00', ['sunday', 'Tuesday', 'FrIdaY']), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-29 14:00:00, day # 5
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-29 14:00:00, day # 5
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 15 - Mixed str/int days list
+  Given:      ('14:00', [7, 'Tuesday', 5]), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-29 14:00:00, day # 5
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-29 14:00:00, day # 5
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 15a - Day value = 0
+  Given:      ('14:00', 0), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-27 14:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 14:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 16a - Time offset
+  Given:      ('27h', []), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-28 13:43:12, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-28 13:43:12, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 16b - Time offset
+  Given:      ('2.5w', []), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-01-13 22:43:12, day # 6
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-01-13 22:43:12, day # 6
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 16c - Time offset
+  Given:      ('5m', 'Dont care'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-27 10:48:12, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 10:48:12, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 16d - Time offset with usec res
+  Given:      ('5m', 'Dont care'), {'usec_resolution': True, 'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-27 10:48:12.123456, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 10:48:12.123456, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 16e - Partial sec offset with usec res
+  Given:      ('1.5', {'Dont care'}), {'usec_resolution': True, 'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-27 10:43:13.623456, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 10:43:13.623456, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 17a - Invalid day name
+  Given:      ('14:00', ['Sunday', 'TuesdayX', 5]), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid day string <TuesdayX>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid day string <TuesdayX>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 17b - Day num out of range
+  Given:      ('14:00', 8), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid day number <8>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid day number <8>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 17c - Day num out of range
+  Given:      ('14:00', -3), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid day number <-3>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid day number <-3>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 17d - Invalid days list (dict order may vary)
+  Given:      ('14:00', {5, 'Tuesday', 7}), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid days arg <{'Tuesday', 5, 7}>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid days arg <{5, 'Tuesday', 7}>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 17e - Invalid days list
+  Given:      ('14:00', (7, 'Tuesday', 5)), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid days arg <(7, 'Tuesday', 5)>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid days arg <(7, 'Tuesday', 5)>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 17f - Empty days_list
+  Given:      ('14:00', []), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid days arg <[]>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid days arg <[]>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 18a - Invalid time
+  Given:      ('14.10.05', 0), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid times arg <14.10.05>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid times arg <14.10.05>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 18b - Invalid time
+  Given:      ('xyz', 0), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid times arg <xyz>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid times arg <xyz>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 18c - Invalid time
+  Given:      ('3y', 0), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid times arg <3y>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid times arg <3y>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 18d - Invalid time
+  Given:      (['12:15', '13;45'], 0), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid times arg <13;45>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid times arg <13;45>

@@ -43,7 +43,7 @@ Distribution files and directory trees are hosted in `<module_root>/deployment_f
 `deploy_files()` accepts a list of dictionaries to be pushed to user or site space. 
 
 
-### Parameters
+### Args
 `files_list` (list of dictionaries)
 - A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
   - `source` - Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.

@@ -1,7 +1,18 @@
-# timevalue() and retime() - Cleanly translate time values with units to seconds and other units
+# Working with times
+
+Function | What for?
+--|--
+`timevalue()` | Enables working with time durations such as '10s' (10 seconds) and '1.5h' (1.5 hours)
+`retime()` | Translates a number of seconds into another time unit, such as minutes or hours
+`get_next_dt()` | Returns a datetime for a future scheduled time
 
 Skip to [API documentation](#links)
 
+
+<br/>
+
+
+## Using `timevalue()` and `retime()`
 
 `timevalue()` is a class for dealing with time values (eg, 5 minutes, 2 weeks, 30 seconds) in a simple form.  timevalues are cleanly used in time/datetime calculations and print statements.  There's no magic here, just convenience and cleaner code.
 
@@ -10,10 +21,10 @@ Skip to [API documentation](#links)
 Creating a timevalue instance gives ready access to the value in seconds, and useful `unit_chr` and `unit_str` strings for use in printing and logging.
 
 Using timevalues in configuration files is quite convenient.  
-- A service loop time param may be expressed as `5m` (5 minutes), rather than `300` (hard coded for seconds), or `5` (hard coded for minutes)
+- A service loop time param may be expressed as `5m` (5 minutes), rather than `300` (with hard coding for seconds), or `5` (with hard coding for minutes)
 - A failed command retry interval param my be expressed a `3s` (3 seconds), rather than `3` (what are the time units again?)
 
-## Example usage
+### Example usage
 
 Given
 ```
@@ -58,3 +69,105 @@ w | weeks
 
 <br>
 
+## `get_next_dt()` - An event scheduler building block
+
+`get_next_dt()` returns a datetime for a future scheduled time, based on lists of times and days of the week. The produced datetime can be checked in a while loop to see if the current time has reached the target scheduled datetime.  If so, do the scheduled operation and call `get_next_dt()` again to schedule the next occurrence.
+
+It is suggested that the `times` and `days` args get their values from a config file, thus allowing for config-based scheduling of operations within the tool script.
+
+A few examples to highlight `get_next_dt()`'s functionality:
+
+times arg | days arg | Returns datetime
+--|--|--
+'30s' | don't care | 30 seconds from now
+'12:00' | 0 |        Noon today if currently before noon, else noon tomorrow
+['9:00', '15:00'] | 3 | If today is Wednesday and it's before 9AM then return datetime for 9AM today, or if after 9AM and before 3PM then return datetime for 3PM today.  Else return datetime for 9AM next Wednesday.
+'03:10:15' | [1, 3, 5] | 3:10:15 AM on the next Monday, Wednesday, or Friday
+['9:00', '15:00'] | [1, 3, 5] | The next 9AM or 3PM on Monday, Wednesday, or Friday
+
+
+### Example usage
+
+Given this code:
+
+```
+#!/usr/bin/env python3
+# ***** get_next_dt_ex1.py *****
+
+import datetime
+import shutil
+import time
+
+from cjnfuncs.core          import set_toolname, setuplogging, logging
+from cjnfuncs.timevalue     import get_next_dt
+
+set_toolname('get_next_dt_ex1')
+setuplogging()
+
+
+meas_interval = '30s'
+# times_list =    ['06:00', '12:00', '18:00', '00:00']                      # **** NOTE 1
+# days_list =     ['Monday', 'Wednesday', 'Friday']
+
+times_list =    ['15:56', '15:56:30', '15:56:50', '15:57:25']
+days_list =     0
+
+
+do_meas_dt =    datetime.datetime.now()
+logging.warning (f"First scheduled do_meas   operation: <{do_meas_dt}>")    # **** NOTE 2
+do_backup_dt =  get_next_dt(times_list, days_list)
+logging.warning (f"First scheduled do_backup operation: <{do_backup_dt}>")
+quit_dt =       get_next_dt('4m')                                           # **** NOTE 3
+logging.warning (f"Scheduled to quit at:                <{quit_dt}>\n")
+
+while True:
+    now_dt = datetime.datetime.now()
+
+    if now_dt > do_meas_dt:
+        # take measurements and log to the trace file
+        do_meas_dt = get_next_dt(meas_interval)
+        logging.warning (f"Triggered do_meas   operation at <{now_dt}>, next do_meas   scheduled for <{do_meas_dt}>")
+
+    if now_dt > do_backup_dt:
+        # shutil.copy ('mytrace.csv', '~/.local/mytool/share')
+        do_backup_dt = get_next_dt(times_list, days_list)
+        logging.warning (f"Triggered do_backup operation at <{now_dt}>, next do_backup scheduled for <{do_backup_dt}>")
+
+    # Do other stuff in the main loop, as needed...
+
+    if now_dt > quit_dt:
+        logging.warning (f"Triggered quit at <{now_dt}>")
+        break
+
+    time.sleep (1)
+```
+
+The output
+
+```
+$ ./get_next_dt_ex1.py 
+get_next_dt_ex1.<module>             -  WARNING:  First scheduled do_meas   operation: <2025-06-18 15:56:03.805038>
+get_next_dt_ex1.<module>             -  WARNING:  First scheduled do_backup operation: <2025-06-18 15:56:30>            # **** NOTE 4
+get_next_dt_ex1.<module>             -  WARNING:  Scheduled to quit at:                <2025-06-18 16:00:03>
+
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 15:56:03.805274>, next do_meas   scheduled for <2025-06-18 15:56:33>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_backup operation at <2025-06-18 15:56:30.809096>, next do_backup scheduled for <2025-06-18 15:56:50>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 15:56:33.810096>, next do_meas   scheduled for <2025-06-18 15:57:03>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_backup operation at <2025-06-18 15:56:50.812999>, next do_backup scheduled for <2025-06-18 15:57:25>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 15:57:03.815176>, next do_meas   scheduled for <2025-06-18 15:57:33>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_backup operation at <2025-06-18 15:57:25.818625>, next do_backup scheduled for <2025-06-19 15:56:00>  # **** NOTE 4
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 15:57:33.820345>, next do_meas   scheduled for <2025-06-18 15:58:03>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 15:58:03.825035>, next do_meas   scheduled for <2025-06-18 15:58:33>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 15:58:33.829624>, next do_meas   scheduled for <2025-06-18 15:59:03>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 15:59:03.834010>, next do_meas   scheduled for <2025-06-18 15:59:33>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 15:59:33.838820>, next do_meas   scheduled for <2025-06-18 16:00:03>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered do_meas   operation at <2025-06-18 16:00:03.843111>, next do_meas   scheduled for <2025-06-18 16:00:33>
+get_next_dt_ex1.<module>             -  WARNING:  Triggered quit at <2025-06-18 16:00:03.843111>
+```
+
+Notables
+ 1) A useful application might be to schedule backups of critical files every six hours.  In this example the times_list has been compressed for demo purposes.  `days_list = 0` means every day.
+ 2) `datetime.datetime.now()` returns microsecond resolution, while `get_next_dt()` returns 1 second resolution.
+ 3) get_next_dt() accepts either `times, days` lists or a timevalue offset/interval, eg `'4m'` (the days arg is ignored).
+ 4) The start time for this example code run was after the first time in the times_list, so the first scheduled do_backup time was at the _second time_ in the times_list. Once the times_list is 
+ worked through for today, the next do_backup operation is scheduled for the first time (15:56) the next day.
