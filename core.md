@@ -242,6 +242,8 @@ script running as a service.
 - [set_logging_level](#set_logging_level)
 - [restore_logging_level](#restore_logging_level)
 - [get_logging_level_stack](#get_logging_level_stack)
+- [pop_logging_level_stack](#pop_logging_level_stack)
+- [periodic_log(message,](#periodic_log(message,)
 
 
 
@@ -301,6 +303,11 @@ also to the `.site_data_dir`.
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
 is called the current/active log file (or console) may be reassigned.
 
+Calling `setuplogging()` with no args results in:
+- Logging output to the console
+- Logging format set to the default console logging format
+- Logging level is unchanged (the Python default is 30/WARNING)
+
 setuplogging() works standalone or in conjunction with `cjnfuncs.configman.loadconfig()`.
 If a loaded config file has a `LogFile` parameter then loadconfig() passes it's value thru
 `config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
@@ -337,7 +344,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 
 ### Returns
-- NoneType
+- None
     
 <br/>
 
@@ -345,7 +352,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 ---
 
-# set_logging_level (new_level, clear=False) - Save the current logging level and set the new_level
+# set_logging_level (new_level, clear=False, save=True) - Save the current logging level and set the new_level
 
 The current logging level is saved on a stack and can be restored by a call to restore_logging_level.
 
@@ -357,15 +364,15 @@ equivalents (or to any integer value that makes sense):  logging.DEBUG (10), log
 logging.ERROR (40), or logging.CRITICAL (50).
 
 `clear` (bool, default False)
-- If True, the logging level history stack is cleared.
+- If True, the logging level history stack is cleared
 
 `save` (bool, default True)
 - If True, the current logging level is saved to the stack
-- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level
+- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level.
 
 
 ### Returns
-- NoneType
+- None
     
 <br/>
 
@@ -380,7 +387,7 @@ If the stack is empty then the logging level is set to logging.WARNING (30).
 
 
 ### Returns
-- NoneType
+- None
     
 <br/>
 
@@ -390,8 +397,64 @@ If the stack is empty then the logging level is set to logging.WARNING (30).
 
 # get_logging_level_stack () - Return the content of the stack
 
-Useful for debug.  The stack may be cleared with a call to `set_logging_level()`.
+Useful for debug.  The stack may be cleared with a call to `set_logging_level(clear=True)` or `pop_logging_level_stack(clear=True)`.
 
 
 ### Returns
-- A list of the prior saved logging levels.
+- A list of the prior saved logging levels
+
+<br/>
+
+<a id="pop_logging_level_stack"></a>
+
+---
+
+# pop_logging_level_stack () - Discard top of the stack
+
+Useful if the preexisting logging level was saved to the stack, but should be discarded 
+when a new level is set.  Used in loadconfig() when a new logging level is assigned from
+the config file.
+
+
+### Args
+`clear` (bool, default False)
+- If True, the logging level history stack is cleared, without setting a new logging level
+
+
+### Returns
+- Logging level stack after pop
+
+<br/>
+
+<a id="periodic_log(message,"></a>
+
+---
+
+# periodic_log(message, category='Cat1', log_interval='10m', log_level=30)
+
+Log a message infrequently, so as to avoid flooding the log.  The `category` arg provides for independent
+log intervals for different types of logging events.
+
+
+### Args
+
+`message` (str)
+- The message text to be logged
+- Only logged if the first time for this `category` or the log_interval has expired
+
+`category` (int or str, default 'Cat1')
+- Allows for multiple, independent concurrent periodic_log streams
+- `category` should typically be an int or str.  Used as a dict key.
+
+`log_interval` (timevalue, default '10m')
+- How often this category's messages will be logged.  Only remembered on the first log call
+for this category (ignored of subsequent calls)
+
+`log_level` (int, default logging.WARNING/30)
+- The default for this category is set on first call
+- This default value may be overridden on subsequent calls for this category
+
+
+### Returns
+- None
+      

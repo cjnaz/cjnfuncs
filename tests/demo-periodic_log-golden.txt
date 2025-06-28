@@ -1,0 +1,30 @@
+
+=============================================
+Test 1 - category <Cat1> - Message_1 - WARNING Logged message
+           core.plog                 -  WARNING:  [PLog-Cat1] Message_1 - WARNING Logged message
+
+=============================================
+Test 2 - category <   2> - Message_1 - INFO    Logged message
+           core.plog                 -     INFO:  [PLog-2] Message_1 - INFO    Logged message
+
+=============================================
+Test 3 - category <Cat1> - Message_2 - Not logged
+
+=============================================
+Test 4 - category <   2> - Message_2 - Not logged
+
+=============================================
+Test 5 - category <Cat1> - Message_3 - INFO    Logged message
+           core.plog                 -     INFO:  [PLog-Cat1] Message_3 - INFO    Logged message
+
+=============================================
+Test 6 - category <   2> - Message_3 - DEBUG   Logged message
+           core.plog                 -    DEBUG:  [PLog-2] Message_3 - DEBUG   Logged message
+
+=============================================
+Test 7 - category <Cat1> - Message_4 - WARNING Logged message
+           core.plog                 -  WARNING:  [PLog-Cat1] Message_4 - WARNING Logged message
+
+=============================================
+Test 8 - category <   2> - Message_4 - INFO    Logged message
+           core.plog                 -     INFO:  [PLog-2] Message_4 - INFO    Logged message

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cjnfuncs - Establish the base environment for cjnfuncs
+"""cjnfuncs - Establish the base environment for cjnfuncs, and logging related support
 """
 
 #==========================================================
@@ -136,7 +136,7 @@ also to the `.site_data_dir`.
         else:   # Linux, ...
             self.site_data_dir  = Path("/usr/share") / toolname
 
-        if self.site_config_dir.exists()  or  self.site_data_dir.exists():
+        if self.site_config_dir.exists()  or  self.site_data_dir.exists():      # TODO hang risk, but assumed to be on a local drive
             self.env_defined= "site"
             self.config_dir     = self.site_config_dir
             self.data_dir       = self.site_data_dir
@@ -196,6 +196,11 @@ def setuplogging(call_logfile=None, call_logfile_wins=False, config_logfile=None
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
 is called the current/active log file (or console) may be reassigned.
 
+Calling `setuplogging()` with no args results in:
+- Logging output to the console
+- Logging format set to the default console logging format
+- Logging level is unchanged (the Python default is 30/WARNING)
+
 setuplogging() works standalone or in conjunction with `cjnfuncs.configman.loadconfig()`.
 If a loaded config file has a `LogFile` parameter then loadconfig() passes it's value thru
 `config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
@@ -232,7 +237,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 
 ### Returns
-- NoneType
+- None
     """
 
     from .mungePath import mungePath
@@ -240,7 +245,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
     _lfp = "__console__"
     if call_logfile_wins == False  and  config_logfile:
-        _lfp = mungePath(config_logfile, tool.log_dir_base)     # TODO rename to _lfp_mp?
+        _lfp = mungePath(config_logfile, tool.log_dir_base)
 
     if call_logfile_wins == True   and  call_logfile:
         _lfp = mungePath(call_logfile, tool.log_dir_base)
@@ -261,7 +266,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
         tool.log_full_path = "__console__"
 
     else:
-        mungePath(_lfp.parent, mkdir=True)      # Force make the target dir     TODO hangable?  rwt?
+        mungePath(_lfp.parent, mkdir=True)      # Force make the target dir     TODO Hang risk if not on local drive.  rwt?
         _fmt = FILE_LOGGING_FORMAT  if FileLogFormat == None  else  FileLogFormat
         log_format = logging.Formatter(_fmt, style='{')
         handler = logging.FileHandler(_lfp.full_path, "a")
@@ -277,14 +282,15 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 #=====================================================================================
 #=====================================================================================
-#   s e t _ l o g g i n g _ l e v e l ,   r e s t o r e _ l o g g i n g _ l e v e l
+#   s e t  /  r e s t o r e _ l o g g i n g _ l e v e l  f u n c t i o n s
 #=====================================================================================
 #=====================================================================================
 
 ll_history = []
+
 def set_logging_level(new_level, clear=False, save=True):
     """
-## set_logging_level (new_level, clear=False) - Save the current logging level and set the new_level
+## set_logging_level (new_level, clear=False, save=True) - Save the current logging level and set the new_level
 
 The current logging level is saved on a stack and can be restored by a call to restore_logging_level.
 
@@ -296,16 +302,16 @@ equivalents (or to any integer value that makes sense):  logging.DEBUG (10), log
 logging.ERROR (40), or logging.CRITICAL (50).
 
 `clear` (bool, default False)
-- If True, the logging level history stack is cleared.
+- If True, the logging level history stack is cleared
 
 `save` (bool, default True)
 - If True, the current logging level is saved to the stack
-- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level
+- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level.
 
 
 ### Returns
-- NoneType
-    """     # TODO clear stack
+- None
+    """
     global ll_history
     if clear:
         ll_history = []
@@ -324,7 +330,7 @@ If the stack is empty then the logging level is set to logging.WARNING (30).
 
 
 ### Returns
-- NoneType
+- None
     """
     global ll_history
     try:
@@ -337,12 +343,41 @@ def get_logging_level_stack():
     """
 ## get_logging_level_stack () - Return the content of the stack
 
-Useful for debug.  The stack may be cleared with a call to `set_logging_level()`.
+Useful for debug.  The stack may be cleared with a call to `set_logging_level(clear=True)` or `pop_logging_level_stack(clear=True)`.
 
 
 ### Returns
-- A list of the prior saved logging levels.
+- A list of the prior saved logging levels
 """
+    return ll_history
+
+
+def pop_logging_level_stack(clear=False):
+    """
+## pop_logging_level_stack () - Discard top of the stack
+
+Useful if the preexisting logging level was saved to the stack, but should be discarded 
+when a new level is set.  Used in loadconfig() when a new logging level is assigned from
+the config file.
+
+
+### Args
+`clear` (bool, default False)
+- If True, the logging level history stack is cleared, without setting a new logging level
+
+
+### Returns
+- Logging level stack after pop
+"""
+    global ll_history
+    if clear:
+        ll_history = []
+    else:
+        try:
+            ll_history.pop()
+        except:
+            pass                # Stack was empty
+
     return ll_history
 
 
@@ -373,7 +408,8 @@ class _periodic_log:
 
 
 def periodic_log(message, category='Cat1', log_interval='10m', log_level=None):
-    """## periodic_log(message, category='Cat1', log_interval='10m', log_level=30)
+    """
+## periodic_log(message, category='Cat1', log_interval='10m', log_level=30)
 
 Log a message infrequently, so as to avoid flooding the log.  The `category` arg provides for independent
 log intervals for different types of logging events.
@@ -382,7 +418,8 @@ log intervals for different types of logging events.
 ### Args
 
 `message` (str)
-- The message text to be logged, if the first time for this `category` or the log_interval has expired
+- The message text to be logged
+- Only logged if the first time for this `category` or the log_interval has expired
 
 `category` (int or str, default 'Cat1')
 - Allows for multiple, independent concurrent periodic_log streams
@@ -398,7 +435,7 @@ for this category (ignored of subsequent calls)
 
 
 ### Returns
-- NoneType
+- None
       """
     if category not in cats:
         if log_level is None:

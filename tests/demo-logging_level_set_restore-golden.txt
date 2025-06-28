@@ -1,0 +1,129 @@
+
+======================================================================================================
+***** Test number 1: Initial level WARNING *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 30, ll_history stack: []
+
+======================================================================================================
+***** Test number 2: set to DEBUG *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -    DEBUG:  
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 10, ll_history stack: [30]
+
+======================================================================================================
+***** Test number 3: restored to WARNING *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 30, ll_history stack: []
+
+======================================================================================================
+***** Test number 4: restored with no prior set *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 30, ll_history stack: []
+
+======================================================================================================
+***** Test number 5: set to INFO *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 20, ll_history stack: [30]
+
+======================================================================================================
+***** Test number 6: set to ERROR *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 40, ll_history stack: [30, 20]
+
+======================================================================================================
+***** Test number 7: restored to INFO *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 20, ll_history stack: [30]
+
+======================================================================================================
+***** Test number 8: restored to WARNING *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 30, ll_history stack: []
+
+======================================================================================================
+***** Test number 9: Load the stack, set with save=False *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 20, ll_history stack: [30, 40]
+
+demo-logging_level_set_restore.test_logs            -    DEBUG:  
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 10, ll_history stack: [30, 40]
+
+logging level 50, ll_history stack: [30]
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 30, ll_history stack: []
+
+======================================================================================================
+***** Test number 10: Load the stack, set_logging_level with clear=True *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -    DEBUG:  
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 10, ll_history stack: [20]
+
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 20, ll_history stack: [20, 10, 40]
+
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 40, ll_history stack: []
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 30, ll_history stack: []
+
+======================================================================================================
+***** Test number 11: Load the stack, pop_logging_level with clear=True *****
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 20, ll_history stack: [30, 40, 20]
+
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 20, ll_history stack: [30, 40]
+
+demo-logging_level_set_restore.test_logs            -     INFO:  
+demo-logging_level_set_restore.test_logs            -  WARNING:  
+demo-logging_level_set_restore.test_logs            -    ERROR:  
+logging level 20, ll_history stack: []

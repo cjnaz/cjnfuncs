@@ -3,7 +3,6 @@
 
 Produce / compare to golden results:
     ./demo-rwt.py -t 0 | diff demo-rwt-golden.txt -
-        Or use bcompare
         Differences will be timestamps, pids, and yahoo.com IP address
 
     ./demo-rwt.py --cleanup
@@ -123,15 +122,15 @@ def dotest (testnum, desc, expect, func, *args, **kwargs):
                      f"Test {testnum} - {desc}" +
                      f"  EXPECT: {expect}")
                     #  f"Test {testnum} - {desc}\n" +
-                    #  f"  Given:      {args}, {kwargs}\n"
+                    #  f"  GIVEN:      {args}, {kwargs}\n"
                     #  f"  EXPECT:     {expect}")
     try:
         result = run_with_timeout(func, *args, **kwargs)
-        logging.warning (f"RETURNED:\n{result}")
+        logging.warning (f"  RETURNED:\n{result}")
         return result
     except Exception as e:
-        # logging.exception (f"EXCEPTION:\n{type(e).__name__}: {e}")          # With call stack
-        logging.error (f"EXCEPTION:\n  {type(e).__name__}: {e}")          # Just the exception 
+        logging.error (f"\n  RAISED:     {type(e).__name__}: {e}")
+        # logging.exception (f"\n  RAISED:     {type(e).__name__}: {e}")
         return e
 
 

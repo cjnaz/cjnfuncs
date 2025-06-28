@@ -3,27 +3,36 @@
 
 Produce / compare to golden results:
     ./demo-mungePath.py | diff demo-mungePath-golden.txt -
+
 """
 #==========================================================
 #
-#  Chris Nelson, 2024
+#  Chris Nelson, 2025
 #
-#   NOTE:  This demo file leaves a remnant dir: /tmp/mungepath
-#    
 #==========================================================
 
-__version__ = "1.3"
+__version__ = "1.4"
 
 import shutil
+import argparse
 import os
+import sys
 from pathlib import Path, PurePath
 
 from cjnfuncs.core      import set_toolname, set_logging_level, setuplogging
 from cjnfuncs.mungePath import mungePath
 import cjnfuncs.core as core
 
-set_toolname("mytool")
+set_toolname("demo-mungePath")
 setuplogging(ConsoleLogFormat="{asctime} {module:>22}.{funcName:20} {levelname:>8}:  {message}")
+
+parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument('--nocleanup', action='store_true',
+                    help="Be default, remove test dirs/files.  With --nocleanup, created dirs are left in place for debug.")
+
+args = parser.parse_args()
+
+# --------------------------------------------------------------------
 
 def touch (file_path):
     file_path.open('w').close()
@@ -34,6 +43,7 @@ def remove_file (file_path):
 def remove_tree (path):
     shutil.rmtree(path)
 
+# --------------------------------------------------------------------
 
 def wrapper (in_path="", base_path="", mkdir=False, note=None, set_attributes=True):
     """
@@ -46,6 +56,8 @@ def wrapper (in_path="", base_path="", mkdir=False, note=None, set_attributes=Tr
     xx = mungePath(in_path=in_path, base_path=base_path, mkdir=mkdir, set_attributes=set_attributes)
     print(xx)
     return xx
+
+# --------------------------------------------------------------------
 
 set_logging_level(10)
 
@@ -117,3 +129,28 @@ wrapper ("./xyz/wxy", '/tmp',   mkdir=True,                 note="31 - mkdir <cw
 
 wrapper ('nosuchfile', './',                                note="32 - abs path - attributes not set", set_attributes=False)
 wrapper ('nosuchfile', '',                                  note="33 - rel path - attributes not set", set_attributes=False)
+
+
+# --------------------------------------------------------------------
+
+if not args.nocleanup:
+    try:
+        test_dir = mungePath('newdir').full_path
+        print (f"Removing   {test_dir}")
+        shutil.rmtree(test_dir)
+    except:
+        pass
+
+    try:
+        test_dir = mungePath('xyz').full_path
+        print (f"Removing   {test_dir}")
+        shutil.rmtree(test_dir)
+    except:
+        pass
+
+    try:
+        test_dir = '/tmp/mungePath'
+        print (f"Removing   {test_dir}")
+        shutil.rmtree(test_dir)
+    except:
+        pass

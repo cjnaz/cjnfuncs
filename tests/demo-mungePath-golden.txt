@@ -165,11 +165,11 @@ Given:
 .name         :  mungePath
 .is_absolute  :  True
 .is_relative  :  False
-.exists       :  True
-.is_dir       :  True
+.exists       :  False
+.is_dir       :  False
 .is_file      :  False
 
-Exists, removed.
+Does not exist
 
 NOTE:  11 - Make a work space, then create /tmp/mungePath/file.txt
 Given:
@@ -522,3 +522,6 @@ Given:
 .is_dir       :  None
 .is_file      :  None
 
+Removing   newdir
+Removing   xyz
+Removing   /tmp/mungePath

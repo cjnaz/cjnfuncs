@@ -14,7 +14,6 @@ import posix_ipc
 import mmap
 import os
 import datetime
-# from pathlib import Path
 from .core import logging
 
 try:
@@ -111,9 +110,9 @@ checked and re-instantiate if needed.
 #=====================================================================================
 #=====================================================================================
 
-    def get_lock(self, timeout=1, same_process_ok=False, lock_info=''):
+    def get_lock(self, timeout=1.0, same_process_ok=False, lock_info=''):
         """
-## get_lock (timeout=1, same_process_ok=False, lock_info='') - Request the resource lock
+## get_lock (timeout=1.0, same_process_ok=False, lock_info='') - Request the resource lock
 
 ***resource_lock() class member function***
 
@@ -127,7 +126,7 @@ then get_lock() immediately returns True.  This allows the script code to not ha
 decide if the lock has previously been acquired before calling get_lock() again, leading to cleaner code.
 
 ### Args
-`timeout` (int or float, default 1 second)
+`timeout` (int or float, or None, default 1.0 second)
 - The max time, in seconds, to wait to acquire the lock
 - None is no timeout - wait forever (Hang forever.  Unwise.)
 

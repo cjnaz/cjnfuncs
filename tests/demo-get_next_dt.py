@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Demo/test for cjnfuncs.timevalue get_next_dt()
+"""Demo/test for get_next_dt()
 
 Produce / compare to golden results:
-    ./demo_get_next_dt.py -t 0 | diff demo_get_next_dt-golden.txt -
-        Or use bcompare
+    ./demo-get_next_dt.py -t 0 | diff demo-get_next_dt-golden.txt -
         Differences will be order of days dictionary in test # 17d
 """
 

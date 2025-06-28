@@ -278,7 +278,7 @@ default `to` arg value.
 
 
 ### Returns
-- NoneType
+- None
 - Raises `SndEmailError` on error
 
 
@@ -378,7 +378,7 @@ The `subj` field is part of the log message.
 
 
 ### Returns
-- NoneType
+- None
 - Raises SndEmailError on error
 
 

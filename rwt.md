@@ -198,9 +198,10 @@ rwt_ex3.<module>             -    ERROR:  EXCEPTION received:  TimeoutError: Fun
 
 ---
 
-# run_with_timeout (func, *args, **kwargs, rwt_timeout=1, rwt_ntries=1, rwt_kill=True, rwt_debug=False) - Run a function in a separate process with an enforced timeout.
+# run_with_timeout (func, *args, **kwargs, rwt_timeout=1.0, rwt_ntries=1, rwt_kill=True, rwt_debug=False) - Run a function in a separate process with an enforced timeout.
 
-`run_with_timeout` uses the multiprocessing module, and works by running the specified `func` in a managed external process that can be reliably killed on timeout.
+`run_with_timeout` uses the multiprocessing module, and works by running the specified `func` in a managed 
+external process that can be reliably killed on timeout.
 For a non-timeout run, `run_with_timeout` returns what the `func` returns or any exception raised. 
 On timeout, the process is killed (by default) and a TimeoutError exception is raised.
 
@@ -217,7 +218,7 @@ On timeout, the process is killed (by default) and a TimeoutError exception is r
 `**kwargs` (0+)
 - Keyword args to be passed to func
 
-`rwt_timeout` additional kwarg (int or float, default 1)
+`rwt_timeout` additional kwarg (int or float, default 1.0)
 - Enforced timeout in seconds
 
 `rwt_ntries` additional kwarg (int, default 1)

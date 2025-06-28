@@ -1,8 +1,8 @@
-2025-05-28 21:26:29,292               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:55,522               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 1 - Built-in print  EXPECT: Pass, return None
-2025-05-28 21:26:29,292                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:55,522                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   1
@@ -11,231 +11,231 @@ run_with_timeout switches:
   Function:     <built-in function print>
   args:         ('Hello', 'there', 'again')
   kwargs:       {'sep': ' blah ', 'end': ' The end.\n'}
-2025-05-28 21:26:29,292                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:29,297                    rwt._runner                 DEBUG:  R1  - runner_p pid 2099986
+2025-06-28 12:28:55,522                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:55,528                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919236
 Hello blah there blah again The end.
-2025-05-28 21:26:29,299                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:29,299                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:29,299               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:28:55,529                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:28:55,530                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:28:55,530               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:29,299               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:55,530               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 2 - Subprocess ping known  EXPECT: Return subprocess pass result
-2025-05-28 21:26:29,299                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:55,530                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7fa2ff0ce980>
+  Function:     <function run at 0x7f9eb5eca980>
   args:         (['ping', 'yahoo.com', '-c', '1'],)
   kwargs:       {'timeout': 3, 'capture_output': True, 'text': True}
-2025-05-28 21:26:29,300                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:29,301                    rwt._runner                 DEBUG:  R1  - runner_p pid 2099988
-2025-05-28 21:26:30,293                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:30,294                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:30,294               demo-rwt.dotest                WARNING:  RETURNED:
-CompletedProcess(args=['ping', 'yahoo.com', '-c', '1'], returncode=0, stdout='PING yahoo.com (98.137.11.163) 56(84) bytes of data.\n64 bytes from media-router-fp74.prod.media.vip.gq1.yahoo.com (98.137.11.163): icmp_seq=1 ttl=252 time=57.3 ms\n\n--- yahoo.com ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 57.299/57.299/57.299/0.000 ms\n', stderr='')
-2025-05-28 21:26:30,295               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:55,530                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:55,532                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919238
+2025-06-28 12:28:55,949                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:28:55,950                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:28:55,950               demo-rwt.dotest                WARNING:    RETURNED:
+CompletedProcess(args=['ping', 'yahoo.com', '-c', '1'], returncode=0, stdout='PING yahoo.com (74.6.231.21) 56(84) bytes of data.\n64 bytes from media-router-fp74.prod.media.vip.ne1.yahoo.com (74.6.231.21): icmp_seq=1 ttl=252 time=73.3 ms\n\n--- yahoo.com ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 73.298/73.298/73.298/0.000 ms\n', stderr='')
+2025-06-28 12:28:55,951               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 3 - Subprocess ping unknown  EXPECT: Return subprocess fail result
-2025-05-28 21:26:30,295                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:55,951                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7fa2ff0ce980>
+  Function:     <function run at 0x7f9eb5eca980>
   args:         (['ping', 'dummyunknown.com', '-c', '1'],)
   kwargs:       {'timeout': 1, 'capture_output': True, 'text': True}
-2025-05-28 21:26:30,295                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:30,300                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100023
-2025-05-28 21:26:30,380                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:30,381                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:30,382               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:28:55,951                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:55,955                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919260
+2025-06-28 12:28:55,985                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:28:55,985                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:28:55,986               demo-rwt.dotest                WARNING:    RETURNED:
 CompletedProcess(args=['ping', 'dummyunknown.com', '-c', '1'], returncode=2, stdout='', stderr='ping: dummyunknown.com: Name or service not known\n')
-2025-05-28 21:26:30,382               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:55,986               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 4a - Subprocess ping known/unavailable. subprocess timeout < rwt_timeout  EXPECT: Exception subprocess.TimeoutExpired
-2025-05-28 21:26:30,382                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:55,986                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7fa2ff0ce980>
+  Function:     <function run at 0x7f9eb5eca980>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'timeout': 0.5, 'capture_output': True, 'text': True}
-2025-05-28 21:26:30,382                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:30,387                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100030
-2025-05-28 21:26:30,899                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:30,899                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:30,900               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'
-2025-05-28 21:26:30,900               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:55,986                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:55,988                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919269
+2025-06-28 12:28:56,497                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:28:56,498                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:28:56,498               demo-rwt.dotest                  ERROR:  
+  RAISED:     TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'
+2025-06-28 12:28:56,498               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 4b - Subprocess ping known/unavailable, subprocess timeout < rwt_timeout, rwt_ntries=2  EXPECT: Exception subprocess.TimeoutExpired
-2025-05-28 21:26:30,900                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:56,499                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  3
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7fa2ff0ce980>
+  Function:     <function run at 0x7f9eb5eca980>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'timeout': 0.5, 'capture_output': True, 'text': True}
-2025-05-28 21:26:30,900                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:30,901                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:30,905                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100038
-2025-05-28 21:26:31,420                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:31,421                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:31,421                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
-2025-05-28 21:26:31,421                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:31,429                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100054
-2025-05-28 21:26:31,946                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:31,948                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:31,948               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'
-2025-05-28 21:26:31,949               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:56,499                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:28:56,499                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:56,504                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919274
+2025-06-28 12:28:57,012                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:28:57,012                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:28:57,012                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
+2025-06-28 12:28:57,012                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:57,015                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919299
+2025-06-28 12:28:57,519                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:28:57,519                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:28:57,520               demo-rwt.dotest                  ERROR:  
+  RAISED:     TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'
+2025-06-28 12:28:57,520               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 4c - Subprocess ping known/unavailable, rwt_timeout < subprocess timeout  EXPECT: Exception TimeoutError
-2025-05-28 21:26:31,949                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:57,520                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7fa2ff0ce980>
+  Function:     <function run at 0x7f9eb5eca980>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'timeout': 3, 'capture_output': True, 'text': True}
-2025-05-28 21:26:31,950                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:31,957                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100077
-2025-05-28 21:26:32,454                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:32,455                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:32,467               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <run> timed out after 0.5 seconds (killed)
-2025-05-28 21:26:32,468               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:57,520                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:57,521                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919327
+2025-06-28 12:28:58,021                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:28:58,022                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:28:58,035               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <run> timed out after 0.5 seconds (killed)
+2025-06-28 12:28:58,036               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 4d - Subprocess ping known/unavailable, rwt_timeout < subprocess timeout, rwt_ntries=2  EXPECT: Exception TimeoutError
-2025-05-28 21:26:32,468                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:58,036                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7fa2ff0ce980>
+  Function:     <function run at 0x7f9eb5eca980>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'timeout': 3, 'capture_output': True, 'text': True}
-2025-05-28 21:26:32,468                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:32,468                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:32,473                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100100
-2025-05-28 21:26:32,972                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:32,972                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:32,985                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
-2025-05-28 21:26:32,985                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:32,989                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100109
-2025-05-28 21:26:33,489                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:33,490                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:33,505               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <run> timed out after 0.5 seconds (killed)
-2025-05-28 21:26:33,505               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:58,037                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:28:58,037                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:58,043                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919353
+2025-06-28 12:28:58,540                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:28:58,541                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:28:58,552                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
+2025-06-28 12:28:58,552                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:58,555                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919380
+2025-06-28 12:28:59,055                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:28:59,055                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:28:59,068               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <run> timed out after 0.5 seconds (killed)
+2025-06-28 12:28:59,069               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 4e - Subprocess ping known/unavailable, No subprocess timeout  EXPECT: Exception TimeoutError
-2025-05-28 21:26:33,506                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:59,069                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7fa2ff0ce980>
+  Function:     <function run at 0x7f9eb5eca980>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'capture_output': True, 'text': True}
-2025-05-28 21:26:33,506                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:33,513                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100122
-2025-05-28 21:26:34,011                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:34,012                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:34,025               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <run> timed out after 0.5 seconds (killed)
-2025-05-28 21:26:34,026               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:59,069                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:59,074                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919389
+2025-06-28 12:28:59,574                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:28:59,574                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:28:59,587               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <run> timed out after 0.5 seconds (killed)
+2025-06-28 12:28:59,587               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 4f - Subprocess ping known/unavailable, No subprocess timeout, rwt_ntries=2  EXPECT: Exception TimeoutError
-2025-05-28 21:26:34,027                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:28:59,587                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function run at 0x7fa2ff0ce980>
+  Function:     <function run at 0x7f9eb5eca980>
   args:         (['ping', 'testhostx', '-c', '1'],)
   kwargs:       {'capture_output': True, 'text': True}
-2025-05-28 21:26:34,027                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:34,027                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:34,036                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100144
-2025-05-28 21:26:34,533                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:34,533                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:34,547                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
-2025-05-28 21:26:34,547                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:34,555                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100165
-2025-05-28 21:26:35,052                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:35,053                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:35,067               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <run> timed out after 0.5 seconds (killed)
-2025-05-28 21:26:35,068               demo-rwt.dotest                WARNING:  
+2025-06-28 12:28:59,587                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:28:59,587                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:28:59,591                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919412
+2025-06-28 12:29:00,090                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:29:00,091                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:29:00,102                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
+2025-06-28 12:29:00,102                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:00,105                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919438
+2025-06-28 12:29:00,604                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:29:00,605                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:29:00,619               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <run> timed out after 0.5 seconds (killed)
+2025-06-28 12:29:00,619               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 6a - Function took too long, killed  EXPECT: Exception TimeoutError, File 'FileNotTouched' not created
-2025-05-28 21:26:35,068                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:00,620                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function test_shell_1 at 0x7fa2fed2bb00>
+  Function:     <function test_shell_1 at 0x7f9eb5b27880>
   args:         (2, '6a', '/tmp/demo_rwt/FileNotTouched')
   kwargs:       {}
-2025-05-28 21:26:35,068                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:35,076                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100185
-2025-05-28 21:26:35,573                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:35,573                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:35,584               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <test_shell_1> timed out after 0.5 seconds (killed)
-2025-05-28 21:26:35,585               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:00,620                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:00,624                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919464
+2025-06-28 12:29:01,123                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:29:01,123                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:29:01,134               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <test_shell_1> timed out after 0.5 seconds (killed)
+2025-06-28 12:29:01,135               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 6b - INFO external log level, Function took too long, not killed  EXPECT: Exception TimeoutError, File 'FileTouched_1' created, message logged during Test 6c
-2025-05-28 21:26:35,585                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:01,135                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     False
   rwt_debug:    True
-  Function:     <function test_shell_1 at 0x7fa2fed2bb00>
+  Function:     <function test_shell_1 at 0x7f9eb5b27880>
   args:         (1, '6b', PosixPath('/tmp/demo_rwt/FileTouched_1'))
   kwargs:       {}
-2025-05-28 21:26:35,585                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:35,590                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100204
-2025-05-28 21:26:36,088               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <test_shell_1> timed out after 0.5 seconds (not killed) orphaned pids: 2100204
-2025-05-28 21:26:36,090               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:01,135                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:01,137                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919489
+2025-06-28 12:29:01,637               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <test_shell_1> timed out after 0.5 seconds (not killed) orphaned pids: 2919489
+2025-06-28 12:29:01,638               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 6c - WARNING external log level, Sleep took too long, rwt_debug=False  EXPECT: Exception TimeoutError, Test 6b INFO log
-2025-05-28 21:26:36,590               demo-rwt.test_shell_1             INFO:  Hello there 42.  Log from unkilled Test 6b, pid: 2100204
-2025-05-28 21:26:37,597               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <sleep> timed out after 1.5 seconds (killed)
-2025-05-28 21:26:37,599               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:02,138               demo-rwt.test_shell_1             INFO:  Hello there 42.  Log from unkilled Test 6b, pid: 2919489
+2025-06-28 12:29:03,143               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <sleep> timed out after 1.5 seconds (killed)
+2025-06-28 12:29:03,143               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 6d - Sleep took too long  EXPECT: Exception TimeoutError
-2025-05-28 21:26:37,599                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:03,144                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   1
@@ -244,448 +244,448 @@ run_with_timeout switches:
   Function:     <built-in function sleep>
   args:         (10,)
   kwargs:       {}
-2025-05-28 21:26:37,599                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:37,606                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100321
-2025-05-28 21:26:38,104                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:38,105                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:38,118               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <sleep> timed out after 0.5 seconds (killed)
-2025-05-28 21:26:38,119               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,144                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:03,147                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919625
+2025-06-28 12:29:03,645                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:29:03,646                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:29:03,657               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <sleep> timed out after 0.5 seconds (killed)
+2025-06-28 12:29:03,657               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 9a - Invalid rwt_timeout  EXPECT: Exception ValueError
-2025-05-28 21:26:38,119               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  ValueError: rwt_timeout must be type int or float, received <abc>
-2025-05-28 21:26:38,120               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,657               demo-rwt.dotest                  ERROR:  
+  RAISED:     ValueError: rwt_timeout must be type int or float, received <abc>
+2025-06-28 12:29:03,657               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 9b - Invalid rwt_ntries  EXPECT: Exception ValueError
-2025-05-28 21:26:38,120               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  ValueError: rwt_ntries must be type int, received <abc>
-2025-05-28 21:26:38,120               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,657               demo-rwt.dotest                  ERROR:  
+  RAISED:     ValueError: rwt_ntries must be type int, received <abc>
+2025-06-28 12:29:03,657               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 9c - Invalid rwt_kill  EXPECT: Exception ValueError
-2025-05-28 21:26:38,120               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  ValueError: rwt_kill must be type bool, received <abc>
-2025-05-28 21:26:38,120               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,657               demo-rwt.dotest                  ERROR:  
+  RAISED:     ValueError: rwt_kill must be type bool, received <abc>
+2025-06-28 12:29:03,657               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 9d - Invalid rwt_debug  EXPECT: Exception ValueError
-2025-05-28 21:26:38,121               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  ValueError: rwt_debug must be type bool, received <abc>
-2025-05-28 21:26:38,121               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,657               demo-rwt.dotest                  ERROR:  
+  RAISED:     ValueError: rwt_debug must be type bool, received <abc>
+2025-06-28 12:29:03,657               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 11 - Delete non-existing file  EXPECT: Exception FileNotFoundError from function runtime
-2025-05-28 21:26:38,122                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:03,657                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
   Function:     <bound method Path.unlink of PosixPath('/tmp/demo_rwt/nosuchfile')>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:38,122                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:38,130                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100341
-2025-05-28 21:26:38,140                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:38,141                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:38,142               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:38,143               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,657                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:03,659                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919651
+2025-06-28 12:29:03,661                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:03,662                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:03,662               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:03,662               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 12 - shutil.copy, rwt_debug True  EXPECT: Pass
-2025-05-28 21:26:38,143                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:03,662                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  1
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function copy at 0x7fa2ff01b560>
+  Function:     <function copy at 0x7f9eb5e13560>
   args:         (PosixPath('/tmp/demo_rwt/t12a'), PosixPath('/tmp/demo_rwt/t12b'))
   kwargs:       {}
-2025-05-28 21:26:38,143                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:38,152                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100343
-2025-05-28 21:26:38,159                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:38,161                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:38,161               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:03,662                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:03,664                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919653
+2025-06-28 12:29:03,666                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:03,666                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:29:03,666               demo-rwt.dotest                WARNING:    RETURNED:
 /tmp/demo_rwt/t12b
-2025-05-28 21:26:38,162               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,667               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 13 - shutil.copy, rwt_debug False  EXPECT: Pass
-2025-05-28 21:26:38,177               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:03,673               demo-rwt.dotest                WARNING:    RETURNED:
 /tmp/demo_rwt/t13b
-2025-05-28 21:26:38,178               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,673               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 14a - Function wont_terminate, requiring os.kill, rwt_ntries=1  EXPECT: Exception TimeoutError
-2025-05-28 21:26:38,178                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:03,673                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function wont_terminate at 0x7fa2fed2bce0>
+  Function:     <function wont_terminate at 0x7f9eb5b27a60>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:38,178                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:38,185                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100347
-2025-05-28 21:26:38,683                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
-2025-05-28 21:26:38,684                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
-2025-05-28 21:26:38,884                    rwt.run_with_timeout        DEBUG:  T5  - SIGKILL runner_p
-2025-05-28 21:26:38,885               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (killed)
-2025-05-28 21:26:38,886               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:03,673                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:03,675                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919657
+2025-06-28 12:29:04,175                    rwt.run_with_timeout        DEBUG:  T4  - terminate runner_p
+2025-06-28 12:29:04,176                    rwt.runner_int_handler      DEBUG:  RH1 - Signal 15 received
+2025-06-28 12:29:04,376                    rwt.run_with_timeout        DEBUG:  T5  - SIGKILL runner_p
+2025-06-28 12:29:04,377               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (killed)
+2025-06-28 12:29:04,377               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 14b - Function wont_terminate, not killed, rwt_ntries=1  EXPECT: Exception TimeoutError, pid listed
-2025-05-28 21:26:38,886                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:04,377                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   1
   rwt_kill:     False
   rwt_debug:    True
-  Function:     <function wont_terminate at 0x7fa2fed2bce0>
+  Function:     <function wont_terminate at 0x7f9eb5b27a60>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:38,886                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:38,893                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100366
-2025-05-28 21:26:39,391               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (not killed) orphaned pids: 2100366
-2025-05-28 21:26:39,392               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:04,377                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:04,381                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919685
+2025-06-28 12:29:04,879               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (not killed) orphaned pids: 2919685
+2025-06-28 12:29:04,880               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 14c - Function wont_terminate, not killed, rwt_ntries=4  EXPECT: Exception TimeoutError, pids listed
-2025-05-28 21:26:39,392                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:04,880                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
   rwt_timeout:  0.5
   rwt_ntries:   4
   rwt_kill:     False
   rwt_debug:    True
-  Function:     <function wont_terminate at 0x7fa2fed2bce0>
+  Function:     <function wont_terminate at 0x7f9eb5b27a60>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:39,393                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:39,393                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:39,400                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100385
-2025-05-28 21:26:39,898                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
-2025-05-28 21:26:39,899                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:39,907                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100404
-2025-05-28 21:26:40,404                    rwt.run_with_timeout        DEBUG:  T0  - Try 2
-2025-05-28 21:26:40,404                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:40,406                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100423
-2025-05-28 21:26:40,906                    rwt.run_with_timeout        DEBUG:  T0  - Try 3
-2025-05-28 21:26:40,906                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:40,908                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100432
-2025-05-28 21:26:41,408               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (not killed) orphaned pids: 2100385 2100404 2100423 2100432
-2025-05-28 21:26:41,410               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:04,880                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:29:04,880                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:04,883                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919697
+2025-06-28 12:29:05,382                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
+2025-06-28 12:29:05,383                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:05,388                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919711
+2025-06-28 12:29:05,888                    rwt.run_with_timeout        DEBUG:  T0  - Try 2
+2025-06-28 12:29:05,888                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:05,893                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919736
+2025-06-28 12:29:06,392                    rwt.run_with_timeout        DEBUG:  T0  - Try 3
+2025-06-28 12:29:06,393                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,397                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919761
+2025-06-28 12:29:06,896               demo-rwt.dotest                  ERROR:  
+  RAISED:     TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (not killed) orphaned pids: 2919697 2919711 2919736 2919761
+2025-06-28 12:29:06,896               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 16a - WARNING external log level, rwt_ntries=1, rwt_debug=True  EXPECT: Exception FileNotFoundError, Post test logging level:  30
-2025-05-28 21:26:41,410                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,896                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
   Function:     <bound method Path.unlink of PosixPath('/tmp/demo_rwt/nosuchfile')>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,411                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,418                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100443
-2025-05-28 21:26:41,428                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,429                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,430               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:41,430               demo-rwt.<module>              WARNING:  Post test logging level:  30
-2025-05-28 21:26:41,431               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,896                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,898                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919786
+2025-06-28 12:29:06,901                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,901                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,901               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:06,901               demo-rwt.<module>              WARNING:  Post test logging level:  30
+2025-06-28 12:29:06,902               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 16b - INFO external log level, rwt_ntries=1, rwt_debug=True  EXPECT: Exception FileNotFoundError, Post test logging level:  20
-2025-05-28 21:26:41,431                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,902                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
   Function:     <bound method Path.unlink of PosixPath('/tmp/demo_rwt/nosuchfile')>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,431                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,438                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100445
-2025-05-28 21:26:41,448                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,449                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,450               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:41,450               demo-rwt.<module>              WARNING:  Post test logging level:  20
-2025-05-28 21:26:41,451               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,902                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,904                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919788
+2025-06-28 12:29:06,907                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,907                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,907               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:06,907               demo-rwt.<module>              WARNING:  Post test logging level:  20
+2025-06-28 12:29:06,907               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 16c - DEBUG external log level, rwt_ntries=1, rwt_debug=True  EXPECT: Exception FileNotFoundError, Post test logging level:  10
-2025-05-28 21:26:41,451                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,908                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
   Function:     <bound method Path.unlink of PosixPath('/tmp/demo_rwt/nosuchfile')>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,451                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,459                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100448
-2025-05-28 21:26:41,470                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,471                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,471               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:41,472               demo-rwt.<module>              WARNING:  Post test logging level:  10
-2025-05-28 21:26:41,472               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,908                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,910                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919790
+2025-06-28 12:29:06,914                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,914                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,914               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:06,915               demo-rwt.<module>              WARNING:  Post test logging level:  10
+2025-06-28 12:29:06,915               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 16d - DEBUG external log level, rwt_ntries=1, rwt_debug=False  EXPECT: Exception FileNotFoundError, Post test logging level:  10
-2025-05-28 21:26:41,489               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:41,490               demo-rwt.<module>              WARNING:  Post test logging level:  10
-2025-05-28 21:26:41,490               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,920               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:06,920               demo-rwt.<module>              WARNING:  Post test logging level:  10
+2025-06-28 12:29:06,920               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 16e - WARNING external log level, rwt_ntries=2, rwt_debug=True  EXPECT: Exception FileNotFoundError, Post test logging level:  30
-2025-05-28 21:26:41,490                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,920                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
   Function:     <bound method Path.unlink of PosixPath('/tmp/demo_rwt/nosuchfile')>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,490                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:41,490                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,495                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100455
-2025-05-28 21:26:41,503                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,504                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,504                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
-2025-05-28 21:26:41,504                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,510                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100458
-2025-05-28 21:26:41,517                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,518                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,518               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:41,518               demo-rwt.<module>              WARNING:  Post test logging level:  30
-2025-05-28 21:26:41,518               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,920                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:29:06,921                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,923                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919794
+2025-06-28 12:29:06,927                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,927                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,928                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
+2025-06-28 12:29:06,928                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,930                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919796
+2025-06-28 12:29:06,933                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,933                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,933               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:06,933               demo-rwt.<module>              WARNING:  Post test logging level:  30
+2025-06-28 12:29:06,933               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 16f - INFO external log level, rwt_ntries=2, rwt_debug=True  EXPECT: Exception FileNotFoundError, Post test logging level:  20
-2025-05-28 21:26:41,518                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,933                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
   Function:     <bound method Path.unlink of PosixPath('/tmp/demo_rwt/nosuchfile')>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,519                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:41,519                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,522                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100461
-2025-05-28 21:26:41,527                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,527                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,527                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
-2025-05-28 21:26:41,527                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,530                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100465
-2025-05-28 21:26:41,534                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,534                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,534               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:41,534               demo-rwt.<module>              WARNING:  Post test logging level:  20
-2025-05-28 21:26:41,535               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,933                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:29:06,933                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,935                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919798
+2025-06-28 12:29:06,938                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,938                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,938                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
+2025-06-28 12:29:06,938                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,940                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919800
+2025-06-28 12:29:06,943                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,944                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,944               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:06,944               demo-rwt.<module>              WARNING:  Post test logging level:  20
+2025-06-28 12:29:06,944               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 16g - DEBUG external log level, rwt_ntries=2, rwt_debug=True  EXPECT: Exception FileNotFoundError, Post test logging level:  10
-2025-05-28 21:26:41,535                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,944                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
   Function:     <bound method Path.unlink of PosixPath('/tmp/demo_rwt/nosuchfile')>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,535                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:41,535                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,539                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100467
-2025-05-28 21:26:41,543                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,543                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,543                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
-2025-05-28 21:26:41,543                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,546                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100471
-2025-05-28 21:26:41,550                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,550                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
-2025-05-28 21:26:41,550               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:41,550               demo-rwt.<module>              WARNING:  Post test logging level:  10
-2025-05-28 21:26:41,550               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,944                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:29:06,944                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,947                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919802
+2025-06-28 12:29:06,950                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,951                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,951                    rwt.run_with_timeout        DEBUG:  T0  - Try 1
+2025-06-28 12:29:06,951                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,953                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919804
+2025-06-28 12:29:06,956                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,956                    rwt.run_with_timeout        DEBUG:  T3  - <exception> msg received from runner_p
+2025-06-28 12:29:06,956               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:06,957               demo-rwt.<module>              WARNING:  Post test logging level:  10
+2025-06-28 12:29:06,957               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 16h - DEBUG external log level, rwt_ntries=2, rwt_debug=False  EXPECT: Exception FileNotFoundError, Post test logging level:  10
-2025-05-28 21:26:41,563               demo-rwt.dotest                  ERROR:  EXCEPTION:
-  FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
-2025-05-28 21:26:41,564               demo-rwt.<module>              WARNING:  Post test logging level:  10
-2025-05-28 21:26:41,564               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,967               demo-rwt.dotest                  ERROR:  
+  RAISED:     FileNotFoundError: [Errno 2] No such file or directory: '/tmp/demo_rwt/nosuchfile'
+2025-06-28 12:29:06,967               demo-rwt.<module>              WARNING:  Post test logging level:  10
+2025-06-28 12:29:06,968               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 17a - WARNING external log level, rwt_ntries=1, rwt_debug=True  EXPECT: log_each_level logs WARNING, Post test logging level:  30
-2025-05-28 21:26:41,564                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,968                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function log_each_level at 0x7fa2fed2bc40>
+  Function:     <function log_each_level at 0x7f9eb5b279c0>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,564                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,566                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100480
-2025-05-28 21:26:41,567               demo-rwt.log_each_level        WARNING:  warning
-2025-05-28 21:26:41,568                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,569                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:41,569               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:06,968                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,970                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919810
+2025-06-28 12:29:06,970               demo-rwt.log_each_level        WARNING:  warning
+2025-06-28 12:29:06,972                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,972                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:29:06,972               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:41,569               demo-rwt.<module>              WARNING:  Post test logging level:  30
-2025-05-28 21:26:41,569               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,972               demo-rwt.<module>              WARNING:  Post test logging level:  30
+2025-06-28 12:29:06,972               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 17b - INFO external log level, rwt_ntries=1, rwt_debug=True  EXPECT: log_each_level logs WARNING, INFO, Post test logging level:  20
-2025-05-28 21:26:41,569                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,972                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function log_each_level at 0x7fa2fed2bc40>
+  Function:     <function log_each_level at 0x7f9eb5b279c0>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,569                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,573                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100483
-2025-05-28 21:26:41,573               demo-rwt.log_each_level           INFO:  info
-2025-05-28 21:26:41,573               demo-rwt.log_each_level        WARNING:  warning
-2025-05-28 21:26:41,575                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,575                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:41,576               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:06,972                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,975                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919812
+2025-06-28 12:29:06,975               demo-rwt.log_each_level           INFO:  info
+2025-06-28 12:29:06,975               demo-rwt.log_each_level        WARNING:  warning
+2025-06-28 12:29:06,977                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,977                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:29:06,977               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:41,576               demo-rwt.<module>              WARNING:  Post test logging level:  20
-2025-05-28 21:26:41,576               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,977               demo-rwt.<module>              WARNING:  Post test logging level:  20
+2025-06-28 12:29:06,977               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 17c - DEBUG external log level, rwt_ntries=1, rwt_debug=True  EXPECT: log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10
-2025-05-28 21:26:41,576                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,977                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   1
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function log_each_level at 0x7fa2fed2bc40>
+  Function:     <function log_each_level at 0x7f9eb5b279c0>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,576                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,579                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100486
-2025-05-28 21:26:41,579               demo-rwt.log_each_level          DEBUG:  debug
-2025-05-28 21:26:41,580               demo-rwt.log_each_level           INFO:  info
-2025-05-28 21:26:41,580               demo-rwt.log_each_level        WARNING:  warning
-2025-05-28 21:26:41,581                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,582                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:41,582               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:06,978                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,980                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919814
+2025-06-28 12:29:06,981               demo-rwt.log_each_level          DEBUG:  debug
+2025-06-28 12:29:06,981               demo-rwt.log_each_level           INFO:  info
+2025-06-28 12:29:06,981               demo-rwt.log_each_level        WARNING:  warning
+2025-06-28 12:29:06,983                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,983                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:29:06,983               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:41,582               demo-rwt.<module>              WARNING:  Post test logging level:  10
-2025-05-28 21:26:41,582               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,983               demo-rwt.<module>              WARNING:  Post test logging level:  10
+2025-06-28 12:29:06,983               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 17d - DEBUG external log level, rwt_ntries=1, rwt_debug=False  EXPECT: log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10
-2025-05-28 21:26:41,585               demo-rwt.log_each_level          DEBUG:  debug
-2025-05-28 21:26:41,585               demo-rwt.log_each_level           INFO:  info
-2025-05-28 21:26:41,585               demo-rwt.log_each_level        WARNING:  warning
-2025-05-28 21:26:41,587               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:06,985               demo-rwt.log_each_level          DEBUG:  debug
+2025-06-28 12:29:06,986               demo-rwt.log_each_level           INFO:  info
+2025-06-28 12:29:06,986               demo-rwt.log_each_level        WARNING:  warning
+2025-06-28 12:29:06,987               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:41,587               demo-rwt.<module>              WARNING:  Post test logging level:  10
-2025-05-28 21:26:41,588               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,987               demo-rwt.<module>              WARNING:  Post test logging level:  10
+2025-06-28 12:29:06,987               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 17e - WARNING external log level, rwt_ntries=2, rwt_debug=True  EXPECT: log_each_level logs WARNING, Post test logging level:  30
-2025-05-28 21:26:41,588                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,987                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function log_each_level at 0x7fa2fed2bc40>
+  Function:     <function log_each_level at 0x7f9eb5b279c0>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,588                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:41,588                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,591                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100492
-2025-05-28 21:26:41,591               demo-rwt.log_each_level        WARNING:  warning
-2025-05-28 21:26:41,593                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,593                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:41,594               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:06,987                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:29:06,987                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,989                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919818
+2025-06-28 12:29:06,990               demo-rwt.log_each_level        WARNING:  warning
+2025-06-28 12:29:06,992                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,992                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:29:06,992               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:41,594               demo-rwt.<module>              WARNING:  Post test logging level:  30
-2025-05-28 21:26:41,594               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,992               demo-rwt.<module>              WARNING:  Post test logging level:  30
+2025-06-28 12:29:06,992               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 17f - INFO external log level, rwt_ntries=2, rwt_debug=True  EXPECT: log_each_level logs WARNING, INFO, Post test logging level:  20
-2025-05-28 21:26:41,594                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,992                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function log_each_level at 0x7fa2fed2bc40>
+  Function:     <function log_each_level at 0x7f9eb5b279c0>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,594                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:41,594                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,597                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100495
-2025-05-28 21:26:41,597               demo-rwt.log_each_level           INFO:  info
-2025-05-28 21:26:41,597               demo-rwt.log_each_level        WARNING:  warning
-2025-05-28 21:26:41,598                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,599                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:41,599               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:06,993                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:29:06,993                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:06,995                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919820
+2025-06-28 12:29:06,995               demo-rwt.log_each_level           INFO:  info
+2025-06-28 12:29:06,995               demo-rwt.log_each_level        WARNING:  warning
+2025-06-28 12:29:06,997                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:06,997                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:29:06,997               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:41,599               demo-rwt.<module>              WARNING:  Post test logging level:  20
-2025-05-28 21:26:41,599               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:06,997               demo-rwt.<module>              WARNING:  Post test logging level:  20
+2025-06-28 12:29:06,997               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 17g - DEBUG external log level, rwt_ntries=2, rwt_debug=True  EXPECT: log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10
-2025-05-28 21:26:41,599                    rwt.run_with_timeout        DEBUG:  
+2025-06-28 12:29:06,997                    rwt.run_with_timeout        DEBUG:  
 run_with_timeout switches:
-  rwt_timeout:  1
+  rwt_timeout:  1.0
   rwt_ntries:   2
   rwt_kill:     True
   rwt_debug:    True
-  Function:     <function log_each_level at 0x7fa2fed2bc40>
+  Function:     <function log_each_level at 0x7f9eb5b279c0>
   args:         ()
   kwargs:       {}
-2025-05-28 21:26:41,599                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
-2025-05-28 21:26:41,599                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
-2025-05-28 21:26:41,602                    rwt._runner                 DEBUG:  R1  - runner_p pid 2100497
-2025-05-28 21:26:41,602               demo-rwt.log_each_level          DEBUG:  debug
-2025-05-28 21:26:41,602               demo-rwt.log_each_level           INFO:  info
-2025-05-28 21:26:41,602               demo-rwt.log_each_level        WARNING:  warning
-2025-05-28 21:26:41,604                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
-2025-05-28 21:26:41,604                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
-2025-05-28 21:26:41,604               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:06,998                    rwt.run_with_timeout        DEBUG:  T0  - Try 0
+2025-06-28 12:29:06,998                    rwt.run_with_timeout        DEBUG:  T1  - Starting runner_p
+2025-06-28 12:29:07,000                    rwt._runner                 DEBUG:  R1  - runner_p pid 2919822
+2025-06-28 12:29:07,000               demo-rwt.log_each_level          DEBUG:  debug
+2025-06-28 12:29:07,000               demo-rwt.log_each_level           INFO:  info
+2025-06-28 12:29:07,000               demo-rwt.log_each_level        WARNING:  warning
+2025-06-28 12:29:07,002                    rwt.run_with_timeout        DEBUG:  T2  - runner_p exited before rwt_timeout
+2025-06-28 12:29:07,002                    rwt.run_with_timeout        DEBUG:  T3  - <result> msg received from runner_p
+2025-06-28 12:29:07,002               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:41,604               demo-rwt.<module>              WARNING:  Post test logging level:  10
-2025-05-28 21:26:41,604               demo-rwt.dotest                WARNING:  
+2025-06-28 12:29:07,002               demo-rwt.<module>              WARNING:  Post test logging level:  10
+2025-06-28 12:29:07,002               demo-rwt.dotest                WARNING:  
 
 ==============================================================================================
 Test 17h - DEBUG external log level, rwt_ntries=2, rwt_debug=False  EXPECT: log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10
-2025-05-28 21:26:41,607               demo-rwt.log_each_level          DEBUG:  debug
-2025-05-28 21:26:41,607               demo-rwt.log_each_level           INFO:  info
-2025-05-28 21:26:41,607               demo-rwt.log_each_level        WARNING:  warning
-2025-05-28 21:26:41,609               demo-rwt.dotest                WARNING:  RETURNED:
+2025-06-28 12:29:07,005               demo-rwt.log_each_level          DEBUG:  debug
+2025-06-28 12:29:07,005               demo-rwt.log_each_level           INFO:  info
+2025-06-28 12:29:07,005               demo-rwt.log_each_level        WARNING:  warning
+2025-06-28 12:29:07,007               demo-rwt.dotest                WARNING:    RETURNED:
 None
-2025-05-28 21:26:41,609               demo-rwt.<module>              WARNING:  Post test logging level:  10
+2025-06-28 12:29:07,007               demo-rwt.<module>              WARNING:  Post test logging level:  10

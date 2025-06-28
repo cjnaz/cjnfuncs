@@ -50,7 +50,7 @@ if args.setup_site:
 ```
 
 Notables
-- deploy_files() uses mungePath() for processing the target_dir path, so all of mungePath's features and rules apply, such as user and environment var expanstion, absolute and relative paths.
+- deploy_files() uses mungePath() for processing the target_dir path, so all of mungePath's features and rules apply, such as user and environment var expansion, absolute and relative paths.
 - Permissions may be set on deployed files and directories.  For example, `creds_SMTP` is set to user-read-write only.
 - Various exceptions may be raised, including PermissionError, FileNotFoundError, FileExistsError.  If untrapped then 
 these will cause the tool script to exit.  If usage is interactive only then exception handling in unnecessary.
@@ -76,7 +76,7 @@ In the case of a standalone tool script (not a package), the source files are ho
 
 ### target_dir path keyword substitutions
 
-The `set_toolname()` call defines the environment paths for the tool.  These paths may be referenced in the target_dir field for files or directories to be deployed.  
+The `set_toolname()` call defines the environment paths for the tool.  These paths may be referenced in the `target_dir` field for files or directories to be deployed. Target paths relative to the keywords may be specified, as well as filesystem absolute paths.
 
 Keyword | Maps to
 -- | --
@@ -86,5 +86,11 @@ USER_STATE_DIR  | core.tool.user_state_dir
 USER_CACHE_DIR  | core.tool.user_cache_dir
 SITE_CONFIG_DIR | core.tool.site_config_dir
 SITE_DATA_DIR   | core.tool.site_data_dir
+CONFIG_DIR      | core.tool.config_dir **
+DATA_DIR        | core.tool.data_dir **
+STATE_DIR       | core.tool.state_dir **
+CACHE_DIR       | core.tool.cache_dir **
 
-Target paths relative to the keywords may be specified, as well as filesystem absolute paths.
+** Note: These keywords are set to the user-mode or site-mode full absolute paths by `set_toolname()`.  For example, `USER_CONFIG_DIR` maps to `core.tool.user_config_dir`, and `CONFIG_DIR` maps to `core.tool.config_dir`, and in user mode both of these variables contain the path `/home/<me>/.config/<toolname>/`. In site mode, `CONFIG_DIR` will map to the same path as `SITE_CONFIG_DIR`.
+
+

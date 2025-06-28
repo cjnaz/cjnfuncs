@@ -25,7 +25,7 @@ import shutil
 import sys
 import time
 
-from cjnfuncs.core     import set_toolname, setuplogging, logging, ConfigError
+from cjnfuncs.core     import set_toolname, setuplogging, logging, ConfigError, set_logging_level, get_logging_level_stack
 from cjnfuncs.deployfiles import deploy_files
 from cjnfuncs.configman import config_item
 from cjnfuncs.timevalue import timevalue, retime
@@ -57,6 +57,11 @@ def print_test_header(tnum, header):
     print (f"***** Test number {tnum}: {header} *****")
     print ("======================================================================================================\n")
 
+set_logging_level(19, clear=True, save=False)   # Set stack to [19, 1], with current logging level 30
+set_logging_level(1)
+set_logging_level(30)
+# print (f"logging level stack:  {get_logging_level_stack()}")
+
 
 #===============================================================================================
 if args.test == 0  or  args.test == 1:
@@ -69,7 +74,7 @@ if args.test == 0  or  args.test == 1:
     remove_file(mungePath('cfg_logfile2', core.tool.config_dir).full_path)
 
     print ("\n----- T1.1:  setuplogging with call_logfile_wins=False, call_logfile=None, config_logfile=None >>>>  Log file: __console__ (setuplogging with no config)")
-    setuplogging()
+    setuplogging()      # Does not change logging level, left at preexisting logging level (30)
     print (f"Current log file:              {core.tool.log_full_path}")
     logging.info("Info level log (not displayed)")
     logging.warning (f"T1.1 - Log to  <{core.tool.log_full_path}>")
@@ -156,13 +161,13 @@ if args.test == 0  or  args.test == 2:
     print_test_header (2, "Tests for ldcfg_ll, config LogLevel, flush_on_reload, force_flush_reload")
 
     def print_stats ():
-        print (f"(Re)loaded             :  {reloaded}")
-        print (f"Config file timestamp  :  {config_T2.config_timestamp}")
-        print (f"Config LogLevel        :  {config_T2.getcfg('LogLevel', 'None')}")
-        print (f"Current Logging level  :  {logging.getLogger().level}")
-        print (f"testvar                :  {config_T2.getcfg('testvar', None)}  {type(config_T2.getcfg('testvar', None))}")
-        print (f"var2                   :  {config_T2.getcfg('var2', None)}")
-        print (f"Current log file       :  {core.tool.log_full_path}")
+        print (f"(Re)loaded             {reloaded}")
+        print (f"Config file timestamp  {config_T2.config_timestamp}")
+        print (f"Config LogLevel        {config_T2.getcfg('LogLevel', 'None')}")
+        print (f"Logging level          {logging.getLogger().level}, Logging level stack  {get_logging_level_stack()}")
+        print (f"testvar                {config_T2.getcfg('testvar', None)}  {type(config_T2.getcfg('testvar', None))}")
+        print (f"var2                   {config_T2.getcfg('var2', None)}")
+        print (f"Current log file       {core.tool.log_full_path}")
         logging.warning ("Warning level message")
         logging.info    ("Info    level message")
         logging.debug   ("Debug   level message")
@@ -255,10 +260,15 @@ if args.test == 0  or  args.test == 2:
     print_stats()
 
 
+#===============================================================================================
+
 def do_base_setup(config_load_ll=30):
     global config
     set_toolname(TOOLNAME)                  # Reset for every test to ensure same results for -t 0 and -t n
-    logging.getLogger().setLevel(20)
+    set_logging_level(19, clear=True, save=False)   # Set stack to [19, 1], with current logging level 20
+    set_logging_level(1)
+    set_logging_level(20)
+    # logging.getLogger().setLevel(20)
     deploy_files([
         { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
         { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},
@@ -266,7 +276,6 @@ def do_base_setup(config_load_ll=30):
     config = config_item(CONFIG_FILE)
     print (f"\nLoad config {config.config_full_path}")
     config.loadconfig(ldcfg_ll=config_load_ll)
-    # print ("do_base_setup", logging.getLogger().level)  # TODO cleanup
 
 
 #===============================================================================================
@@ -278,6 +287,7 @@ if args.test == 0  or  args.test == 3:
     print(config.dump())
     print(config.sections_list)
     print(config.sections())
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
 
 #===============================================================================================
@@ -287,7 +297,7 @@ if args.test == 0  or  args.test == 4:
         configX = config_item("nosuchfile.cfg")
         configX.loadconfig(ldcfg_ll=10)
     except ConfigError as e:
-        print (f"In main...  {e}")
+        print (f"In main...  {type(e).__name__}: {e}")
 
 
 #===============================================================================================
@@ -311,14 +321,14 @@ if args.test == 0  or  args.test == 6:
     logging.warning (f"testvar:          {config.getcfg('testvar', None)}  {type(config.getcfg('testvar', None))}")
     logging.warning (f"another:          {additional_config.getcfg('another', None)}  {type(additional_config.getcfg('another', None))}")
     logging.getLogger().setLevel(17)        # Should survive after additional_config load
-    print (f"Current Logging level  :  {logging.getLogger().level}")
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
     
     additional_config.loadconfig(ldcfg_ll=10)
     print(additional_config)
 
     logging.warning (f"testvar:          {config.getcfg('testvar', None)}  {type(config.getcfg('testvar', None))}")
     logging.warning (f"another:          {additional_config.getcfg('another', None)}  {type(additional_config.getcfg('another', None))}")
-    print (f"Current logging level:      {logging.getLogger().level}")
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
     print (core.tool)
 
 
@@ -339,12 +349,12 @@ if args.test == 0  or  args.test == 7:
     try:
         config.getcfg('NotInCfg-NoFB')
     except ConfigError as e:
-        print (f"ConfigError: {e}")
+        print (f"{type(e).__name__}: {e}")
 
     try:
         config.getcfg('NotInCfg-NoFB', section='nosuchsection')
     except ConfigError as e:
-        print (f"ConfigError: {e}")
+        print (f"{type(e).__name__}: {e}")
 
 
 #===============================================================================================
@@ -383,6 +393,8 @@ if args.test == 0  or  args.test == 9:
     config.cfg["dummy"] = True
     config.loadconfig(force_flush_reload=True, ldcfg_ll=10, prereload_callback=mycallback)
     print (f"----- T9.5:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because force_flush_reload == True)\n")
+
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
 
 #===============================================================================================
@@ -432,12 +444,12 @@ if args.test == 0  or  args.test == 13:
     try:
         config.loadconfig(ldcfg_ll=10)
     except Exception as e:
-        print (f"Config loading exception:\n  {e}")
-        print (f"Logging level back in the main code:  {logging.getLogger().level}")
+        print (f"Config loading exception:\n  {type(e).__name__}: {e}")
+        print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
     print (f"\n----- T13.2:  Missing config, tolerate_missing=True >>>>  Returned -1")
     print (f"Returned:  <{config.loadconfig(ldcfg_ll=10, tolerate_missing=True)}>")
-    print (f"Logging level back in the main code:  {logging.getLogger().level}")
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
     print (f"\n----- T13.3:  Working nested import")
     deploy_files([
@@ -449,23 +461,23 @@ if args.test == 0  or  args.test == 13:
     xx = config_item(nest_cfg)
     xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
     print (xx.dump())
-    print (f"Logging level back in the main code:  {logging.getLogger().level}")
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
     
     print (f"\n----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.")
     remove_file(mungePath("import_nest_2.cfg", core.tool.config_dir).full_path)
     try:
         xx.loadconfig(ldcfg_ll=9, tolerate_missing=True, force_flush_reload=True)
     except ConfigError as e:
-        print (f"Exception due to missing imported config file:\n  {e}")
-        print (f"Logging level back in the main code:  {logging.getLogger().level}")
+        print (f"Exception due to missing imported config file:\n  {type(e).__name__}: {e}")
+        print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
     
     print (f"\n----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.")
     remove_file(mungePath("import_nest_1.cfg", core.tool.config_dir).full_path)
     try:
         xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
     except Exception as e:
-        print (f"Exception due to missing imported config file:\n  {e}")
-        print (f"Logging level back in the main code:  {logging.getLogger().level}")
+        print (f"Exception due to missing imported config file:\n  {type(e).__name__}: {e}")
+        print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
 
 #===============================================================================================
@@ -534,7 +546,7 @@ if args.test == 0  or  args.test == 16:
             _value = config.getcfg(param, types=types, section=section)
             print (f"Param <{param}> value <{_value}>, type <{type(_value)}>, expected types <{types}>")
         except Exception as e:
-            print (f"Param <{param}> not expected type:\n  {e}")
+            print (f"Param <{param}> not expected type:\n  {type(e).__name__}: {e}")
 
     dump("Tint",   types=[int, float])
     dump("Tint",   types=int)
@@ -569,12 +581,12 @@ if args.test == 0  or  args.test == 18:
         try:
             xx = '[' + section + '][' + option + ']'
             _value = config.getcfg(option, section=section)
-            print (f"{xx:19}   {_value:<11}  {desc}")
+            print (f"{xx:19}   {_value:<12}    {desc}")
         except:
-            print (f"{xx:19}   NOT DEFINED  {desc}")
+            print (f"{xx:19}   NOT DEFINED     {desc}")
 
     print (config)
-    dump('a',                           desc='Expecting  <9>  from [],             [DEFAULT] ignored')
+    dump('a',                           desc='Expecting  <In top level> from [],   [DEFAULT] ignored')
     dump('b',                           desc='Expecting  <12> from [],             no default')
     dump('c',                           desc='Expecting  <42> from [DEFAULT],      not in []')
     dump('d',                           desc='Not in [] or [DEFAULT]')
@@ -596,12 +608,14 @@ if args.test == 0  or  args.test == 19:
     nest_cfg = mungePath("import_nest_top.cfg", core.tool.config_dir).full_path
     xx = config_item(nest_cfg)
     xx.loadconfig(ldcfg_ll=10, tolerate_missing=True, force_flush_reload=True)
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
     print ("\n***** config contents *****")
     print (xx.dump())
 
 #===============================================================================================
 if args.test == 0  or  args.test == 20:
     print_test_header (20, "Load dictionary into cfg. No file.")
+    set_logging_level(15, save=False)
     new_config = config_item() # config has no file
 
     main_contents = {
@@ -625,6 +639,7 @@ if args.test == 0  or  args.test == 20:
 
     print (new_config)
     print (new_config.dump())
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
 
 #===============================================================================================
@@ -656,6 +671,7 @@ e 20
 #f Hello
 """
     print (f"\n----- T21.0:  Initial state")
+    set_logging_level(10, save=False)           # read_string uses logging level in effect when called.
     new_config.read_string(string_blob)
     print (new_config)
     print (new_config.dump())
@@ -683,7 +699,8 @@ e 20
     try:
         new_config.clear('Test section')
     except ConfigError as e:
-        print (f"ConfigError: {e}")
+        print (f"{type(e).__name__}: {e}")
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
 
 #===============================================================================================
@@ -694,6 +711,7 @@ if args.test == 0  or  args.test == 22:
     config.loadconfig(ldcfg_ll=10)
     print (config)
     print (config.dump())
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
 
 #===============================================================================================
@@ -706,12 +724,15 @@ if args.test == 0  or  args.test == 23:
         { "source": "demo_config_T23c.cfg",       "target_dir": "USER_CONFIG_DIR"},
         ], overwrite=True )
 
+    set_logging_level(23, save=False)
     print (f"\n----- T23.1:  Section defined within imported config file")
     try:
         T23_config = config_item("demo_config_T23a.cfg")
         T23_config.loadconfig(ldcfg_ll=10)
     except ConfigError as e:
-        print (f"ConfigError:  {e}")
+        print (f"{type(e).__name__}: {e}")
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
+
 
     print (f"\n----- T23.1a:  Section defined within imported config file")
     try:
@@ -719,6 +740,7 @@ if args.test == 0  or  args.test == 23:
         T23_config.loadconfig(ldcfg_ll=10)
     except ConfigError as e:
         logging.exception ("----- T23.1a:  Section defined within imported config file")
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
 
     print (f"\n----- T23.2:  Malformed Section name")
@@ -726,7 +748,8 @@ if args.test == 0  or  args.test == 23:
         T23_config = config_item("demo_config_T23c.cfg")
         T23_config.loadconfig(ldcfg_ll=10)
     except ConfigError as e:
-        print (f"ConfigError:  {e}")
+        print (f"{type(e).__name__}: {e}")
+    print (f"Logging level:  {logging.getLogger().level}, Logging level stack:  {get_logging_level_stack()}")
 
 
 #===============================================================================================

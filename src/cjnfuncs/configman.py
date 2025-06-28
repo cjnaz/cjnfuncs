@@ -10,21 +10,15 @@
 
 import re
 import ast
-from pathlib import Path
 
-from .core      import setuplogging, logging, ConfigError
+from .core      import setuplogging, logging, ConfigError, set_logging_level, restore_logging_level, pop_logging_level_stack, get_logging_level_stack
 from .mungePath import mungePath, check_path_exists
+from .rwt       import run_with_timeout
 import cjnfuncs.core as core
 
 # Configs / Constants
 DEFAULT_LOGGING_LEVEL  = logging.WARNING
 IO_RETRY_COUNT         = 3
-
-# def log_handlers():
-#     xx = ''
-#     for h in logging.getLogger().handlers:
-#         xx += f"{h}'\n'"
-#     return xx
 
 
 #=====================================================================================
@@ -101,7 +95,7 @@ instantiation `config_file` is a relative path (uses mungePath)
 - More than one `config_item()` may be created and loaded.  This allows for configuration data to be partitioned 
 as desired.  Each defined config is loaded to its own instance-specific `cfg` dictionary. Only one config_item()
 instance should be considered the primary, while other instances should be tagged with `secondary_config=True`. 
-Logging setups are controlled only by the primary instance.
+Logging setups are controlled only by the primary config instance.
 Also see the loadconfig() `import` feature.
 - Initially in _user_ mode, after the `set_toolname()` call, `core.tool.log_dir_base` 
 (the log directory) is set to the `core.tool.user_data_dir`.
@@ -137,11 +131,11 @@ directory.  With `remap_logdirbase=True`, the log dir will also be set to the to
             self.config_timestamp   = 0
             self.config_content     = ''        # Used by modify_configfile()
         else:
-            config = mungePath(config_file, core.tool.config_dir)   # TODO rename config_mp
-            if config.is_file:
-                self.config_file        = config.name
-                self.config_dir         = config.parent
-                self.config_full_path   = config.full_path
+            config_mp = mungePath(config_file, core.tool.config_dir, set_attributes=True)
+            if config_mp.is_file:
+                self.config_file        = config_mp.name
+                self.config_dir         = config_mp.parent
+                self.config_full_path   = config_mp.full_path
                 self.config_timestamp   = 0
                 self.config_content     = ''    # Used by modify_configfile()
             else:
@@ -178,7 +172,7 @@ directory.  With `remap_logdirbase=True`, the log dir will also be set to the to
 ## loadconfig () - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
-    ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
+    ldcfg_ll            = 30,
     call_logfile        = None,
     call_logfile_wins   = False,
     flush_on_reload     = False,
@@ -277,7 +271,7 @@ regardless of whether the config file timestamp has changed
 
 - **Logging level control** - Optional `LogLevel` in the primary config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the primary config file, then 
-  the logging level is set to the Python default logging level, 30/WARNING.
+  the logging level is left unchanged (the Python default logging level, 30/WARNING).
   The tool script code may also manually/explicitly set the logging level _after the initial `loadconifig()` call_
   and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
   switch feature.  Note that logging done _within_ loadconfig() code is always done at the `ldcfg_ll` level.
@@ -331,9 +325,8 @@ cannot be accessed.
         """
 
         global initial_logging_setup_done
-        global preexisting_loglevel
 
-        if not initial_logging_setup_done:      #TODO
+        if not initial_logging_setup_done:
             # Initial logging will go to the console if no call_logfile is specified (and call_logfile_wins) on the initial loadconfig call.
             console_lf = self.getcfg('ConsoleLogFormat', None)
             file_lf = self.getcfg('FileLogFormat', None)
@@ -343,41 +336,37 @@ cannot be accessed.
         config = self.config_full_path
 
         # Operations only on top-level config file
-        if not isimport:
+        is_top_level = not isimport
+        if is_top_level:
 
-            # Save externally set / prior log level for later restore
-            preexisting_loglevel = logging.getLogger().level            #TODO use set_logging_level
+            set_logging_level(ldcfg_ll)                         # logging within loadconfig is always done at ldcfg_ll
 
             if force_flush_reload:
-                logging.getLogger().setLevel(ldcfg_ll)  # logging within loadconfig is always done at ldcfg_ll
                 logging.info(f"Config  <{self.config_file}>  force flushed (force_flush_reload)")
                 self.clear()
-                self.config_timestamp = 0               # Force reload of the config file
+                self.config_timestamp = 0                       # Force reload of the config file
 
             # Check if config file is available and has changed
             _exists = False
-            for _ in range(IO_RETRY_COUNT):
-                if check_path_exists(config):       # TODO rwt
-                    _exists = True
-                    break
+            if check_path_exists(config, ntries=IO_RETRY_COUNT):
+                _exists = True
 
             if not _exists:
                 if tolerate_missing:
-                    logging.getLogger().setLevel(ldcfg_ll)
                     logging.info (f"Config  <{self.config_file}>  file not currently accessible.  Skipping (re)load.")
-                    logging.getLogger().setLevel(preexisting_loglevel)
-                    return -1                           # -1 indicates that the config file cannot currently be found
+                    restore_logging_level()
+                    return -1                                   # -1 indicates that the config file cannot currently be found
                 else:
-                    logging.getLogger().setLevel(preexisting_loglevel)
+                    restore_logging_level()
                     raise ConfigError (f"Could not find  <{self.config_file}>")
 
-            current_timestamp = int(self.config_full_path.stat().st_mtime)  # integer-second resolution
+            current_timestamp = int(self.config_full_path.stat().st_mtime)  # force integer-second resolution
             if self.config_timestamp == current_timestamp:
-                return 0                                # 0 indicates that the config file was NOT (re)loaded
+                restore_logging_level()
+                return 0                                        # 0 indicates that the config file was NOT (re)loaded
 
             # It's an initial load call, or config file has changed, or force_flush_reload...  Do (re)load
             self.config_timestamp = current_timestamp
-            logging.getLogger().setLevel(ldcfg_ll)      # Set logging level for remainder of loadconfig call
             if prereload_callback:
                 logging.debug("Pre-reload callback user function called")
                 prereload_callback()
@@ -389,42 +378,56 @@ cannot be accessed.
 
 
         # Load the config
+            # If there is an import then read_string() recursively calls loadconfig().  Imported configs can in turn import configs.
+            # An exception raised within read_string() while processing an imported config lands at this except clause, and is re-raised
+            # to be handled at the next higher level, until we reach the top-level loadconfig() call, and the exception is passed to the 
+            # tool script code.
         logging.info (f"Loading  <{config}>")
-        string_blob = config.read_text()
-        self.read_string (string_blob, ldcfg_ll=ldcfg_ll, isimport=isimport)
+        try:
+            string_blob = config.read_text()
+            self.read_string (string_blob, isimport=isimport)
+        except:
+            if is_top_level:
+                restore_logging_level()
+            raise
 
 
         # Operations only for finishing a top-level call
-        if not isimport  and  not self.secondary_config:
+        if is_top_level  and  not self.secondary_config:
+
+            # Re-setup the root logger, adjusting for config LogFile and logging formats
             console_lf = self.getcfg('ConsoleLogFormat', None)
-            file_lf = self.getcfg('FileLogFormat', None)
+            file_lf =    self.getcfg('FileLogFormat', None)
             setuplogging(config_logfile=self.getcfg('LogFile', None), call_logfile=call_logfile, call_logfile_wins=call_logfile_wins, ConsoleLogFormat=console_lf, FileLogFormat=file_lf)
 
+            # Apply SMTP module control flags based on config params
             if 'SMTP' in self.sections_list:
                 if self.getcfg('DontEmail', False, section='SMTP'):
                     logging.info ("DontEmail is set - Emails and Notifications will NOT be sent")
                 elif self.getcfg('DontNotif', False, section='SMTP'):
                     logging.info ("DontNotif is set - Notifications will NOT be sent")
 
+            # Apply LogLevel, if defined in the config
             config_loglevel = self.getcfg('LogLevel', None)
             if config_loglevel is not None:
                 try:
-                    config_loglevel = int(config_loglevel)  # Handles force_str=True
+                    config_loglevel = int(config_loglevel)      # Handles force_str=True
                 except:
                     raise ConfigError (f"Config file <LogLevel> must be integer value (found <{config_loglevel}>)") from None
                 logging.info (f"Logging level set to config LogLevel <{config_loglevel}>")
-                logging.getLogger().setLevel(config_loglevel)
+                pop_logging_level_stack()                       # Purge old saved loglevel value and apply new value
+                set_logging_level(config_loglevel, save=False)
             else:
-                logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
-                logging.getLogger().setLevel(preexisting_loglevel)
+                logging.info (f"Logging level set to preexisting level <{get_logging_level_stack()[-1]}>")
+                restore_logging_level()
 
-        # Secondary configs may not modify the Loglevel
-        if self.secondary_config  and  not isimport:    # TODO
-            logging.info (f"Logging level set to preexisting level <{preexisting_loglevel}>")
-            logging.getLogger().setLevel(preexisting_loglevel)
+        # Secondary configs may not modify the LogLevel.  Ignored if defined.
+        if is_top_level  and  self.secondary_config:
+            logging.info (f"Logging level set to preexisting level <{get_logging_level_stack()[-1]}>")
+            restore_logging_level()
 
         self.current_section_name = ''
-        return 1                                        # 1 indicates that the config file was (re)loaded
+        return 1                                                # 1 indicates that the config file was (re)loaded
 
 
 #=====================================================================================
@@ -433,9 +436,9 @@ cannot be accessed.
 #=====================================================================================
 #=====================================================================================
 
-    def read_string(self, str_blob, ldcfg_ll=DEFAULT_LOGGING_LEVEL, isimport=False):
+    def read_string(self, str_blob, isimport=False):
         """
-## read_string (str_blob, ldcfg_ll=DEFAULT_LOGGING_LEVEL, isimport=False) - Load content of a string into the cfg dictionary
+## read_string (str_blob, isimport=False) - Load content of a string into the cfg dictionary
 
 ***config_item() class member function***
 
@@ -451,19 +454,18 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 `str_blob` (str)
 - String containing the lines of config data
 
-`ldcfg_ll` (int, default 30 (WARNING))
-- Logging level used within `read_string()` code for debugging read_string() itself
-
 `isimport` (bool, default False)
 - Internally set True when handling imports.  Not used by tool script calls.
 
 
 ### Returns
 - A ConfigError is raised if there are parsing issues
-- A ConfigError is also raised if an imported config file cannot be loaded (non-existent)
+- A ConfigError is also raised if an imported config file cannot accessed
 
 
 ### Behaviors and rules
+- read_string() does not modify the logging level (ldcfg_ll is not an arg).  If called from user code, 
+the logging level will be as set in the user code.  Logging statements within read_string() is at the debug level.
 - See loadconfig() for config loading Behaviors and rules.
         """
         continuation_line = False
@@ -491,11 +493,9 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                         self.cfg[section_name] = {}
                         self.sections_list.append(section_name)
                 if section_name is None:
-                    logging.getLogger().setLevel(preexisting_loglevel)
                     raise ConfigError (f"Malformed section line <{line}>")
                 else:
                     if isimport:
-                        logging.getLogger().setLevel(preexisting_loglevel)
                         raise ConfigError ("Section within imported file is not supported.")
                     self.current_section_name = section_name
                 continue
@@ -524,20 +524,16 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
             if param_name != '':
                 if param_name.lower().startswith('import'):             # import line
-                    target = mungePath(value_portion, self.config_dir)  # TODO rename target_mp
-                    try:        # TODO config_item hangable??
-                        imported_config = config_item(target.full_path, secondary_config=True)
-                        imported_config.loadconfig(ldcfg_ll, isimport=True)
-                        for key in imported_config.cfg:
-                            if self.current_section_name == '':
-                                self.cfg[key] = imported_config.cfg[key]
-                            elif self.current_section_name == 'DEFAULT':
-                                self.defaults[key] = imported_config.cfg[key]
-                            else:
-                                self.cfg[self.current_section_name][key] = imported_config.cfg[key]
-                    except Exception as e:
-                        logging.getLogger().setLevel(preexisting_loglevel)
-                        raise e
+                    target = mungePath(value_portion, self.config_dir).full_path
+                    imported_config = config_item(target, secondary_config=True)
+                    imported_config.loadconfig(isimport=True)               # May raise exception, caught by higher level
+                    for key in imported_config.cfg:
+                        if self.current_section_name == '':
+                            self.cfg[key] = imported_config.cfg[key]
+                        elif self.current_section_name == 'DEFAULT':
+                            self.defaults[key] = imported_config.cfg[key]
+                        else:
+                            self.cfg[self.current_section_name][key] = imported_config.cfg[key]
                 else:                                                   # param - value line
                     if value_portion.lower() == 'true':
                         value_portion = 'True'
@@ -761,7 +757,7 @@ modifications of the config file then the modified content will be reloaded into
 
 
 ### Returns
-- No return value
+- None
 - Warning messages are logged for attempting to modify or remove a non-existing param.
 
 
@@ -872,16 +868,12 @@ reload call to avoid multiple config reloads.
             for key in self.cfg[section]:
                 cfg_list += f"{key:20} = {self.cfg[section][key]}\n"
         
-        outfile = mungePath(savefile, core.tool.config_dir).full_path   # TODO rename outfile_fp
-        for ntry in range(IO_RETRY_COUNT):
-            try:
-                Path(outfile).write_text(cfg_list)      # TODO rwt
-                return
-            except Exception as e:
-                _e = e
-                logging.debug(f"Failed try {ntry} to write config {self.config_file} to file {outfile}\n  {e}")
+        outfile = mungePath(savefile, core.tool.config_dir).full_path
 
-        raise ConfigError (f"Failed to write config {self.config_file} to file {outfile}\n  {_e}")
+        try:
+            run_with_timeout(outfile.write_text, cfg_list, rwt_ntries=IO_RETRY_COUNT)
+        except Exception as e:
+            raise ConfigError (f"Failed to write config {self.config_file} to file {outfile}\n  {type(e).__name__}: {e}")
 
 
 #=====================================================================================
@@ -931,6 +923,7 @@ output:
 
 
 ### Returns
+- None
 - A ConfigError is raised if attempting to remove a non-existing section
         """
 

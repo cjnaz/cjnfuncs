@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 """Demo/test for periodic_log
+
+Produce / compare to golden results:
+    ./demo-periodic_log.py | diff demo-periodic_log-golden.txt -
+        No differences expected
 """
 #==========================================================
 #
@@ -12,14 +16,11 @@ __version__ = "1.0"
 
 import time
 
-# cjnfuncs.core must be imported before mine, else circular import since mine imports mungePath
-from cjnfuncs.core import set_toolname, setuplogging, logging, periodic_log, set_logging_level
+from cjnfuncs.core import set_toolname, setuplogging, logging, periodic_log
 
 set_toolname('demo_periodic_log')
 setuplogging()
 logging.getLogger().setLevel(10)
-
-# from mine.mine import periodic_log, set_logging_level
 
 
 def dotest (testnum, message, category, log_interval='1s', log_level=30):

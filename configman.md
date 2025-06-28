@@ -524,7 +524,7 @@ instantiation `config_file` is a relative path (uses mungePath)
 - More than one `config_item()` may be created and loaded.  This allows for configuration data to be partitioned 
 as desired.  Each defined config is loaded to its own instance-specific `cfg` dictionary. Only one config_item()
 instance should be considered the primary, while other instances should be tagged with `secondary_config=True`. 
-Logging setups are controlled only by the primary instance.
+Logging setups are controlled only by the primary config instance.
 Also see the loadconfig() `import` feature.
 - Initially in _user_ mode, after the `set_toolname()` call, `core.tool.log_dir_base` 
 (the log directory) is set to the `core.tool.user_data_dir`.
@@ -551,7 +551,7 @@ directory.  With `remap_logdirbase=True`, the log dir will also be set to the to
 # loadconfig () - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
-    ldcfg_ll            = DEFAULT_LOGGING_LEVEL,
+    ldcfg_ll            = 30,
     call_logfile        = None,
     call_logfile_wins   = False,
     flush_on_reload     = False,
@@ -650,7 +650,7 @@ regardless of whether the config file timestamp has changed
 
 - **Logging level control** - Optional `LogLevel` in the primary config file will set the logging level after
   the config file has been loaded.  If LogLevel is not specified in the primary config file, then 
-  the logging level is set to the Python default logging level, 30/WARNING.
+  the logging level is left unchanged (the Python default logging level, 30/WARNING).
   The tool script code may also manually/explicitly set the logging level _after the initial `loadconifig()` call_
   and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
   switch feature.  Note that logging done _within_ loadconfig() code is always done at the `ldcfg_ll` level.
@@ -708,7 +708,7 @@ cannot be accessed.
 
 ---
 
-# read_string (str_blob, ldcfg_ll=DEFAULT_LOGGING_LEVEL, isimport=False) - Load content of a string into the cfg dictionary
+# read_string (str_blob, isimport=False) - Load content of a string into the cfg dictionary
 
 ***config_item() class member function***
 
@@ -724,19 +724,18 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 `str_blob` (str)
 - String containing the lines of config data
 
-`ldcfg_ll` (int, default 30 (WARNING))
-- Logging level used within `read_string()` code for debugging read_string() itself
-
 `isimport` (bool, default False)
 - Internally set True when handling imports.  Not used by tool script calls.
 
 
 ### Returns
 - A ConfigError is raised if there are parsing issues
-- A ConfigError is also raised if an imported config file cannot be loaded (non-existent)
+- A ConfigError is also raised if an imported config file cannot accessed
 
 
 ### Behaviors and rules
+- read_string() does not modify the logging level (ldcfg_ll is not an arg).  If called from user code, 
+the logging level will be as set in the user code.  Logging statements within read_string() is at the debug level.
 - See loadconfig() for config loading Behaviors and rules.
         
 <br/>
@@ -883,7 +882,7 @@ modifications of the config file then the modified content will be reloaded into
 
 
 ### Returns
-- No return value
+- None
 - Warning messages are logged for attempting to modify or remove a non-existing param.
 
 
@@ -961,6 +960,7 @@ output:
 
 
 ### Returns
+- None
 - A ConfigError is raised if attempting to remove a non-existing section
         
 <br/>

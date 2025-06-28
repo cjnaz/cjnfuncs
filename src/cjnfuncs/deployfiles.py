@@ -4,18 +4,16 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2024
+#  Chris Nelson, 2018-2025
 #
 #==========================================================
 
-# import sys
-import os.path
-from pathlib import PurePath
+from pathlib import Path
 import shutil
 import __main__
 
 from .core import logging
-from .mungePath import mungePath, check_path_exists
+from .mungePath import mungePath
 import cjnfuncs.core as core
 
 # if sys.version_info < (3, 9):
@@ -36,11 +34,14 @@ def deploy_files(files_list, overwrite=False, missing_ok=False):
     """
 ## deploy_files (files_list, overwrite=False, missing_ok=False) - Install initial tool script files in user or site space
 
-`deploy_files()` is used to install initial setup files (and directory trees) from the module to the user 
-or site config and data directories. Suggested usage is with the CLI `--setup-user` or `--setup-site` switches.
+`deploy_files()` is used to install initial setup files (and directory trees) from the installed package (or tool script) 
+to the user or site config and data directories. Suggested usage is with the CLI `--setup-user` or `--setup-site` switches.
 Distribution files and directory trees are hosted in `<module_root>/deployment_files/`.
 
-`deploy_files()` accepts a list of dictionaries to be pushed to user or site space. 
+`deploy_files()` accepts a list of dictionaries defining items to be pushed to user or site space.
+Each dictionary defines
+the `source` file or directory root to be pushed, the `target_dir` for where to push the source, and optionally
+the file and directory permissions for the pushed items.  Ownership matches the running user.
 
 
 ### Args
@@ -49,25 +50,58 @@ Distribution files and directory trees are hosted in `<module_root>/deployment_f
   - `source` - Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
     No wildcard support.
   - `target_dir` - A directory target for the pushed `source`.  It is expanded for user and environment vars, 
-    and supports these substitutions (per set_toolname()):
+    and supports these substitutions (per `set_toolname()`):
     - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR
     - SITE_CONFIG_DIR, SITE_DATA_DIR
+    - CONFIG_DIR, DATA_DIR, STATE_DIR, CACHE_DIR as determined by the existence of site directories (maybe only useful for testing)
     - Also absolute paths
-  - `file_stat` - Permissions set on each created file (default 0o664)
-  - `dir_stat` - Permissions set on each created directory (if not already existing, default 0o775)
+  - `file_stat` - Permissions set on created files (default 0o644) - See Behaviors and rules, below.
+  - `dir_stat` - Permissions set on created directories (default 0o755) - See Behaviors and rules, below.
 
 `overwrite` (bool, default False)
-- If overwrite=False (default) then only missing files will be copied.  If overwrite=True then all files will be overwritten 
-if they exist - data may be lost!
+- If `overwrite=False` (default) then only missing files/directories will be deployed, with `file_stat`/`dir_stat` applied.
+- If `overwrite=True` then all files/directories will be (re)deployed (using the new `file_stat`/`dir_stat`),
+potentially overwriting existing data.
 
 `missing_ok` (bool, default False)
-- If missing_ok=True then a missing source file or directory is tolerated (non-fatal).  This feature is used for testing.
+- If `missing_ok=True` then a missing `source` file or directory is tolerated (non-fatal).  This feature is used for testing.
+- If `missing_ok=False` (default) and the `source` is missing then a FileNotFoundError exception is raised.  Any files deployed before
+the exception will be left in place.
 
 
 ### Returns
-- NoneType
+- None
 - Raises various exceptions on failure
+
+
+### Behaviors and rules
+- An empty directory may be deployed, eg: `{"source": "test_dir/emptydir",  "target_dir": "USER_CONFIG_DIR"}`
+deploys the source directory named `emptydir` to `$HOME/.config/<toolname>/emptydir`.
+
+- If the `source` points to an individual file, even if within a subdirectory of `deployment_files`,
+that file, and not its nested path, will be deployed.
+For example, `{"source": "test_dir/x1",  "target_dir": "USER_CONFIG_DIR/subdir"}` 
+deploys just the file `x1` to `$HOME/.config/<toolname>/subdir/x1`. 
+If you want to deploy a file and retain the source directory structure, then deploy the entire
+source subdirectory, eg: `{"source": "test_dir",  "target_dir": "USER_CONFIG_DIR/subdir"}`, which
+deploys the entire test_dir directory structure to `$HOME/.config/<toolname>/subdir/test_dir`.
+
+- `dir_stat` is applied to the parent directory where a file is deployed.
+When `source` points to a directory tree, `dir_stat` is also applied to
+deployed subdirectories _but not the parent directory_ 
+(the leaf dir of the `target_dir`). Higher-level created directories are assigned the user-default permissions
+(typically 0o755 - umask).
+
+- The permissions on a directory (the `dir_stat`) are set the first time a file
+is deployed to that directory.
+With `overwrite=False`, for subsequent file deployments to that directory the first `dir_stat` settings are 
+retained (the new `dir_stat` setting is disregarded). 
+With `overwrite=True`, an existing directory where a file is deployed will be updated 
+to the new `dir_stat` value.
     """
+
+    default_file_stat = 0o644
+    default_dir_stat  = 0o755
 
     mapping = [
         ["USER_CONFIG_DIR", core.tool.user_config_dir],
@@ -76,81 +110,104 @@ if they exist - data may be lost!
         ["USER_CACHE_DIR",  core.tool.user_cache_dir],
         ["SITE_CONFIG_DIR", core.tool.site_config_dir],
         ["SITE_DATA_DIR",   core.tool.site_data_dir],
+        ["CONFIG_DIR",      core.tool.config_dir],
+        ["DATA_DIR",        core.tool.data_dir],
+        ["STATE_DIR",       core.tool.state_dir],
+        ["CACHE_DIR     ",  core.tool.cache_dir],
         ]
 
     def resolve_target(_targ, mkdir=False):
-        """Do any CONFIG/DATA replacements.  Return a fully resolved mungePath.
+        """Do any CONFIG/DATA replacements.  Return a pathlib full path.
         """
         base_path = ""
+        _targ = str(_targ)              # Accept str and pathlib
         for remap in mapping:
             if remap[0] in _targ:
                 _targ = _targ.replace(remap[0], "")
                 if len(_targ) > 0:
-                    _targ = _targ[1:]   # TODO This is weak.  Drops leading '/' after remap removed.
+                    _targ = _targ[1:]   # Drops leading '/' after remap removed.
                 base_path = remap[1]
                 break
-        xx = mungePath(_targ, base_path, mkdir=mkdir)
-        return xx
+        return mungePath(_targ, base_path, mkdir=mkdir).full_path
 
-    def copytree(src, dst, file_stat=None, dir_stat=None):
-        """ Adapted from link, plus permissions settings feature.  No needed support for symlinks and ignore.
-        https://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
+
+    def copytree(src_dir, dst_dir, overwrite, file_stat, dir_stat):
+        """ Recursively deploy the contents of src_dir to dst_dir
+        dst_dir is created by the level above, before calling copytree
         """
-        for item in os.listdir(src):
-            s = os.path.join(src, item)
-            d = os.path.join(dst, item)
-            if os.path.isdir(s):
-                if not os.path.exists(d):
-                    os.makedirs(d)
-                    if dir_stat:
-                        os.chmod(d, dir_stat)
-                copytree(s, d, file_stat=file_stat, dir_stat=dir_stat)
-            else:
-                shutil.copy2(s, d)
-                if file_stat:
-                    os.chmod(d, file_stat)
+
+        for item in list(src_dir.iterdir()):
+            out_item = dst_dir / item.name
+
+            if item.is_dir():
+                didnt_exist = False
+                if not out_item.exists():
+                    didnt_exist = True
+                    out_item.mkdir(parents=True)
+                    logging.info (f"Created   {out_item}")
+                if didnt_exist or overwrite:
+                    out_item.chmod(dir_stat)
+                copytree(item, out_item, overwrite=overwrite, file_stat=file_stat, dir_stat=dir_stat)
+
+            else:   # is_file
+                if not out_item.exists()  or  overwrite:
+                    shutil.copy2(item, out_item)
+                    if file_stat:
+                        out_item.chmod(file_stat)
+                    logging.info (f"Deployed  {out_item}")
+                else:
+                    logging.info (f"File <{out_item}> already exists.  Skipped.")
 
 
-    if core.tool.main_module.__name__ == "__main__":   # Caller is a tool script file, not an installed module
+    if core.tool.main_module.__name__ == "__main__":    # Caller is a tool script file, not an installed module
         my_resources = mungePath(__main__.__file__).parent / "deployment_files"
         # print (f"Script case:  <{my_resources}>")
-    else:                                       # Caller is an installed module
+    else:                                               # Caller is an installed module
         my_resources = ir_files(core.tool.main_module).joinpath("deployment_files")
         # print (f"Module case:  <{my_resources}>")
 
 
+    # ***** Start of iteration thru dictionaries *****
     for item in files_list:
-        source = my_resources.joinpath(item["source"])
+        file_stat=  item.get("file_stat", default_file_stat)
+        dir_stat=   item.get("dir_stat",  default_dir_stat)
+        source =    Path(my_resources.joinpath(item["source"]))
 
         if source.is_file():
-            target_dir = resolve_target(item["target_dir"], mkdir=True)
-            if "dir_stat" in item:
-                os.chmod(target_dir.full_path, item["dir_stat"])
+            target_dir = resolve_target(item["target_dir"])
+            didnt_exist = False
+            if not target_dir.exists():         # TODO hang risk
+                didnt_exist = True
+                target_dir.mkdir(parents=True)
+                logging.info (f"Created   {target_dir}")
+            if didnt_exist or overwrite:
+                target_dir.chmod(dir_stat)
 
-            outfile = target_dir.full_path / PurePath(item["source"]).name
-            if not check_path_exists(outfile)  or  overwrite:
-                with outfile.open('w') as ofile:
-                    ofile.write(source.read_text())
-                if "file_stat" in item:
-                    os.chmod(outfile, item["file_stat"])
-                logging.info (f"Deployed  {item['source']:20} to  {outfile}")
+            outfile = target_dir / source.name
+            if not outfile.exists()  or  overwrite:
+                shutil.copy2 (source, outfile)
+                outfile.chmod(file_stat)
+                logging.info (f"Deployed  {outfile}")
             else:
-                logging.info (f"File <{item['source']}> already exists at <{outfile}>.  Skipped.")
+                logging.info (f"File <{outfile}> already exists.  Skipped.")
 
         elif source.is_dir():
-                # ONLY WORKS if the source dir is on the file system (eg, not in a package .zip)
-                target_dir = resolve_target(item["target_dir"])
-                if not check_path_exists(target_dir.full_path)  or  overwrite:
-                    target_dir.full_path.mkdir(parents=True, exist_ok=True)
-                    if "dir_stat" in item:
-                        os.chmod(target_dir.full_path, item["dir_stat"])
-                    copytree(source, target_dir.full_path, file_stat=item.get("file_stat", None), dir_stat=item.get("dir_stat", None))
-                    logging.info (f"Deployed  {source.name:20} to  {target_dir.full_path}")
-                else:
-                    logging.info (f"Directory <{target_dir.full_path}> already exists.  Copytree skipped.")
-        
+            # TODO ONLY WORKS if the source dir is on the file system (eg, not in a package .zip) ????
+
+            target_dir = resolve_target(item["target_dir"]) / source.name
+
+            didnt_exist = False
+            if not target_dir.exists():
+                didnt_exist = True
+                target_dir.mkdir(parents=True)
+                logging.info (f"Created   {target_dir}")
+            if didnt_exist or overwrite:
+                target_dir.chmod(dir_stat)
+
+            copytree(source, target_dir, overwrite=overwrite, file_stat=file_stat, dir_stat=dir_stat)
+
         elif missing_ok:
-            logging.info (f"Can't deploy <{source.name}>.  Item not found and missing_ok=True.  Skipping.")
+            logging.info (f"Can't deploy source <{source.name}>.  Item not found and missing_ok=True.  Skipping.")
         
         else:
             raise FileNotFoundError (f"Can't deploy <{source.name}>.  Item not found.")
