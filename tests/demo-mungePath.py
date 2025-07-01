@@ -3,6 +3,7 @@
 
 Produce / compare to golden results:
     ./demo-mungePath.py | diff demo-mungePath-golden.txt -
+        No differences expected
 
 """
 #==========================================================

@@ -40,21 +40,21 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 
 ## Key changes since the prior major public release (version 2.5)
 
-`run_with_timeout()`
+`run_with_timeout()` (see module `rwt`)
 - If a network share (or an internet resource) is 
 unavailable or extremely slow then the tool script can hang indefinitely.  `run_with_timeout()` can wrap any function call
 (any callable - built-in, standard library, installed package, or defined within the tool script) with an enforced timeout
 and number of retries on timeout so that your code can make rational decisions when there are access issues.
 
-`set / restore_logging_level()` on a stack
+`set / restore_logging_level()` on a stack  (see module `core`)
 - When you want this, you want this.  Its used in configman, for instance, to allow for debug logging within the configman code (valuable for cjnfuncs debug and regression testing).  If you are developing a hardware sensor driver for example, you can enable debug logging of calls to your driver code
 and restore the level before return.
-You can use set_logging_level() standalone, or with later `restore_logging_level()` calls.  
+You can use `set_logging_level()` standalone, or with later `restore_logging_level()` calls.  
 
-`periodic_log()`
+`periodic_log()` (see module `core`)
 - `periodic_log()` solves the difficulty of finding the sweet spot of how much logging to do to avoiding flooding the log.  You can say "log this event only once every 10 minutes", for example.  So even if the log event gets triggered every 100 ms, no problem.  
 
-`get_next_dt()`
+`get_next_dt()` (see module `timevalue`)
 - A lot of what I develop are process monitoring tools.  These typically implement a `while True` loop where various operations get triggered periodically on their own schedules.  `get_next_dt()` provides a simple and clean way to get the next `datetime` to do an operation (in my usage, as defined in a config file).  `get_next_dt()` supports arbitrary times of day and days of week.  For example, trigger generating a summary report every Thursday at 9AM:
 
       if now_dt > generate_summary_dt:    # I suffix datetimes with '_dt' for readability
@@ -67,7 +67,7 @@ You can use set_logging_level() standalone, or with later `restore_logging_level
 <br/>
 
 ## Revision history
-- 3.0 250620 - Added run_with_timeout, set_logging_level, restore_logging_level, periodic_logging, get_next_dt.  Changes to mungePath.
+- 3.0 250620 - Added run_with_timeout, set / restore_logging_level, periodic_logging, get_next_dt.  Functional change to mungePath.
 - 2.5 250206 - Added multi-line and quoted string support to configman
 - 2.4.1 241118 - resource_lock only init lock_info if not existing
 - 2.4 241105 - Twilio support in snd_notif, resource_lock trace/debug features, check_path_exists exception fix

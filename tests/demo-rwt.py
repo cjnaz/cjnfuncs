@@ -3,7 +3,7 @@
 
 Produce / compare to golden results:
     ./demo-rwt.py -t 0 | diff demo-rwt-golden.txt -
-        Differences will be timestamps, pids, and yahoo.com IP address
+        Differences will be timestamps, pids, function addresses, and yahoo.com IP address
 
     ./demo-rwt.py --cleanup
 """

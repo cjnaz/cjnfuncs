@@ -292,7 +292,7 @@ def set_logging_level(new_level, clear=False, save=True):
     """
 ## set_logging_level (new_level, clear=False, save=True) - Save the current logging level and set the new_level
 
-The current logging level is saved on a stack and can be restored by a call to restore_logging_level.
+The current logging level is saved on a stack and can be restored by a call to `restore_logging_level()`.
 
 
 ### Args
@@ -354,7 +354,7 @@ Useful for debug.  The stack may be cleared with a call to `set_logging_level(cl
 
 def pop_logging_level_stack(clear=False):
     """
-## pop_logging_level_stack () - Discard top of the stack
+## pop_logging_level_stack (clear=False) - Discard top of the stack
 
 Useful if the preexisting logging level was saved to the stack, but should be discarded 
 when a new level is set.  Used in loadconfig() when a new logging level is assigned from

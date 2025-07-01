@@ -1,4 +1,4 @@
-# core - Set up the base environment
+# core - Set up the base environment and logging tools
 
 Skip to [API documentation](#links)
 
@@ -7,7 +7,7 @@ and establishing standardized paths for configuration, logging, working files, e
 
 <br>
 
-## Setting up the base environment with set_toolname()
+## Setting up the base environment with `set_toolname()`
 
 ```
 Given core_ex1.py:
@@ -136,7 +136,7 @@ Example `print(core.tool)` for a site setup (.site_config_dir and/or .site_data_
 
 <br>
 
-## Configuring the root logger with setuplogging()
+## Configuring the root logger with `setuplogging()`
 
 setuplogging() provides a clean solution for configuring logging for a tool script. 
 It comprehends whether logging should go to the `console` or to the `.log_dir_base`, what logging 
@@ -228,6 +228,89 @@ or `FileLogFormat` in the config file, respectively.
 Typically, console logging is used for tool script interactive use, and file logging is used for a tool
 script running as a service.
 
+<br>
+
+## `set_logging_level()` and `restore_logging_level()` - Controlling logging level for sections of code
+
+These functions may be used to temporarily set a logging level.  Here's a basic example for enabling 
+debug-level logging while developing/testing myfunction().
+
+```
+#!/usr/bin/env python3
+from cjnfuncs.core import set_toolname, logging, set_logging_level, restore_logging_level, get_logging_level_stack
+
+set_toolname('core_ex3')    # Configures the root logger to defaults, including default logging level WARNING/30
+
+
+def myfunction():
+    # With set and restore_logging_level calls uncommented I get debug logging within myfunction
+
+    set_logging_level(logging.DEBUG)    # Save current WARNING/30 level to the stack and set DEBUG/10 level
+    # Do complicated stuff in this function
+    logging.debug   (f"2 - Within myfunction()        - logging level: {logging.getLogger().level}. On the stack: {get_logging_level_stack()}")
+
+    restore_logging_level()             # Restore (and pop) the pre-existing level from from stack
+    return
+
+
+logging.warning (f"1 - Before myfunction() call   - logging level: {logging.getLogger().level}. On the stack: {get_logging_level_stack()}")
+myfunction()
+logging.warning (f"3 - After  myfunction() return - logging level: {logging.getLogger().level}. On the stack: {get_logging_level_stack()}")
+```
+The output:
+```
+$ ./core_ex3.py 
+       core_ex3.<module>             -  WARNING:  1 - Before myfunction() call   - logging level: 30. On the stack: []
+       core_ex3.myfunction           -    DEBUG:  2 - Within myfunction()        - logging level: 10. On the stack: [30]
+       core_ex3.<module>             -  WARNING:  3 - After  myfunction() return - logging level: 30. On the stack: []
+```
+`set_logging_level()` and `restore_logging_level()` are used extensively within rwt.run_with_timeout() for validation and regression testing, and within configman.loadconfig() additionally for handling the 
+LogLevel setting from the config file.
+
+<br>
+
+## `periodic_log()` - Logging without flooding the log
+
+`periodic_log()` provides an clean and easy method for logging important events in your tool script's execution without the risk of getting hundreds of the same log messages when there is a problem.
+Log messages are tagged with a category (related messages can share the same category), and that category of messages will only be logged once in a specified period of time (eg, 5 minutes or 2 days). Any number of categories of messages may be used.
+
+With this code:
+```
+#!/usr/bin/env python3
+import time
+from cjnfuncs.core import set_toolname, setuplogging, periodic_log
+
+set_toolname ('core_ex4')
+setuplogging (ConsoleLogFormat='{asctime} {module:>6}.{funcName:6} {levelname:>8}:  {message}')
+
+periodic_log ("mycat1 messages are logged once ever 1s at log_level 30", category='mycat1', log_interval='1s', log_level=30)
+periodic_log ("mycat2 messages are logged once ever 3s at log_level 30", category='mycat2', log_interval='3s', log_level=30)
+
+for n in range(100):
+    periodic_log (f"Loop iteration {n}", category='mycat1')
+    periodic_log (f"Loop iteration {n}", category='mycat2')
+
+    time.sleep (0.1)
+```
+
+We get this output:
+```
+$ ./core_ex4.py 
+2025-06-30 22:12:47,102   core.plog    WARNING:  [PLog-mycat1] mycat1 messages are logged once ever 1s at log_level 30
+2025-06-30 22:12:47,102   core.plog    WARNING:  [PLog-mycat2] mycat2 messages are logged once ever 3s at log_level 30
+2025-06-30 22:12:48,104   core.plog    WARNING:  [PLog-mycat1] Loop iteration 10
+2025-06-30 22:12:49,105   core.plog    WARNING:  [PLog-mycat1] Loop iteration 20
+2025-06-30 22:12:50,106   core.plog    WARNING:  [PLog-mycat1] Loop iteration 30
+2025-06-30 22:12:50,106   core.plog    WARNING:  [PLog-mycat2] Loop iteration 30
+2025-06-30 22:12:51,108   core.plog    WARNING:  [PLog-mycat1] Loop iteration 40
+2025-06-30 22:12:52,110   core.plog    WARNING:  [PLog-mycat1] Loop iteration 50
+2025-06-30 22:12:53,111   core.plog    WARNING:  [PLog-mycat1] Loop iteration 60
+2025-06-30 22:12:53,111   core.plog    WARNING:  [PLog-mycat2] Loop iteration 60
+2025-06-30 22:12:54,113   core.plog    WARNING:  [PLog-mycat1] Loop iteration 70
+2025-06-30 22:12:55,114   core.plog    WARNING:  [PLog-mycat1] Loop iteration 80
+2025-06-30 22:12:56,115   core.plog    WARNING:  [PLog-mycat1] Loop iteration 90
+2025-06-30 22:12:56,116   core.plog    WARNING:  [PLog-mycat2] Loop iteration 90
+```
 
 <a id="links"></a>
          
@@ -354,7 +437,7 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 # set_logging_level (new_level, clear=False, save=True) - Save the current logging level and set the new_level
 
-The current logging level is saved on a stack and can be restored by a call to restore_logging_level.
+The current logging level is saved on a stack and can be restored by a call to `restore_logging_level()`.
 
 
 ### Args
@@ -409,7 +492,7 @@ Useful for debug.  The stack may be cleared with a call to `set_logging_level(cl
 
 ---
 
-# pop_logging_level_stack () - Discard top of the stack
+# pop_logging_level_stack (clear=False) - Discard top of the stack
 
 Useful if the preexisting logging level was saved to the stack, but should be discarded 
 when a new level is set.  Used in loadconfig() when a new logging level is assigned from

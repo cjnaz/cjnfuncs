@@ -116,7 +116,7 @@ Executing `pathlib.Path(/network_path_not_currently_available/myfile).exists()` 
 
 ---
 
-# Class mungePath (in_path='', base_path='', mkdir=False, set_attributes=False, timeout=1.0) - A clean interface for dealing with filesystem paths
+# Class mungePath (in_path='', base_path='', mkdir=False, set_attributes=False, timeout=1.0, ntries=1) - A clean interface for dealing with filesystem paths
 
 `mungePath()` is based on pathlib, producing Path type attributes and status booleans which may be used with all
 pathlib.Path methods, such as .open().  `mungePath()` accepts paths in two parts - the tool script specific
@@ -147,8 +147,11 @@ to `in_path`, and the `base_path` is disregarded.  See Special handling note, be
 - If False then those attributes are set to `None`, indicating not initialized.
 - These other attributes are always set: `.full_path`, `.parent`, `.name`, `.is_absolute`, and `.is_relative`, as the do not depend on file system access.
 
-timeout (int or float, default 1.0 second)
+`timeout` (int or float, default 1.0 second)
 - If `set_attributes=True` then `refresh_stats()` is called using this timeout value for each of the three `run_with_timeout()` calls.
+
+`ntries` (int, default 1)
+If `set_attributes=True` then `refresh_stats()` is called using this ntries value for each of the three `run_with_timeout()` calls.
 
 
 ### Returns
@@ -217,7 +220,7 @@ is raised if you attempt to mkdir on top of an existing file.
 
 ---
 
-# refresh_stats () - Update the instance .exists, .is_dir, and .is_file booleans attributes
+# refresh_stats (timeout=1.0, ntries=1) - Update the instance .exists, .is_dir, and .is_file booleans attributes
 
 ***mungePath() class member function***
 
