@@ -409,9 +409,9 @@ class _periodic_log:
 
 def periodic_log(message, category='Cat1', log_interval='10m', log_level=None):
     """
-## periodic_log(message, category='Cat1', log_interval='10m', log_level=30)
+## periodic_log (message, category='Cat1', log_interval='10m', log_level=30) - Log a message infrequently
 
-Log a message infrequently, so as to avoid flooding the log.  The `category` arg provides for independent
+Log infrequently so as to avoid flooding the log.  The `category` arg provides for independent
 log intervals for different types of logging events.
 
 

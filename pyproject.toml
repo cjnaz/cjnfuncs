@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "3.0rc2"
+version = "3.0rc3"
+    # 3.0rc3 - More doc work
     # 3.0rc2 - doc work
     # 3.0rc1 - regressions updated/passing, doc and code cleaned up
     # 3.0b6 - get_next_dt added, reworked deployfiles and tests

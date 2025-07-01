@@ -6,10 +6,10 @@ Some built-in, standard library, installed packages, and user-written functions 
 an intermittent resource.  EG, attempting to check the existence of a file on a network drive when the server hosting
 the file is non-responsive.  
 
-run_with_timeout provides a method to executed any function with an enforced timeout.
+`run_with_timeout()` provides a method to execute any function with an enforced timeout.
 
-To run any function using run_with_timeout, simply change the call structure to pass the function
-pointer as the first argument to run_with_timeout, then specify the timeout limit using the additional `rwt_timeout` 
+To run any function using `run_with_timeout()`, simply change the call structure to pass the function
+pointer as the first argument to `run_with_timeout()`, then specify the timeout limit using the additional `rwt_timeout` 
 keyword argument.
 
 <br>
@@ -48,9 +48,9 @@ TimeoutError: Function <sleep> timed out after 0.2 seconds (killed)
 
 What's going on?  Of note:
 - The standard library time.sleep() function is being called in both cases.  Note that `time.sleep` has no parens since
-we're passing the callable to run_with_timeout, not actually calling it directly.
-- In Case 2, we set rwt_timeout to less than the sleep time, causing run_with_timeout to terminate the sleep early and raise
-a TimeoutError exception.  In real usage the exception should be trapped and handled.
+we're passing the _callable_ to `run_with_timeout()`, not actually calling it directly.
+- In Case 2, we set `rwt_timeout` to less than the sleep time, causing `run_with_timeout()` to terminate the sleep early and raise
+a `TimeoutError` exception.  In real usage the exception should be trapped and handled.
 
 <br>
 

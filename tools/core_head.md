@@ -264,8 +264,8 @@ $ ./core_ex3.py
        core_ex3.myfunction           -    DEBUG:  2 - Within myfunction()        - logging level: 10. On the stack: [30]
        core_ex3.<module>             -  WARNING:  3 - After  myfunction() return - logging level: 30. On the stack: []
 ```
-`set_logging_level()` and `restore_logging_level()` are used extensively within rwt.run_with_timeout() for validation and regression testing, and within configman.loadconfig() additionally for handling the 
-LogLevel setting from the config file.
+`set_logging_level()` and `restore_logging_level()` are used extensively within `rwt.run_with_timeout()` for validation and regression testing, and within `configman.loadconfig()` additionally for handling the 
+`LogLevel` setting from the config file.
 
 <br>
 
@@ -278,13 +278,14 @@ With this code:
 ```
 #!/usr/bin/env python3
 import time
-from cjnfuncs.core import set_toolname, setuplogging, periodic_log
+from cjnfuncs.core import set_toolname, setuplogging, periodic_log, set_logging_level, logging
 
 set_toolname ('core_ex4')
 setuplogging (ConsoleLogFormat='{asctime} {module:>6}.{funcName:6} {levelname:>8}:  {message}')
+set_logging_level (logging.INFO)
 
-periodic_log ("mycat1 messages are logged once ever 1s at log_level 30", category='mycat1', log_interval='1s', log_level=30)
-periodic_log ("mycat2 messages are logged once ever 3s at log_level 30", category='mycat2', log_interval='3s', log_level=30)
+periodic_log ("mycat1 messages are logged once every 1s at log_level WARNING", category='mycat1', log_interval='1s', log_level=30)
+periodic_log ("mycat2 messages are logged once every 3s at log_level INFO", category='mycat2', log_interval='3s', log_level=logging.INFO)
 
 for n in range(100):
     periodic_log (f"Loop iteration {n}", category='mycat1')
@@ -296,18 +297,18 @@ for n in range(100):
 We get this output:
 ```
 $ ./core_ex4.py 
-2025-06-30 22:12:47,102   core.plog    WARNING:  [PLog-mycat1] mycat1 messages are logged once ever 1s at log_level 30
-2025-06-30 22:12:47,102   core.plog    WARNING:  [PLog-mycat2] mycat2 messages are logged once ever 3s at log_level 30
-2025-06-30 22:12:48,104   core.plog    WARNING:  [PLog-mycat1] Loop iteration 10
-2025-06-30 22:12:49,105   core.plog    WARNING:  [PLog-mycat1] Loop iteration 20
-2025-06-30 22:12:50,106   core.plog    WARNING:  [PLog-mycat1] Loop iteration 30
-2025-06-30 22:12:50,106   core.plog    WARNING:  [PLog-mycat2] Loop iteration 30
-2025-06-30 22:12:51,108   core.plog    WARNING:  [PLog-mycat1] Loop iteration 40
-2025-06-30 22:12:52,110   core.plog    WARNING:  [PLog-mycat1] Loop iteration 50
-2025-06-30 22:12:53,111   core.plog    WARNING:  [PLog-mycat1] Loop iteration 60
-2025-06-30 22:12:53,111   core.plog    WARNING:  [PLog-mycat2] Loop iteration 60
-2025-06-30 22:12:54,113   core.plog    WARNING:  [PLog-mycat1] Loop iteration 70
-2025-06-30 22:12:55,114   core.plog    WARNING:  [PLog-mycat1] Loop iteration 80
-2025-06-30 22:12:56,115   core.plog    WARNING:  [PLog-mycat1] Loop iteration 90
-2025-06-30 22:12:56,116   core.plog    WARNING:  [PLog-mycat2] Loop iteration 90
+2025-07-01 13:06:07,898   core.plog    WARNING:  [PLog-mycat1] mycat1 messages are logged once every 1s at log_level WARNING
+2025-07-01 13:06:07,898   core.plog       INFO:  [PLog-mycat2] mycat2 messages are logged once every 3s at log_level INFO
+2025-07-01 13:06:08,900   core.plog    WARNING:  [PLog-mycat1] Loop iteration 10
+2025-07-01 13:06:09,901   core.plog    WARNING:  [PLog-mycat1] Loop iteration 20
+2025-07-01 13:06:10,903   core.plog    WARNING:  [PLog-mycat1] Loop iteration 30
+2025-07-01 13:06:10,903   core.plog       INFO:  [PLog-mycat2] Loop iteration 30
+2025-07-01 13:06:11,904   core.plog    WARNING:  [PLog-mycat1] Loop iteration 40
+2025-07-01 13:06:12,906   core.plog    WARNING:  [PLog-mycat1] Loop iteration 50
+2025-07-01 13:06:13,907   core.plog    WARNING:  [PLog-mycat1] Loop iteration 60
+2025-07-01 13:06:13,908   core.plog       INFO:  [PLog-mycat2] Loop iteration 60
+2025-07-01 13:06:14,909   core.plog    WARNING:  [PLog-mycat1] Loop iteration 70
+2025-07-01 13:06:15,911   core.plog    WARNING:  [PLog-mycat1] Loop iteration 80
+2025-07-01 13:06:16,912   core.plog    WARNING:  [PLog-mycat1] Loop iteration 90
+2025-07-01 13:06:16,913   core.plog       INFO:  [PLog-mycat2] Loop iteration 90
 ```
