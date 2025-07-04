@@ -5,23 +5,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cjnfuncs"
-version = "3.0rc3"
-    # 3.0rc3 - More doc work
-    # 3.0rc2 - doc work
-    # 3.0rc1 - regressions updated/passing, doc and code cleaned up
-    # 3.0b6 - get_next_dt added, reworked deployfiles and tests
-    # 3.0b5 - restructured rwt
-    # 3.0b4 - rwt handle possible No such process for os.kill
-    # 3.0b3 - rwt final
-    # 3.0b2 - rwt_debug switch functionality, set_logging_level save switch
-    # 3.0b1 - Added rwt module, set/restore_logging_level and periodic_log added to core, mungePath set_attributes switch
-    # 2.6b3 - rwt added ntries
-    # 2.6b2 - all functional and almost stable
-    # 2.6b1 - rwt module, set/restore_logging_level and periodic_log added to core
+version = "3.0"
+    # 3.0 - release
+    #   added get_next_dt
+    #   reworked deployfiles and tests
+    #   added rwt_debug
+    #   added set/restore_logging_level
+    #   added periodic_log
+    #   added mungePath set_attributes switch
     # 2.5 - configman config file parser refactor - multi-line, quoted strings support
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
-requires-python = ">=3.6"       # Centos 7 uses 3.6.8
+requires-python = ">=3.11"       # Centos 7 uses 3.6.8
 authors = [ {name = "Chris Nelson", email = "github@cjnaz.com"} ]
 license = {file = "LICENSE.txt"}
 dependencies = [
