@@ -18,7 +18,7 @@ description = "A collection of core functions for tool script writing"
 readme = "README.md"
 requires-python = ">=3.11"       # Centos 7 uses 3.6.8
 authors = [ {name = "Chris Nelson", email = "github@cjnaz.com"} ]
-license = {file = "LICENSE.txt"}
+license = "MIT"
 dependencies = [
     'requests',
     'appdirs >= 1.4',
