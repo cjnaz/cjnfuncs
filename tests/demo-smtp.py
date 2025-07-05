@@ -9,6 +9,8 @@ Produce / compare to golden results:
         Should receive emails 1, 2, 3, 4, 5, 11
         Should receive text notifications 9, 10
         Test 14 (inval@i^*#d) produces 3 diffs with varying reference codes such as d9443c01a7336-211056efd01sm81645855ad.52
+
+    ./demo-smtp.py --cleanup
 """
 
 #==========================================================

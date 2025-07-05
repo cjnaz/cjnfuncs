@@ -7,6 +7,8 @@ Produce / compare to golden results:
 
     ./demo-config.py -t 14
     diff /home/me/.config/cjnfuncs_testcfg/demo_config.cfg demo-config-T14-golden.cfg
+
+    ./demo-config.py --cleanup
 """
 
 #==========================================================

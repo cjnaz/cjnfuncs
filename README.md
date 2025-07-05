@@ -15,7 +15,7 @@ module | Description/Purpose
 [resourcelock](resourcelock.md)   | Inter-process resource lock mechanism
 [SMTP](SMTP.md)                   | Send notification and email messages
 
-Developed and tested on Python 3.11.9 and supported on all higher Python versions.
+Developed and tested on Python 3.9.21 and supported on all higher Python versions.
 Developed on Linux.  Not supported on Windows (posix-ipc module dependency).
 
 In this documentation, "tool script" refers to a Python project that imports and uses cjnfuncs. Some may be simple scripts, and others may themselves be installed packages.
@@ -67,7 +67,7 @@ You can use `set_logging_level()` standalone, or with later `restore_logging_lev
 <br/>
 
 ## Revision history
-- 3.0 250620 - Added run_with_timeout, set / restore_logging_level, periodic_logging, get_next_dt.  Functional change to mungePath.
+- 3.0 250705 - Added run_with_timeout, set / restore_logging_level, periodic_logging, get_next_dt.  Functional change to mungePath.
 - 2.5 250206 - Added multi-line and quoted string support to configman
 - 2.4.1 241118 - resource_lock only init lock_info if not existing
 - 2.4 241105 - Twilio support in snd_notif, resource_lock trace/debug features, check_path_exists exception fix

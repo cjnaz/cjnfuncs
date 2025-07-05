@@ -16,14 +16,14 @@ version = "3.0"
     # 2.5 - configman config file parser refactor - multi-line, quoted strings support
 description = "A collection of core functions for tool script writing"
 readme = "README.md"
-requires-python = ">=3.11"       # Centos 7 uses 3.6.8
+requires-python = ">=3.9"       # RHEL 9 uses 3.9
 authors = [ {name = "Chris Nelson", email = "github@cjnaz.com"} ]
 license = "MIT"
 dependencies = [
     'requests',
     'appdirs >= 1.4',
     'dkimpy',
-    'importlib_resources',      #; python_version < "3.9"',  # in 2.0.1, used for all python versions
+    'importlib_resources',      # Used in deployfiles.py for all python versions
     'posix-ipc >= 1.1.1'
     ]
 classifiers = [                 # https://pypi.org/classifiers/
