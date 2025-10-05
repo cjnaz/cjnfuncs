@@ -479,7 +479,8 @@ the logging level will be as set in the user code.  Logging statements within re
             (\#)                            # Match unquoted # (group 3)
         """
         find_comment_re =   re.compile(xx, re.VERBOSE)                  # Find unquoted '#'
-        section_name_re =   re.compile(r'\[([^\].]*)\]')                # Get section name
+        # section_name_re =   re.compile(r'\[([^\].]*)\]')                # Get section name
+        section_name_re =   re.compile(r'\[([^\]]*)\]')                # Get section name
 
 
         for line in str_blob.split('\n'):

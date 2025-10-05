@@ -64,9 +64,12 @@ You can use `set_logging_level()` standalone, or with later `restore_logging_lev
 `mungePath(..., set_attributes=False)` switch
 - On network outages, my apps would slow to a crawl.  The root of the issue was in checking if a network file exists, with no timeout mechanism. The pathlib `.exists()`, `.is_dir()`, and `is_file()` methods are all susceptible to indefinate hangs.  The set_attributues switch has been added to mungePath, with a default value of False.  _Note that this is a change to default behavior._  If set True then `refresh_stats()` is called (or you can call it directly yourself, as needed).  `refresh_stats()` and `check_file_exists()` have been rewritten to utilize `run_with_timeout()`, with a default timeout of 1.0 seconds. I then `periodic_log()` the access problem. Ah, so much more stable.
 
+Version 3.0.1 add support for '.' in config file section names, as may be needed in lanmonitor.
+
 <br/>
 
 ## Revision history
+- 3.0.1 251005 - Allow '.' in config section names
 - 3.0 250705 - Added run_with_timeout, set / restore_logging_level, periodic_logging, get_next_dt.  Functional change to mungePath.
 - 2.5 250206 - Added multi-line and quoted string support to configman
 - 2.4.1 241118 - resource_lock only init lock_info if not existing
