@@ -5,13 +5,14 @@
 #==========================================================
 
 
-from .core import logging, set_logging_level, restore_logging_level
+from .core import logging, set_logging_level, restore_logging_level, setuplogging, get_logging_level_stack
 
 import signal
 import time
 import os
 import sys
 import multiprocessing
+import subprocess
 import traceback
 
 def run_with_timeout(func, *args, **kwargs):
@@ -74,24 +75,24 @@ Note that if `rwt_ntries` is greater than 1 and `rwt_kill=False`, then potential
 be created and orphaned, all attempting to doing the same work.
 """
 
-    def _runner(q, func, args, kwargs):
-        def runner_int_handler(sig, frame):
-            if _debug:
-                set_logging_level(logging.DEBUG)
-                logging.debug(f"RH1 - Signal {sig} received")
-                time.sleep(0.01)                            # allow time for logging before terminating
-            sys.exit()
+    # def _runner(q, func, args, kwargs):
+    #     def runner_int_handler(sig, frame):
+    #         if _debug:
+    #             set_logging_level(logging.DEBUG)
+    #             logging.debug(f"RH1 - Signal {sig} received")
+    #             time.sleep(0.01)                            # allow time for logging before terminating
+    #         sys.exit()
         
-        signal.signal(signal.SIGTERM, runner_int_handler)   # kill (15)
+    #     signal.signal(signal.SIGTERM, runner_int_handler)   # kill (15)
         
-        logging.debug(f"R1  - runner_p pid {os.getpid()}")
-        try:
-            restore_logging_level()                         # External logging level restored for running target function
-                                                            # The stack pop is meaningless since running with a copy of the stack in a separate process
-            result = func(*args, **kwargs)
-            q.put(("result", result))
-        except Exception as e:
-            q.put(("exception", (e.__class__, str(e), traceback.format_exc())))
+    #     logging.debug(f"R1  - runner_p pid {os.getpid()}")
+    #     try:
+    #         restore_logging_level()                         # External logging level restored for running target function
+    #                                                         # The stack pop is meaningless since running with a copy of the stack in a separate process
+    #         result = func(*args, **kwargs)
+    #         q.put(("result", result))
+    #     except Exception as e:
+    #         q.put(("exception", (e.__class__, str(e), traceback.format_exc())))
 
 
     #--------- Top_level ---------
@@ -122,7 +123,7 @@ be created and orphaned, all attempting to doing the same work.
     _debug = False
     if 'rwt_debug' in kwargs:
         _debug = kwargs['rwt_debug']
-        del kwargs['rwt_debug']
+        # del kwargs['rwt_debug']
         if not isinstance(_debug, bool):
             raise ValueError (f"rwt_debug must be type bool, received <{_debug}>")
 
@@ -131,12 +132,18 @@ be created and orphaned, all attempting to doing the same work.
     else:
         set_logging_level(logging.INFO)
 
+    if 'rwt_debug' in kwargs  and  kwargs['rwt_debug'] == True:
+        _kwargs = kwargs.copy()
+        del _kwargs['rwt_debug']
+        xx =  f"\nrun_with_timeout switches:\n  rwt_timeout:  {_timeout}\n  rwt_ntries:   {_ntries}\n  rwt_kill:     {_kill}\n  rwt_debug:    {_debug}"
+        xx += f"\n  Function:     {func}\n  args:         {args}\n  kwargs:       {_kwargs}"
+        logging.debug (xx)
 
     for ntry in range(_ntries):
-        if ntry == 0:
-            xx =  f"\nrun_with_timeout switches:\n  rwt_timeout:  {_timeout}\n  rwt_ntries:   {_ntries}\n  rwt_kill:     {_kill}\n  rwt_debug:    {_debug}"
-            xx += f"\n  Function:     {func}\n  args:         {args}\n  kwargs:       {kwargs}"
-            logging.debug (xx)
+        # if ntry == 0:
+            # xx =  f"\nrun_with_timeout switches:\n  rwt_timeout:  {_timeout}\n  rwt_ntries:   {_ntries}\n  rwt_kill:     {_kill}\n  rwt_debug:    {_debug}"
+            # xx += f"\n  Function:     {func}\n  args:         {args}\n  kwargs:       {kwargs}"
+            # logging.debug (xx)
 
         if _ntries > 1:
             logging.debug (f"T0  - Try {ntry}")
@@ -161,7 +168,12 @@ be created and orphaned, all attempting to doing the same work.
                 if runner_p.is_alive():
                     logging.debug (f"T5  - SIGKILL runner_p")
                     try:
-                        os.kill (runner_p.pid, signal.SIGKILL)
+                        print (sys.platform)
+                        if sys.platform.startswith("win"):
+                            subprocess.run(["taskkill", "/PID", str(runner_p.pid), "/F"])
+                        else:
+                            os.kill(runner_p.pid, signal.SIGKILL)
+                        # os.kill (runner_p.pid, signal.SIGKILL)
                     except Exception as e:
                         if 'No such process' in str(e):     # Corner case of runner_p either ended normally, or the terminate finally happened
                             pass
@@ -193,3 +205,32 @@ be created and orphaned, all attempting to doing the same work.
                     restore_logging_level()
                     ex_type, ex_msg, ex_trace = payload     # ex_trace retained for possible future debug/use
                     raise ex_type(f"{ex_msg}")
+
+
+def _runner(q, func, args, kwargs):
+    def runner_int_handler(sig, frame):
+        if _debug:
+            set_logging_level(logging.DEBUG)
+            logging.debug(f"RH1 - Signal {sig} received")
+            time.sleep(0.01)                            # allow time for logging before terminating
+        sys.exit()
+    
+    signal.signal(signal.SIGTERM, runner_int_handler)   # kill (15)
+
+    setuplogging()
+    _debug = False
+    if 'rwt_debug' in kwargs:
+        _debug = kwargs['rwt_debug']
+        del kwargs['rwt_debug']
+    if _debug:
+        set_logging_level(10, save=False)    
+    logging.debug(f"R1  - runner_p pid {os.getpid()}")
+
+    try:
+        # print (get_logging_level_stack())
+        restore_logging_level()                         # External logging level restored for running target function
+                                                        # The stack pop is meaningless since running with a copy of the stack in a separate process
+        result = func(*args, **kwargs)
+        q.put(("result", result))
+    except Exception as e:
+        q.put(("exception", (e.__class__, str(e), traceback.format_exc())))

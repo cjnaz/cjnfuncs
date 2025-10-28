@@ -62,9 +62,17 @@ def wrapper (in_path="", base_path="", mkdir=False, note=None, set_attributes=Tr
 
 set_logging_level(10)
 
+# xx_mp = mungePath('linux.txt', '.', set_attributes=True)
+# xx_fp = xx_mp.full_path
+# print (xx_mp)
+# print (xx_fp.exists())
+
+# exit()
+
 print ("\n\n***** File paths relative to a base path")
 wrapper ("xyz/file.txt", ".",                               note="01 - Returns absolute path to shell cwd")
 wrapper ("", "",                                            note="02 - No base_path - Returns relative path from shell cwd")
+# exit()
 wrapper ("file.txt",                                        note="03 - No base_path - Returns relative path from shell cwd - same dir")
 wrapper ("xyz/file.txt",                                    note="04 - No base_path - Returns relative path from shell cwd - below")
 wrapper ("../file.txt",                                     note="05 - No base_path - Returns relative path from shell cwd - above")

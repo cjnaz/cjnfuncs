@@ -1,11 +1,7 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
-
 [project]
-name = "cjnfuncs"
-version = "3.0.1"
+name = 'cjnfuncs'
+version = '3.1b1'
+    # 3.1b1 - setuplogging queue in junk3.py
     # 3.0.1 - Allow '.' in config section names
     # 3.0 - release
     #   added get_next_dt
@@ -15,26 +11,37 @@ version = "3.0.1"
     #   added periodic_log
     #   added mungePath set_attributes switch
     # 2.5 - configman config file parser refactor - multi-line, quoted strings support
-description = "A collection of core functions for tool script writing"
-readme = "README.md"
-requires-python = ">=3.9"       # RHEL 9 uses 3.9
-authors = [ {name = "Chris Nelson", email = "github@cjnaz.com"} ]
-license = "MIT"
+description = 'A collection of core functions for tool script writing'
+readme = 'README.md'
+requires-python = '>=3.9'       # RHEL 9 uses 3.9
+authors = [ {name = 'Chris Nelson', email = 'github@cjnaz.com'} ]
+license = 'MIT'
 dependencies = [
     'requests',
     'appdirs >= 1.4',
     'dkimpy',
     'importlib_resources',      # Used in deployfiles.py for all python versions
-    'posix-ipc >= 1.1.1'
+    'posix-ipc >= 1.1.1; sys_platform == "linux"'
     ]
-classifiers = [                 # https://pypi.org/classifiers/
-    "Topic :: Software Development :: Libraries :: Python Modules",
+keywords = ['cjnaz', 'library', 'cjnfuncs']
+classifiers = [                             # https://pypi.org/classifiers/
+    'Programming Language :: Python :: 3',
+    'Topic :: Software Development :: Libraries :: Python Modules',
     ]
+
+
+# [project.optional-dependencies]
+# linux = ["posix-ipc >= 1.1.1; sys_platform == 'linux'"]
+
+
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
 
 
 [project.urls]
-repository = "https://github.com/cjnaz/cjnfuncs"
+repository = 'https://github.com/cjnaz/cjnfuncs'
 
 
 [project.scripts]
-resourcelock = "cjnfuncs.resourcelock:cli"
+resourcelock = 'cjnfuncs.resourcelock:cli'
