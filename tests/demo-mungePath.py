@@ -42,6 +42,28 @@ parser.add_argument('--cleanup', action='store_true',
 
 args = parser.parse_args()
 
+if args.cleanup:
+    try:
+        newdir = mungePath('newdir', '.').full_path
+        print (f"Removing   {newdir}")
+        shutil.rmtree(newdir)
+    except:
+        pass
+
+    try:
+        xyzdir = mungePath('xyz', '.').full_path
+        print (f"Removing   {xyzdir}")
+        shutil.rmtree(xyzdir)
+    except:
+        pass
+
+    try:
+        print (f"Removing   {test_dir}")
+        shutil.rmtree(test_dir)
+    except:
+        pass
+    sys.exit(0)
+
 
 # --------------------------------------------------------------------
 
@@ -271,27 +293,3 @@ if __name__ == '__main__':
         dotest (f"Rel path - attributes not set", f"Relative path to dir <cwd>/nosuchfile, attributes = None",
                 'nosuchfile', '')
 
-
-
-    # --------------------------------------------------------------------
-
-    if args.cleanup:
-        try:
-            newdir = mungePath('newdir', '.').full_path
-            print (f"Removing   {newdir}")
-            shutil.rmtree(newdir)
-        except:
-            pass
-
-        try:
-            xyzdir = mungePath('xyz', '.').full_path
-            print (f"Removing   {xyzdir}")
-            shutil.rmtree(xyzdir)
-        except:
-            pass
-
-        try:
-            print (f"Removing   {test_dir}")
-            shutil.rmtree(test_dir)
-        except:
-            pass

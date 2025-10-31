@@ -16,7 +16,6 @@ Produce / compare to golden results:
 
 __version__ =   '2.0'
 TOOLNAME =      'demo_rwt'          # rename
-# test_dir =      f'/tmp/{TOOLNAME}'
 
 import argparse
 import tempfile
@@ -34,6 +33,8 @@ from cjnfuncs.rwt       import run_with_timeout
 
 set_toolname(TOOLNAME)
 setuplogging(ConsoleLogFormat="{module:>22}.{funcName:20} {levelname:>8}:  {message}")      # No timestamps for cleaner compares
+test_dir = Path(tempfile.gettempdir()) / TOOLNAME
+test_dir.mkdir(exist_ok=True)
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-t', '--test', default='0',
@@ -42,6 +43,15 @@ parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 
 args = parser.parse_args()
+
+
+if args.cleanup:
+    try:
+        print (f"Removing   {test_dir}")
+        shutil.rmtree(test_dir)
+    except:
+        pass
+    sys.exit(0)
 
 
 # --------------------------------------------------------------------
@@ -73,8 +83,8 @@ def check_tnum(tnum_in, include0='0'):
 # --------------------------------------------------------------------
 # Setups, functions, and vars
 
-test_dir = Path(tempfile.gettempdir()) / TOOLNAME
-test_dir.mkdir(exist_ok=True)
+# test_dir = Path(tempfile.gettempdir()) / TOOLNAME
+# test_dir.mkdir(exist_ok=True)
 
 set_logging_level(logging.WARNING, save=False)
 abc= 42
@@ -383,13 +393,4 @@ if __name__ == "__main__":
                                  rwt_timeout=3)
 
     time.sleep(0.2)     # TODO debug
-    # closelogging()
 
-
-
-    if args.cleanup:
-        try:
-            print (f"Removing   {test_dir}")
-            shutil.rmtree(test_dir)
-        except:
-            pass
