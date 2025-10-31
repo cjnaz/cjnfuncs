@@ -1,7 +1,7 @@
 [project]
 name = 'cjnfuncs'
 version = '3.1b2'
-    # 3.1b2 - integration
+    # 3.1b2 - Windows fixes in rwt, and updated mungePath and rwt tests
     # 3.1b1 - setuplogging queue in junk3.py
     # 3.0.1 - Allow '.' in config section names
     # 3.0 - release
