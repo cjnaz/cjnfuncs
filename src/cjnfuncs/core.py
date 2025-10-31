@@ -14,6 +14,9 @@ import logging
 import inspect
 import platform
 from pathlib import Path
+import time
+import multiprocessing
+from logging.handlers import QueueHandler, QueueListener
 import __main__
 import appdirs
 import datetime
@@ -189,12 +192,16 @@ also to the `.site_data_dir`.
 #=====================================================================================
 #=====================================================================================
 
+logger_q = None
+logger_listener = None
+
+
 def setuplogging(call_logfile=None, call_logfile_wins=False, config_logfile=None, ConsoleLogFormat=None, FileLogFormat=None):
     """
 ## setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None, ConsoleLogFormat=None, FileLogFormat=None) - Set up the root logger
 
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
-is called the current/active log file (or console) may be reassigned.
+is called the output path (log file or console) may be reassigned.
 
 Calling `setuplogging()` with no args results in:
 - Logging output to the console
@@ -238,9 +245,85 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 ### Returns
 - None
+
+
+### Behaviors and rules
+- `closelogging()` must be called on tool script exit.  This ensures clean exit and no process hangs.
+- For support of Windows multiprocessing, setuplogging() uses QueueListener / QueueHandler architecture.
+  The QueueListener runs as a thread in the main process and is (re)configured with the specified stream or 
+  file handler.  Started multiprocesses should be passed `core.logger_q` and configure their root
+  logging handler as follows:
+
+        def my_special_process (logger_q):
+            from logging.handlers import QueueHandler
+            root_logger = logging.getLogger()
+            root_logger.handlers.clear()
+            root_logger.addHandler(QueueHandler(logger_q))
+            root_logger.setLevel(logging.DEBUG)
+            ...
+
+- Multiprocessing on linux is fast, due to process fork support.  Multiprocessing on Windows can be SLOOOOOW -
+perhaps taking longer than 1 second to start a spawned process.  Use appropriately.
     """
 
+    global logger_q, logger_listener
+
     from .mungePath import mungePath
+
+
+    # # Setup handler
+    # _lfp = "__console__"
+    # if not call_logfile_wins and config_logfile:
+    #     _lfp = mungePath(config_logfile, tool.log_dir_base)
+    # if call_logfile_wins and call_logfile:
+    #     _lfp = mungePath(call_logfile, tool.log_dir_base)
+
+    # handlers = []
+    # if _lfp == "__console__":
+    #     fmt = CONSOLE_LOGGING_FORMAT if ConsoleLogFormat is None else ConsoleLogFormat
+    #     ch = logging.StreamHandler(sys.stdout)
+    #     ch.setFormatter(logging.Formatter(fmt, style='{'))
+    #     handlers.append(ch)
+    #     tool.log_dir = None
+    #     tool.log_file = None
+    #     tool.log_full_path = "__console__"
+    # else:
+    #     _lfp.parent.mkdir(parents=True, exist_ok=True)
+    #     fmt = FILE_LOGGING_FORMAT if FileLogFormat is None else FileLogFormat
+    #     fh = logging.FileHandler(_lfp.full_path, "a", encoding="utf-8")
+    #     fh.setFormatter(logging.Formatter(fmt, style='{'))
+    #     handlers.append(fh)
+    #     tool.log_dir = _lfp.parent
+    #     tool.log_file = _lfp.name
+    #     tool.log_full_path = _lfp.full_path
+
+
+    # # Create queue once
+    # if logger_q is None:
+    #     logger_q = multiprocessing.get_context().Queue()
+
+
+    # # Start queue listener
+    # if logger_listener:
+    #     while not logger_q.empty():         # purge the queue
+    #         time.sleep(0.05)
+    #     logger_listener.stop()
+
+    # logger_listener = QueueListener(logger_q, *handlers, respect_handler_level=True)
+    # # logger_listener.start()
+    # # logger_listener._thread.daemon = True       # TODO added for debug ???
+    # import threading
+    # listener_thread = threading.Thread(target=logger_listener.start)
+    # listener_thread.daemon = True
+    # listener_thread.start()
+
+    # # Set the root logger to send to the queue
+    # qh = QueueHandler(logger_q)
+    # root_logger = logging.getLogger()
+    # root_logger.handlers.clear()
+    # root_logger.addHandler(qh)
+    # root_logger.setLevel(logging.DEBUG)
+
 
 
     _lfp = "__console__"
@@ -278,6 +361,17 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
         tool.log_dir = _lfp.parent
         tool.log_file = _lfp.name
         tool.log_full_path = _lfp.full_path
+
+# def closelogging():
+#     global logger_q, logger_listener
+#     time.sleep (0.1)    # Allow time for messages in the queue to be processed
+#     if logger_listener:
+#         logger_listener.stop()
+#         logger_listener = None
+#     if logger_q is not None:
+#         logger_q.close()
+#         logger_q.join_thread()
+#         logger_q = None
 
 
 #=====================================================================================

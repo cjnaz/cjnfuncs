@@ -1,0 +1,453 @@
+
+
+***** File paths relative to a base path
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 1 - '.' base_path
+  GIVEN:      ('xyz/file.txt', '.'), {'set_attributes': True}
+  EXPECT:     Returns absolute path from shell cwd
+.full_path    :  Z:\dev\packages\cjnfuncs\tests\xyz\file.txt
+.parent       :  Z:\dev\packages\cjnfuncs\tests\xyz
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 2 - '' base_path
+  GIVEN:      ('', ''), {'set_attributes': True}
+  EXPECT:     Returns relative path from shell cwd
+.full_path    :  .
+.parent       :  .
+.name         :  
+.is_absolute  :  False
+.is_relative  :  True
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 3 - No base_path
+  GIVEN:      ('file.txt',), {'set_attributes': True}
+  EXPECT:     Returns relative path from shell cwd - file in same dir
+.full_path    :  file.txt
+.parent       :  .
+.name         :  file.txt
+.is_absolute  :  False
+.is_relative  :  True
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 4 - No base_path
+  GIVEN:      ('xyz/file.txt',), {'set_attributes': True}
+  EXPECT:     Returns relative path from shell cwd - file in dir below
+.full_path    :  xyz\file.txt
+.parent       :  xyz
+.name         :  file.txt
+.is_absolute  :  False
+.is_relative  :  True
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 5 - No base_path
+  GIVEN:      ('../file.txt',), {'set_attributes': True}
+  EXPECT:     Returns relative path from shell cwd - file in dir above
+.full_path    :  ..\file.txt
+.parent       :  ..
+.name         :  file.txt
+.is_absolute  :  False
+.is_relative  :  True
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 5a - No base_path, mkdir at shell cdw
+  GIVEN:      ('newdir',), {'set_attributes': True, 'mkdir': True}
+  EXPECT:     Returns relative path to 'newdir' from shell cwd
+.full_path    :  newdir
+.parent       :  .
+.name         :  newdir
+.is_absolute  :  False
+.is_relative  :  True
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 6 - '.' base_path
+  GIVEN:      ('', '.'), {'set_attributes': True}
+  EXPECT:     Returns absolute full path to shell cwd
+.full_path    :  Z:\dev\packages\cjnfuncs\tests
+.parent       :  Z:\dev\packages\cjnfuncs
+.name         :  tests
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 7 - Expand user
+  GIVEN:      ('', '~'), {'set_attributes': True}
+  EXPECT:     Returns absolute full path to user home dir
+.full_path    :  C:\Users\stuff
+.parent       :  C:\Users
+.name         :  stuff
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 8a - Expand environment var
+  GIVEN:      ('', '%HOMEDRIVE%%HOMEPATH%'), {'set_attributes': True}
+  EXPECT:     Returns absolute full path to user home dir
+.full_path    :  C:\Users\stuff
+.parent       :  C:\Users
+.name         :  stuff
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 9 - Expand user in in_path
+  GIVEN:      ('~/xyz/file.txt', '.'), {'set_attributes': True}
+  EXPECT:     Absolute in_path overrides the base_path (base_path not used)
+.full_path    :  C:\Users\stuff\xyz\file.txt
+.parent       :  C:\Users\stuff\xyz
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+
+
+***** Using the base_path
+<C:\Users\stuff\AppData\Local\Temp\demo-mungePath> exists, removed.
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 11a - Make work space
+  GIVEN:      ('', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True, 'mkdir': True}
+  EXPECT:     Dir <C:\Users\stuff\AppData\Local\Temp\demo-mungePath> created
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath
+.parent       :  C:\Users\stuff\AppData\Local\Temp
+.name         :  demo-mungePath
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 11b - Check status of <C:\Users\stuff\AppData\Local\Temp\demo-mungePath/file.txt>
+  GIVEN:      ('file.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     File exists, absolute path
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\file.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 14 - Path up then down
+  GIVEN:      ('../demo-mungePath/file.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     File exists, absolute path
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\..\demo-mungePath\file.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\..\demo-mungePath
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 15 - file.txt referenced thru non-existent subdir
+  GIVEN:      ('subdir/../file.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     Linux: file.txt does NOT exist since referenced thru non-existent subdir.  Exists on Windows.
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir\..\file.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir\..
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 16 - Make subdir (trailing '/' doesn't matter)
+  GIVEN:      ('subdir/', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True, 'mkdir': True}
+  EXPECT:     subdir exists
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath
+.name         :  subdir
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 17 - Now file.txt exists - referenced thru subdir
+  GIVEN:      ('subdir/../file.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     file.txt exists, absolute path
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir\..\file.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir\..
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 18 - file.txt referenced thru different base_path
+  GIVEN:      ('../file.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath/subdir')), {'set_attributes': True}
+  EXPECT:     file.txt exists, absolute path
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir\..\file.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir\..
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
+
+
+***** str, Path, and PurePath arguments types accepted
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 19 - Accepts str types
+  GIVEN:      ('file.txt', 'C:\\Users\\stuff\\AppData\\Local\\Temp\\demo-mungePath'), {'set_attributes': True}
+  EXPECT:     file.txt exists, absolute path
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\file.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 20 - Accepts Path types
+  GIVEN:      (WindowsPath('file.txt'), WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     file.txt exists, absolute path
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\file.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 21 - Accepts PurePath types
+  GIVEN:      (PureWindowsPath('file.txt'), PureWindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     file.txt exists, absolute path
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\file.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  False
+.is_file      :  True
+
+
+
+***** mkdir=True makes the full path.  Don't inadvertently include a file part.
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 25 - Happy to make a dir with a file-like name
+  GIVEN:      ('subdir/testxxxx.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True, 'mkdir': True}
+  EXPECT:     dir named testxxxx.txt exists, absolute path
+.full_path    :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir\testxxxx.txt
+.parent       :  C:\Users\stuff\AppData\Local\Temp\demo-mungePath\subdir
+.name         :  testxxxx.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 26 - Exception raised due to trying to make a directory on top of an existing file
+  GIVEN:      ('dummyfile.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True, 'mkdir': True}
+  EXPECT:     Raise FileExistsError
+        demo-mungePath.dotest                  ERROR:  
+  RAISED:     FileExistsError: [WinError 183] Cannot create a file when that file already exists: 'C:\\Users\\stuff\\AppData\\Local\\Temp\\demo-mungePath\\dummyfile.txt'
+
+
+***** Referencing the tool script dir
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 27 - Returns absolute path to script dir
+  GIVEN:      ('xyz/file.txt', WindowsPath('Z:/dev/packages/cjnfuncs/tests')), {'set_attributes': True}
+  EXPECT:     Absolute path to script dir, xyz/file.txt does not exist
+.full_path    :  Z:\dev\packages\cjnfuncs\tests\xyz\file.txt
+.parent       :  Z:\dev\packages\cjnfuncs\tests\xyz
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+
+
+***** Referencing file in shell cwd, overriding base_path
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 28 - Absolute in_path overrides base_path
+  GIVEN:      ('./file.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     Absolute path to <cwd>/file.txt (does not exist)
+.full_path    :  Z:\dev\packages\cjnfuncs\tests\file.txt
+.parent       :  Z:\dev\packages\cjnfuncs\tests
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 29 - Absolute in_path overrides base_path
+  GIVEN:      ('./../file.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     Absolute path to <cwd>/../file.txt (does not exist)
+.full_path    :  Z:\dev\packages\cjnfuncs\tests\..\file.txt
+.parent       :  Z:\dev\packages\cjnfuncs\tests\..
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 30 - Absolute in_path overrides base_path
+  GIVEN:      ('./xyz/file.txt', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True}
+  EXPECT:     Absolute path to <cwd>/xyz/file.txt (does not exist)
+.full_path    :  Z:\dev\packages\cjnfuncs\tests\xyz\file.txt
+.parent       :  Z:\dev\packages\cjnfuncs\tests\xyz
+.name         :  file.txt
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  False
+.is_dir       :  False
+.is_file      :  False
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 31 - mkdir <cwd>/xyz/wxy
+  GIVEN:      ('./xyz/wxy', WindowsPath('C:/Users/stuff/AppData/Local/Temp/demo-mungePath')), {'set_attributes': True, 'mkdir': True}
+  EXPECT:     Absolute path to dir <cwd>/xyz/wxy (exists)
+.full_path    :  Z:\dev\packages\cjnfuncs\tests\xyz\wxy
+.parent       :  Z:\dev\packages\cjnfuncs\tests\xyz
+.name         :  wxy
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  True
+.is_dir       :  True
+.is_file      :  False
+
+
+
+***** Attributes not set
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 32 - Abs path - attributes not set
+  GIVEN:      ('nosuchfile', './'), {}
+  EXPECT:     Absolute path to dir <cwd>/nosuchfile, attributes = None
+.full_path    :  Z:\dev\packages\cjnfuncs\tests\nosuchfile
+.parent       :  Z:\dev\packages\cjnfuncs\tests
+.name         :  nosuchfile
+.is_absolute  :  True
+.is_relative  :  False
+.exists       :  None
+.is_dir       :  None
+.is_file      :  None
+
+        demo-mungePath.dotest                WARNING:  
+
+==============================================================================================
+Test 33 - Rel path - attributes not set
+  GIVEN:      ('nosuchfile', ''), {}
+  EXPECT:     Relative path to dir <cwd>/nosuchfile, attributes = None
+.full_path    :  nosuchfile
+.parent       :  .
+.name         :  nosuchfile
+.is_absolute  :  False
+.is_relative  :  True
+.exists       :  None
+.is_dir       :  None
+.is_file      :  None
+
+Removing   Z:\dev\packages\cjnfuncs\tests\newdir
+Removing   Z:\dev\packages\cjnfuncs\tests\xyz
+Removing   C:\Users\stuff\AppData\Local\Temp\demo-mungePath
