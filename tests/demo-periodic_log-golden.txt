@@ -1,30 +1,58 @@
 
 =============================================
-Test 1 - category <Cat1> - Message_1 - WARNING Logged message
-           core.plog                 -  WARNING:  [PLog-Cat1] Message_1 - WARNING Logged message
+Test 1 - category <Cat1> logger <> - Expect logged message, WARNING [PLog-Cat1]
+           core.plog                 -  WARNING:  [PLog-Cat1] Expect logged message, WARNING [PLog-Cat1]
 
 =============================================
-Test 2 - category <   2> - Message_1 - INFO    Logged message
-           core.plog                 -     INFO:  [PLog-2] Message_1 - INFO    Logged message
+Test 2 - category <   2> logger <> - Expect logged message,    INFO [PLog-2]
+           core.plog                 -     INFO:  [PLog-2] Expect logged message,    INFO [PLog-2]
 
 =============================================
-Test 3 - category <Cat1> - Message_2 - Not logged
+Test 3 - category <Cat1> logger <> - Expect NOT LOGGED
 
 =============================================
-Test 4 - category <   2> - Message_2 - Not logged
+Test 4 - category <   2> logger <> - Expect NOT LOGGED
 
 =============================================
-Test 5 - category <Cat1> - Message_3 - INFO    Logged message
-           core.plog                 -     INFO:  [PLog-Cat1] Message_3 - INFO    Logged message
+Test 5 - category <Cat1> logger <> - Expect logged message,   DEBUG [PLog-Cat1]
+           core.plog                 -    DEBUG:  [PLog-Cat1] Expect logged message,   DEBUG [PLog-Cat1]
 
 =============================================
-Test 6 - category <   2> - Message_3 - DEBUG   Logged message
-           core.plog                 -    DEBUG:  [PLog-2] Message_3 - DEBUG   Logged message
+Test 6 - category <   2> logger <> - Expect logged message, WARNING [PLog-2]
+           core.plog                 -  WARNING:  [PLog-2] Expect logged message, WARNING [PLog-2]
 
 =============================================
-Test 7 - category <Cat1> - Message_4 - WARNING Logged message
-           core.plog                 -  WARNING:  [PLog-Cat1] Message_4 - WARNING Logged message
+Test 7 - category <Cat1> logger <> - Expect logged message, WARNING [PLog-Cat1]
+           core.plog                 -  WARNING:  [PLog-Cat1] Expect logged message, WARNING [PLog-Cat1]
 
 =============================================
-Test 8 - category <   2> - Message_4 - INFO    Logged message
-           core.plog                 -     INFO:  [PLog-2] Message_4 - INFO    Logged message
+Test 8 - category <   2> logger <> - Expect logged message,    INFO [PLog-2]
+           core.plog                 -     INFO:  [PLog-2] Expect logged message,    INFO [PLog-2]
+
+=============================================
+Test 9 - category <Cat1> logger <> - Expect NOT LOGGED
+
+=============================================
+Test 20 - category <abc > logger <xyz> - Expect logged message,    INFO [PLog-abc]
+           core.plog                 -     INFO:  [PLog-abc] Expect logged message,    INFO [PLog-abc]
+
+=============================================
+Test 21 - category <def > logger <ghi> - Expect logged message, WARNING [PLog-def]
+           core.plog                 -  WARNING:  [PLog-def] Expect logged message, WARNING [PLog-def]
+
+=============================================
+Test 22 - category <abc > logger <mmm> - Expect logged message,    INFO [PLog-abc]
+           core.plog                 -     INFO:  [PLog-abc] Expect logged message,    INFO [PLog-abc]
+
+=============================================
+Test 23 - category <def > logger <ppp> - Expect logged message, WARNING [PLog-def]
+           core.plog                 -  WARNING:  [PLog-def] Expect logged message, WARNING [PLog-def]
+
+
+=====================
+Known categories
+Category name   logger_name    default log_level
+Cat1                             30
+   2                             20
+abc              xyz             20
+def              ghi             30

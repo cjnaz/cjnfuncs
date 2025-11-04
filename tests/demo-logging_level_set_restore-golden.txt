@@ -1,129 +1,264 @@
 
 ======================================================================================================
-***** Test number 1: Initial level WARNING *****
+Test number 1:  Root logger - Initial level WARNING
+Expect:
+logger <> logging level 30, history stack: []
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 30, ll_history stack: []
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 30, history stack: []
 
 ======================================================================================================
-***** Test number 2: set to DEBUG *****
+Test number 2:  Root logger - Save, set to DEBUG
+Expect:
+logger <> logging level 10, history stack: [30]
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -    DEBUG:  
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 10, ll_history stack: [30]
+demo-logging_level_set_restore.test_logs            -    DEBUG:  logger <>
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 10, history stack: [30]
 
 ======================================================================================================
-***** Test number 3: restored to WARNING *****
+Test number 3:  Root logger - Restore to WARNING
+Expect:
+logger <> logging level 30, history stack: []
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 30, ll_history stack: []
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 30, history stack: []
 
 ======================================================================================================
-***** Test number 4: restored with no prior set *****
+Test number 4:  Root logger - Restore with no prior set (empty stack)
+Expect:
+logger <> logging level 30, history stack: []
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 30, ll_history stack: []
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 30, history stack: []
 
 ======================================================================================================
-***** Test number 5: set to INFO *****
+Test number 5:  Root logger - Save, set to INFO
+Expect:
+logger <> logging level 20, history stack: [30]
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 20, ll_history stack: [30]
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 20, history stack: [30]
 
 ======================================================================================================
-***** Test number 6: set to ERROR *****
+Test number 6:  Root logger - Save, set to ERROR
+Expect:
+logger <> logging level 40, history stack: [30, 20]
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 40, ll_history stack: [30, 20]
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 40, history stack: [30, 20]
 
 ======================================================================================================
-***** Test number 7: restored to INFO *****
+Test number 7:  Root logger - Restore to INFO
+Expect:
+logger <> logging level 20, history stack: [30]
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 20, ll_history stack: [30]
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 20, history stack: [30]
 
 ======================================================================================================
-***** Test number 8: restored to WARNING *****
+Test number 8:  Root logger - Restore to WARNING
+Expect:
+logger <> logging level 30, history stack: []
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 30, ll_history stack: []
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 30, history stack: []
 
 ======================================================================================================
-***** Test number 9: Load the stack, set with save=False *****
+Test number 9:  Root logger - Load the stack, set with save=False
+Expect:
+See after each stage
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 20, ll_history stack: [30, 40]
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 20, history stack: [30, 40]
+logger <> logging level 20, history stack: [30, 40]   <<< Expect
 
-demo-logging_level_set_restore.test_logs            -    DEBUG:  
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 10, ll_history stack: [30, 40]
+demo-logging_level_set_restore.test_logs            -    DEBUG:  logger <>
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 10, history stack: [30, 40]
+logger <> logging level 10, history stack: [30, 40]   <<< Expect
 
-logging level 50, ll_history stack: [30]
+logger <> logging level 50, history stack: [30]
+logger <> logging level 50, history stack: [30]       <<< Expect
 
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 30, ll_history stack: []
-
-======================================================================================================
-***** Test number 10: Load the stack, set_logging_level with clear=True *****
-======================================================================================================
-
-demo-logging_level_set_restore.test_logs            -    DEBUG:  
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 10, ll_history stack: [20]
-
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 20, ll_history stack: [20, 10, 40]
-
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 40, ll_history stack: []
-
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 30, ll_history stack: []
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 30, history stack: []
+logger <> logging level 30, history stack: []         <<< Expect
 
 ======================================================================================================
-***** Test number 11: Load the stack, pop_logging_level with clear=True *****
+Test number 10:  Root logger - Load the stack, set_logging_level with clear=True
+Expect:
+See after each stage
 ======================================================================================================
 
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 20, ll_history stack: [30, 40, 20]
+demo-logging_level_set_restore.test_logs            -    DEBUG:  logger <>
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 10, history stack: []
+logger <> logging level 10, history stack: []           <<< Expect
 
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 20, ll_history stack: [30, 40]
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 20, history stack: [10, 40]
+logger <> logging level 20, history stack: [10, 40]     <<< Expect
 
-demo-logging_level_set_restore.test_logs            -     INFO:  
-demo-logging_level_set_restore.test_logs            -  WARNING:  
-demo-logging_level_set_restore.test_logs            -    ERROR:  
-logging level 20, ll_history stack: []
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 40, history stack: []
+logger <> logging level 40, history stack: []           <<< Expect
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 30, history stack: []
+logger <> logging level 30, history stack: []           <<< Expect
+
+======================================================================================================
+Test number 11:  Root logger - Load the stack, pop_logging_level with clear=True
+Expect:
+See after each stage
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 20, history stack: [30, 40, 20]
+logger <> logging level 20, history stack: [30, 40, 20]     <<< Expect
+
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 20, history stack: [30, 40]
+logger <> logging level 20, history stack: [30, 40]         <<< Expect
+
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 20, history stack: []
+logger <> logging level 20, history stack: []               <<< Expect
+
+======================================================================================================
+Test number 21:  Child xyz logger - Initial level 0
+Expect:
+logger <xyz> logging level 0, history stack: []
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 0, history stack: []
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 25, history stack: [15]
+
+======================================================================================================
+Test number 21a:  Child xyz logger - uninitialized, pop stack
+Expect:
+logger <xyz> logging level 0, history stack: []
+======================================================================================================
+
+logger xyz uninitialized.  pop_logging_level_stack('xyz') = <[]>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 0, history stack: []
+
+======================================================================================================
+Test number 22:  Child xyz logger - Save, set to DEBUG
+Expect:
+logger <xyz> logging level 10, history stack: [0]
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -    DEBUG:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 10, history stack: [0]
+
+======================================================================================================
+Test number 23:  Child xyz logger - Restore to 0 (WARNING)
+Expect:
+logger <xyz> logging level 0, history stack: []
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 0, history stack: []
+
+======================================================================================================
+Test number 24:  Child xyz logger - Save, set to INFO, ERROR
+Expect:
+logger <xyz> logging level 40, history stack: [0, 20]
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 40, history stack: [0, 20]
+
+======================================================================================================
+Test number 25:  Child xyz logger - Save, Clear set to DEBUG
+Expect:
+logger <xyz> logging level 10, history stack: [40]
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -    DEBUG:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 10, history stack: [40]
+
+======================================================================================================
+Test number 26:  Child xyz logger - Load stack to [10, 16], Pop stack to [10], Pop stack clear to [], restore to WARNING
+Expect:
+See after each stage
+======================================================================================================
+
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 16, history stack: [10]
+logger <xyz> logging level 16, history stack: [10]      <<< Expect
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 17, history stack: [10, 16]
+logger <xyz> logging level 17, history stack: [10, 16]  <<< Expect
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 17, history stack: [10]
+logger <xyz> logging level 17, history stack: [10]      <<< Expect
+demo-logging_level_set_restore.test_logs            -     INFO:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 17, history stack: []
+logger <xyz> logging level 17, history stack: []        <<< Expect
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <xyz>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <xyz>
+logger <xyz> logging level 30, history stack: []
+logger <xyz> logging level 30, history stack: []        <<< Expect
+demo-logging_level_set_restore.test_logs            -  WARNING:  logger <>
+demo-logging_level_set_restore.test_logs            -    ERROR:  logger <>
+logger <> logging level 25, history stack: [15]
+logger <> logging level 25, history stack: [15]         <<< Expect

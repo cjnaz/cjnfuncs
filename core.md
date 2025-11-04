@@ -385,7 +385,7 @@ also to the `.site_data_dir`.
 # setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None, ConsoleLogFormat=None, FileLogFormat=None) - Set up the root logger
 
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
-is called the current/active log file (or console) may be reassigned.
+is called the root logger's output path (log file or console) may be reassigned.
 
 Calling `setuplogging()` with no args results in:
 - Logging output to the console
@@ -429,6 +429,15 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 ### Returns
 - None
+
+
+### Behaviors and rules
+- All cjnfuncs modules start with WARNING level logging.  To enable debug or info logging on a specific cjnfuncs 
+module set the named child logger from your tool script, eg:
+
+    logging.getLogger('cjnfuncs.rwt').setLevel(logging.DEBUG)
+
+These modules support setting child logger levels:  configman, deployfiles, resourcelock, rwt, SMTP
     
 <br/>
 
@@ -436,9 +445,11 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 ---
 
-# set_logging_level (new_level, clear=False, save=True) - Save the current logging level and set the new_level
+# set_logging_level (new_level, logger='', clear=False, save=False) - Save the current logging level and set the new_level
 
-The current logging level is saved on a stack and can be restored by a call to `restore_logging_level()`.
+The current logging level is optionally saved on a stack and can be restored by a call to `restore_logging_level()`.
+Calling set_logging_level is exactly equivalent to `logging.getLogger(logger).setLevel(new_level)`, with the 
+added history mechanism (and a cleaner syntax).
 
 
 ### Args
@@ -447,16 +458,26 @@ The current logging level is saved on a stack and can be restored by a call to `
 equivalents (or to any integer value that makes sense):  logging.DEBUG (10), logging.INFO (20), logging.WARNING (30), 
 logging.ERROR (40), or logging.CRITICAL (50).
 
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, sets the root logger level
+
 `clear` (bool, default False)
 - If True, the logging level history stack is cleared
 
-`save` (bool, default True)
-- If True, the current logging level is saved to the stack
-- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level.
+`save` (bool, default False)
+- If True, the current logging level is saved to the stack for being restored by `restore_logging_level()`.
+- If also clear=True, then the clear is done first, resulting in the stack having only the prior logging level.
 
 
 ### Returns
 - None
+
+
+### Behaviors
+- NOTE that child logger that has not be set to a logging level will have a logging level = 0, which Python 
+treats the same as logging.WARNING (30).
+
     
 <br/>
 
@@ -464,10 +485,17 @@ logging.ERROR (40), or logging.CRITICAL (50).
 
 ---
 
-# restore_logging_level () - Restore the prior logging level from the stack
+# restore_logging_level (logger='') - Restore the prior logging level from the stack
 
-The prior saved logging level (from the prior set_logging_level call) is popped from the stack and set as the current logging level.
+The prior saved logging level for the specified child/root logger (from the prior set_logging_level call) is popped
+from the stack and set as the current logging level.
 If the stack is empty then the logging level is set to logging.WARNING (30).
+
+
+### Args
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, restores the root logger level
 
 
 ### Returns
@@ -479,13 +507,20 @@ If the stack is empty then the logging level is set to logging.WARNING (30).
 
 ---
 
-# get_logging_level_stack () - Return the content of the stack
+# get_logging_level_stack (logger='') - Return the content of the stack
 
-Useful for debug.  The stack may be cleared with a call to `set_logging_level(clear=True)` or `pop_logging_level_stack(clear=True)`.
+Useful for debug and testing.  The stack may be cleared with a call to `set_logging_level(clear=True)` or `pop_logging_level_stack(clear=True)`.
+
+
+### Args
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, returns the root logger level stack
 
 
 ### Returns
-- A list of the prior saved logging levels
+- A list of the prior saved logging levels for the specified child/root logger, or an empty list if no
+values are on the stack or have previously been saved.
 
 <br/>
 
@@ -493,20 +528,23 @@ Useful for debug.  The stack may be cleared with a call to `set_logging_level(cl
 
 ---
 
-# pop_logging_level_stack (clear=False) - Discard top of the stack
+# pop_logging_level_stack (logger='', clear=False) - Discard top of the stack
 
 Useful if the preexisting logging level was saved to the stack, but should be discarded 
-when a new level is set.  Used in loadconfig() when a new logging level is assigned from
-the config file.
+when a new level is set.
 
 
 ### Args
+`logger` (str, default '' (root logger))
+- Optional child logger name to be stack popped, eg: 'cjnfuncs.rwt'
+- If omitted, pops the stack of the root logger
+
 `clear` (bool, default False)
-- If True, the logging level history stack is cleared, without setting a new logging level
+- If True, the logging level history stack is cleared
 
 
 ### Returns
-- Logging level stack after pop
+- Logging level stack after pop or clear
 
 <br/>
 
@@ -514,7 +552,7 @@ the config file.
 
 ---
 
-# periodic_log (message, category='Cat1', log_interval='10m', log_level=30) - Log a message infrequently
+# periodic_log (message, category='Cat1', logger_name='', log_interval='10m', log_level=30) - Log a message infrequently
 
 Log infrequently so as to avoid flooding the log.  The `category` arg provides for independent
 log intervals for different types of logging events.
@@ -530,9 +568,13 @@ log intervals for different types of logging events.
 - Allows for multiple, independent concurrent periodic_log streams
 - `category` should typically be an int or str.  Used as a dict key.
 
+`logger_name` (str, default '')
+- Name of child or root logger.  Only remembered on the first log call
+for this category (ignored of subsequent calls).
+
 `log_interval` (timevalue, default '10m')
 - How often this category's messages will be logged.  Only remembered on the first log call
-for this category (ignored of subsequent calls)
+for this category (ignored of subsequent calls).
 
 `log_level` (int, default logging.WARNING/30)
 - The default for this category is set on first call

@@ -14,9 +14,6 @@ import logging
 import inspect
 import platform
 from pathlib import Path
-# import time
-# import multiprocessing
-# from logging.handlers import QueueHandler, QueueListener
 import __main__
 import appdirs
 import datetime
@@ -37,6 +34,12 @@ for item in stack:  # Look for the import cjnfuncs line
         if "cjnfuncs" in code_context[0]:
             calling_module = inspect.getmodule(item[0])
             break
+
+
+# All cjnfuncs modules start with WARNING level logging.
+# To enable debug logging on a specific cjnfuncs module set the named child logger from your tool script:
+    # logging.getLogger('cjnfuncs.rwt').setLevel(logging.DEBUG)
+cjnfuncs_logger = logging.getLogger('cjnfuncs').setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -201,7 +204,7 @@ def setuplogging(call_logfile=None, call_logfile_wins=False, config_logfile=None
 ## setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None, ConsoleLogFormat=None, FileLogFormat=None) - Set up the root logger
 
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
-is called the output path (log file or console) may be reassigned.
+is called the root logger's output path (log file or console) may be reassigned.
 
 Calling `setuplogging()` with no args results in:
 - Logging output to the console
@@ -248,83 +251,15 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 
 ### Behaviors and rules
-- `closelogging()` must be called on tool script exit.  This ensures clean exit and no process hangs.
-- For support of Windows multiprocessing, setuplogging() uses QueueListener / QueueHandler architecture.
-  The QueueListener runs as a thread in the main process and is (re)configured with the specified stream or 
-  file handler.  Started multiprocesses should be passed `core.logger_q` and configure their root
-  logging handler as follows:
+- All cjnfuncs modules start with WARNING level logging.  To enable debug or info logging on a specific cjnfuncs 
+module set the named child logger from your tool script, eg:
 
-        def my_special_process (logger_q):
-            from logging.handlers import QueueHandler
-            root_logger = logging.getLogger()
-            root_logger.handlers.clear()
-            root_logger.addHandler(QueueHandler(logger_q))
-            root_logger.setLevel(logging.DEBUG)
-            ...
+    logging.getLogger('cjnfuncs.rwt').setLevel(logging.DEBUG)
 
-- Multiprocessing on linux is fast, due to process fork support.  Multiprocessing on Windows can be SLOOOOOW -
-perhaps taking longer than 1 second to start a spawned process.  Use appropriately.
+These modules support setting child logger levels:  configman, deployfiles, resourcelock, rwt, SMTP
     """
 
-    global logger_q, logger_listener
-
     from .mungePath import mungePath
-
-
-    # # Setup handler
-    # _lfp = "__console__"
-    # if not call_logfile_wins and config_logfile:
-    #     _lfp = mungePath(config_logfile, tool.log_dir_base)
-    # if call_logfile_wins and call_logfile:
-    #     _lfp = mungePath(call_logfile, tool.log_dir_base)
-
-    # handlers = []
-    # if _lfp == "__console__":
-    #     fmt = CONSOLE_LOGGING_FORMAT if ConsoleLogFormat is None else ConsoleLogFormat
-    #     ch = logging.StreamHandler(sys.stdout)
-    #     ch.setFormatter(logging.Formatter(fmt, style='{'))
-    #     handlers.append(ch)
-    #     tool.log_dir = None
-    #     tool.log_file = None
-    #     tool.log_full_path = "__console__"
-    # else:
-    #     _lfp.parent.mkdir(parents=True, exist_ok=True)
-    #     fmt = FILE_LOGGING_FORMAT if FileLogFormat is None else FileLogFormat
-    #     fh = logging.FileHandler(_lfp.full_path, "a", encoding="utf-8")
-    #     fh.setFormatter(logging.Formatter(fmt, style='{'))
-    #     handlers.append(fh)
-    #     tool.log_dir = _lfp.parent
-    #     tool.log_file = _lfp.name
-    #     tool.log_full_path = _lfp.full_path
-
-
-    # # Create queue once
-    # if logger_q is None:
-    #     logger_q = multiprocessing.get_context().Queue()
-
-
-    # # Start queue listener
-    # if logger_listener:
-    #     while not logger_q.empty():         # purge the queue
-    #         time.sleep(0.05)
-    #     logger_listener.stop()
-
-    # logger_listener = QueueListener(logger_q, *handlers, respect_handler_level=True)
-    # # logger_listener.start()
-    # # logger_listener._thread.daemon = True       # TODO added for debug ???
-    # import threading
-    # listener_thread = threading.Thread(target=logger_listener.start)
-    # listener_thread.daemon = True
-    # listener_thread.start()
-
-    # # Set the root logger to send to the queue
-    # qh = QueueHandler(logger_q)
-    # root_logger = logging.getLogger()
-    # root_logger.handlers.clear()
-    # root_logger.addHandler(qh)
-    # root_logger.setLevel(logging.DEBUG)
-
-
 
     _lfp = "__console__"
     if call_logfile_wins == False  and  config_logfile:
@@ -362,17 +297,6 @@ perhaps taking longer than 1 second to start a spawned process.  Use appropriate
         tool.log_file = _lfp.name
         tool.log_full_path = _lfp.full_path
 
-# def closelogging():
-#     global logger_q, logger_listener
-#     time.sleep (0.1)    # Allow time for messages in the queue to be processed
-#     if logger_listener:
-#         logger_listener.stop()
-#         logger_listener = None
-#     if logger_q is not None:
-#         logger_q.close()
-#         logger_q.join_thread()
-#         logger_q = None
-
 
 #=====================================================================================
 #=====================================================================================
@@ -380,13 +304,16 @@ perhaps taking longer than 1 second to start a spawned process.  Use appropriate
 #=====================================================================================
 #=====================================================================================
 
-ll_history = []
+known_loggers = {}
 
-def set_logging_level(new_level, clear=False, save=True):
+
+def set_logging_level(new_level, logger_name='', clear=False, save=False):
     """
-## set_logging_level (new_level, clear=False, save=True) - Save the current logging level and set the new_level
+## set_logging_level (new_level, logger_name='', clear=False, save=False) - Save the current logging level and set the new_level
 
-The current logging level is saved on a stack and can be restored by a call to `restore_logging_level()`.
+The current logging level is optionally saved on a stack and can be restored by a call to `restore_logging_level()`.
+Calling set_logging_level is exactly equivalent to `logging.getLogger(logger).setLevel(new_level)`, with the 
+added history mechanism (and a cleaner syntax).
 
 
 ### Args
@@ -395,84 +322,119 @@ The current logging level is saved on a stack and can be restored by a call to `
 equivalents (or to any integer value that makes sense):  logging.DEBUG (10), logging.INFO (20), logging.WARNING (30), 
 logging.ERROR (40), or logging.CRITICAL (50).
 
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, sets the root logger level
+
 `clear` (bool, default False)
 - If True, the logging level history stack is cleared
 
-`save` (bool, default True)
-- If True, the current logging level is saved to the stack
-- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level.
+`save` (bool, default False)
+- If True, the current logging level is saved to the stack for being restored by `restore_logging_level()`.
+- If also clear=True, then the clear is done first, resulting in the stack having only the prior logging level.
 
 
 ### Returns
 - None
+
+
+### Behaviors
+- NOTE that a child logger that has not been set to a logging level will have a logging level = 0, which Python 
+treats the same as logging.WARNING (30).
+
     """
-    global ll_history
+
+    global known_loggers
+    if logger_name not in known_loggers:
+        known_loggers[logger_name] = []
     if clear:
-        ll_history = []
+        known_loggers[logger_name] = []
     if save:
-        ll_history.append(logging.getLogger().level)
-    logging.getLogger().setLevel(new_level)
+        known_loggers[logger_name].append(logging.getLogger(logger_name).level)
+    logging.getLogger(logger_name).setLevel(new_level)
 
 
 
-def restore_logging_level():
+def restore_logging_level(logger_name=''):
     """
-## restore_logging_level () - Restore the prior logging level from the stack
+## restore_logging_level (logger_name='') - Restore the prior logging level from the stack
 
-The prior saved logging level (from the prior set_logging_level call) is popped from the stack and set as the current logging level.
+The prior saved logging level for the specified child/root logger (from the prior set_logging_level call) is popped
+from the stack and set as the current logging level.
 If the stack is empty then the logging level is set to logging.WARNING (30).
 
 
+### Args
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, restores the root logger level
+
+
 ### Returns
 - None
     """
-    global ll_history
+    global known_loggers
     try:
-        logging.getLogger().setLevel(ll_history.pop())
+        logging.getLogger(logger_name).setLevel(known_loggers[logger_name].pop())
     except:
-        logging.getLogger().setLevel(logging.WARNING)
+        logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 
-def get_logging_level_stack():
+def get_logging_level_stack(logger_name=''):
     """
-## get_logging_level_stack () - Return the content of the stack
+## get_logging_level_stack (logger_name='') - Return the content of the stack
 
-Useful for debug.  The stack may be cleared with a call to `set_logging_level(clear=True)` or `pop_logging_level_stack(clear=True)`.
-
-
-### Returns
-- A list of the prior saved logging levels
-"""
-    return ll_history
-
-
-def pop_logging_level_stack(clear=False):
-    """
-## pop_logging_level_stack (clear=False) - Discard top of the stack
-
-Useful if the preexisting logging level was saved to the stack, but should be discarded 
-when a new level is set.  Used in loadconfig() when a new logging level is assigned from
-the config file.
+Useful for debug and testing.  The stack may be cleared with a call to `set_logging_level(clear=True)` or `pop_logging_level_stack(clear=True)`.
 
 
 ### Args
-`clear` (bool, default False)
-- If True, the logging level history stack is cleared, without setting a new logging level
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, returns the root logger level stack
 
 
 ### Returns
-- Logging level stack after pop
+- A list of the prior saved logging levels for the specified child/root logger, or an empty list if no
+values are on the stack or have previously been saved.
 """
-    global ll_history
+    global known_loggers
+    try:
+        return known_loggers[logger_name]
+    except:
+        return []
+    return ll_history
+
+
+def pop_logging_level_stack(logger_name='', clear=False):
+    """
+## pop_logging_level_stack (logger_name='', clear=False) - Discard top of the stack
+
+Useful if the preexisting logging level was saved to the stack, but should be discarded 
+when a new level is set.
+
+
+### Args
+`logger` (str, default '' (root logger))
+- Optional child logger name to be stack popped, eg: 'cjnfuncs.rwt'
+- If omitted, pops the stack of the root logger
+
+`clear` (bool, default False)
+- If True, the logging level history stack is cleared
+
+
+### Returns
+- Logging level stack after pop or clear
+"""
+    global known_loggers
     if clear:
-        ll_history = []
+        xx = known_loggers[logger_name] = []
     else:
         try:
-            ll_history.pop()
+            xx = known_loggers[logger_name].pop()
         except:
-            pass                # Stack was empty
+            xx = []               # Stack was empty or no prior history
 
-    return ll_history
+    return xx
 
 
 #=====================================================================================
@@ -484,26 +446,28 @@ the config file.
 cats = {}
 
 class _periodic_log:
-    def __init__(self, log_interval, log_level):
+    def __init__(self, log_interval, log_level, logger_name):
 
         from .timevalue import timevalue
 
         self.next_dt = datetime.datetime.now()
         self.log_interval = datetime.timedelta(seconds=timevalue(log_interval).seconds)
         self.log_level = log_level
+        self.logger_name = logger_name
 
     def plog(self, message, log_level, cat):
         now_dt = datetime.datetime.now()
         if now_dt > self.next_dt:
             if log_level is None:
                 log_level = self.log_level
-            logging.log(log_level, f"[PLog-{cat}] {message}")
+            _logger = logging.getLogger(self.logger_name)
+            _logger.log(log_level, f"[PLog-{cat}] {message}")
             self.next_dt = now_dt + self.log_interval
 
 
-def periodic_log(message, category='Cat1', log_interval='10m', log_level=None):
+def periodic_log(message, category='Cat1', logger_name='', log_interval='10m', log_level=None):
     """
-## periodic_log (message, category='Cat1', log_interval='10m', log_level=30) - Log a message infrequently
+## periodic_log (message, category='Cat1', logger_name='', log_interval='10m', log_level=30) - Log a message infrequently
 
 Log infrequently so as to avoid flooding the log.  The `category` arg provides for independent
 log intervals for different types of logging events.
@@ -519,9 +483,13 @@ log intervals for different types of logging events.
 - Allows for multiple, independent concurrent periodic_log streams
 - `category` should typically be an int or str.  Used as a dict key.
 
+`logger_name` (str, default '')
+- Name of child or root logger.  Only remembered on the first log call
+for this category (ignored of subsequent calls).
+
 `log_interval` (timevalue, default '10m')
 - How often this category's messages will be logged.  Only remembered on the first log call
-for this category (ignored of subsequent calls)
+for this category (ignored of subsequent calls).
 
 `log_level` (int, default logging.WARNING/30)
 - The default for this category is set on first call
@@ -534,7 +502,7 @@ for this category (ignored of subsequent calls)
     if category not in cats:
         if log_level is None:
             log_level = logging.WARNING
-        xx = _periodic_log(log_interval, log_level)
+        xx = _periodic_log(log_interval, log_level, logger_name)
         cats[category] = xx
     
     p_logger = cats[category]

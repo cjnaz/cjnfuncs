@@ -14,7 +14,7 @@ Produce / compare to golden results:
 #
 #==========================================================
 
-__version__ =   '2.0'
+__version__ =   '3.1'
 TOOLNAME =      'demo_rwt'          # rename
 
 import argparse
@@ -82,9 +82,6 @@ def check_tnum(tnum_in, include0='0'):
 
 # --------------------------------------------------------------------
 # Setups, functions, and vars
-
-# test_dir = Path(tempfile.gettempdir()) / TOOLNAME
-# test_dir.mkdir(exist_ok=True)
 
 set_logging_level(logging.WARNING, save=False)
 abc= 42

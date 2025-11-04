@@ -23,6 +23,9 @@ import cjnfuncs.core as core
 #     from importlib.resources import files as ir_files
 from importlib_resources import files as ir_files
 
+deployfiles_logger = logging.getLogger('cjnfuncs.deployfiles')
+deployfiles_logger.setLevel(logging.INFO)      # logging enabled from this module.  All logging is at the INFO level.
+
 
 #=====================================================================================
 #=====================================================================================
@@ -98,6 +101,14 @@ With `overwrite=False`, for subsequent file deployments to that directory the fi
 retained (the new `dir_stat` setting is disregarded). 
 With `overwrite=True`, an existing directory where a file is deployed will be updated 
 to the new `dir_stat` value.
+
+- Directory and file permissions on Windows do not support separate permissions for user, group and world.
+When setting permissions on deployed items on Windows, only the user permission is used even on a file share
+hosted on Linux.  Eg, a file permission of 0x644 will deploy with permission 0x666 (only the first octet is used).
+
+- deploy_files produces several log events at the INFO level.  To disable logging, in your tool script add:
+
+    logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.WARNING)
     """
 
     default_file_stat = 0o644
@@ -144,7 +155,7 @@ to the new `dir_stat` value.
                 if not out_item.exists():
                     didnt_exist = True
                     out_item.mkdir(parents=True)
-                    logging.info (f"Created   {out_item}")
+                    deployfiles_logger.info (f"Created   {out_item}")
                 if didnt_exist or overwrite:
                     out_item.chmod(dir_stat)
                 copytree(item, out_item, overwrite=overwrite, file_stat=file_stat, dir_stat=dir_stat)
@@ -154,9 +165,9 @@ to the new `dir_stat` value.
                     shutil.copy2(item, out_item)
                     if file_stat:
                         out_item.chmod(file_stat)
-                    logging.info (f"Deployed  {out_item}")
+                    deployfiles_logger.info (f"Deployed  {out_item}")
                 else:
-                    logging.info (f"File <{out_item}> already exists.  Skipped.")
+                    deployfiles_logger.info (f"File <{out_item}> already exists.  Skipped.")
 
 
     if core.tool.main_module.__name__ == "__main__":    # Caller is a tool script file, not an installed module
@@ -179,7 +190,7 @@ to the new `dir_stat` value.
             if not target_dir.exists():         # TODO hang risk
                 didnt_exist = True
                 target_dir.mkdir(parents=True)
-                logging.info (f"Created   {target_dir}")
+                deployfiles_logger.info (f"Created   {target_dir}")
             if didnt_exist or overwrite:
                 target_dir.chmod(dir_stat)
 
@@ -187,9 +198,9 @@ to the new `dir_stat` value.
             if not outfile.exists()  or  overwrite:
                 shutil.copy2 (source, outfile)
                 outfile.chmod(file_stat)
-                logging.info (f"Deployed  {outfile}")
+                deployfiles_logger.info (f"Deployed  {outfile}")
             else:
-                logging.info (f"File <{outfile}> already exists.  Skipped.")
+                deployfiles_logger.info (f"File <{outfile}> already exists.  Skipped.")
 
         elif source.is_dir():
             # TODO ONLY WORKS if the source dir is on the file system (eg, not in a package .zip) ????
@@ -200,14 +211,14 @@ to the new `dir_stat` value.
             if not target_dir.exists():
                 didnt_exist = True
                 target_dir.mkdir(parents=True)
-                logging.info (f"Created   {target_dir}")
+                deployfiles_logger.info (f"Created   {target_dir}")
             if didnt_exist or overwrite:
                 target_dir.chmod(dir_stat)
 
             copytree(source, target_dir, overwrite=overwrite, file_stat=file_stat, dir_stat=dir_stat)
 
         elif missing_ok:
-            logging.info (f"Can't deploy source <{source.name}>.  Item not found and missing_ok=True.  Skipping.")
+            deployfiles_logger.info (f"Can't deploy source <{source.name}>.  Item not found and missing_ok=True.  Skipping.")
         
         else:
             raise FileNotFoundError (f"Can't deploy <{source.name}>.  Item not found.")

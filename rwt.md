@@ -198,7 +198,7 @@ rwt_ex3.<module>             -    ERROR:  EXCEPTION received:  TimeoutError: Fun
 
 ---
 
-# run_with_timeout (func, *args, **kwargs, rwt_timeout=1.0, rwt_ntries=1, rwt_kill=True, rwt_debug=False) - Run a function in a separate process with an enforced timeout.
+# run_with_timeout (func, *args, **kwargs, rwt_timeout=1.0, rwt_ntries=1, rwt_kill=True) - Run a function in a separate process with an enforced timeout.
 
 `run_with_timeout` uses the multiprocessing module, and works by running the specified `func` in a managed 
 external process that can be reliably killed on timeout.
@@ -210,7 +210,8 @@ On timeout, the process is killed (by default) and a TimeoutError exception is r
 
 `func` (callable)
 - The function to run
-- May be any function - built-in, standard library, supplied by an installed package, or user-written.
+- May be any function - built-in, standard library, supplied by an installed package, or user-written
+- On Windows `func` must be defined as a top level function of the module
 
 `*args` (0+)
 - Positional args required by func
@@ -228,25 +229,22 @@ On timeout, the process is killed (by default) and a TimeoutError exception is r
 - If True, on timeout kill the process
 - If False, on timeout let the process continue to run.  It will be orphaned - see Behavior notes, below.
 
-`rwt_debug` additional kwarg (bool, default False)
-- Intended for regression testing.  Logs rwt internal status and trace info.
-
 
 ### Returns
 - With no timeout or exception, returns the value returned from `func`
 - Any exception raised by `func`
 - If rwt_timeout is exceeded, returns TimeoutError
-- Exceptions raised for invalid rwt_timeout, rwt_ntries, rwt_kill, or rwt_debug values
+- Exceptions raised for invalid rwt_timeout, rwt_ntries, or rwt_kill values
 
 
 ### Behaviors and rules
 - Logging within the called `func` is done at the logging level in effect when run_with_timeout is called. 
-rwt_debug=True enables additional status and trace info, intended for debug and regression testing.
+`logging.getLogger('rwt').setLevel(logging.DEBUG)` enables additional status and trace info, intended for debug and regression testing.
 - If making a subprocess call and the subprocess timeout limit is triggered, a
 subprocess.TimeoutExpired exception is produce with an odd error message on Python 3.11.9: 
 `TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'`. Generally, don't use
 the subprocess timeout arg when using run_with_timeout.
-- If `rwt_kill=False` then the spawned process will not be killed, and if the process doesn't exit by itself 
+- If `rwt_kill=False` then the forked/spawned process will not be killed, and if the process doesn't exit by itself 
 then the tool script will hang on exit, waiting for the orphan process to terminate.
 To solve this the tool script needs to kill any orphaned processes created by run_with_timeout before exiting. 
 The pids of the orphaned processes are listed in the TimeoutError exception when `rwt_kill=False`, and can
@@ -254,3 +252,6 @@ be captured for explicitly killing of any unterminated orphaned processes before
 `os.kill (pid, signal.OSKILL)`.  See `rwt.md` for a working example.
 Note that if `rwt_ntries` is greater than 1 and `rwt_kill=False`, then potentially several processes may 
 be created and orphaned, all attempting to doing the same work.
+- On Windows, debug logging messages from the run_with_timeout internal `worker()` function (which calls `func`) are 
+erratically produced, and not produced if `func` raises an exception.  Logging from within `func`, and any raised exception
+operate normally.  On Linux, worker debug operates correctly.
