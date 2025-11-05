@@ -9,6 +9,7 @@
 #==========================================================
 
 import time
+import datetime
 import sys
 import importlib
 import re
@@ -30,6 +31,9 @@ SERVER_TIMEOUT =        '2s'        # server connection timeout
 
 COUNTRY_CODE =          1           # US/Canada
 PHONE_NUM_LENGTH =      10          # US/Canada
+
+smtp_logger = logging.getLogger('cjnfuncs.smtp')
+smtp_logger.setLevel(logging.WARNING)      # Logging disabled from this module since all log statements are info or debug level.
 
 
 #=====================================================================================
@@ -74,8 +78,8 @@ contain an '@' it is assumed to be a config param.
 - Define `NotifList` in the config file to use the default `to` value.
 
 `log` (bool, default False)
-- If True, logs that the message was sent at the WARNING level. If False, logs 
-at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
+- If True, logs that the message was sent at the WARNING level (using the root logger). If False, logs 
+at the DEBUG level (using the 'cjnfuncs.smpt' logger). Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
 `smtp_config` (config_item class instance)
@@ -122,11 +126,11 @@ default `to` arg value.
         if log:
             logging.warning (f"Notification NOT sent <{subj}> <{msg}>")
         else:
-            logging.debug (f"Notification NOT sent <{subj}> <{msg}>")
+            smtp_logger.debug (f"Notification NOT sent <{subj}> <{msg}>")
         return
 
-    msg_handler = smtp_config.getcfg('Msg_Handler', fallback=None, section='SMTP')
 
+    msg_handler = smtp_config.getcfg('Msg_Handler', fallback=None, section='SMTP')
     if msg_handler:
         # Import the messaging service handler
         if msg_handler.startswith('/'):                 # Absolute path case
@@ -139,17 +143,17 @@ default `to` arg value.
             if xx_parent not in sys.path:
                 sys.path.append(xx_parent)
             try:
-                logging.info (xx)
+                # smtp_logger.info (xx)
                 sender_plugin = __import__(xx.name)
             except Exception as e:
                 raise ImportError (f"Can't import SMS/MMS message handler <{msg_handler}>\n  {e}")
-            logging.debug (f"Imported message sender plugin <{msg_handler}>, version <{sender_plugin.__version__}>")
+            smtp_logger.debug (f"Imported message sender plugin <{msg_handler}>, version <{sender_plugin.__version__}>")
         else:                                           # package.module case
             try:
                 sender_plugin = importlib.import_module(msg_handler)
             except Exception as e:
                 raise ImportError (f"Can't import SMS/MMS message handler <{msg_handler}>\n  {e}")
-            logging.debug (f"Imported message sender plugin <{sender_plugin.__name__}>, version <{sender_plugin.__version__}>")
+            smtp_logger.debug (f"Imported message sender plugin <{sender_plugin.__name__}>, version <{sender_plugin.__version__}>")
 
         package = {'subj': subj,
                    'msg':  msg,
@@ -165,7 +169,7 @@ default `to` arg value.
     if log:
         logging.warning (f"Notification sent <{subj}> <{msg}>")
     else:
-        logging.debug (f"Notification sent <{subj}> <{msg}>")
+        smtp_logger.debug (f"Notification sent <{subj}> <{msg}>")
 
 
 #=====================================================================================
@@ -210,8 +214,8 @@ contain an '@' it is assumed to be a config param.
 - A str or Path to the html formatted file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
 
 `log` (bool, default False)
-- If True, logs that the message was sent at the WARNING level. If False, logs 
-at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
+- If True, logs that the message was sent at the WARNING level (using the root logger). If False, logs 
+at the DEBUG level (using the 'cjnfuncs.smpt' logger). Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
 `smtp_config` (config_item class instance)
@@ -289,6 +293,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
     if smtp_config is None:
         raise SndEmailError ("smtp_section required for SMTP params")
 
+
     # Deal with what to send
     if body:
         msg_type = "plain"
@@ -314,10 +319,13 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
 
     else:
         raise SndEmailError (f"snd_email - Message subject <{subj}>:  No body, filename, or htmlfile specified.")
-    m_text += f"\n(sent {time.asctime(time.localtime())})"
+
+    m_text += ('\n' + datetime.datetime.now().astimezone().strftime("%a %b %d %Y - %H:%M:%S"))
+
 
     # Deal with 'to'
     To = list_to(to, 'emails', subj, smtp_config=smtp_config)
+
 
     # Gather, check remaining config params
     ntries =            smtp_config.getcfg('EmailNTries', SND_EMAIL_NTRIES, types=int, section='SMTP')
@@ -342,6 +350,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
         if not dkim_selector:
             raise SndEmailError (f"snd_email - Config <EmailDKIMSelector> is required for SMTP DKIM signing")
 
+
     # Send the message, with retries
     for trynum in range(ntries):
         try:
@@ -351,13 +360,13 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
             msg['To']      = ", ".join(To)
             msg["Date"]    = formatdate(localtime=True)
 
-            # logging.debug (msg)
+            # smtp_logger.debug (msg)
 
             if smtp_config.getcfg('DontEmail', fallback=False, types=bool, section='SMTP'):
                 if log:
                     logging.warning (f"Email NOT sent <{subj}>")
                 else:
-                    logging.debug (f"Email NOT sent <{subj}>")
+                    smtp_logger.debug (f"Email NOT sent <{subj}>")
                 return
 
             # Add DKIM signature if EmailDKIMDomain is specified
@@ -371,7 +380,7 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
                 sig = sig.decode()
                 msg['DKIM-Signature'] = sig[len("DKIM-Signature: "):]
 
-            logging.debug (f"Initialize the SMTP server connection for port <{cfg_port}>")
+            smtp_logger.debug (f"Initialize the SMTP server connection for port <{cfg_port}>")
             if cfg_port == "p25":
                 server = smtplib.SMTP(cfg_server, 25, timeout=server_timeout)
             elif cfg_port == "p465":
@@ -380,32 +389,32 @@ so it may be practical to bundle `EmailFrom` with the server specifics.  Place a
                 server = smtplib.SMTP(cfg_server, 587, timeout=server_timeout)
 
             if smtp_config.getcfg("EmailVerbose", False, types=[bool], section='SMTP'):
-                logging.debug ("Set SMTP connection debuglevel(1)")
+                smtp_logger.debug ("Set SMTP connection debuglevel(1)")
                 server.set_debuglevel(1)
 
             if cfg_port == "p587tls":
-                logging.debug ("Start TLS")
+                smtp_logger.debug ("Start TLS")
                 server.starttls()
 
             # if email_user:
             if cfg_port.startswith('p587'):
-                logging.debug (f"Logging into SMTP server")
+                smtp_logger.debug (f"Logging into SMTP server")
                 server.login (email_user, email_pass)
 
-            logging.debug (f"Sending message <{subj}>")
+            smtp_logger.debug (f"Sending message <{subj}>")
             server.sendmail(email_from, To, msg.as_string())
             server.quit()
 
             if log:
                 logging.warning (f"Email sent <{subj}>")
             else:
-                logging.debug (f"Email sent <{subj}>")
+                smtp_logger.debug (f"Email sent <{subj}>")
             return
 
         except Exception as e:
             last_error = e
             if trynum < ntries -1:
-                logging.debug(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec>:\n  <{e}>")
+                smtp_logger.debug(f"Email send try {trynum} failed.  Retry in <{retry_wait} sec>:\n  <{e}>")
                 time.sleep(retry_wait)
             continue
 

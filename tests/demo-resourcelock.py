@@ -14,20 +14,19 @@ Produce / compare to golden results:
 
 #==========================================================
 #
-#  Chris Nelson, 2024
+#  Chris Nelson, 2024-2025
 #
 #==========================================================
 
-__version__ = "1.3"
+__version__ = "3.1"
 
-from cjnfuncs.core import set_toolname, setuplogging, logging
+from cjnfuncs.core import set_toolname, logging
 from cjnfuncs.resourcelock import resource_lock
 
 set_toolname("demo-resourcelock")
-# setuplogging()
-logging.getLogger().setLevel(logging.DEBUG)
-
+logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
 LOCK_NAME = 'test_lock'
+
 
 print ("\n***** 0 - Lock instantiation")
 my_lock = resource_lock(LOCK_NAME)

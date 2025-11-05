@@ -90,7 +90,6 @@ def do_base_setup(safe_mode=False):
         ], overwrite=True )
     config = config_item(CONFIG_FILE, safe_mode=safe_mode)
     print (f"\nLoad config {config.config_full_path}")
-    # logging.getLogger('cjnfuncs.configman').setLevel(config_load_ll)
     config.loadconfig()
 
 

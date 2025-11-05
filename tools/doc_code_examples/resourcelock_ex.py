@@ -6,7 +6,7 @@ from cjnfuncs.resourcelock import resource_lock
 
 set_toolname("resourcelock_ex")
 setuplogging()
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
 
 
 LOCK_NAME = 'test_lock'

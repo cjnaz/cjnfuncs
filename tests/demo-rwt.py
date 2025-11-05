@@ -28,7 +28,7 @@ import time
 import signal
 from pathlib import Path
 
-from cjnfuncs.core      import set_toolname, setuplogging, logging, set_logging_level #, restore_logging_level
+from cjnfuncs.core      import set_toolname, setuplogging, logging, set_logging_level
 from cjnfuncs.rwt       import run_with_timeout
 
 set_toolname(TOOLNAME)
@@ -43,6 +43,8 @@ parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 
 args = parser.parse_args()
+
+
 
 
 if args.cleanup:
@@ -83,7 +85,6 @@ def check_tnum(tnum_in, include0='0'):
 # --------------------------------------------------------------------
 # Setups, functions, and vars
 
-set_logging_level(logging.WARNING, save=False)
 abc= 42
 
 def test_shell_1(t, tnum, file):    # Used in tests 6a, 6b (placeholder in test 9 series)
@@ -127,8 +128,7 @@ def hack():                         # Development / debug use
 #===============================================================================================
 
 if __name__ == "__main__":
-    logging.getLogger('rwt').setLevel(logging.DEBUG)
-
+    set_logging_level(logging.DEBUG, 'cjnfuncs.rwt')
 
     #-------------------------------------------------------------------------
     # Test 1 series - Check function run pass/fail/exception cases
@@ -160,16 +160,16 @@ if __name__ == "__main__":
                test_shell_1, 2, tnum, f'{test_dir}/FileNotTouched', rwt_timeout=0.5)
 
     if check_tnum('6b'):
-        set_logging_level(logging.INFO, save=False)
+        set_logging_level(logging.INFO)
         dotest("INFO root log level, Function took too long, not killed", "Raise TimeoutError, File 'FileTouched_1' created, message logged during Test 6c",
                test_shell_1, 1, tnum, Path(f'{test_dir}/FileTouched_1'), rwt_timeout=0.5, rwt_kill=False)
 
     if check_tnum('6c'):
-        logging.getLogger('rwt').setLevel(logging.WARNING)
-        set_logging_level(logging.WARNING, save=False)
+        set_logging_level(logging.WARNING, 'cjnfuncs.rwt')
+        set_logging_level(logging.WARNING)
         dotest("WARNING root log level, Sleep took too long, No rwt logging", "Raise TimeoutError, Test 6b INFO log",
                time.sleep, 10, rwt_timeout=1.5)
-        logging.getLogger('rwt').setLevel(logging.DEBUG)
+        set_logging_level(logging.DEBUG, 'cjnfuncs.rwt')
 
     if check_tnum('6d'):
         dotest("Sleep took too long", "Raise TimeoutError",
@@ -205,13 +205,13 @@ if __name__ == "__main__":
                shutil.copy, t12a, t12b, rwt_timeout=1)
 
     if check_tnum('13'):
-        logging.getLogger('rwt').setLevel(logging.WARNING)
+        set_logging_level(logging.WARNING, 'cjnfuncs.rwt')
         t13a = Path(f'{test_dir}/t13a')
         t13a.touch()
         t13b = Path(f'{test_dir}/t13b')
         dotest("shutil.copy, rwt_debug False", "Pass",
                shutil.copy, t13a, t13b, rwt_timeout=1)
-        logging.getLogger('rwt').setLevel(logging.DEBUG)
+        set_logging_level(logging.DEBUG, 'cjnfuncs.rwt')
 
 
     #-------------------------------------------------------------------------
@@ -234,119 +234,119 @@ if __name__ == "__main__":
     #-------------------------------------------------------------------------
     # Test 16 series - Check logging level handling with exception raised by function
     if check_tnum('16a'):
-        set_logging_level(logging.WARNING, save=False)
+        set_logging_level(logging.WARNING)
         nosuchfile = Path(f'{test_dir}//nosuchfile')
         dotest("WARNING root log level, rwt_ntries=1", "Exception FileNotFoundError, Post test logging level:  30",
                nosuchfile.unlink, rwt_ntries=1, rwt_timeout=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('16b'):
-        set_logging_level(logging.INFO, save=False)
+        set_logging_level(logging.INFO)
         nosuchfile = Path(f'{test_dir}//nosuchfile')
         dotest("INFO root log level, rwt_ntries=1", "Raise FileNotFoundError, Post test logging level:  20",
                nosuchfile.unlink, rwt_ntries=1, rwt_timeout=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('16c'):
-        set_logging_level(logging.DEBUG, save=False)
+        set_logging_level(logging.DEBUG)
         nosuchfile = Path(f'{test_dir}//nosuchfile')
         dotest("DEBUG root log level, rwt_ntries=1", "Raise FileNotFoundError, Post test logging level:  10",
                nosuchfile.unlink, rwt_ntries=1, rwt_timeout=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('16d'):
-        logging.getLogger('rwt').setLevel(logging.WARNING)
-        set_logging_level(logging.DEBUG, save=False)
+        set_logging_level(logging.WARNING, 'cjnfuncs.rwt')
+        set_logging_level(logging.DEBUG)
         nosuchfile = Path(f'{test_dir}//nosuchfile')
         dotest("DEBUG root log level, rwt_ntries=1, No rwt logging", "Raise FileNotFoundError, Post test logging level:  10",
                nosuchfile.unlink, rwt_ntries=1, rwt_timeout=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
-        logging.getLogger('rwt').setLevel(logging.DEBUG)
+        set_logging_level(logging.DEBUG, 'cjnfuncs.rwt')
 
     if check_tnum('16e'):
-        set_logging_level(logging.WARNING, save=False)
+        set_logging_level(logging.WARNING)
         nosuchfile = Path(f'{test_dir}//nosuchfile')
         dotest("WARNING root log level, rwt_ntries=2", "Raise FileNotFoundError, Post test logging level:  30",
                nosuchfile.unlink, rwt_ntries=2, rwt_timeout=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('16f'):
-        set_logging_level(logging.INFO, save=False)
+        set_logging_level(logging.INFO)
         nosuchfile = Path(f'{test_dir}//nosuchfile')
         dotest("INFO root log level, rwt_ntries=2", "Raise FileNotFoundError, Post test logging level:  20",
                nosuchfile.unlink, rwt_ntries=2, rwt_timeout=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('16g'):
-        set_logging_level(logging.DEBUG, save=False)
+        set_logging_level(logging.DEBUG)
         nosuchfile = Path(f'{test_dir}//nosuchfile')
         dotest("DEBUG root log level, rwt_ntries=2", "Raise FileNotFoundError, Post test logging level:  10",
                nosuchfile.unlink, rwt_ntries=2, rwt_timeout=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('16h'):
-        logging.getLogger('rwt').setLevel(logging.WARNING)
-        set_logging_level(logging.DEBUG, save=False)
+        set_logging_level(logging.WARNING, 'cjnfuncs.rwt')
+        set_logging_level(logging.DEBUG)
         nosuchfile = Path(f'{test_dir}//nosuchfile')
         dotest("DEBUG root log level, rwt_ntries=2, No rwt logging", "Raise FileNotFoundError, Post test logging level:  10",
                nosuchfile.unlink, rwt_ntries=2, rwt_timeout=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
-        logging.getLogger('rwt').setLevel(logging.DEBUG)
+        set_logging_level(logging.DEBUG, 'cjnfuncs.rwt')
 
 
     #-------------------------------------------------------------------------
     # Test 17 series - Check logging level handling with normal exit by function
     if check_tnum('17a'):
-        set_logging_level(logging.WARNING, save=False)
+        set_logging_level(logging.WARNING)
         dotest("WARNING root log level, rwt_ntries=1", "log_each_level logs WARNING, Post test logging level:  30",
                log_each_level, rwt_ntries=1)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('17b'):
-        set_logging_level(logging.INFO, save=False)
+        set_logging_level(logging.INFO)
         dotest("INFO root log level, rwt_ntries=1", "log_each_level logs WARNING, INFO, Post test logging level:  20",
                log_each_level, rwt_ntries=1)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('17c'):
-        set_logging_level(logging.DEBUG, save=False)
+        set_logging_level(logging.DEBUG)
         dotest("DEBUG root log level, rwt_ntries=1", "log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10",
                log_each_level, rwt_ntries=1)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('17d'):
-        logging.getLogger('rwt').setLevel(logging.WARNING)
-        set_logging_level(logging.DEBUG, save=False)
+        set_logging_level(logging.WARNING, 'cjnfuncs.rwt')
+        set_logging_level(logging.DEBUG)
         dotest("DEBUG root log level, rwt_ntries=1, No rwt logging", "log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10",
                log_each_level, rwt_ntries=1)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
-        logging.getLogger('rwt').setLevel(logging.DEBUG)
+        set_logging_level(logging.DEBUG, 'cjnfuncs.rwt')
 
     if check_tnum('17e'):
-        set_logging_level(logging.WARNING, save=False)
+        set_logging_level(logging.WARNING)
         dotest("WARNING root log level, rwt_ntries=2", "log_each_level logs WARNING, Post test logging level:  30",
                log_each_level, rwt_ntries=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('17f'):
-        set_logging_level(logging.INFO, save=False)
+        set_logging_level(logging.INFO)
         dotest("INFO root log level, rwt_ntries=2", "log_each_level logs WARNING, INFO, Post test logging level:  20",
                log_each_level, rwt_ntries=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('17g'):
-        set_logging_level(logging.DEBUG, save=False)
+        set_logging_level(logging.DEBUG)
         dotest("DEBUG root log level, rwt_ntries=2", "log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10",
                log_each_level, rwt_ntries=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
 
     if check_tnum('17h'):
-        logging.getLogger('rwt').setLevel(logging.WARNING)
-        set_logging_level(logging.DEBUG, save=False)
+        set_logging_level(logging.WARNING, 'cjnfuncs.rwt')
+        set_logging_level(logging.DEBUG)
         dotest("DEBUG root log level, rwt_ntries=2, No rwt logging", "log_each_level logs WARNING, INFO, DEBUG, Post test logging level:  10",
                log_each_level, rwt_ntries=2)
         logging.warning (f"Post test logging level:  {logging.getLogger().level}")
-        logging.getLogger('rwt').setLevel(logging.DEBUG)
+        set_logging_level(logging.DEBUG, 'cjnfuncs.rwt')
 
 
 

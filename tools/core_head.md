@@ -264,8 +264,11 @@ $ ./core_ex3.py
        core_ex3.myfunction           -    DEBUG:  2 - Within myfunction()        - logging level: 10. On the stack: [30]
        core_ex3.<module>             -  WARNING:  3 - After  myfunction() return - logging level: 30. On the stack: []
 ```
-`set_logging_level()` and `restore_logging_level()` are used extensively within `rwt.run_with_timeout()` for validation and regression testing, and within `configman.loadconfig()` additionally for handling the 
-`LogLevel` setting from the config file.
+`set_logging_level()` and `restore_logging_level()` also support controlling 'child'/'named' (module-specific) logging.  For example, to enable 
+info level logging for a loadconfig() sequence:
+
+        set_logging_level(logging.INFO, 'cjnfuncs.configman')
+        loadconfig()
 
 <br>
 

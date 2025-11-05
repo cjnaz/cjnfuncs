@@ -21,7 +21,7 @@ RWT_NTRIES =    3
 RWT_TIMEOUT =   2.0
 
 configman_logger = logging.getLogger('cjnfuncs.configman')
-configman_logger.setLevel(logging.WARNING)      # Disable logging from this module since all log statements are info or debug level.
+configman_logger.setLevel(logging.WARNING)      # Logging disabled from this module since all log statements are info or debug level.
 
 
 #=====================================================================================

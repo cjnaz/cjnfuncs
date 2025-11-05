@@ -187,3 +187,16 @@ config that contains the [SMTP] section).
   - Building a list of numbers for the plugin handler to iterate thru
   - Example:  Given `'4805551212@vzwpix.com 4805551213 +14805551214, +44123456'`, list_to() returns:  `['+14805551212', '+14805551213', '+14805551214', '+44123456']`
 
+
+<br>
+
+## Controlling logging from within smtp code
+
+Logging within the SMTP module uses the `cjnfuncs.smtp` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
+meaning that no logging messages are produced from within the SMTP code.  For validation and debug purposes, logging from within SMTP code 
+can be enabled by setting the logging level for this module's logger from within the tool script code:
+
+        logging.getLogger('cjnfuncs.smtp').setLevel(logging.DEBUG)
+
+        # Or alternately, use the core module set_logging_level() function:
+        set_logging_level (logging.DEBUG, 'cjnfuncs.smtp')

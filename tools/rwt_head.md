@@ -179,3 +179,20 @@ Output from the exception log:
 ```
 rwt_ex3.<module>             -    ERROR:  EXCEPTION received:  TimeoutError: Function <wont_terminate> timed out after 0.5 seconds (not killed) orphaned pids: 2069926 2069931 2069969
 ```
+
+<br>
+
+## Controlling logging from within rwt code
+
+Logging within the rwt module uses the `cjnfuncs.rwt` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
+meaning that no logging messages are produced from within the rwt code.  For validation and debug purposes, logging from within rwt code 
+can be enabled by setting the logging level for this module's logger from within the tool script code:
+
+        logging.getLogger('cjnfuncs.rwt').setLevel(logging.DEBUG)
+
+        # Or alternately, use the core module set_logging_level() function:
+        set_logging_level (logging.DEBUG, 'cjnfuncs.rwt')
+
+Note that on Windows, debug logging messages from the run_with_timeout internal `worker()` function (which calls `func`) are 
+erratically produced, and not produced if `func` raises an exception.  Logging from within `func`, and any raised exception
+operate normally.  On Linux, worker debug logging operates correctly.

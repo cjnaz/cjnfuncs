@@ -94,3 +94,16 @@ CACHE_DIR       | core.tool.cache_dir **
 ** Note: These keywords are set to the user-mode or site-mode full absolute paths by `set_toolname()`.  For example, `USER_CONFIG_DIR` maps to `core.tool.user_config_dir`, and `CONFIG_DIR` maps to `core.tool.config_dir`, and in user mode both of these variables contain the path `/home/<me>/.config/<toolname>/`. In site mode, `CONFIG_DIR` will map to the same path as `SITE_CONFIG_DIR`.
 
 
+
+<br>
+
+## Controlling logging from within deployfiles code
+
+Logging within the deployfiles module uses the `cjnfuncs.deployfiles` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
+meaning that no logging messages are produced from within the deployfiles code.  For validation and debug purposes, logging from within deployfiles code 
+can be enabled by setting the logging level for this module's logger from within the tool script code:
+
+        logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
+
+        # Or alternately, use the core module set_logging_level() function:
+        set_logging_level (logging.INFO, 'cjnfuncs.deployfiles')

@@ -16,7 +16,7 @@ import multiprocessing
 import subprocess
 import traceback
 
-logging.getLogger('rwt').setLevel(logging.WARNING)
+logging.getLogger('cjnfuncs.rwt').setLevel(logging.WARNING)
 
 def run_with_timeout(func, *args, **kwargs):
     pass
@@ -62,7 +62,7 @@ On timeout, the process is killed (by default) and a TimeoutError exception is r
 
 ### Behaviors and rules
 - Logging within the called `func` is done at the logging level in effect when run_with_timeout is called. 
-`logging.getLogger('rwt').setLevel(logging.DEBUG)` enables additional status and trace info, intended for debug and regression testing.
+`logging.getLogger('cjnfuncs.rwt').setLevel(logging.DEBUG)` enables additional status and trace info, intended for debug and regression testing.
 - If making a subprocess call and the subprocess timeout limit is triggered, a
 subprocess.TimeoutExpired exception is produce with an odd error message on Python 3.11.9: 
 `TypeError: TimeoutExpired.__init__() missing 1 required positional argument: 'timeout'`. Generally, don't use
@@ -76,8 +76,8 @@ be captured for explicitly killing of any unterminated orphaned processes before
 Note that if `rwt_ntries` is greater than 1 and `rwt_kill=False`, then potentially several processes may 
 be created and orphaned, all attempting to doing the same work.
 - On Windows, debug logging messages from the run_with_timeout internal `worker()` function (which calls `func`) are 
-erratically produced, and not produced if `func` raises an exception.  Logging from within `func`, and any raised exception
-operate normally.  On Linux, worker debug operates correctly.
+erratically produced, and not produced if `func` raises an exception.  Logging from within `func`, and any raised exceptions
+operate normally.  On Linux, worker debug logging operates correctly.
 """
 
     #--------- Top_level ---------
@@ -106,7 +106,7 @@ def run_with_timeout(func, *args, **kwargs):
     if _kill == False:
         pid_list = []
 
-    rwt_logger=logging.getLogger('rwt')
+    rwt_logger=logging.getLogger('cjnfuncs.rwt')
     xx =  f"\nrun_with_timeout switches:\n  rwt_timeout:  {_timeout}\n  rwt_ntries:   {_ntries}\n  rwt_kill:     {_kill}"
     xx += f"\n  Function:     {func}\n  args:         {args}\n  kwargs:       {kwargs}"
     rwt_logger.debug (xx)
@@ -182,11 +182,11 @@ def worker(result_q, func, args, kwargs):
         sys.exit()
     signal.signal(signal.SIGTERM, worker_int_handler)       # kill (15)
 
-    logging.getLogger().setLevel(kwargs['root_loglevel'])
+    logging.getLogger().setLevel(kwargs['root_loglevel'])   # Necessary on Windows since executed func is in the spawned process (defaults to logging.WARNING)
     del kwargs['root_loglevel']
 
-    rwt_logger = logging.getLogger('rwt')
-    rwt_logger.setLevel(kwargs['rwt_loglevel'])
+    rwt_logger = logging.getLogger('cjnfuncs.rwt')
+    rwt_logger.setLevel(kwargs['rwt_loglevel'])             # Necessary on Windows since worker is in the spawned process (defaults to logging.WARNING)
     del kwargs['rwt_loglevel']
 
     # Run it

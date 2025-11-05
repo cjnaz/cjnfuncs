@@ -432,3 +432,18 @@ Notables:
   Interpolation | No | Yes
   Mapping Protocol Access | No | Yes
   Save to file | Yes | Yes
+
+<br>
+
+## Controlling logging from within configman code
+
+Logging within the configman module uses the `cjnfuncs.configman` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
+meaning that no logging messages are produced from within the configman code.  For validation and debug purposes, logging from within configman code 
+can be enabled by setting the logging level for this module's logger from within the tool script code:
+
+        logging.getLogger('cjnfuncs.configman').setLevel(logging.DEBUG)     # or logging.INFO
+
+        # Or alternately, use the core module set_logging_level() function:
+        set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
+
+

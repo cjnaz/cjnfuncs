@@ -45,7 +45,8 @@ Several issues with Windows support were fixed.
 `configman.config_item()` now supports a safe_mode switch, which will speed up Windows usage of loadconfig() as some risk.  See the note on `config_item()`.
 
 Named child loggers are now implemented on several cjnfuncs modules.  By default, logging from cjnfuncs modules is disabled (logging events are usually at the INFO or DEBUG
-level, while the default logging level is set to WARNING).  For example, logging from configman may be enabled by `logging.getLogger('cjnfuncs.configman').setLevel(logging.INFO)`.
+level, while the default logging level is set to WARNING).  For example, logging from configman may be enabled by `logging.getLogger('cjnfuncs.configman').setLevel(logging.INFO)`,
+or using `core.set_logging.level(logging.INFO, 'cjnfuncs.configman')`.
 
 Changed mungePath set_attributes from default True to default False to avoid long processing time on Windows by default.
 

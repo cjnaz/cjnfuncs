@@ -16,15 +16,10 @@ from .core import logging
 from .mungePath import mungePath
 import cjnfuncs.core as core
 
-# if sys.version_info < (3, 9):
-#     from importlib_resources import files as ir_files
-# else:
-      # Errors on Py3.9:  TypeError: <module ...> is not a package.  The module __spec__.submodule_search_locations is None
-#     from importlib.resources import files as ir_files
 from importlib_resources import files as ir_files
 
 deployfiles_logger = logging.getLogger('cjnfuncs.deployfiles')
-deployfiles_logger.setLevel(logging.INFO)      # logging enabled from this module.  All logging is at the INFO level.
+deployfiles_logger.setLevel(logging.WARNING)      # logging level enabled from this module.  All logging is at the INFO level.
 
 
 #=====================================================================================

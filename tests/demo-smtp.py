@@ -11,41 +11,47 @@ Produce / compare to golden results:
         Test 14 (inval@i^*#d) produces 3 diffs with varying reference codes such as d9443c01a7336-211056efd01sm81645855ad.52
 
     ./demo-smtp.py --cleanup
+
+Notes:
+    There are no tests for message handler services (eg twilio) since debug logging includes account credentials.
+    There are also no tests for DKIM signed messages.
+    These features must be manually tested.
 """
 
 #==========================================================
 #
-#  Chris Nelson, 2024
+#  Chris Nelson, 2024-2025
 #
 #==========================================================
 
-__version__ = "1.4"
+__version__ = "3.1"
 TOOLNAME =    "cjnfuncs_testsmtp"
 CONFIG_FILE = "demo_smtp.cfg"
 
 import argparse
+import re
 import sys
 import os
 import shutil
 
-from cjnfuncs.core     import set_toolname, SndEmailError, logging
-from cjnfuncs.configman import config_item
-from cjnfuncs.deployfiles import deploy_files
-from cjnfuncs.mungePath import mungePath
-from cjnfuncs.SMTP import snd_email, snd_notif, list_to
+from cjnfuncs.core          import set_toolname, logging, set_logging_level
+from cjnfuncs.configman     import config_item
+from cjnfuncs.deployfiles   import deploy_files
+from cjnfuncs.mungePath     import mungePath
+from cjnfuncs.SMTP          import snd_email, snd_notif, list_to
 import cjnfuncs.core as core
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('-t', '--test', type=int, default=0,
-                    help="Test number to run (default 0 = all).")
+parser.add_argument('-t', '--test', default='0',
+                    help="Test number to run (default 0) - 0 runs all tests")
 parser.add_argument('--config-file', '-c', type=str, default=CONFIG_FILE,
-                    help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory.")
+                    help=f"Path to the config file (Default <{CONFIG_FILE})> in user config directory")
 parser.add_argument('--dry-run', '-d', action='store_true',
-                    help=f"Disable email sends (set DontEmail).")
+                    help=f"Disable email sends (set DontEmail)")
 parser.add_argument('--setup-user', action='store_true',
-                    help=f"Install starter files in user space.")
+                    help=f"Install starter files in user space")
 parser.add_argument('--cleanup', action='store_true',
-                    help="Remove test dirs/files.")
+                    help="Remove test dirs/files")
 args = parser.parse_args()
 
 
@@ -76,9 +82,8 @@ if args.cleanup:
 try:
     config = config_item(args.config_file)
     print (f"\nLoad config {config.config_full_path}")
-    config.loadconfig()
-    # config.loadconfig(ldcfg_ll=10)    # Avoid logging credentials
-    # print (config.dump())
+    config.loadconfig()         # Don't log credentials
+    # print (config.dump())     # Enable for debug
 except Exception as e:
     print ("No user or site setup found.  Run with <--setup-user> to set up the environment.")
     print (f"Then customize mail params in {CONFIG_FILE} and creds_SMTP as needed.")
@@ -90,166 +95,137 @@ if args.dry_run:
     config.read_dict({'DontEmail':True}, section_name='SMTP')
 
 
-if args.test == 0  or  args.test == 1:
-    print ("\n\n=====  Test 1:  body to EmailTo  =====")
-    test_desc = '1:  body to EmailTo'
-    try:    # This first send will fail with <[Errno -2] Name or service not known> if smtp server params are not valid
-        snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>. The config files need to be customized?")
-        sys.exit()
+# --------------------------------------------------------------------
 
-if args.test == 0  or  args.test == 2:
-    print ("\n\n=====  Test 2:  body to EmailTo - not logged  =====")
-    test_desc = '2:  body to EmailTo - not logged'
+def dotest (desc, expect, func, *args, **kwargs):
+    logging.warning (f"\n\n==============================================================================================\n" +
+                     f"Test {tnum} - {desc}\n" +
+                     f"  GIVEN:      {args}, {kwargs}\n" +
+                     f"  EXPECT:     {expect}")
     try:
-        snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+        result = func (*args, subj=f"{tnum}: {desc}", smtp_config=config, **kwargs)
+        logging.warning (f"  RETURNED:\n{result}")
+        return result
+    except Exception as e:
+        logging.error (f"\n  RAISED:     {type(e).__name__}: {e}")
+        # logging.exception (f"\n  RAISED:     {type(e).__name__}: {e}")
+        return e
 
-if args.test == 0  or  args.test == 3:
-    print ("\n\n=====  Test 3:  filename to EmailTo - not logged  =====")
 
-    test_desc = '3:  filename to EmailTo - not logged'
+tnum_parse = re.compile(r"([\d]+)([\w]*)")
+def check_tnum(tnum_in, include0='0'):
+    global tnum
+    tnum = tnum_in
+    if args.test == include0  or  args.test == tnum_in:  return True
     try:
-        snd_email (subj=test_desc, to="EmailTo", filename=mungePath("testfile.txt", core.tool.config_dir).full_path, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+        if int(args.test) == int(tnum_parse.match(tnum_in).group(1)):  return True
+    except:  pass
+    return False
 
-if args.test == 0  or  args.test == 4:
-    print ("\n\n=====  Test 4:  htmlfile to EmailTo  =====")
+#===============================================================================================
 
-    test_desc = '4:  htmlfile to EmailTo'
-    try:
-        snd_email (subj=test_desc, htmlfile="testfile.html", to="EmailTo", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
 
-if args.test == 0  or  args.test == 5:
-    print ("\n\n=====  Test 5:  body to EmailToMulti  =====")
+set_logging_level(logging.DEBUG, 'cjnfuncs.smtp')
 
-    test_desc = '5:  body to EmailToMulti'
-    try:
-        snd_email (subj=test_desc, body="To be, or not to be...", to="EmailToMulti", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('1'):
+    # This first send will fail with <[Errno -2] Name or service not known> if smtp server params are not valid
+    dotest('body to EmailTo, logged', 'email send success, return None',
+        snd_email, to="EmailTo", body="To be, or not to be...", log=True)
 
-if args.test == 0  or  args.test == 6:
-    print ("\n\n=====  Test 6:  No such file nofile.txt  =====")
 
-    test_desc = '6:  No such file nofile.txt'
-    try:
-        snd_email (subj=test_desc, filename="nofile.txt", to="EmailTo", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('2'):
+    dotest('body to EmailTo - not logged', 'email send success, not logged, return None',
+        snd_email, to="EmailTo", body="To be, or not to be...")
 
-if args.test == 0  or  args.test == 7:
-    print ("\n\n=====  Test 7:  No to=  =====")
 
-    test_desc = '7:  No to='
-    try:
-        snd_email (subj=test_desc, body="Hello", smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('3'):
+    dotest('filename to EmailTo - not logged', 'email send success, not logged, return None',
+        snd_email, to="EmailTo", filename=mungePath("testfile.txt", core.tool.config_dir).full_path)
 
-if args.test == 0  or  args.test == 8:
-    print ("\n\n=====  Test 8:  Invalid to=  =====")
 
-    test_desc = '8:  Invalid to='
-    try:
-        snd_email (subj=test_desc, body="Hello", to="me@example.com, junkAtexample.com", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('4'):
+    dotest('htmlfile to EmailTo', 'email send success, logged, return None',
+        snd_email, htmlfile="testfile.html", to="EmailTo", log=True)
 
-if args.test == 0  or  args.test == 9:
-    print ("\n\n=====  Test 9:  This is a test subject - not logged  =====")
 
-    test_desc = '9:  This is a test subject - not logged'
-    try:
-        snd_notif (subj=test_desc, msg='This is the message body', smtp_config=config)       # to defaults to cfg["NotifList"]
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('5'):
+    dotest('body to EmailToMulti', 'email send success, logged, return None',
+        snd_email, body="To be, or not to be...", to="EmailToMulti", log=True)
 
-if args.test == 0  or  args.test == 10:
-    print ("\n\n=====  Test 10: This is another test subject  =====")
 
-    test_desc = '10: This is another test subject'
-    try:
-        snd_notif (subj=test_desc, msg='This is another message body', log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('6'):
+    dotest('No such file nofile.txt', "SndEmailError... [Errno 2] No such file or directory: '/home/cjn/.cache/cjnfuncs_testsmtp/nofile.txt'",
+        snd_email, filename="nofile.txt", to="EmailTo", log=True)
 
-if args.test == 0  or  args.test == 11:
-    print ("\n\n=====  Test 11: snd_notif with to='EmailTo'  =====")
 
-    test_desc = "11: snd_notif with to='EmailTo'"
-    try:
-        snd_notif (subj=test_desc, msg='This is another message body', to="EmailTo", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('7'):
+    dotest('No to=', "TypeError: snd_email() missing 1 required positional argument: 'to'",
+        snd_email, body="Hello")
 
-if args.test == 0  or  args.test == 12:
-    print ("\n\n=====  Test 12: No body, filename, or htmlfile  =====")
 
-    test_desc = '12: No body, filename, or htmlfile'
-    try:
-        snd_email (subj=test_desc, to="EmailTo", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('8'):
+    dotest('Invalid to=', "SndEmailError: Message subject <8: Invalid to=>:  <junkAtexample.com> is not a valid email address",
+        snd_email, body="Hello", to="me@example.com, junkAtexample.com", log=True)
 
-if args.test == 0  or  args.test == 13:
-    print ("\n\n=====  Test 13: Empty to=  =====")
 
-    test_desc = '13: Empty to='
-    try:
-        snd_email (subj=test_desc, to="", body="Hello", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('9'):
+    dotest('snd_notif to= defaults to cfg["NotifList"]', "notif send success, not logged, return None",
+        snd_notif, msg='This is the message body')
 
-if args.test == 0  or  args.test == 14:
-    print ("\n\n=====  Test 14: Invalid to='inval@i^*#d  =====")
 
-    test_desc = "14: Invalid to='inval@i^*#d"
-    try:
-        snd_email (subj=test_desc, to="inval@i^*#d", body="Hello", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+if check_tnum('10'):
+    dotest('snd_notif logged', "notif send success, logged, return None",
+        snd_notif, msg='This is another message body', log=True)
 
-if args.test == 0  or  args.test == 15:
-    print ("\n\n=====  Test 15:  Failed email server  =====")
 
-    test_desc = '15:  Failed email server'
+if check_tnum('11'):
+    dotest('This is another test subject', "notif send success, not logged, return None",
+        snd_notif, msg='This is another message body', to="EmailTo", log=True)
+
+
+if check_tnum('12'):
+    dotest('No body, filename, or htmlfile', "SndEmailError ... No body, filename, or htmlfile specified.",
+        snd_email, to="EmailTo", log=True)
+
+
+if check_tnum('13'):
+    dotest('Empty to=', "SndEmailError ... <> is not a valid email address",
+        snd_email, to="", body="Hello", log=True)
+
+
+if check_tnum('14'):
+    dotest("Invalid to='inval@i^*#d", "SndEmailError ... The recipient address <inval@i^*#d> is not a valid RFC 5321 address",
+        snd_email, to="inval@i^*#d", body="Hello", log=True)
+
+
+if check_tnum('15'):
+    orig_server = config.getcfg('EmailServer', section='SMTP')
     config.cfg['SMTP']['EmailServer'] = 'nosuchserver.nosuchmail.com'
-    try:
-        snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+    dotest("Failed email server", "SndEmailError ... <[Errno -2] Name or service not known> / <[Errno 11001] getaddrinfo failed>",
+        snd_email, to="EmailTo", body="To be, or not to be...", log=True)
+    config.cfg['SMTP']['EmailServer'] = orig_server
 
-if args.test == 0  or  args.test == 16:
-    print ("\n\n=====  Test 16:  Bad server port  =====")
 
-    test_desc = '16:  Bad server port'
+if check_tnum('16'):
     orig_port = config.getcfg('EmailServerPort', section='SMTP')
     config.read_dict({'EmailServerPort':'badport'}, section_name='SMTP')
-    try:
-        snd_email (subj=test_desc, to="EmailTo", body="To be, or not to be...", log=True, smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+    dotest("Bad server port", "SndEmailError ... Config EmailServerPort <badport> is invalid",
+        snd_email, to="EmailTo", body="To be, or not to be...", log=True)
     config.read_dict({'EmailServerPort':orig_port}, section_name='SMTP')
-    
 
-if args.test == 0  or  args.test == 17:
-    print ("\n\n=====  Test 17:  snd_notif Failed email server  =====")
 
-    test_desc = '17:  snd_notif Failed email server'
+if check_tnum('17'):
+    orig_server = config.cfg['SMTP']['EmailServer']
+
     config.cfg['SMTP']['EmailServer'] = 'nosuchserver.nosuchmail.com'
-    try:
-        snd_notif (subj=test_desc, msg='This is the message body', smtp_config=config)
-    except Exception:
-        logging.exception (f"Test failed:  <{test_desc}>")
+    config.cfg['SMTP']['EmailNTries'] = 2
+    config.cfg['SMTP']['EmailRetryWait'] = 0.5
+    dotest("snd_notif Failed email server", "SndEmailError ... <[Errno -2] Name or service not known> / <[Errno 11001] getaddrinfo failed>",
+        snd_notif, msg='This is the message body')
+    config.cfg['SMTP']['EmailServer'] = orig_server
 
 
-if args.test == 0  or  args.test == 18:
+if check_tnum('18'):
     print ("\n\n=====  Test 18:  list_to tests  =====")
 
     def list_to_test(desc, to, get_type):

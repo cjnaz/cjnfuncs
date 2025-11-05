@@ -339,8 +339,8 @@ logging.ERROR (40), or logging.CRITICAL (50).
 
 
 ### Behaviors
-- NOTE that a child logger that has not been set to a logging level will have a logging level = 0, which Python 
-treats the same as logging.WARNING (30).
+- NOTE that a child logger that has not been set to a logging level will have a logging level = 0, which Python seems to
+treat the same as logging.WARNING (30).
 
     """
 
