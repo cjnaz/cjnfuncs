@@ -14,6 +14,25 @@ keyword argument.
 
 <br>
 
+## Works well on Linux, but serious constraints on Windows
+
+Usage on Windows can be challenging due to the nature of Windows.
+
+- Windows implements multiprocessing by spawning a entire new Python interpreter.  This takes at least a second on a fast computer.  This startup time must be added to the rwt_timeout arg, as compare to the same call on Linux.
+
+- Because of using spawn, the function to be run must be defined at the top-level of the module, not defined within nested code.  This function, and the global information of the module are pickled and sent to the new Python interpreter process.  The spawned process executes the pickled code at startup, and then the called top-level function.  For this reason, the main code must be guarded inside `if __name__ == '__main__':` or you end up with a recursive loop.
+
+- Variables can only be accessed by the spawned process if they were globally and statically defined in the main module, so no dynamic state info can be passed thru globals.  Similarly, work done by the spawned process cannot be made available to the main process thru globals (this is the same on Linux).  Passing info between the calling main process and the spawned process should be via function args and returned values.
+
+- The root logger handler used by the main process (eg, configured by setuplogging()) is only erratically available to the spawned process.
+
+- Linux uses fork to launch a new multiprocess, which avoids all of these Windows problems.
+
+Bottom line:  If you need a controlled timeout for a function on Windows then keep it simple.  run_with_timeout() is functional on Windows, with coding constraints and with a substantial startup time penalty.  See [https://github.com/cjnaz/cjnfuncs/blob/main/tests/demo-rwt.py](https://github.com/cjnaz/cjnfuncs/blob/main/tests/demo-rwt.py) for example tests/usage that run on Windows and Linux.
+
+
+<br>
+
 ## Basic example
 
 Given:
@@ -24,13 +43,14 @@ Given:
 import time
 from cjnfuncs.rwt import run_with_timeout
 
-# Case 1
-print ("0.5 sec delay")
-run_with_timeout (time.sleep, 0.5, rwt_timeout=1)
+if __name__ == '__main__':
+    # Case 1
+    print ("0.5 sec delay")
+    run_with_timeout (time.sleep, 0.5, rwt_timeout=1)
 
-# Case 2
-print ("0.5 sec delay, killed after 0.2 sec")
-run_with_timeout (time.sleep, 0.5, rwt_timeout=0.2)
+    # Case 2
+    print ("0.5 sec delay, killed after 0.2 sec")
+    run_with_timeout (time.sleep, 0.5, rwt_timeout=0.2)
 ```
 
 The output:
@@ -39,9 +59,9 @@ $ ./rwt_ex1.py
 0.5 sec delay
 0.5 sec delay, killed after 0.2 sec
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/./rwt_ex1.py", line 13, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tools/doc_code_examples/./rwt_ex1.py", line 14, in <module>
     run_with_timeout (time.sleep, 0.5, rwt_timeout=0.2)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/rwt.py", line 159, in run_with_timeout
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/rwt.py", line 152, in run_with_timeout
     raise TimeoutError (f"Function <{func.__name__}> timed out after {_timeout} seconds (killed)")
 TimeoutError: Function <sleep> timed out after 0.2 seconds (killed)
 ```
@@ -54,7 +74,7 @@ a `TimeoutError` exception.  In real usage the exception should be trapped and h
 
 <br>
 
-## A detailed, annotated example
+## A detailed, annotated example - _Does not work on Windows_
 
 Given:
 ```
@@ -102,10 +122,9 @@ try:                                                                            
 except Exception as e:
     logging.warning (f"Received exception:  {type(e).__name__}: {e}")
 logging.info (f"Vars in main code after my_func call:  <{global_str}>, <{global_dict}>")
-
 ```
 
-The output:
+The output on Linux:
 ```
 $ ./rwt_ex2.py 
 2025-05-23 10:39:25,395                rwt_ex2.my_func                  INFO:  ===== Test 1:  Product: 42 =====
@@ -170,9 +189,9 @@ except Exception as e:
     logging.error (f"EXCEPTION received:  {type(e).__name__}: {e}")
 
     # Kill the orphaned processes
-    runner_pids = str(e).split('orphaned pids: ')[1].split(' ')
-    for runner_pid in runner_pids:
-        os.kill(int(runner_pid), signal.SIGKILL)
+    orphaned_pids = str(e).split('orphaned pids: ')[1].split(' ')
+    for pid in orphaned_pids:
+        os.kill(int(pid), signal.SIGKILL)
 ```
 
 Output from the exception log:
@@ -192,7 +211,3 @@ can be enabled by setting the logging level for this module's logger from within
 
         # Or alternately, use the core module set_logging_level() function:
         set_logging_level (logging.DEBUG, 'cjnfuncs.rwt')
-
-Note that on Windows, debug logging messages from the run_with_timeout internal `worker()` function (which calls `func`) are 
-erratically produced, and not produced if `func` raises an exception.  Logging from within `func`, and any raised exception
-operate normally.  On Linux, worker debug logging operates correctly.

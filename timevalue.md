@@ -196,19 +196,19 @@ Notables
 # Class timevalue (orig_val) - Convert time value strings of various resolutions to seconds
 
 `timevalue()` provides a convenience mechanism for working with time values and time/datetime calculations.
-timevalues are generally an integer value with an attached single character time resolution, such as "5m".
-Supported timevalue units are 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks, and are case insensitive. 
+timevalues are generally an integer or float value with an attached single character time resolution, such as "5m".
 `timevalue()` also accepts integer and float values, which are interpreted as seconds resolution. Also see retime().
 
 
 ### Args
 `orig_val` (str, int, or float)
 - The original, passed-in value
-
+- str values support these case insensitive suffix characters: 's'econds, 'm'inutes, 'h'ours, 'd'ays, and 'w'eeks
+- int and float values (and str values without suffix characters) have assumed resolution seconds (eg, 7.5 means 7.5 seconds)
 
 ### Returns
 - Handle to instance
-- Raises ValueError if given an unsupported time unit suffix.
+- Raises ValueError if the numeric value cannot be parsed or if given an unsupported time unit suffix.
 
 
 ### Instance attributes
@@ -259,7 +259,7 @@ time offset with the same syntax, simplifying the script code.
 - If timevalue (eg, '20m'), then value is taken as a time offset from now, equivalent to `datetime.datetime.now() + timevalue`.
 Note that using timevalue offsets may accumulate a time drift.
 - If single time (eg, '17:20') or list of str times (eg ['12:13:14', '14:00']), then taken as specific times.
-- times format is hour:minute with optional :second (default :00 seconds) using a 24-hour clock.
+- times format is hour:minute with optional :second (default :00 seconds) using a 24-hour clock and local time zone.
 - Note: A typo on a time replacing a ':' with '.' will be interpreted as a valid decimal number of seconds of a timevalue.
 
 `days` (int/str or list of int/str, default 0)

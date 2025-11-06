@@ -1,6 +1,7 @@
 [project]
 name = 'cjnfuncs'
-version = '3.1rc3'
+version = '3.1rc4'
+    # 3.1rc4 - Finished cleanup and doc work
     # 3.1rc3 - Testing scrub, doc work
     # 3.1rc2 - Windows fixes and improvements in core, rwt, configman.  Child loggers with support in set_logging_level & periodic_log.  Tests refresh.
     # 3.1rc1 - cleanup.  Last version of core with commented out QueueListener/QueueHandler

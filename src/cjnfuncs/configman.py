@@ -20,8 +20,12 @@ import cjnfuncs.core as core
 RWT_NTRIES =    3
 RWT_TIMEOUT =   2.0
 
+# Logging events within this module are at the INFO and DEBUG levels.  With this module's child logger set to
+# a minimum of WARNING level by default, then logging from this module is effectively disabled.  To enable
+# logging from this module add this within your tool script code:
+#       logging.getLogger('cjnfuncs.configman').setLevel(logging.DEBUG)
 configman_logger = logging.getLogger('cjnfuncs.configman')
-configman_logger.setLevel(logging.WARNING)      # Logging disabled from this module since all log statements are info or debug level.
+configman_logger.setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -35,7 +39,7 @@ initial_logging_setup_done = False   # Global since more than one config can be 
 
 class config_item():
     """
-## Class config_item (config_file=None, remap_logdirbase=True, force_str=False, secondary_config=False safe_mode=False) - Create a configuration instance
+## Class config_item (config_file=None, remap_logdirbase=True, force_str=False, secondary_config=False, safe_mode=False) - Create a configuration instance
 The config_item() class provides handling of one or more config file instances.  Class methods include:
  - Config file loading and reloading - `loadconfig()`
  - Loading config data from strings and dictionaries - `read_string()`, `read_dict()`
@@ -594,23 +598,25 @@ Loaded content is added to and/or modifies any previously loaded content.
 ```
     new_config = config_item()      # config need not be associated with a file
 
-        main_contents = {
+    main_contents = {
         'a' : 6,
         'b' : 7.0,
         'c' : [6, 7.0, 42, 'hi']
         }
+    new_config.read_dict(main_contents)
+
     sect_contents = {
         'd' : ('hi', 'there'),
         'e' : {'hi':'Hi!', 'there':'There!'},
         'f' : [6, 7.0, 42, 'hi']
         }
+    new_config.read_dict(sect_contents, 'A section')
+
     def_contents = {
         'g' : 'Hi',
         'h' : True,
         'i' : False
         }
-    new_config.read_dict(main_contents)
-    new_config.read_dict(sect_contents, 'A section')
     new_config.read_dict(def_contents, 'DEFAULT')
 ```
         """

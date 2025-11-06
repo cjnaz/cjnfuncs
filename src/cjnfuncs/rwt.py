@@ -6,7 +6,6 @@
 
 
 from .core import logging
-import cjnfuncs.core as core
 
 import signal
 import time
@@ -16,7 +15,13 @@ import multiprocessing
 import subprocess
 import traceback
 
-logging.getLogger('cjnfuncs.rwt').setLevel(logging.WARNING)
+# Logging events within this module are at the DEBUG level.  With this module's child logger set to
+# a minimum of WARNING level by default, then logging from this module is effectively disabled.  To enable
+# logging from this module add this within your tool script code:
+#       logging.getLogger('cjnfuncs.rwt').setLevel(logging.DEBUG)
+rwt_logger = logging.getLogger('cjnfuncs.rwt')
+rwt_logger.setLevel(logging.WARNING)
+
 
 def run_with_timeout(func, *args, **kwargs):
     pass
@@ -76,8 +81,8 @@ be captured for explicitly killing of any unterminated orphaned processes before
 Note that if `rwt_ntries` is greater than 1 and `rwt_kill=False`, then potentially several processes may 
 be created and orphaned, all attempting to doing the same work.
 - On Windows, debug logging messages from the run_with_timeout internal `worker()` function (which calls `func`) are 
-erratically produced, and not produced if `func` raises an exception.  Logging from within `func`, and any raised exceptions
-operate normally.  On Linux, worker debug logging operates correctly.
+erratically produced, and not produced if `func` raises an exception.  Logging from within `func` can also be
+erratic.  Raised exceptions operate normally.
 """
 
     #--------- Top_level ---------
@@ -106,7 +111,6 @@ def run_with_timeout(func, *args, **kwargs):
     if _kill == False:
         pid_list = []
 
-    rwt_logger=logging.getLogger('cjnfuncs.rwt')
     xx =  f"\nrun_with_timeout switches:\n  rwt_timeout:  {_timeout}\n  rwt_ntries:   {_ntries}\n  rwt_kill:     {_kill}"
     xx += f"\n  Function:     {func}\n  args:         {args}\n  kwargs:       {kwargs}"
     rwt_logger.debug (xx)

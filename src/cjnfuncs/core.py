@@ -36,9 +36,6 @@ for item in stack:  # Look for the import cjnfuncs line
             break
 
 
-# All cjnfuncs modules start with WARNING level logging.
-# To enable debug logging on a specific cjnfuncs module set the named child logger from your tool script:
-    # logging.getLogger('cjnfuncs.rwt').setLevel(logging.DEBUG)
 cjnfuncs_logger = logging.getLogger('cjnfuncs').setLevel(logging.WARNING)
 
 
@@ -84,11 +81,11 @@ class set_toolname():
 ## Class set_toolname (toolname) - Set target directories for config and data storage
 
 set_toolname() centralizes and establishes a set of base directory path variables for use in
-the tool script.  It looks for existing directories, based on the specified toolname, in
-the site-wide (system-wide) and then user-specific locations.  Specifically, site-wide 
+the tool script.  It looks first for existing directories, based on the specified toolname, in
+the site-wide (system-wide) locations and then in user-specific locations.  Specifically, site-wide 
 config and/or data directories are looked for at `/etc/xdg/<toolname>` and/or 
 `/usr/share/<toolname>`.  If site-wide directories are not 
-found then user-specific is assumed.  No directories are created.
+found then the user-specific environment is assumed.  No directories are created.
 
 
 ### Args
@@ -106,7 +103,8 @@ found then user-specific is assumed.  No directories are created.
 If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
 Thus, for a `user` setup, logging defaults to the configuration directory.  This is a 
-style variance, and can be reset in the tool script by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
+style variance, and can be disabled by setting `remap_logdirbase = False` on the config_item instantiation, or
+by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
 other directory) before a subsequent call to `loadconfig()` or `setuplogging()`.
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
@@ -213,11 +211,11 @@ Calling `setuplogging()` with no args results in:
 
 setuplogging() works standalone or in conjunction with `cjnfuncs.configman.loadconfig()`.
 If a loaded config file has a `LogFile` parameter then loadconfig() passes it's value thru
-`config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
+`config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins` switch
 that were passed to loadconfig() from the tool script.  This mechanism allows the tool script
 to override any config `LogFile`, such as for directing output to the console for a tool script's 
 interactive use.  For example, this call will set logging output to the console regardless of 
-the log file declared in the config file:
+the LogFile declared in the config file:
 
     setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')
 
@@ -409,8 +407,7 @@ def pop_logging_level_stack(logger_name='', clear=False):
     """
 ## pop_logging_level_stack (logger_name='', clear=False) - Discard top of the stack
 
-Useful if the preexisting logging level was saved to the stack, but should be discarded 
-when a new level is set.
+Useful if the preexisting logging level was saved to the stack, but should be discarded.
 
 
 ### Args

@@ -16,14 +16,18 @@ import posix_ipc
 import mmap
 import os
 import datetime
-from .core import logging
+from .core import logging, set_toolname, setuplogging
 
 import importlib.metadata
 __version__ = importlib.metadata.version(__package__ or __name__)
 
 
+# Logging events within this module are at the DEBUG level.  With this module's child logger set to
+# a minimum of WARNING level by default, then logging from this module is effectively disabled.  To enable
+# logging from this module add this within your tool script code:
+#       logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
 resourcelock_logger = logging.getLogger('cjnfuncs.resourcelock')
-resourcelock_logger.setLevel(logging.WARNING)       # Logging disabled from this module since all log statements are debug level.
+resourcelock_logger.setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -46,16 +50,16 @@ process completes its work, and then acquire the I2C bus lock so that other proc
 
 - Resource locks are on the honor system.  Any process can unget a lock, but should not if it didn't get the lock.
 
-- This lock mechanism is just as effective across threads within a process.
+- This lock mechanism is just as effective across threads within a process, and between processes.
 
 - As many different/independent locks as needed may be created.
 
-- The first time a lock is created (on the current computer since reboot) the lock info string (accessible via `get_lock_info()`)
-is set to '', else it retains the value set by the most recent get_lock() call.
+- The first time a lock is created (on the current computer since reboot) the lock info string is set to ''
+(accessible via `get_lock_info()`), else it retains the value set by the most recent get_lock() call.
 
 - It is recommended (in order to avoid a minor memory leak) to `close()` the lock in the tool script cleanup code.
-Calling `close()` sets the `closed` attribute to True so that any following code can detect and re-instantiate the 
-lock if needed.
+Calling `close()` sets the `closed` attribute to True so that any following code within the current tool script
+can detect and re-instantiate the lock if needed.
 
 - Semaphores (lock names) and shared memory segments (used for the `lock_info` string) in the posix_ipc module 
 must have `/` prefixes.  resource_lock() prepends the `/` if `lockname` doesn't start with a `/`, and hides the `/` prefix.
@@ -194,6 +198,7 @@ unless `force=True`.
 
 `where_called` (str, default '')
 - Debugging aid string for indicating what code released the lock.  Logged at the debug level.
+Not stored anywhere, nor available to a later call.
 
 ### Returns
 - True:  Lock successfully released
@@ -346,6 +351,10 @@ def cli():
     import argparse
     from time import sleep
 
+    set_toolname ('resourcelock_cli')
+    setuplogging()
+    logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
+
     GET_TIMEOUT = 0.5
     TRACE_INTERVAL = 0.5
     
@@ -367,7 +376,6 @@ def cli():
 
     lock = resource_lock(args.LockName)
 
-    logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
 
     if args.Cmd == "get":
         _timeout = args.get_timeout

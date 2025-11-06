@@ -16,7 +16,7 @@ module | Description/Purpose
 [SMTP](SMTP.md)                   | Send notification and email messages
 
 Developed and tested on Python 3.9.21 and supported on all higher Python versions.
-Developed on Linux.  Not supported on Windows (posix-ipc module dependency).
+Developed on Linux.  Supported on Windows, except for the resourcelock module (posix-ipc module dependency).
 
 In this documentation, "tool script" refers to a Python project that imports and uses cjnfuncs. Some may be simple scripts, and others may themselves be installed packages.
 
@@ -40,15 +40,15 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 
 ## Key changes since the prior major public release (version 3.0)
 
-Several issues with Windows support were fixed.
+- Several issues with Windows support were fixed.
 
-`configman.config_item()` now supports a safe_mode switch, which will speed up Windows usage of loadconfig() as some risk.  See the note on `config_item()`.
+- `configman.config_item()` now supports a safe_mode switch, which will speed up Windows usage of loadconfig() at some risk.  See the note on `config_item()`.
 
-Named child loggers are now implemented on several cjnfuncs modules.  By default, logging from cjnfuncs modules is disabled (logging events are usually at the INFO or DEBUG
+- Named child loggers are now implemented on several cjnfuncs modules.  By default, logging from cjnfuncs modules is disabled (logging events are usually at the INFO or DEBUG
 level, while the default logging level is set to WARNING).  For example, logging from configman may be enabled by `logging.getLogger('cjnfuncs.configman').setLevel(logging.INFO)`,
 or using `core.set_logging.level(logging.INFO, 'cjnfuncs.configman')`.
 
-Changed mungePath set_attributes from default True to default False to avoid long processing time on Windows by default.
+- Changed mungePath set_attributes from default True to default False to avoid long processing time on Windows by default.
 
 <br/>
 

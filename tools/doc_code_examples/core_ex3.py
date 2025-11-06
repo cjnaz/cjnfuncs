@@ -7,11 +7,11 @@ set_toolname('core_ex3')    # Configures the root logger to defaults, including 
 def myfunction():
     # With set and restore_logging_level calls uncommented I get debug logging within myfunction
 
-    set_logging_level(logging.DEBUG)    # Save current WARNING/30 level to the stack and set DEBUG/10 level
+    set_logging_level(logging.DEBUG, save=True) # Save current WARNING/30 level to the stack and set DEBUG/10 level
     # Do complicated stuff in this function
     logging.debug   (f"2 - Within myfunction()        - logging level: {logging.getLogger().level}. On the stack: {get_logging_level_stack()}")
 
-    restore_logging_level()             # Restore (and pop) the pre-existing level from from stack
+    restore_logging_level()                     # Restore (and pop) the pre-existing level from from stack
     return
 
 

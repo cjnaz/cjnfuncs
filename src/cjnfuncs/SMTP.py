@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2024
+#  Chris Nelson, 2018-2025
 #
 #==========================================================
 
@@ -32,8 +32,12 @@ SERVER_TIMEOUT =        '2s'        # server connection timeout
 COUNTRY_CODE =          1           # US/Canada
 PHONE_NUM_LENGTH =      10          # US/Canada
 
+# Logging events within this module are at the DEBUG level.  With this module's child logger set to
+# a minimum of WARNING level by default, then logging from this module is effectively disabled.  To enable
+# logging from this module add this within your tool script code:
+#       logging.getLogger('cjnfuncs.smtp').setLevel(logging.DEBUG)
 smtp_logger = logging.getLogger('cjnfuncs.smtp')
-smtp_logger.setLevel(logging.WARNING)      # Logging disabled from this module since all log statements are info or debug level.
+smtp_logger.setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -67,20 +71,19 @@ Three attempts are made to send the message.
 
 `urls_list` (list, default [])
 - A list of url strings to be passed to the message sending plugin module, which should pass them to the messaging service.
-- This list is discarded by `snd_notif()` if not using a messaging service.  If you want to send a message with
-urls then included them in the `msg` body text.
+- If not using a messaging service then this list is discarded, in which case include the URLs in the `msg` body.
 
 `to` (str, default 'NotifList')
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name (also listing one
 or more whitespace or comma separated email addresses).  If the `to` arg does not
-contain an '@' it is assumed to be a config param.
+contain an '@' it is assumed to be a config param name.
 - Define `NotifList` in the config file to use the default `to` value.
 
 `log` (bool, default False)
 - If True, logs that the message was sent at the WARNING level (using the root logger). If False, logs 
-at the DEBUG level (using the 'cjnfuncs.smpt' logger). Useful for eliminating separate logging messages in the tool script code.
-The `subj` field is part of the log message.
+at the DEBUG level (using the 'cjnfuncs.smtp' logger). Useful for eliminating separate logging messages in the tool script code.
+The `subj` field and `msg` body are included in the log message.
 
 `smtp_config` (config_item class instance)
 - config_item class instance containing the [SMTP] section and related params
@@ -119,7 +122,7 @@ default `to` arg value.
 
 
 ### Behaviors and rules
-- `snd_notif()` uses `snd_email()` to send the message. See `snd_email()` for related setup.
+- `snd_notif()` uses `snd_email()` to send the message (if not using a messaging service). See `snd_email()` for related setup.
     """
 
     if smtp_config.getcfg('DontNotif', fallback=False, section='SMTP'):
@@ -202,16 +205,18 @@ Three attempts are made to send the message (see `EmailNTries`, below).
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name in the [SMTP] section (also listing one
 or more whitespace or comma separated email addresses).  If the `to` arg does not
-contain an '@' it is assumed to be a config param.
+contain an '@' it is assumed to be a config param name.
 
 `body` (str, default None)
 - A string message to be sent
 
 `filename` (str, default None)
-- A str or Path to the file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
+- A str or Path to the file who's content will be sent as the body of the message
+- The file path is relative to the `core.tool.cache_dir`, or an absolute path
 
 `htmlfile` (str, default None)
-- A str or Path to the html formatted file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
+- A str or Path to the file who's HTML-formatted content will be sent as the body of the message
+- The file path is relative to the `core.tool.cache_dir`, or an absolute path
 
 `log` (bool, default False)
 - If True, logs that the message was sent at the WARNING level (using the root logger). If False, logs 
@@ -239,7 +244,7 @@ The `subj` field is part of the log message.
 - Password for `EmailServer` login, if required by the server
 
 `DontEmail` (default False)
-- If True, messages are not sent. Useful for debug. Also blocks `snd_notif()` messages.
+- If True, messages are not sent. Useful for debug. Also blocks `snd_notif()` messages not sent thru a messaging service.
 
 `EmailVerbose` (default False)
 - If True, detailed transactions with the SMTP server are sent to stdout. Useful for debug.

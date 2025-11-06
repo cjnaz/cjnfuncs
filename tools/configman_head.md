@@ -254,7 +254,7 @@ bad_float:     52.3.5
 
 Notables (See **** NOTE # in the above example config file and code):
 1. loadconfig() looks for `LogLevel` abd `LogFile` and sets the root logger accordingly.  If you want to
-change the console or file logging format you may also define `ConsoleLogFormat` or `FileLogFormat`, respectively.  Logging setups only apply for the primary/master config (`config_item(secondary_config = False)`).  The logging level _within_ loadconfig() is set using the `ldcfg_ll` switch (default WARNING level).
+change the console or file logging format you may also define `ConsoleLogFormat` or `FileLogFormat`, respectively.  Logging setups only apply for the primary/master config (`config_item(secondary_config = False)`).  The logging level _within_ loadconfig() is controlled by the child logger `cjnfuncs.configman` (default WARNING level, see below).
 2. loadconfig() accepts most any character in a param name, except the comment character `#`, or the param-value separator characters whitespace, `=`, or `:`.  
 3. loadconfig() attempts to load a value as a type `int`, `bool`, `float`, `list`, `dict`, or `tuple`, if the value has the correct syntax for that type.  The fallback is to type `str`.  Loading all params as type `str` can be forced:  `my_config = config_item('configman_ex2.cfg', force_str=True)`.
 4. Sections are supported, and are accessed as `my_config.getcfg('NotifList', section='SMTP')`.  Only 
@@ -348,8 +348,8 @@ core.tool.log_dir_base  :  /home/me/.config/configman_ex3
 
 Notables:
 1. At the startup of the service script, with `loadconfig(tolerate_missing=False)`, the config file must be accessible or a `ConfigError` will be raised.  This should be trapped and gracefully handled.
-2. With `loadconfig(tolerate_missing=True)`, `-1` will be returned if the config file is not currently accessible. You will want to add code to output this warning only once, so as to not flood the log.  tolerate_missing=True allows the config file to be placed on a network file system. 
-3. loadconfig() will return `1` if the config file timestamp has changed (`0` if not changed).  The prior `loadconfig(flush_on_reload=True)` will have purged all cfg data and reloaded it from the file.
+2. With `loadconfig(tolerate_missing=True)`, `-1` will be returned if the config file is not currently accessible. You will want to add code to output this warning only once, so as to not flood the log.  tolerate_missing=True allows the config file to be placed on a network file system. Also see `core.periodic_log()`.
+3. loadconfig() will return `1` if the config file timestamp has changed (`0` if not changed).  If the config file was changed the `loadconfig(flush_on_reload=True)` call will have purged all cfg data and reloaded it from the file.
 4. If this is a `reloaded` case (versus `first`), then cleanup work may be needed prior to the following resource setups.
 5. Threads and asyncio should use local copies of cfg data so that they don't crash when the cfg data temporarily disappears during the loadconfig() reload.  Also see loadconfig's `prereload_callback` parameter.
 

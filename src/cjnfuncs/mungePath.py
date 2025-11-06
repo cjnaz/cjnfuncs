@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2024
+#  Chris Nelson, 2018-2025
 #
 #==========================================================
 
@@ -50,7 +50,7 @@ to `in_path`, and the `base_path` is disregarded.  See Special handling note, be
 - Force-make a full directory path.  `base_path` / `in_path` is understood to be to a directory.
 
 `set_attributes` (bool, default False) - _See the first note in Behaviors and rules, below_
-- If True then `refresh_stats()` is called, setting `.exists`, `.is_file`, .is_dir` to valid values (or False on timeout).
+- If True then `refresh_stats()` is called, setting `.exists`, `.is_file`, `.is_dir` to valid values (or False on timeout).
 - If False then those attributes are set to `None`, indicating not initialized.
 - These other attributes are always set: `.full_path`, `.parent`, `.name`, `.is_absolute`, and `.is_relative`, as the do not depend on file system access.
 
@@ -112,12 +112,14 @@ referenced, eg `./myfile`.  _Covering the cases, assuming the shell cwd is `/hom
 
 - `in_path` and `base_path` may be type str(), Path(), or PurePath().
 - Symlinks are followed (not resolved).
-- User and environment vars are expanded, eg `~/.config` >> `/home/me/.config`, as does `$HOME/.config`.
+- User and environment vars are expanded, eg `~/.config` >> `/home/me/.config` (`C:\\Users\\me` on Windows), as does `$HOME/.config`. 
+Environment var `$HOME` on Linux is equivalent to `%HOMEDRIVE%%HOMEPATH%` on Windows.  mungePath does not
+make the substitution since `$HOME` is just one of many possible environment vars.
 - The `.parent` is the directory containing (above) the `.full_path`.  If the object `.is_file` then `.parent` is the
 directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
 `.parent` is the directory above the end-point directory.
 - When using `mkdir=True` the combined `base_path` / `in_path` is understood to be a directory path (not
-to a file), and will be created if it does not already exist. (Uses `pathlib.Path.mkdir()`).  A FileExistsError 
+to a file), and that directory if possible. (Uses `pathlib.Path.mkdir()`).  A FileExistsError 
 is raised if you attempt to mkdir on top of an existing file.
 - See [GitHub repo](https://github.com/cjnaz/cjnfuncs) tests/demo-mungePath.py for numerous application examples.
         """
@@ -164,7 +166,7 @@ is raised if you attempt to mkdir on top of an existing file.
 
 ***mungePath() class member function***
 
-The instance attributes `.exists`, `.is_dir`, and `.is_file`) may be set 
+The instance attributes `.exists`, `.is_dir`, and `.is_file` may be set 
 at the time the mungePath instance is created by setting `set_attributes=True` (the default is False). 
 These attributes are not updated automatically as changes happen on the filesystem. 
 Call `refresh_stats()` as needed, or directly access the pathlib methods (or access through
@@ -232,7 +234,7 @@ are access issues.
 
 def check_path_exists(inpath, timeout=1.0, ntries=1):
     """
-## check_path_exists (path, timeout=1.0, ntries=1) - With enforced timeout (no hang)
+## check_path_exists (inpath, timeout=1.0, ntries=1) - With enforced timeout (no hang)
 
 pathlib.Path.exists() tends to hang for an extended time when there are network access issues.
 check_path_exists() wraps `pathlib.Path.exists()` with a call to run_with_timeout().

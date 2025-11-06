@@ -18,8 +18,12 @@ import cjnfuncs.core as core
 
 from importlib_resources import files as ir_files
 
+# Logging events within this module are at the INFO level.  With this module's child logger set to
+# a minimum of WARNING level by default, then logging from this module is effectively disabled.  To enable
+# logging from this module add this within your tool script code:
+#       logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
 deployfiles_logger = logging.getLogger('cjnfuncs.deployfiles')
-deployfiles_logger.setLevel(logging.WARNING)      # logging level enabled from this module.  All logging is at the INFO level.
+deployfiles_logger.setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -34,7 +38,7 @@ def deploy_files(files_list, overwrite=False, missing_ok=False):
 
 `deploy_files()` is used to install initial setup files (and directory trees) from the installed package (or tool script) 
 to the user or site config and data directories. Suggested usage is with the CLI `--setup-user` or `--setup-site` switches.
-Distribution files and directory trees are hosted in `<module_root>/deployment_files/`.
+Distribution files and directory trees are hosted in `<package_dir>/deployment_files/`.
 
 `deploy_files()` accepts a list of dictionaries defining items to be pushed to user or site space.
 Each dictionary defines
@@ -45,7 +49,7 @@ the file and directory permissions for the pushed items.  Ownership matches the 
 ### Args
 `files_list` (list of dictionaries)
 - A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
-  - `source` - Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
+  - `source` - Either an individual file or directory tree within and relative to `<package_dir>/deployment_files/`.
     No wildcard support.
   - `target_dir` - A directory target for the pushed `source`.  It is expanded for user and environment vars, 
     and supports these substitutions (per `set_toolname()`):
@@ -97,13 +101,10 @@ retained (the new `dir_stat` setting is disregarded).
 With `overwrite=True`, an existing directory where a file is deployed will be updated 
 to the new `dir_stat` value.
 
-- Directory and file permissions on Windows do not support separate permissions for user, group and world.
-When setting permissions on deployed items on Windows, only the user permission is used even on a file share
+- Directory and file permissions on Windows do not support separate permissions for User, Group and Other, 
+and Windows ACLs are not currently supported.
+When setting permissions on deployed items on Windows, only the User permission is used even on a file share
 hosted on Linux.  Eg, a file permission of 0x644 will deploy with permission 0x666 (only the first octet is used).
-
-- deploy_files produces several log events at the INFO level.  To disable logging, in your tool script add:
-
-    logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.WARNING)
     """
 
     default_file_stat = 0o644

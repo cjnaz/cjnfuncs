@@ -17,24 +17,25 @@ from cjnfuncs.core      import set_toolname
 from cjnfuncs.mungePath import mungePath
 import cjnfuncs.core as core
 
-tool = set_toolname("mungePath_ex1")
+if __name__ == '__main__':                                          # **** NOTE 8   
+    tool = set_toolname("mungePath_ex1")
+                                                                    # **** NOTE 1
+    my_mp = mungePath ("mysubdir/file.txt", core.tool.data_dir, set_attributes=True)
+    print (my_mp)                                                   # **** NOTE 2
 
-my_mp = mungePath ("mysubdir/file.txt", core.tool.data_dir, set_attributes=True)    # **** NOTE 1
-print (my_mp)                                                   # **** NOTE 2
+    mungePath (my_mp.parent, mkdir=True)                            # **** NOTE 3
 
-mungePath (my_mp.parent, mkdir=True)                            # **** NOTE 3
-
-if not my_mp.exists:                                            # **** NOTE 4, NOTE 1
-    print (f"Making the file <{my_mp.name}>")
-    with my_mp.full_path.open('w') as outfile:                  # **** NOTE 5
-        outfile.write("Hello")
-    my_mp.refresh_stats()                                       # **** NOTE 6
-    print (my_mp)
-else:
-    print ("File content: ", my_mp.full_path.read_text())       # **** NOTE 5
-    print ("Removing the file")
-    my_mp.full_path.unlink()                                    # **** NOTE 5
-    print (my_mp.refresh_stats())                               # **** NOTE 7
+    if not my_mp.exists:                                            # **** NOTE 4, NOTE 1
+        print (f"Making the file <{my_mp.name}>")
+        with my_mp.full_path.open('w') as outfile:                  # **** NOTE 5
+            outfile.write("Hello")
+        my_mp.refresh_stats()                                       # **** NOTE 6
+        print (my_mp)
+    else:
+        print ("File content: ", my_mp.full_path.read_text())       # **** NOTE 5
+        print ("Removing the file")
+        my_mp.full_path.unlink()                                    # **** NOTE 5
+        print (my_mp.refresh_stats())                               # **** NOTE 7
 ```
 
 What gets printed:
@@ -88,18 +89,26 @@ Notables:
    - _Recommended:_ Call `check_path_exists(my_mp.full_path)`, which supports enforced timeout and retries, and returns `True` or `False`.
    - Call `my_mp.refresh_stats()` before accessing `my_mp.exists`, but `refresh_status()` updates all three attributes, with possible 3x timeouts, while the code only needs `.exists`.
    - Access the pathlib method directly: `my_mp.full_path.exists()`, but this can hang.
+
 2. Printing the instance shows all its stats.  `my_mp.exists` indicates whether the file exists _at the time the instance was created_.
+
 3. The `my_mp.parent` directory is created, if it doesn't yet exist.
-4. A mungePath instance holds a set of status booleans (attributes, not methods) that are handy for coding.
+
+4. A mungePath instance holds a set of status booleans (attributes, not methods) that are 
+handy for coding.
+
 5. `.full_path` and `.parent` are pathlib.Path types, so all of the Path methods may be used.
+
 6. If the mungePath `.exists`, `.is_dir` and `.is_file` instance booleans are stale, a call to `.refresh_stats()` is needed.
+
 7. `.refresh_stats()` returns the instance handle, so it may be called in-line with boolean checks, etc.
 
+8. Using `set_attributes=True` on Windows slows down execution dramatically due to three underlying `run_with_timeout()` calls, which invoke multiprocess spawns on Windows.  See note 1 for alternatives.  On Linux this code runs quickly.
 <br>
 
 ## check_path_exists() eliminates hangs
 
-Executing `pathlib.Path(/network_path_not_currently_available/myfile).exists()` may result in a many second hang.  `check_path_exists()` is a simple function that wraps `Path.exists()` with timeout enforcement using `run_with_timeout()`.  
+Executing `pathlib.Path(/network_path_not_currently_available/myfile).exists()` may result in a many second hang.  `check_path_exists()` is a simple function that wraps `Path.exists()` with timeout enforcement using `run_with_timeout()`.  Note that it can take a couple seconds to run `check_path_exists()` on Windows (fast on Linux), but it wont hang.
 
 
 <a id="links"></a>
@@ -149,7 +158,7 @@ to `in_path`, and the `base_path` is disregarded.  See Special handling note, be
 - Force-make a full directory path.  `base_path` / `in_path` is understood to be to a directory.
 
 `set_attributes` (bool, default False) - _See the first note in Behaviors and rules, below_
-- If True then `refresh_stats()` is called, setting `.exists`, `.is_file`, .is_dir` to valid values (or False on timeout).
+- If True then `refresh_stats()` is called, setting `.exists`, `.is_file`, `.is_dir` to valid values (or False on timeout).
 - If False then those attributes are set to `None`, indicating not initialized.
 - These other attributes are always set: `.full_path`, `.parent`, `.name`, `.is_absolute`, and `.is_relative`, as the do not depend on file system access.
 
@@ -211,12 +220,14 @@ referenced, eg `./myfile`.  _Covering the cases, assuming the shell cwd is `/hom
 
 - `in_path` and `base_path` may be type str(), Path(), or PurePath().
 - Symlinks are followed (not resolved).
-- User and environment vars are expanded, eg `~/.config` >> `/home/me/.config`, as does `$HOME/.config`.
+- User and environment vars are expanded, eg `~/.config` >> `/home/me/.config` (`C:\\Users\\me` on Windows), as does `$HOME/.config`. 
+Environment var `$HOME` on Linux is equivalent to `%HOMEDRIVE%%HOMEPATH%` on Windows.  mungePath does not
+make the substitution since `$HOME` is just one of many possible environment vars.
 - The `.parent` is the directory containing (above) the `.full_path`.  If the object `.is_file` then `.parent` is the
 directory containing the file.  If the object `.is_dir` then the `.full_path` includes the end-point directory, and 
 `.parent` is the directory above the end-point directory.
 - When using `mkdir=True` the combined `base_path` / `in_path` is understood to be a directory path (not
-to a file), and will be created if it does not already exist. (Uses `pathlib.Path.mkdir()`).  A FileExistsError 
+to a file), and that directory if possible. (Uses `pathlib.Path.mkdir()`).  A FileExistsError 
 is raised if you attempt to mkdir on top of an existing file.
 - See [GitHub repo](https://github.com/cjnaz/cjnfuncs) tests/demo-mungePath.py for numerous application examples.
         
@@ -230,7 +241,7 @@ is raised if you attempt to mkdir on top of an existing file.
 
 ***mungePath() class member function***
 
-The instance attributes `.exists`, `.is_dir`, and `.is_file`) may be set 
+The instance attributes `.exists`, `.is_dir`, and `.is_file` may be set 
 at the time the mungePath instance is created by setting `set_attributes=True` (the default is False). 
 These attributes are not updated automatically as changes happen on the filesystem. 
 Call `refresh_stats()` as needed, or directly access the pathlib methods (or access through
@@ -260,7 +271,7 @@ are access issues.
 
 ---
 
-# check_path_exists (path, timeout=1.0, ntries=1) - With enforced timeout (no hang)
+# check_path_exists (inpath, timeout=1.0, ntries=1) - With enforced timeout (no hang)
 
 pathlib.Path.exists() tends to hang for an extended time when there are network access issues.
 check_path_exists() wraps `pathlib.Path.exists()` with a call to run_with_timeout().

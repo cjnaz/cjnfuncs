@@ -13,13 +13,14 @@ deploy_files() provides the mechanism to push files and directories from the too
 
 import argparse
 import sys
-from cjnfuncs.core        import set_toolname
+from cjnfuncs.core        import set_toolname, logging
 from cjnfuncs.deployfiles import deploy_files
 
 CONFIG_FILE = "tool_config.cfg"
 
 
-tool = set_toolname("deployfiles_ex1")
+set_toolname("deployfiles_ex1")
+logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
 
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--setup-user', action='store_true',
@@ -48,23 +49,40 @@ if args.setup_site:
         ]) #, overwrite=True)
     sys.exit()
 ```
+And when run:
+```
+$ ./deployfiles_ex1.py --setup-user
+    deployfiles.deploy_files         -     INFO:  Created   /home/me/.config/deployfiles_ex1
+    deployfiles.deploy_files         -     INFO:  Deployed  /home/me/.config/deployfiles_ex1/tool_config.cfg
+    deployfiles.deploy_files         -     INFO:  Deployed  /home/me/.config/deployfiles_ex1/creds_SMTP
+    deployfiles.deploy_files         -     INFO:  Deployed  /home/me/.config/deployfiles_ex1/template.service
+    deployfiles.deploy_files         -     INFO:  Created   /home/me/.local/share/deployfiles_ex1/mydirs/test_dir
+    deployfiles.copytree             -     INFO:  Deployed  /home/me/.local/share/deployfiles_ex1/mydirs/test_dir/x3
+    deployfiles.copytree             -     INFO:  Deployed  /home/me/.local/share/deployfiles_ex1/mydirs/test_dir/x1
+    deployfiles.copytree             -     INFO:  Created   /home/me/.local/share/deployfiles_ex1/mydirs/test_dir/subdir
+    deployfiles.copytree             -     INFO:  Deployed  /home/me/.local/share/deployfiles_ex1/mydirs/test_dir/subdir/x4
+    deployfiles.copytree             -     INFO:  Created   /home/me/.local/share/deployfiles_ex1/mydirs/test_dir/subdir/emptydir
+    deployfiles.copytree             -     INFO:  Deployed  /home/me/.local/share/deployfiles_ex1/mydirs/test_dir/x2
+```
 
 Notables
 - deploy_files() uses mungePath() for processing the target_dir path, so all of mungePath's features and rules apply, such as user and environment var expansion, absolute and relative paths.
 - Permissions may be set on deployed files and directories.  For example, `creds_SMTP` is set to user-read-write only.
 - Various exceptions may be raised, including PermissionError, FileNotFoundError, FileExistsError.  If untrapped then 
-these will cause the tool script to exit.  If usage is interactive only then exception handling in unnecessary.
+these will cause the tool script to exit.  If usage is interactive only then exception handling may be unnecessary.
 - By default, if the target file already exists then a warning in printed and that file deploy is skipped, leaving the existing file untouched. Setting `overwrite=True` does what you might expect.  One usage method is to simply delete a deployed file and run the tool script with `--setup-user` again to replace the file with a fresh copy.
 
 
 ### Where are the source files/dirs located?
 
-In the case of a packaged tool, the source files are hosted in a `deployment_files` directory beneath the module's directory in the package:
+In the case of a packaged tool, the source files are hosted in a `deployment_files` directory beneath the `package_dir`:
 
     package-root
       | src
-        | module_dir
-           tool_script_module.py
+        | package_dir
+           __init.py__
+           tool_script_module1.py
+           tool_script_module2.py
            | deployment_files
               tool_config.cfg
               creds_SMTP
@@ -91,9 +109,20 @@ DATA_DIR        | core.tool.data_dir **
 STATE_DIR       | core.tool.state_dir **
 CACHE_DIR       | core.tool.cache_dir **
 
-** Note: These keywords are set to the user-mode or site-mode full absolute paths by `set_toolname()`.  For example, `USER_CONFIG_DIR` maps to `core.tool.user_config_dir`, and `CONFIG_DIR` maps to `core.tool.config_dir`, and in user mode both of these variables contain the path `/home/<me>/.config/<toolname>/`. In site mode, `CONFIG_DIR` will map to the same path as `SITE_CONFIG_DIR`.
+** Note: These keywords are set to the user-mode or site-mode absolute paths by `set_toolname()`.  For example, `USER_CONFIG_DIR` maps to `core.tool.user_config_dir`, and `CONFIG_DIR` maps to `core.tool.config_dir`, and in user mode both of these variables contain the path `/home/<me>/.config/<toolname>/`. In site mode, `CONFIG_DIR` will map to the same path as `SITE_CONFIG_DIR`.
 
+<br>
 
+## Controlling logging from within deployfiles code
+
+Logging within the deployfiles module uses the `cjnfuncs.deployfiles` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
+meaning that no logging messages are produced from within the deployfiles code.  For validation and debug purposes, logging from within deployfiles code 
+can be enabled by setting the logging level for this module's logger from within the tool script code:
+
+        logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
+
+        # Or alternately, use the core module set_logging_level() function:
+        set_logging_level (logging.INFO, 'cjnfuncs.deployfiles')
 
 
 <a id="links"></a>
@@ -118,7 +147,7 @@ CACHE_DIR       | core.tool.cache_dir **
 
 `deploy_files()` is used to install initial setup files (and directory trees) from the installed package (or tool script) 
 to the user or site config and data directories. Suggested usage is with the CLI `--setup-user` or `--setup-site` switches.
-Distribution files and directory trees are hosted in `<module_root>/deployment_files/`.
+Distribution files and directory trees are hosted in `<package_dir>/deployment_files/`.
 
 `deploy_files()` accepts a list of dictionaries defining items to be pushed to user or site space.
 Each dictionary defines
@@ -129,7 +158,7 @@ the file and directory permissions for the pushed items.  Ownership matches the 
 ### Args
 `files_list` (list of dictionaries)
 - A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
-  - `source` - Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
+  - `source` - Either an individual file or directory tree within and relative to `<package_dir>/deployment_files/`.
     No wildcard support.
   - `target_dir` - A directory target for the pushed `source`.  It is expanded for user and environment vars, 
     and supports these substitutions (per `set_toolname()`):
@@ -180,4 +209,9 @@ With `overwrite=False`, for subsequent file deployments to that directory the fi
 retained (the new `dir_stat` setting is disregarded). 
 With `overwrite=True`, an existing directory where a file is deployed will be updated 
 to the new `dir_stat` value.
+
+- Directory and file permissions on Windows do not support separate permissions for User, Group and Other, 
+and Windows ACLs are not currently supported.
+When setting permissions on deployed items on Windows, only the User permission is used even on a file share
+hosted on Linux.  Eg, a file permission of 0x644 will deploy with permission 0x666 (only the first octet is used).
     
