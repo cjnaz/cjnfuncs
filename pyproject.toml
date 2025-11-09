@@ -1,13 +1,12 @@
 [project]
 name = 'cjnfuncs'
-version = '3.1rc5'
-    # 3.1rc5 - deployfiles create empty target_dir.  Testing final.
-    # 3.1rc4 - Finished cleanup and doc work
-    # 3.1rc3 - Testing scrub, doc work
-    # 3.1rc2 - Windows fixes and improvements in core, rwt, configman.  Child loggers with support in set_logging_level & periodic_log.  Tests refresh.
-    # 3.1rc1 - cleanup.  Last version of core with commented out QueueListener/QueueHandler
-    # 3.1b2 - Windows fixes in rwt, and updated mungePath and rwt tests
-    # 3.1b1 - setuplogging queue in junk3.py
+version = '3.1'
+    # 3.1 - release
+    #   Support for and use of child loggers
+    #   deployfiles create empty dir
+    #   Windows fixes
+    #   config_item() safe_mode switch
+    #   mungePath set_attributes from default False
     # 3.0.1 - Allow '.' in config section names
     # 3.0 - release
     #   added get_next_dt

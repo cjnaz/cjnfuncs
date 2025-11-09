@@ -8,3 +8,4 @@ cjn_demo_smtp.cfg
 junk.txt
 tools/doc_code_examples/configman_ex2.log
 tests/mydev/
+.vscode/
