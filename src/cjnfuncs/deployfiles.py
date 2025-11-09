@@ -16,12 +16,14 @@ from .core import logging
 from .mungePath import mungePath
 import cjnfuncs.core as core
 
-# if sys.version_info < (3, 9):
-#     from importlib_resources import files as ir_files
-# else:
-      # Errors on Py3.9:  TypeError: <module ...> is not a package.  The module __spec__.submodule_search_locations is None
-#     from importlib.resources import files as ir_files
 from importlib_resources import files as ir_files
+
+# Logging events within this module are at the INFO level.  With this module's child logger set to
+# a minimum of WARNING level by default, then logging from this module is effectively disabled.  To enable
+# logging from this module add this within your tool script code:
+#       logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
+deployfiles_logger = logging.getLogger('cjnfuncs.deployfiles')
+deployfiles_logger.setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -36,7 +38,7 @@ def deploy_files(files_list, overwrite=False, missing_ok=False):
 
 `deploy_files()` is used to install initial setup files (and directory trees) from the installed package (or tool script) 
 to the user or site config and data directories. Suggested usage is with the CLI `--setup-user` or `--setup-site` switches.
-Distribution files and directory trees are hosted in `<module_root>/deployment_files/`.
+Distribution files and directory trees are hosted in `<package_dir>/deployment_files/`.
 
 `deploy_files()` accepts a list of dictionaries defining items to be pushed to user or site space.
 Each dictionary defines
@@ -47,8 +49,9 @@ the file and directory permissions for the pushed items.  Ownership matches the 
 ### Args
 `files_list` (list of dictionaries)
 - A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
-  - `source` - Either an individual file or directory tree within and relative to `<module_root>/deployment_files/`.
-    No wildcard support.
+  - `source` - Either an individual file or directory tree within and relative to `<package_dir>/deployment_files/`.
+    - No wildcard support
+    - `source = ''` will create an empty `target_dir`, if not already existing.
   - `target_dir` - A directory target for the pushed `source`.  It is expanded for user and environment vars, 
     and supports these substitutions (per `set_toolname()`):
     - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR
@@ -98,6 +101,11 @@ With `overwrite=False`, for subsequent file deployments to that directory the fi
 retained (the new `dir_stat` setting is disregarded). 
 With `overwrite=True`, an existing directory where a file is deployed will be updated 
 to the new `dir_stat` value.
+
+- Directory and file permissions on Windows do not support separate permissions for User, Group and Other, 
+and Windows ACLs are not currently supported.
+When setting permissions on deployed items on Windows, only the User permission is used even on a file share
+hosted on Linux.  Eg, a file permission of 0x644 will deploy with permission 0x666 (only the first octet is used).
     """
 
     default_file_stat = 0o644
@@ -144,7 +152,7 @@ to the new `dir_stat` value.
                 if not out_item.exists():
                     didnt_exist = True
                     out_item.mkdir(parents=True)
-                    logging.info (f"Created   {out_item}")
+                    deployfiles_logger.info (f"Created   {out_item}")
                 if didnt_exist or overwrite:
                     out_item.chmod(dir_stat)
                 copytree(item, out_item, overwrite=overwrite, file_stat=file_stat, dir_stat=dir_stat)
@@ -154,9 +162,9 @@ to the new `dir_stat` value.
                     shutil.copy2(item, out_item)
                     if file_stat:
                         out_item.chmod(file_stat)
-                    logging.info (f"Deployed  {out_item}")
+                    deployfiles_logger.info (f"Deployed  {out_item}")
                 else:
-                    logging.info (f"File <{out_item}> already exists.  Skipped.")
+                    deployfiles_logger.info (f"File <{out_item}> already exists.  Skipped.")
 
 
     if core.tool.main_module.__name__ == "__main__":    # Caller is a tool script file, not an installed module
@@ -171,25 +179,28 @@ to the new `dir_stat` value.
     for item in files_list:
         file_stat=  item.get("file_stat", default_file_stat)
         dir_stat=   item.get("dir_stat",  default_dir_stat)
-        source =    Path(my_resources.joinpath(item["source"]))
+        source = item["source"]
+        if source != '':
+            source =    Path(my_resources.joinpath(item["source"]))
 
-        if source.is_file():
+        if source == ''  or  source.is_file():
             target_dir = resolve_target(item["target_dir"])
             didnt_exist = False
             if not target_dir.exists():         # TODO hang risk
                 didnt_exist = True
                 target_dir.mkdir(parents=True)
-                logging.info (f"Created   {target_dir}")
+                deployfiles_logger.info (f"Created   {target_dir}")
             if didnt_exist or overwrite:
                 target_dir.chmod(dir_stat)
 
-            outfile = target_dir / source.name
-            if not outfile.exists()  or  overwrite:
-                shutil.copy2 (source, outfile)
-                outfile.chmod(file_stat)
-                logging.info (f"Deployed  {outfile}")
-            else:
-                logging.info (f"File <{outfile}> already exists.  Skipped.")
+            if source != '':
+                outfile = target_dir / source.name
+                if not outfile.exists()  or  overwrite:
+                    shutil.copy2 (source, outfile)
+                    outfile.chmod(file_stat)
+                    deployfiles_logger.info (f"Deployed  {outfile}")
+                else:
+                    deployfiles_logger.info (f"File <{outfile}> already exists.  Skipped.")
 
         elif source.is_dir():
             # TODO ONLY WORKS if the source dir is on the file system (eg, not in a package .zip) ????
@@ -200,14 +211,14 @@ to the new `dir_stat` value.
             if not target_dir.exists():
                 didnt_exist = True
                 target_dir.mkdir(parents=True)
-                logging.info (f"Created   {target_dir}")
+                deployfiles_logger.info (f"Created   {target_dir}")
             if didnt_exist or overwrite:
                 target_dir.chmod(dir_stat)
 
             copytree(source, target_dir, overwrite=overwrite, file_stat=file_stat, dir_stat=dir_stat)
 
         elif missing_ok:
-            logging.info (f"Can't deploy source <{source.name}>.  Item not found and missing_ok=True.  Skipping.")
+            deployfiles_logger.info (f"Can't deploy source <{source.name}>.  Item not found and missing_ok=True.  Skipping.")
         
         else:
             raise FileNotFoundError (f"Can't deploy <{source.name}>.  Item not found.")

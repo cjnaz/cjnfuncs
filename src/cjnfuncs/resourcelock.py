@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Inter-process lock mechanism using posix_ipc
+
+Only works on Linux
 """
 
 #==========================================================
 #
-#  Chris Nelson, Copyright 2024
+#  Chris Nelson, Copyright 2024-2025
 #
 #==========================================================
 
@@ -14,17 +16,18 @@ import posix_ipc
 import mmap
 import os
 import datetime
-from .core import logging
+from .core import logging, set_toolname, setuplogging
 
-try:
-    import importlib.metadata
-    __version__ = importlib.metadata.version(__package__ or __name__)
-except:
-    try:
-        import importlib_metadata
-        __version__ = importlib_metadata.version(__package__ or __name__)
-    except:
-        __version__ = "1.0 X"
+import importlib.metadata
+__version__ = importlib.metadata.version(__package__ or __name__)
+
+
+# Logging events within this module are at the DEBUG level.  With this module's child logger set to
+# a minimum of WARNING level by default, then logging from this module is effectively disabled.  To enable
+# logging from this module add this within your tool script code:
+#       logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
+resourcelock_logger = logging.getLogger('cjnfuncs.resourcelock')
+resourcelock_logger.setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -37,22 +40,29 @@ class resource_lock():
     """
 ## Class resource_lock (lockname) - Inter-process lock mechanism using posix_ipc
 
+__NOTE:  This module only works on Linux.__
+
 In applications that have independent processes sharing a resource, such as an I2C bus, `resource_lock()`
 provides a semaphore communication mechanism between the processes, using the posix-ipc module, 
 in order to coordinate access to the shared resource.  By using resource_lock(), ProcessA becomes aware
 that the I2C bus is in-use by some other process (ProcessB), and it should wait until that other 
 process completes its work, and then acquire the I2C bus lock so that other process(es) are blocked. 
+
 - Resource locks are on the honor system.  Any process can unget a lock, but should not if it didn't get the lock.
-- This lock mechanism is just as effective across threads within a process.
+
+- This lock mechanism is just as effective across threads within a process, and between processes.
+
 - As many different/independent locks as needed may be created.
-- The first time a lock is created (on the current computer since reboot) the lock info string (accessible via `get_lock_info()`)
-is set to '', else it retains the value set by the most recent get_lock() call.
+
+- The first time a lock is created (on the current computer since reboot) the lock info string is set to ''
+(accessible via `get_lock_info()`), else it retains the value set by the most recent get_lock() call.
+
 - It is recommended (in order to avoid a minor memory leak) to `close()` the lock in the tool script cleanup code.
-Calling `close()` sets the `closed` attribute to True so that any following code can detect and re-instantiate the 
-lock if needed.
+Calling `close()` sets the `closed` attribute to True so that any following code within the current tool script
+can detect and re-instantiate the lock if needed.
+
 - Semaphores (lock names) and shared memory segments (used for the `lock_info` string) in the posix_ipc module 
-must have `/` prefixes.  resource_lock() prepends the `/` if `lockname`
-doesn't start with a `/`, and hides the `/` prefix.
+must have `/` prefixes.  resource_lock() prepends the `/` if `lockname` doesn't start with a `/`, and hides the `/` prefix.
 
 resource_lock() requires the `posix_ipc` module (installed with cjnfuncs) from PyPI. 
 See https://pypi.org/project/posix-ipc/.
@@ -147,7 +157,7 @@ with timeout.
 - False: Lock request failed, timed out
         """
         if same_process_ok  and  self.I_have_the_lock == True:
-            logging.debug (f"<{self.lockname[1:]}> lock already acquired   - Prior grant     <{self.get_lock_info()}>")
+            resourcelock_logger.debug (f"<{self.lockname[1:]}> lock already acquired   - Prior grant     <{self.get_lock_info()}>")
             return True
 
         try:
@@ -155,10 +165,10 @@ with timeout.
             lock_text = f"{datetime.datetime.now()} - {lock_info}"
             self._set_lock_info(lock_text)
             self.I_have_the_lock = True
-            logging.debug (f"<{self.lockname[1:]}> lock request successful - Granted         <{lock_text}>")
+            resourcelock_logger.debug (f"<{self.lockname[1:]}> lock request successful - Granted         <{lock_text}>")
             return True
         except posix_ipc.BusyError:
-            logging.debug (f"<{self.lockname[1:]}> lock request timed out  - Current owner   <{self.get_lock_info()}>")
+            resourcelock_logger.debug (f"<{self.lockname[1:]}> lock request timed out  - Current owner   <{self.get_lock_info()}>")
             return False
 
 
@@ -188,6 +198,7 @@ unless `force=True`.
 
 `where_called` (str, default '')
 - Debugging aid string for indicating what code released the lock.  Logged at the debug level.
+Not stored anywhere, nor available to a later call.
 
 ### Returns
 - True:  Lock successfully released
@@ -197,18 +208,18 @@ unless `force=True`.
             if self.I_have_the_lock:
                 self.lock.release()
                 self.I_have_the_lock = False
-                logging.debug (f"<{self.lockname[1:]}> lock released  <{where_called}>")
+                resourcelock_logger.debug (f"<{self.lockname[1:]}> lock released  <{where_called}>")
                 return True
             else:
                 if force:
                     self.lock.release()
-                    logging.debug (f"<{self.lockname[1:]}> lock force released  <{where_called}>")
+                    resourcelock_logger.debug (f"<{self.lockname[1:]}> lock force released  <{where_called}>")
                     return True
                 else:
-                    logging.debug (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process  <{where_called}>")
+                    resourcelock_logger.debug (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process  <{where_called}>")
                     return False
         else:
-            logging.debug (f"<{self.lockname[1:]}> Extraneous lock unget request ignored  <{where_called}>")
+            resourcelock_logger.debug (f"<{self.lockname[1:]}> Extraneous lock unget request ignored  <{where_called}>")
             return False
 
 
@@ -228,7 +239,7 @@ unless `force=True`.
 - True if currently locked, else False
         """
         locked = True  if self.lock.value == 0  else False
-        logging.debug (f"<{self.lockname[1:]}> is currently locked?  <{locked}>  Prior info  <{self.get_lock_info()}>")
+        resourcelock_logger.debug (f"<{self.lockname[1:]}> is currently locked?  <{locked}>  Prior info  <{self.get_lock_info()}>")
         return locked
 
 
@@ -248,7 +259,7 @@ unless `force=True`.
 - Current value of the semaphore count - should be 0 (locked) or 1 (unlocked)
         """
         _value = self.lock.value
-        logging.debug (f"<{self.lockname[1:]}> semaphore = {_value}")
+        resourcelock_logger.debug (f"<{self.lockname[1:]}> semaphore = {_value}")
         return _value
 
 
@@ -270,7 +281,7 @@ unless `force=True`.
         self.lock.close()
         self.mapfile.close()
         self.closed = True
-        logging.debug (f"<{self.lockname[1:]}> semaphore closed")
+        resourcelock_logger.debug (f"<{self.lockname[1:]}> semaphore closed")
 
 
 #=====================================================================================
@@ -322,7 +333,7 @@ unless `force=True`.
 #=====================================================================================
 
 def int_handler(sig, frame):
-    logging.warning(f"Signal {sig} received")
+    resourcelock_logger.warning(f"Signal {sig} received")
     sys.exit(0)
 
 signal.signal(signal.SIGINT,  int_handler)      # Ctrl-C
@@ -339,6 +350,10 @@ def cli():
     """
     import argparse
     from time import sleep
+
+    set_toolname ('resourcelock_cli')
+    setuplogging()
+    logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
 
     GET_TIMEOUT = 0.5
     TRACE_INTERVAL = 0.5
@@ -361,7 +376,6 @@ def cli():
 
     lock = resource_lock(args.LockName)
 
-    logging.getLogger().setLevel(logging.DEBUG)
 
     if args.Cmd == "get":
         _timeout = args.get_timeout

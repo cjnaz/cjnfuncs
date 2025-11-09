@@ -1,15 +1,34 @@
 #!/usr/bin/env python3
 """Demo/test for cjnfuncs.deployfiles
 
-Produce / compare to golden results:
-    ./demo-deployfiles.py | diff demo-deployfiles-golden-user.txt -
+Produce / compare to golden results on Linux:
+
+  As user on Linux:
+    ./demo-deployfiles.py | diff demo-deployfiles-golden-user-linux.txt -
         No differences expected
 
-As root:
+  As root Linux:
     ./demo-deployfiles.py --setup-site-mode
-    ./demo-deployfiles.py -t 0 | diff demo-deployfiles-golden-site.txt -
+    ./demo-deployfiles.py | diff demo-deployfiles-golden-site-linux.txt -
     ./demo-deployfiles.py --remove-site-mode
-    
+
+
+Produce / compare to golden results on Windows:
+
+  As user on Windows:
+    demo-deployfiles.py > tempfile.txt    Then check diff to demo-deployfiles-golden-user-windows.txt
+        No differences expected
+
+  As privileged user Windows:
+    demo-deployfiles.py --setup-site-mode
+    demo-deployfiles.py > tempfile.txt      Then check diff to demo-deployfiles-golden-site-windows.txt
+        No differences expected
+    demo-deployfiles.py --remove-site-mode
+
+Linux and Windows test 6 will show significant difference due to .config_dir, .data_dir, and .state_dir
+all mapping to the same directory on Windows user mode:
+    C:\\Users\\stuff\\AppData\\Local\\cjnfuncs_testdeployfiles
+    Similar for site mode.
 """
 
 #==========================================================
@@ -18,15 +37,16 @@ As root:
 #
 #==========================================================
 
-__version__ =   '2.0'
+__version__ =   '3.1'
 TOOLNAME =      'cjnfuncs_testdeployfiles'
 CONFIG_FILE =   "demo_deployfiles.cfg"
 
 import argparse
-import os.path
+import tempfile
+import os
+import stat
 import shutil
 import sys
-import subprocess
 from pathlib import Path
 
 from cjnfuncs.core              import set_toolname, setuplogging, logging, set_logging_level
@@ -35,6 +55,10 @@ import cjnfuncs.core as core
 
 set_toolname(TOOLNAME)
 setuplogging(ConsoleLogFormat="{module:>22}.{funcName:20} {levelname:>8}:  {message}")
+
+testpath = Path(tempfile.gettempdir()) / TOOLNAME
+testpath.mkdir(exist_ok=True)
+
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--setup-site-mode', action='store_true',
@@ -68,33 +92,85 @@ def dotest (testnum, desc, expect, *args, **kwargs):
 # Setups, support functions, and vars
 
 set_logging_level(logging.INFO, save=False)
-logging.info (core.tool)
-config_junk2 = Path(os.path.expandvars('$HOME/.config/junk2'))
+set_logging_level(logging.DEBUG, 'cjnfuncs.deployfiles')
 
-def list_tree(root):
-    result = subprocess.run (['tree', '-p', root], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    logging.info (f"\n------------------------------------\nContents of {result.stdout}")
+if sys.platform.startswith("win"):
+    config_junk2 = Path(os.path.expandvars('%HOMEDRIVE%%HOMEPATH%/.config/junk2'))
+else:
+    config_junk2 = Path(os.path.expandvars('$HOME/.config/junk2'))
 
 
 def rmtree(root):
-    if os.path.exists(root):
-        shutil.rmtree(root)
+    try:
+        if os.path.exists(root):
+            shutil.rmtree(root)
+    except:
+        pass
+
 
 if args.setup_site_mode:                        # Must be run as root
     Path(core.tool.site_config_dir).mkdir(exist_ok=True)
+    logging.info (f"Site mode enabled.  Created:  {core.tool.site_config_dir}")
     sys.exit()
 
 if args.remove_site_mode:                       # Must be run as root
     rmtree(core.tool.site_config_dir)
     rmtree(core.tool.site_data_dir)
     rmtree(config_junk2)
+    rmtree(testpath)
+    logging.info (f"Site mode disabled.  Removed:\n  {core.tool.site_config_dir}\n  {core.tool.site_data_dir}\n  {config_junk2}")
     sys.exit()
 
 
-#===============================================================================================
-# NOTE:  Site/User non-specific dir names used so that the same tests run in both site and user modes.
-#   eg, DATA_DIR (core.tool.data_dir) rather than USER_DATA_DIR (core.tool.user_data_dir)
+def dump_tree(start_path="."):
+    """
+    Return a string of the directory tree with permissions (symbolic + octal) and size.
+    """
+    lines = []
 
+    def _walk(dir_path, prefix=""):
+        try:
+            entries = sorted(os.scandir(dir_path), key=lambda e: (not e.is_dir(), e.name.lower()))
+        except PermissionError:
+            lines.append(f"{prefix}[Permission Denied]")
+            return
+
+        if not entries:
+            return
+
+        # max_name_len = max(len(entry.name) for entry in entries)
+
+        for i, entry in enumerate(entries):
+            is_last = (i == len(entries) - 1)
+            # connector = "└── " if is_last else "├── "     # Avoid utf-8 conflict
+            connector = "`-- " if is_last else "|-- "
+            next_prefix = prefix + ("    " if is_last else "|   ")
+
+            try:
+                st = entry.stat(follow_symlinks=False)
+                perm_symbolic = stat.filemode(st.st_mode)
+                perm_octal = oct(st.st_mode & 0o777)
+                size = st.st_size
+            except Exception:
+                perm_symbolic = "??????????"
+                perm_octal = "???"
+                size = 0
+
+            pad_len = 30 - len(prefix + connector + entry.name)     # weak.  fails on deeper paths
+            padded_name = entry.name + ' '*pad_len
+            lines.append(f"{prefix}{connector}{padded_name}[{perm_symbolic}] {perm_octal:<5} {size:>7} bytes")
+
+            if entry.is_dir(follow_symlinks=False):
+                _walk(entry.path, next_prefix)
+
+    lines.append(f"Contents of {os.path.abspath(start_path)}")
+    _walk(start_path)
+    return "\n".join(lines)
+
+logging.info (core.tool)
+
+
+#===============================================================================================
 
 # *****  Deploy a directory test cases
 tnum = '1'
@@ -103,7 +179,7 @@ if args.test == '0'  or  args.test in '1 2 3':      # tnum 1 sets base env for t
     dotest(tnum, "Deploy directory tree", "None (success)", [
         { "source": "test_dir",             "target_dir": "DATA_DIR/",       "file_stat": 0o601, "dir_stat": 0o701},
         ])
-    list_tree (core.tool.data_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.data_dir)}")
 
 tnum = '2'
 if args.test == '0'  or  args.test == tnum:
@@ -112,7 +188,7 @@ if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Deploy directory tree, overwrite=False", "None (success) with <Copytree skipped.>", [
         { "source": "test_dir",             "target_dir": "DATA_DIR/",       "file_stat": 0o602, "dir_stat": 0o702},
         ])
-    list_tree (core.tool.data_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.data_dir)}")
 
 tnum = '3'
 if args.test == '0'  or  args.test == tnum:
@@ -122,7 +198,7 @@ if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Deploy directory tree, overwrite=True", "None (success)", [
         { "source": "test_dir",             "target_dir": "DATA_DIR/",       "file_stat": 0o603, "dir_stat": 0o703},
         ], overwrite=True)
-    list_tree (core.tool.data_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.data_dir)}")
 
 if args.test == '0'  or  args.test in '1 2 3':      # Cleanup for tests 1, 2, 3
     rmtree(core.tool.data_dir)
@@ -136,7 +212,7 @@ if args.test == '0'  or  args.test == tnum:
         { "source": "no_such_file",         "target_dir": "DATA_DIR",              "file_stat": 0o602, "dir_stat": 0o702},
         { "source": "testfile.txt",         "target_dir": "DATA_DIR",              "file_stat": 0o603, "dir_stat": 0o703},
         ])
-    list_tree (core.tool.data_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.data_dir)}")
     rmtree(core.tool.data_dir)
 
 tnum = '4b'
@@ -146,33 +222,29 @@ if args.test == '0'  or  args.test == tnum:
         { "source": "no_such_file",         "target_dir": "DATA_DIR",              "file_stat": 0o602, "dir_stat": 0o702},
         { "source": "testfile.txt",         "target_dir": "DATA_DIR",              "file_stat": 0o603, "dir_stat": 0o703},
         ], missing_ok=True)
-    list_tree (core.tool.data_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.data_dir)}")
     rmtree(core.tool.data_dir)
 
 
 # **** target_dir errors
 tnum = '5a'
 if args.test == '0'  or  args.test == tnum:
-    testpath = Path ('/tmp') / core.tool.toolname
-    testpath.mkdir(exist_ok=True)
     (testpath / 'IsAFile').touch()
     dotest(tnum, "target_dir exists as a file", "NotADirectoryError: [Errno 20] Not a directory: '/tmp/cjnfuncs_testdeployfiles/IsAFile/testfile.txt'", [
         { "source": "testfile.txt",         "target_dir": testpath,                 "file_stat": 0o601, "dir_stat": 0o701},
         { "source": "testfile.txt",         "target_dir": testpath,                 "file_stat": 0o602, "dir_stat": 0o702},
         { "source": "testfile.txt",         "target_dir": testpath / 'IsAFile',     "file_stat": 0o603, "dir_stat": 0o703},
         ])
-    list_tree (testpath)
+    logging.info(f"\n------------------------------------\n{dump_tree(testpath)}")
     rmtree(testpath)
 
 tnum = '5b'
 if args.test == '0'  or  args.test == tnum:
-    testpath = Path ('/tmp') / core.tool.toolname
-    # testpath.mkdir()
     dotest(tnum, "Destination is an existing file with overwrite but no permission", "PermissionError: [Errno 13] Permission denied: '/tmp/cjnfuncs_testdeployfiles/testfile.txt'", [
         { "source": "testfile.txt",         "target_dir": testpath,                 "file_stat": 0o000, "dir_stat": 0o701},
         { "source": "testfile.txt",         "target_dir": testpath,                 "file_stat": 0o602, "dir_stat": 0o702},
         ], overwrite=True)
-    list_tree (testpath)
+    logging.info(f"\n------------------------------------\n{dump_tree(testpath)}")
     rmtree(testpath)
 
 
@@ -188,11 +260,12 @@ if args.test == '0'  or  args.test == tnum:
         { "source": "test_dir",             "target_dir": "DATA_DIR/mydirs",        "file_stat": 0o604, "dir_stat": 0o704},
         { "source": "test_dir",             "target_dir": "DATA_DIR/mydirs/defaults"},  # use default file_stat, dir_stat
         { "source": "test_dir/subdir/x4",   "target_dir": "CONFIG_DIR/mydirs",      "file_stat": 0o605, "dir_stat": 0o705},
+        { "source": "",                     "target_dir": "CONFIG_DIR/dir3/emptydir2", "file_stat": 0o604, "dir_stat": 0o705},
         ])
 
-    list_tree(core.tool.config_dir)
-    list_tree(config_junk2)
-    list_tree(core.tool.data_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.config_dir)}")
+    logging.info(f"\n------------------------------------\n{dump_tree(config_junk2)}")
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.data_dir)}")
 
     rmtree(core.tool.config_dir)
     rmtree(config_junk2)
@@ -205,7 +278,7 @@ if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Deploy empty directory", "None (success)", [
         { "source": "emptydir2",            "target_dir": "CONFIG_DIR",                 "file_stat": 0o601, "dir_stat": 0o701},
         ])
-    list_tree (core.tool.config_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.config_dir)}")
     rmtree(core.tool.config_dir)
 
 tnum = '7b'
@@ -213,7 +286,7 @@ if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Deploy subdirectory to top level", "None (success)", [
         { "source": "test_dir/subdir",      "target_dir": "CONFIG_DIR",                 "file_stat": 0o602, "dir_stat": 0o702},
         ])
-    list_tree (core.tool.config_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.config_dir)}")
     rmtree(core.tool.config_dir)
 
 tnum = '7c'
@@ -221,7 +294,7 @@ if args.test == '0'  or  args.test == tnum:
     dotest(tnum, "Deploy subdirectory to subdirectory", "None (success)", [
         { "source": "test_dir/subdir",      "target_dir": "CONFIG_DIR/mydir",           "file_stat": 0o603, "dir_stat": 0o703},
         ])
-    list_tree (core.tool.config_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.config_dir)}")
     rmtree(core.tool.config_dir)
 
 tnum = '8a'
@@ -232,7 +305,7 @@ if args.test == '0'  or  args.test == tnum:
         { "source": "x0",                   "target_dir": 'CONFIG_DIR/dir1',            "file_stat": 0o603, "dir_stat": 0o703},
         { "source": "test_dir/emptydir",    "target_dir": "CONFIG_DIR/dir1",            "file_stat": 0o604, "dir_stat": 0o704},
         ])
-    list_tree (core.tool.config_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.config_dir)}")
     rmtree(core.tool.config_dir)
 
 tnum = '8b'
@@ -243,7 +316,7 @@ if args.test == '0'  or  args.test == tnum:
         { "source": "x0",                   "target_dir": 'CONFIG_DIR/dir1',            "file_stat": 0o603, "dir_stat": 0o703},
         { "source": "test_dir/emptydir",    "target_dir": "CONFIG_DIR/dir1",            "file_stat": 0o604, "dir_stat": 0o704},
         ], overwrite=True)
-    list_tree (core.tool.config_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.config_dir)}")
     rmtree(core.tool.config_dir)
 
 
@@ -255,7 +328,6 @@ if core.tool.env_defined == 'site':
 
 if args.test == '50':   # Development
 
-    # testpath = Path ('/tmp') / core.tool.toolname
     rmtree(core.tool.config_dir)
     dotest(tnum, "How dir_stat is applied, modified", "None (success)", [
         { "source": "test_dir/subdir/",      "target_dir": 'USER_CONFIG_DIR/..',       "file_stat": 0o611, "dir_stat": 0o711},
@@ -268,5 +340,5 @@ if args.test == '50':   # Development
         # {"source": "test_dir/emptydir",  "target_dir": "USER_CONFIG_DIR/dir1",  "file_stat": 0o615, "dir_stat": 0o715},
         # { "source": "test_dir/subdir",      "target_dir": testpath,                 "file_stat": 0o612, "dir_stat": 0o712},
         ], overwrite=True)
-    list_tree (core.tool.config_dir)
+    logging.info(f"\n------------------------------------\n{dump_tree(core.tool.config_dir)}")
     # rmtree(testpath)

@@ -2,9 +2,15 @@
 """Demo/test for mungePath
 
 Produce / compare to golden results:
-    ./demo-mungePath.py | diff demo-mungePath-golden.txt -
+    ./demo-mungePath.py | diff demo-mungePath-golden-linux.txt -
+  or
+    demo-mungePath.py > tempfile.txt (On Windows, and then compare)
+
         No differences expected
 
+    ./demo-mungePath.py --cleanup
+
+Note:  This test takes about 1s to run on Linux, but > 1m on Windows due to many spawned processes.
 """
 #==========================================================
 #
@@ -12,26 +18,85 @@ Produce / compare to golden results:
 #
 #==========================================================
 
-__version__ = "1.4"
+__version__ = "2.0"
 
 import shutil
 import argparse
 import os
 import sys
+import re
+import logging
+import tempfile
 from pathlib import Path, PurePath
 
 from cjnfuncs.core      import set_toolname, set_logging_level, setuplogging
 from cjnfuncs.mungePath import mungePath
 import cjnfuncs.core as core
 
-set_toolname("demo-mungePath")
-setuplogging(ConsoleLogFormat="{asctime} {module:>22}.{funcName:20} {levelname:>8}:  {message}")
+TOOLNAME = "demo-mungePath"
+
+set_toolname(TOOLNAME)
+test_dir = Path(tempfile.gettempdir()) / TOOLNAME
+test_dir.mkdir(exist_ok=True)
+setuplogging(ConsoleLogFormat="{module:>22}.{funcName:20} {levelname:>8}:  {message}")
 
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('--nocleanup', action='store_true',
-                    help="Be default, remove test dirs/files.  With --nocleanup, created dirs are left in place for debug.")
+parser.add_argument('-t', '--test', default='0',
+                    help="Test number to run (default 0).  0 runs all tests")
+parser.add_argument('--cleanup', action='store_true',
+                    help="Remove test dirs/files.")
 
 args = parser.parse_args()
+
+if args.cleanup:
+    try:
+        newdir = mungePath('newdir', '.').full_path
+        print (f"Removing   {newdir}")
+        shutil.rmtree(newdir)
+    except:
+        pass
+
+    try:
+        xyzdir = mungePath('xyz', '.').full_path
+        print (f"Removing   {xyzdir}")
+        shutil.rmtree(xyzdir)
+    except:
+        pass
+
+    try:
+        print (f"Removing   {test_dir}")
+        shutil.rmtree(test_dir)
+    except:
+        pass
+    sys.exit(0)
+
+
+# --------------------------------------------------------------------
+
+def dotest (desc, expect, *args, **kwargs):
+    logging.warning (f"\n\n==============================================================================================\n" +
+                     f"Test {tnum} - {desc}\n" +
+                     f"  GIVEN:      {args}, {kwargs}\n" +
+                     f"  EXPECT:     {expect}")
+    try:
+        result = mungePath(*args, timeout=2.0, **kwargs)    # timeout set to 2s for Windows stability
+        print (result)
+        return result
+    except Exception as e:
+        logging.error (f"\n  RAISED:     {type(e).__name__}: {e}")
+        # logging.exception (f"\n  RAISED:     {type(e).__name__}: {e}")        # for debug
+        return e
+
+tnum_parse = re.compile(r"([\d]+)([\w]*)")
+def check_tnum(tnum_in, include0='0'):
+    global tnum
+    tnum = tnum_in
+    if args.test == include0  or  args.test == tnum_in:  return True
+    try:
+        if int(args.test) == int(tnum_parse.match(tnum_in).group(1)):  return True
+    except:  pass
+    return False
+
 
 # --------------------------------------------------------------------
 
@@ -44,114 +109,193 @@ def remove_file (file_path):
 def remove_tree (path):
     shutil.rmtree(path)
 
-# --------------------------------------------------------------------
-
-def wrapper (in_path="", base_path="", mkdir=False, note=None, set_attributes=True):
-    """
-    Operates exactly the same as mungePath, with the additional note field and results stats.
-    """
-    print()
-    if note:
-        print ("NOTE: ", note)
-    print (f"Given:\n in_path   :  <{in_path}>\n base_path :  <{base_path}>\n mkdir     :  <{mkdir}>")
-    xx = mungePath(in_path=in_path, base_path=base_path, mkdir=mkdir, set_attributes=set_attributes)
-    print(xx)
-    return xx
 
 # --------------------------------------------------------------------
 
-set_logging_level(10)
+if __name__ == '__main__':
+    set_logging_level(10)
+    logging.getLogger('rwt').setLevel(logging.WARNING)
 
-print ("\n\n***** File paths relative to a base path")
-wrapper ("xyz/file.txt", ".",                               note="01 - Returns absolute path to shell cwd")
-wrapper ("", "",                                            note="02 - No base_path - Returns relative path from shell cwd")
-wrapper ("file.txt",                                        note="03 - No base_path - Returns relative path from shell cwd - same dir")
-wrapper ("xyz/file.txt",                                    note="04 - No base_path - Returns relative path from shell cwd - below")
-wrapper ("../file.txt",                                     note="05 - No base_path - Returns relative path from shell cwd - above")
-wrapper ("newdir", mkdir=True,                              note="05a- No base_path - Make dir at shell cwd, returns relative path")
-wrapper ("", ".",                                           note="06 - Returns absolute full path to shell cwd")
-wrapper ("", "~",                                           note="07 - User expanded")
-wrapper ("xyz/file.txt", "$HOME",                           note="08 - Env vars expanded")
-wrapper ("~/xyz/file.txt", ".",                             note="09 - User expanded, Absolute in_path overrides the base_path (base_path not used)")
+    #-------------------------------------------------------------------------
+    print ("\n\n***** File paths relative to a base path")
 
-print ("\n\n***** Using the base_path")
-if wrapper ("", "/tmp/mungePath",                           note="10 - Check existence of the work space tree").exists:
-    print ("Exists, removed.")
-    remove_tree ("/tmp/mungePath")
-else:
-    print ("Does not exist")
-testpath = wrapper ("", "/tmp/mungePath", mkdir=True,
-                                                            note="11 - Make a work space, then create /tmp/mungePath/file.txt").full_path
-touch (mungePath("file.txt", testpath).full_path)
+    if check_tnum('1'):
+        dotest ("'.' base_path", "Returns absolute path from shell cwd",
+                "xyz/file.txt", ".",                        set_attributes=True)
 
-wrapper ("", testpath,                                      note="12 - /tmp/mungePath exists")
-wrapper ("file.txt", testpath,                              note="13 - file.txt exists")
-wrapper ("../mungePath/file.txt", testpath,                 note="14 - file.txt exists")
-wrapper ("subdir/../file.txt", testpath,                    note="15 - file.txt does NOT exist since referenced thru non-existent subdir")
-wrapper ("subdir/", testpath, mkdir=True,                   note="16 - Make subdir (trailing '/' doesn't matter)")
-xx = wrapper ("subdir/../file.txt", testpath,               note="17 - Now file.txt exists - referenced thru subdir")
-wrapper ("../file.txt", testpath / "subdir",                note="18 - Referenced thru different base_path")
+    if check_tnum('2'):
+        dotest ("'' base_path", "Returns relative path from shell cwd",
+                "", "",                                     set_attributes=True)
 
-print ("\n\n***** str, Path, and PurePath arguments types accepted")
-wrapper ("file.txt", "/tmp/mungePath",                      note="19 - Accepts str types")
-wrapper (Path("file.txt"), Path("/tmp/mungePath"),          note="20 - Accepts Path types")
-wrapper (PurePath("file.txt"), PurePath("/tmp/mungePath"),  note="21 - Accepts PurePath types")
+    if check_tnum('3'):
+        dotest ("No base_path", "Returns relative path from shell cwd - file in same dir",
+                "file.txt",                                 set_attributes=True)
 
-print ("\n\n***** symlinks followed (not resolved)")
-os.symlink(xx.full_path, xx.parent / "subdir" / "symlink.txt")
-os.symlink(xx.parent, xx.parent / "symlinkdir")
-# NOTE on Win10 symlinks do not appear to be valid - Properties Shortcut of symlinkdir = C:\tmp\mungePath\temp\mungePath)
-# however these tests seem to be retuning expected results.
+    if check_tnum('4'):
+        dotest ("No base_path", "Returns relative path from shell cwd - file in dir below",
+                "xyz/file.txt",                             set_attributes=True)
 
-wrapper ("subdir/symlink.txt", testpath,                    note="22 - symlink file honored (symlink created earlier)")
-remove_file(xx.full_path)
-wrapper ("subdir/symlink.txt", testpath,                    note="23 - symlink target file was removed")
-wrapper ("symlinkdir", testpath,                            note="24 - symlink dir honored (symlink created earlier)")
+    if check_tnum('5'):
+        dotest ("No base_path", "Returns relative path from shell cwd - file in dir above",
+                "../file.txt",                              set_attributes=True)
 
-print ("\n\n***** mkdir=True makes the full path.  Don't inadvertently include a file part.")
-wrapper ("subdir/testxxxx.txt", testpath, mkdir=True,       note="25 - Happy to make a dir with a file-like name")
+    if check_tnum('5a'):
+        dotest ("No base_path, mkdir at shell cdw", "Returns relative path to 'newdir' from shell cwd",
+                "newdir",                                   set_attributes=True, mkdir=True)
 
-touch(testpath / "dummyfile.txt")
-try:
-    wrapper ("dummyfile.txt", testpath, mkdir=True, 
-                                                            note="26 - Exception raised due to trying to make a directory on top of an existing file")
-except Exception as e:
-    print (f"Exception: {e}")
+    if check_tnum('6'):
+        dotest ("'.' base_path", "Returns absolute full path to shell cwd",
+                "", ".",                                    set_attributes=True)
 
-print ("\n\n***** Referencing the tool script dir")
-wrapper ("xyz/file.txt", core.tool.main_dir,                note="27 - Returns absolute path to script dir")
+    if check_tnum('7'):
+        dotest ("Expand user", "Returns absolute full path to user home dir",
+                "", "~",                                    set_attributes=True)
 
-print ("\n\n***** Referencing file in shell cwd, overriding base_path")
-wrapper ("./file.txt", '/tmp',                              note="28 - Returns absolute path to <cwd>/file")
-wrapper ("./../file.txt", '/tmp',                           note="29 - Returns absolute path to <cwd>/../file")
-wrapper ("./xyz/file.txt", '/tmp',                          note="30 - Returns absolute path to <cwd>/xyz/file")
+    if sys.platform.startswith("win"):
+        if check_tnum('8a'):
+            dotest ("Expand environment var", "Returns absolute full path to user home dir",
+                    "", "%HOMEDRIVE%%HOMEPATH%",            set_attributes=True)
+    else:       # Linux
+        if check_tnum('8b'):
+            dotest ("Expand environment var", "Returns absolute full path to user home dir",
+                    "", "$HOME",                            set_attributes=True)
 
-wrapper ("./xyz/wxy", '/tmp',   mkdir=True,                 note="31 - mkdir <cwd>/xyz/wxy")
-
-wrapper ('nosuchfile', './',                                note="32 - abs path - attributes not set", set_attributes=False)
-wrapper ('nosuchfile', '',                                  note="33 - rel path - attributes not set", set_attributes=False)
+    if check_tnum('9'):
+        dotest ("Expand user in in_path", "Absolute in_path overrides the base_path (base_path not used)",
+                "~/xyz/file.txt", ".",                      set_attributes=True)
 
 
-# --------------------------------------------------------------------
+    #-------------------------------------------------------------------------
+    print ("\n\n***** Using the base_path")
 
-if not args.nocleanup:
-    try:
-        test_dir = mungePath('newdir').full_path
-        print (f"Removing   {test_dir}")
-        shutil.rmtree(test_dir)
-    except:
-        pass
+    if mungePath("", test_dir).full_path.exists():
+        print (f"<{test_dir}> exists, removed.")
+        remove_tree (test_dir)
 
-    try:
-        test_dir = mungePath('xyz').full_path
-        print (f"Removing   {test_dir}")
-        shutil.rmtree(test_dir)
-    except:
-        pass
+    if check_tnum('11a'):
+        dotest (f"Make work space", f"Dir <{test_dir}> created",
+                "", test_dir,                               set_attributes=True, mkdir=True)
+        touch (mungePath("file.txt", test_dir).full_path)
+    else:
+        mungePath(test_dir, mkdir=True)                     # Make env for later tests is test 11a is not run
+        touch (mungePath("file.txt", test_dir).full_path)
 
-    try:
-        test_dir = '/tmp/mungePath'
-        print (f"Removing   {test_dir}")
-        shutil.rmtree(test_dir)
-    except:
-        pass
+    if check_tnum('11b'):
+        dotest (f"Check status of <{test_dir}/file.txt>", f"File exists, absolute path",
+                "file.txt", test_dir,                       set_attributes=True)
+
+    if check_tnum('14'):
+        dotest (f"Path up then down", f"File exists, absolute path",
+                f"../{TOOLNAME}/file.txt", test_dir,        set_attributes=True)
+
+    if check_tnum('15'):
+        dotest (f"file.txt referenced thru non-existent subdir", f"Linux: file.txt does NOT exist since referenced thru non-existent subdir.  Exists on Windows.",
+                "subdir/../file.txt", test_dir,             set_attributes=True)
+
+    if check_tnum('16'):
+        dotest (f"Make subdir (trailing '/' doesn't matter)", f"subdir exists",
+                "subdir/", test_dir,                        set_attributes=True, mkdir=True)
+    else:
+        mungePath("subdir/", test_dir, mkdir=True)      # Make env for later tests if test 16 is not run
+
+    if check_tnum('17'):
+        dotest (f"Now file.txt exists - referenced thru subdir", f"file.txt exists, absolute path",
+                "subdir/../file.txt", test_dir,             set_attributes=True)
+
+    if check_tnum('18'):
+        dotest (f"file.txt referenced thru different base_path", f"file.txt exists, absolute path",
+                "../file.txt", test_dir / "subdir",         set_attributes=True)
+
+
+    #-------------------------------------------------------------------------
+    print ("\n\n***** str, Path, and PurePath arguments types accepted")
+
+    if check_tnum('19'):
+        dotest (f"Accepts str types", f"file.txt exists, absolute path",
+                "file.txt", str(test_dir),                  set_attributes=True)
+
+    if check_tnum('20'):
+        dotest (f"Accepts Path types", f"file.txt exists, absolute path",
+                Path("file.txt"), test_dir,                 set_attributes=True)
+
+    if check_tnum('21'):
+        dotest (f"Accepts PurePath types", f"file.txt exists, absolute path",
+                PurePath("file.txt"), PurePath(test_dir),   set_attributes=True)
+
+
+    #-------------------------------------------------------------------------
+    # symlinks not supported on Windows
+    if sys.platform.startswith("linux"):
+        print ("\n\n***** symlinks followed (not resolved)")
+        xx = mungePath("file.txt", test_dir)
+        xx.full_path.touch()
+        os.symlink(xx.full_path, xx.parent / "subdir" / "symlink.txt")
+        os.symlink(xx.parent, xx.parent / "symlinkdir")
+
+        if check_tnum('22'):
+            dotest (f"symlink file honored", f"file.txt exists, absolute path",
+                    "subdir/symlink.txt", test_dir,         set_attributes=True)
+
+        remove_file(xx.full_path)
+        if check_tnum('23'):
+            dotest (f"symlink target file was removed", f"file.txt does not exist, absolute path",
+                    "subdir/symlink.txt", test_dir,         set_attributes=True)
+
+        if check_tnum('24'):
+            dotest (f"symlink dir honored", f"symlink dir exists, absolute path",
+                    "symlinkdir", test_dir,                 set_attributes=True)
+
+
+    #-------------------------------------------------------------------------
+    print ("\n\n***** mkdir=True makes the full path.  Don't inadvertently include a file part.")
+
+    if check_tnum('25'):
+        dotest (f"Happy to make a dir with a file-like name", f"dir named testxxxx.txt exists, absolute path",
+                "subdir/testxxxx.txt", test_dir,            set_attributes=True, mkdir=True)
+
+
+    touch(test_dir / "dummyfile.txt")
+    if check_tnum('26'):
+        dotest (f"Exception raised due to trying to make a directory on top of an existing file", f"Raise FileExistsError",
+                "dummyfile.txt", test_dir,                  set_attributes=True, mkdir=True)
+
+
+    #-------------------------------------------------------------------------
+    print ("\n\n***** Referencing the tool script dir")
+
+    if check_tnum('27'):
+        dotest (f"Returns absolute path to script dir", f"Absolute path to script dir, xyz/file.txt does not exist",
+                "xyz/file.txt", core.tool.main_dir,         set_attributes=True)
+
+
+    #-------------------------------------------------------------------------
+    print ("\n\n***** Referencing file in shell cwd, overriding base_path")
+
+    if check_tnum('28'):
+        dotest (f"Absolute in_path overrides base_path", f"Absolute path to <cwd>/file.txt (does not exist)",
+                "./file.txt", test_dir,                     set_attributes=True)
+
+    if check_tnum('29'):
+        dotest (f"Absolute in_path overrides base_path", f"Absolute path to <cwd>/../file.txt (does not exist)",
+                "./../file.txt", test_dir,                  set_attributes=True)
+
+    if check_tnum('30'):
+        dotest (f"Absolute in_path overrides base_path", f"Absolute path to <cwd>/xyz/file.txt (does not exist)",
+                "./xyz/file.txt", test_dir,                 set_attributes=True)
+
+    if check_tnum('31'):
+        dotest (f"mkdir <cwd>/xyz/wxy", f"Absolute path to dir <cwd>/xyz/wxy (exists)",
+                "./xyz/wxy", test_dir,                      set_attributes=True, mkdir=True)
+
+
+    #-------------------------------------------------------------------------
+    print ("\n\n***** Attributes not set")
+
+    if check_tnum('32'):
+        dotest (f"Abs path - attributes not set", f"Absolute path to dir <cwd>/nosuchfile, attributes = None",
+                'nosuchfile', './')
+
+    if check_tnum('33'):
+        dotest (f"Rel path - attributes not set", f"Relative path to dir <cwd>/nosuchfile, attributes = None",
+                'nosuchfile', '')
+

@@ -37,7 +37,7 @@ EmailPass           mypassword
 EmailFrom           me@myserver.com
 ```
 
-And running this code:
+And this code:
 ```
 #!/usr/bin/env python3
 # ***** SMTP_ex1.py *****
@@ -47,8 +47,8 @@ from cjnfuncs.configman   import config_item
 from cjnfuncs.deployfiles import deploy_files
 from cjnfuncs.SMTP        import snd_notif, snd_email
 
-tool = set_toolname('SMTP_ex1')
-
+set_toolname('SMTP_ex1')
+logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
 
 deploy_files([
     { 'source': 'SMTP_ex1.cfg',      'target_dir': 'USER_CONFIG_DIR' },
@@ -65,7 +65,7 @@ try:
               log=True, 
               smtp_config=myconfig)
 except SndEmailError as e:
-    logging.warning(f"snd_notif() failed:\n  {e}")
+    logging.warning(f"snd_notif() failed:\n  {type(e).__name__}: {e}")
 
 try:
     snd_email(subj='My first email send',
@@ -74,14 +74,15 @@ try:
               log=True,
               smtp_config=myconfig)
 except SndEmailError as e:
-    logging.warning(f"snd_email() failed:\n  {e}")
+    logging.warning(f"snd_email() failed:\n  {type(e).__name__}: {e}")
 ```
 
 And finally, running the code produces this output, and a couple sent messages:
 ```
 $ ./SMTP_ex1.py 
-Deployed  SMTP_ex1.cfg         to  /home/me/.config/SMTP_ex1/SMTP_ex1.cfg
-Deployed  creds_SMTP           to  /home/me/.config/SMTP_ex1/creds_SMTP
+    deployfiles.deploy_files         -     INFO:  Created   /home/me/.config/SMTP_ex1
+    deployfiles.deploy_files         -     INFO:  Deployed  /home/me/.config/SMTP_ex1/SMTP_ex1.cfg
+    deployfiles.deploy_files         -     INFO:  Deployed  /home/me/.config/SMTP_ex1/creds_SMTP
            SMTP.snd_notif            -  WARNING:  Notification sent <My first text message> <This is pretty clean interface!>
            SMTP.snd_email            -  WARNING:  Email sent <My first email send>
 ```
@@ -187,3 +188,16 @@ config that contains the [SMTP] section).
   - Building a list of numbers for the plugin handler to iterate thru
   - Example:  Given `'4805551212@vzwpix.com 4805551213 +14805551214, +44123456'`, list_to() returns:  `['+14805551212', '+14805551213', '+14805551214', '+44123456']`
 
+
+<br>
+
+## Controlling logging from within smtp code
+
+Logging within the SMTP module uses the `cjnfuncs.smtp` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
+meaning that no logging messages are produced from within the SMTP code.  For validation and debug purposes, logging from within SMTP code 
+can be enabled by setting the logging level for this module's logger from within the tool script code:
+
+        logging.getLogger('cjnfuncs.smtp').setLevel(logging.DEBUG)
+
+        # Or alternately, use the core module set_logging_level() function:
+        set_logging_level (logging.DEBUG, 'cjnfuncs.smtp')

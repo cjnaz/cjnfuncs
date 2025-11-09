@@ -3,13 +3,14 @@
 
 import argparse
 import sys
-from cjnfuncs.core        import set_toolname
+from cjnfuncs.core        import set_toolname, logging
 from cjnfuncs.deployfiles import deploy_files
 
 CONFIG_FILE = "tool_config.cfg"
 
 
 set_toolname("deployfiles_ex1")
+logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
 
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--setup-user', action='store_true',

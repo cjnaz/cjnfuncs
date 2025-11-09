@@ -1,7 +1,7 @@
       demo-deployfiles.<module>                 INFO:  
 Stats for set_toolname <cjnfuncs_testdeployfiles>:
 .toolname         :  cjnfuncs_testdeployfiles
-.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py'>
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/demo-deployfiles.py'>
 .main_full_path   :  /mnt/share/dev/packages/cjnfuncs/tests/demo-deployfiles.py
 .main_dir         :  /mnt/share/dev/packages/cjnfuncs/tests
 General user and site paths:
@@ -37,19 +37,16 @@ Test 1 - Deploy directory tree
            deployfiles.copytree                 INFO:  Created   /home/cjn/.local/share/cjnfuncs_testdeployfiles/test_dir/emptydir
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.local/share/cjnfuncs_testdeployfiles
-└── [drwx-----x]  test_dir
-    ├── [drwx-----x]  emptydir
-    ├── [drwx-----x]  subdir
-    │   └── [-rw------x]  x4
-    ├── [-rw------x]  x1
-    ├── [-rw------x]  x2
-    └── [-rw------x]  x3
-
-3 directories, 4 files
-
+`-- test_dir                  [drwx-----x] 0o701      66 bytes
+    |-- emptydir              [drwx-----x] 0o701       6 bytes
+    |-- subdir                [drwx-----x] 0o701      16 bytes
+    |   `-- x4                [-rw------x] 0o601       0 bytes
+    |-- x1                    [-rw------x] 0o601       0 bytes
+    |-- x2                    [-rw------x] 0o601       0 bytes
+    `-- x3                    [-rw------x] 0o601       0 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -63,19 +60,16 @@ Test 2 - Deploy directory tree, overwrite=False
            deployfiles.copytree                 INFO:  Deployed  /home/cjn/.local/share/cjnfuncs_testdeployfiles/test_dir/x2
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.local/share/cjnfuncs_testdeployfiles
-└── [drwx-----x]  test_dir
-    ├── [drwx-----x]  emptydir
-    ├── [drwx----w-]  subdir
-    │   └── [-rw-----w-]  x4
-    ├── [-rw------x]  x1
-    ├── [-rw-----w-]  x2
-    └── [-rw------x]  x3
-
-3 directories, 4 files
-
+`-- test_dir                  [drwx-----x] 0o701      66 bytes
+    |-- emptydir              [drwx-----x] 0o701       6 bytes
+    |-- subdir                [drwx----w-] 0o702      16 bytes
+    |   `-- x4                [-rw-----w-] 0o602       0 bytes
+    |-- x1                    [-rw------x] 0o601       0 bytes
+    |-- x2                    [-rw-----w-] 0o602       0 bytes
+    `-- x3                    [-rw------x] 0o601       0 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -89,19 +83,16 @@ Test 3 - Deploy directory tree, overwrite=True
            deployfiles.copytree                 INFO:  Deployed  /home/cjn/.local/share/cjnfuncs_testdeployfiles/test_dir/x2
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.local/share/cjnfuncs_testdeployfiles
-└── [drwx----wx]  test_dir
-    ├── [drwx----wx]  emptydir
-    ├── [drwx----wx]  subdir
-    │   └── [-rw-----wx]  x4
-    ├── [-rw-----wx]  x1
-    ├── [-rw-----wx]  x2
-    └── [-rw-----wx]  x3
-
-3 directories, 4 files
-
+`-- test_dir                  [drwx----wx] 0o703      66 bytes
+    |-- emptydir              [drwx----wx] 0o703       6 bytes
+    |-- subdir                [drwx----wx] 0o703      16 bytes
+    |   `-- x4                [-rw-----wx] 0o603       0 bytes
+    |-- x1                    [-rw-----wx] 0o603       0 bytes
+    |-- x2                    [-rw-----wx] 0o603       0 bytes
+    `-- x3                    [-rw-----wx] 0o603       0 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -112,14 +103,11 @@ Test 4a - Try copy non-existing source file
            deployfiles.deploy_files             INFO:  Deployed  /home/cjn/.local/share/cjnfuncs_testdeployfiles/xyz/testfile.txt
       demo-deployfiles.dotest                  ERROR:  
   RAISED:     FileNotFoundError: Can't deploy <no_such_file>.  Item not found.
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.local/share/cjnfuncs_testdeployfiles
-└── [drwx-----x]  xyz
-    └── [-rw------x]  testfile.txt
-
-1 directory, 1 file
-
+`-- xyz                       [drwx-----x] 0o701      26 bytes
+    `-- testfile.txt          [-rw------x] 0o601    1088 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -132,15 +120,12 @@ Test 4b - Try copy non-existing source file
            deployfiles.deploy_files             INFO:  Deployed  /home/cjn/.local/share/cjnfuncs_testdeployfiles/testfile.txt
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.local/share/cjnfuncs_testdeployfiles
-├── [-rw-----wx]  testfile.txt
-└── [drwx-----x]  xyz
-    └── [-rw------x]  testfile.txt
-
-1 directory, 2 files
-
+|-- xyz                       [drwx-----x] 0o701      26 bytes
+|   `-- testfile.txt          [-rw------x] 0o601    1088 bytes
+`-- testfile.txt              [-rw-----wx] 0o603    1088 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -151,14 +136,11 @@ Test 5a - target_dir exists as a file
            deployfiles.deploy_files             INFO:  File </tmp/cjnfuncs_testdeployfiles/testfile.txt> already exists.  Skipped.
       demo-deployfiles.dotest                  ERROR:  
   RAISED:     NotADirectoryError: [Errno 20] Not a directory: '/tmp/cjnfuncs_testdeployfiles/IsAFile/testfile.txt'
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /tmp/cjnfuncs_testdeployfiles
-├── [-rw-r--r--]  IsAFile
-└── [-rw------x]  testfile.txt
-
-0 directories, 2 files
-
+|-- IsAFile                   [-rw-r--r--] 0o644       0 bytes
+`-- testfile.txt              [-rw------x] 0o601    1088 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -169,18 +151,15 @@ Test 5b - Destination is an existing file with overwrite but no permission
            deployfiles.deploy_files             INFO:  Deployed  /tmp/cjnfuncs_testdeployfiles/testfile.txt
       demo-deployfiles.dotest                  ERROR:  
   RAISED:     PermissionError: [Errno 13] Permission denied: '/tmp/cjnfuncs_testdeployfiles/testfile.txt'
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /tmp/cjnfuncs_testdeployfiles
-└── [----------]  testfile.txt
-
-0 directories, 1 file
-
+`-- testfile.txt              [----------] 0o0      1088 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
 Test 6 - Deploy to various directories
-  GIVEN:      ([{'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR', 'file_stat': 385, 'dir_stat': 449}, {'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR/subdir', 'file_stat': 386, 'dir_stat': 450}, {'source': 'testfile.txt', 'target_dir': PosixPath('/home/cjn/.config/junk2'), 'file_stat': 387, 'dir_stat': 451}, {'source': 'testfile.txt', 'target_dir': 'CONFIG_DIR/dirxxx'}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs', 'file_stat': 388, 'dir_stat': 452}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs/defaults'}, {'source': 'test_dir/subdir/x4', 'target_dir': 'CONFIG_DIR/mydirs', 'file_stat': 389, 'dir_stat': 453}],), {}
+  GIVEN:      ([{'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR', 'file_stat': 385, 'dir_stat': 449}, {'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR/subdir', 'file_stat': 386, 'dir_stat': 450}, {'source': 'testfile.txt', 'target_dir': PosixPath('/home/cjn/.config/junk2'), 'file_stat': 387, 'dir_stat': 451}, {'source': 'testfile.txt', 'target_dir': 'CONFIG_DIR/dirxxx'}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs', 'file_stat': 388, 'dir_stat': 452}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs/defaults'}, {'source': 'test_dir/subdir/x4', 'target_dir': 'CONFIG_DIR/mydirs', 'file_stat': 389, 'dir_stat': 453}, {'source': '', 'target_dir': 'CONFIG_DIR/dir3/emptydir2', 'file_stat': 388, 'dir_stat': 453}],), {}
   EXPECT:     None (success)
            deployfiles.deploy_files             INFO:  Created   /home/cjn/.config/cjnfuncs_testdeployfiles
            deployfiles.deploy_files             INFO:  Deployed  /home/cjn/.config/cjnfuncs_testdeployfiles/demo_deployfiles.cfg
@@ -206,50 +185,44 @@ Test 6 - Deploy to various directories
            deployfiles.copytree                 INFO:  Created   /home/cjn/.local/share/cjnfuncs_testdeployfiles/mydirs/defaults/test_dir/emptydir
            deployfiles.deploy_files             INFO:  Created   /home/cjn/.config/cjnfuncs_testdeployfiles/mydirs
            deployfiles.deploy_files             INFO:  Deployed  /home/cjn/.config/cjnfuncs_testdeployfiles/mydirs/x4
+           deployfiles.deploy_files             INFO:  Created   /home/cjn/.config/cjnfuncs_testdeployfiles/dir3/emptydir2
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.config/cjnfuncs_testdeployfiles
-├── [-rw------x]  demo_deployfiles.cfg
-├── [drwxr-xr-x]  dirxxx
-│   └── [-rw-r--r--]  testfile.txt
-├── [drwx---r-x]  mydirs
-│   └── [-rw----r-x]  x4
-└── [drwx----w-]  subdir
-    └── [-rw-----w-]  demo_deployfiles.cfg
-
-3 directories, 4 files
-
-      demo-deployfiles.list_tree                INFO:  
+|-- dir3                      [drwxr-xr-x] 0o755      23 bytes
+|   `-- emptydir2             [drwx---r-x] 0o705       6 bytes
+|-- dirxxx                    [drwxr-xr-x] 0o755      26 bytes
+|   `-- testfile.txt          [-rw-r--r--] 0o644    1088 bytes
+|-- mydirs                    [drwx---r-x] 0o705      16 bytes
+|   `-- x4                    [-rw----r-x] 0o605       0 bytes
+|-- subdir                    [drwx----w-] 0o702      34 bytes
+|   `-- demo_deployfiles.cfg  [-rw-----w-] 0o602       0 bytes
+`-- demo_deployfiles.cfg      [-rw------x] 0o601       0 bytes
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.config/junk2
-└── [-rw-----wx]  testfile.txt
-
-0 directories, 1 file
-
-      demo-deployfiles.list_tree                INFO:  
+`-- testfile.txt              [-rw-----wx] 0o603    1088 bytes
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.local/share/cjnfuncs_testdeployfiles
-└── [drwxr-xr-x]  mydirs
-    ├── [drwxr-xr-x]  defaults
-    │   └── [drwxr-xr-x]  test_dir
-    │       ├── [drwxr-xr-x]  emptydir
-    │       ├── [drwxr-xr-x]  subdir
-    │       │   └── [-rw-r--r--]  x4
-    │       ├── [-rw-r--r--]  x1
-    │       ├── [-rw-r--r--]  x2
-    │       └── [-rw-r--r--]  x3
-    └── [drwx---r--]  test_dir
-        ├── [drwx---r--]  emptydir
-        ├── [drwx---r--]  subdir
-        │   └── [-rw----r--]  x4
-        ├── [-rw----r--]  x1
-        ├── [-rw----r--]  x2
-        └── [-rw----r--]  x3
-
-8 directories, 8 files
-
+`-- mydirs                    [drwxr-xr-x] 0o755      38 bytes
+    |-- defaults              [drwxr-xr-x] 0o755      22 bytes
+    |   `-- test_dir          [drwxr-xr-x] 0o755      66 bytes
+    |       |-- emptydir      [drwxr-xr-x] 0o755       6 bytes
+    |       |-- subdir        [drwxr-xr-x] 0o755      16 bytes
+    |       |   `-- x4        [-rw-r--r--] 0o644       0 bytes
+    |       |-- x1            [-rw-r--r--] 0o644       0 bytes
+    |       |-- x2            [-rw-r--r--] 0o644       0 bytes
+    |       `-- x3            [-rw-r--r--] 0o644       0 bytes
+    `-- test_dir              [drwx---r--] 0o704      66 bytes
+        |-- emptydir          [drwx---r--] 0o704       6 bytes
+        |-- subdir            [drwx---r--] 0o704      16 bytes
+        |   `-- x4            [-rw----r--] 0o604       0 bytes
+        |-- x1                [-rw----r--] 0o604       0 bytes
+        |-- x2                [-rw----r--] 0o604       0 bytes
+        `-- x3                [-rw----r--] 0o604       0 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -259,13 +232,10 @@ Test 7a - Deploy empty directory
            deployfiles.deploy_files             INFO:  Created   /home/cjn/.config/cjnfuncs_testdeployfiles/emptydir2
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.config/cjnfuncs_testdeployfiles
-└── [drwx-----x]  emptydir2
-
-1 directory, 0 files
-
+`-- emptydir2                 [drwx-----x] 0o701       6 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -276,14 +246,11 @@ Test 7b - Deploy subdirectory to top level
            deployfiles.copytree                 INFO:  Deployed  /home/cjn/.config/cjnfuncs_testdeployfiles/subdir/x4
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.config/cjnfuncs_testdeployfiles
-└── [drwx----w-]  subdir
-    └── [-rw-----w-]  x4
-
-1 directory, 1 file
-
+`-- subdir                    [drwx----w-] 0o702      16 bytes
+    `-- x4                    [-rw-----w-] 0o602       0 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -294,15 +261,12 @@ Test 7c - Deploy subdirectory to subdirectory
            deployfiles.copytree                 INFO:  Deployed  /home/cjn/.config/cjnfuncs_testdeployfiles/mydir/subdir/x4
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.config/cjnfuncs_testdeployfiles
-└── [drwxr-xr-x]  mydir
-    └── [drwx----wx]  subdir
-        └── [-rw-----wx]  x4
-
-2 directories, 1 file
-
+`-- mydir                     [drwxr-xr-x] 0o755      20 bytes
+    `-- subdir                [drwx----wx] 0o703      16 bytes
+        `-- x4                [-rw-----wx] 0o603       0 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -316,19 +280,16 @@ Test 8a - Demo dir_stat rules - overwrite=False
            deployfiles.deploy_files             INFO:  Created   /home/cjn/.config/cjnfuncs_testdeployfiles/dir1/emptydir
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.config/cjnfuncs_testdeployfiles
-└── [drwxr-xr-x]  dir1
-    ├── [drwxr-xr-x]  dir2
-    │   └── [drwx-----x]  subdir
-    │       ├── [-rw-----w-]  x0
-    │       └── [-rw------x]  x4
-    ├── [drwx---r--]  emptydir
-    └── [-rw-----wx]  x0
-
-4 directories, 3 files
-
+`-- dir1                      [drwxr-xr-x] 0o755      44 bytes
+    |-- dir2                  [drwxr-xr-x] 0o755      20 bytes
+    |   `-- subdir            [drwx-----x] 0o701      26 bytes
+    |       |-- x0            [-rw-----w-] 0o602       0 bytes
+    |       `-- x4            [-rw------x] 0o601       0 bytes
+    |-- emptydir              [drwx---r--] 0o704       6 bytes
+    `-- x0                    [-rw-----wx] 0o603       0 bytes
       demo-deployfiles.dotest                WARNING:  
 
 ==============================================================================================
@@ -342,16 +303,13 @@ Test 8b - Demo dir_stat rules - overwrite=True
            deployfiles.deploy_files             INFO:  Created   /home/cjn/.config/cjnfuncs_testdeployfiles/dir1/emptydir
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
-      demo-deployfiles.list_tree                INFO:  
+      demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /home/cjn/.config/cjnfuncs_testdeployfiles
-└── [drwx----wx]  dir1
-    ├── [drwxr-xr-x]  dir2
-    │   └── [drwx----w-]  subdir
-    │       ├── [-rw-----w-]  x0
-    │       └── [-rw------x]  x4
-    ├── [drwx---r--]  emptydir
-    └── [-rw-----wx]  x0
-
-4 directories, 3 files
-
+`-- dir1                      [drwx----wx] 0o703      44 bytes
+    |-- dir2                  [drwxr-xr-x] 0o755      20 bytes
+    |   `-- subdir            [drwx----w-] 0o702      26 bytes
+    |       |-- x0            [-rw-----w-] 0o602       0 bytes
+    |       `-- x4            [-rw------x] 0o601       0 bytes
+    |-- emptydir              [drwx---r--] 0o704       6 bytes
+    `-- x0                    [-rw-----wx] 0o603       0 bytes

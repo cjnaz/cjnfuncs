@@ -37,7 +37,7 @@ EmailPass           mypassword
 EmailFrom           me@myserver.com
 ```
 
-And running this code:
+And this code:
 ```
 #!/usr/bin/env python3
 # ***** SMTP_ex1.py *****
@@ -47,8 +47,8 @@ from cjnfuncs.configman   import config_item
 from cjnfuncs.deployfiles import deploy_files
 from cjnfuncs.SMTP        import snd_notif, snd_email
 
-tool = set_toolname('SMTP_ex1')
-
+set_toolname('SMTP_ex1')
+logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
 
 deploy_files([
     { 'source': 'SMTP_ex1.cfg',      'target_dir': 'USER_CONFIG_DIR' },
@@ -65,7 +65,7 @@ try:
               log=True, 
               smtp_config=myconfig)
 except SndEmailError as e:
-    logging.warning(f"snd_notif() failed:\n  {e}")
+    logging.warning(f"snd_notif() failed:\n  {type(e).__name__}: {e}")
 
 try:
     snd_email(subj='My first email send',
@@ -74,14 +74,15 @@ try:
               log=True,
               smtp_config=myconfig)
 except SndEmailError as e:
-    logging.warning(f"snd_email() failed:\n  {e}")
+    logging.warning(f"snd_email() failed:\n  {type(e).__name__}: {e}")
 ```
 
 And finally, running the code produces this output, and a couple sent messages:
 ```
 $ ./SMTP_ex1.py 
-Deployed  SMTP_ex1.cfg         to  /home/me/.config/SMTP_ex1/SMTP_ex1.cfg
-Deployed  creds_SMTP           to  /home/me/.config/SMTP_ex1/creds_SMTP
+    deployfiles.deploy_files         -     INFO:  Created   /home/me/.config/SMTP_ex1
+    deployfiles.deploy_files         -     INFO:  Deployed  /home/me/.config/SMTP_ex1/SMTP_ex1.cfg
+    deployfiles.deploy_files         -     INFO:  Deployed  /home/me/.config/SMTP_ex1/creds_SMTP
            SMTP.snd_notif            -  WARNING:  Notification sent <My first text message> <This is pretty clean interface!>
            SMTP.snd_email            -  WARNING:  Email sent <My first email send>
 ```
@@ -188,6 +189,19 @@ config that contains the [SMTP] section).
   - Example:  Given `'4805551212@vzwpix.com 4805551213 +14805551214, +44123456'`, list_to() returns:  `['+14805551212', '+14805551213', '+14805551214', '+44123456']`
 
 
+<br>
+
+## Controlling logging from within smtp code
+
+Logging within the SMTP module uses the `cjnfuncs.smtp` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
+meaning that no logging messages are produced from within the SMTP code.  For validation and debug purposes, logging from within SMTP code 
+can be enabled by setting the logging level for this module's logger from within the tool script code:
+
+        logging.getLogger('cjnfuncs.smtp').setLevel(logging.DEBUG)
+
+        # Or alternately, use the core module set_logging_level() function:
+        set_logging_level (logging.DEBUG, 'cjnfuncs.smtp')
+
 
 <a id="links"></a>
          
@@ -231,20 +245,19 @@ Three attempts are made to send the message.
 
 `urls_list` (list, default [])
 - A list of url strings to be passed to the message sending plugin module, which should pass them to the messaging service.
-- This list is discarded by `snd_notif()` if not using a messaging service.  If you want to send a message with
-urls then included them in the `msg` body text.
+- If not using a messaging service then this list is discarded, in which case include the URLs in the `msg` body.
 
 `to` (str, default 'NotifList')
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name (also listing one
 or more whitespace or comma separated email addresses).  If the `to` arg does not
-contain an '@' it is assumed to be a config param.
+contain an '@' it is assumed to be a config param name.
 - Define `NotifList` in the config file to use the default `to` value.
 
 `log` (bool, default False)
-- If True, logs that the message was sent at the WARNING level. If False, logs 
-at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
-The `subj` field is part of the log message.
+- If True, logs that the message was sent at the WARNING level (using the root logger). If False, logs 
+at the DEBUG level (using the 'cjnfuncs.smtp' logger). Useful for eliminating separate logging messages in the tool script code.
+The `subj` field and `msg` body are included in the log message.
 
 `smtp_config` (config_item class instance)
 - config_item class instance containing the [SMTP] section and related params
@@ -283,7 +296,7 @@ default `to` arg value.
 
 
 ### Behaviors and rules
-- `snd_notif()` uses `snd_email()` to send the message. See `snd_email()` for related setup.
+- `snd_notif()` uses `snd_email()` to send the message (if not using a messaging service). See `snd_email()` for related setup.
     
 <br/>
 
@@ -313,20 +326,22 @@ Three attempts are made to send the message (see `EmailNTries`, below).
 - To whom to send the message. `to` may be either an explicit string list of email addresses
 (whitespace or comma separated) or a config param name in the [SMTP] section (also listing one
 or more whitespace or comma separated email addresses).  If the `to` arg does not
-contain an '@' it is assumed to be a config param.
+contain an '@' it is assumed to be a config param name.
 
 `body` (str, default None)
 - A string message to be sent
 
 `filename` (str, default None)
-- A str or Path to the file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
+- A str or Path to the file who's content will be sent as the body of the message
+- The file path is relative to the `core.tool.cache_dir`, or an absolute path
 
 `htmlfile` (str, default None)
-- A str or Path to the html formatted file to be sent, relative to the `core.tool.cache_dir`, or an absolute path.
+- A str or Path to the file who's HTML-formatted content will be sent as the body of the message
+- The file path is relative to the `core.tool.cache_dir`, or an absolute path
 
 `log` (bool, default False)
-- If True, logs that the message was sent at the WARNING level. If False, logs 
-at the DEBUG level. Useful for eliminating separate logging messages in the tool script code.
+- If True, logs that the message was sent at the WARNING level (using the root logger). If False, logs 
+at the DEBUG level (using the 'cjnfuncs.smpt' logger). Useful for eliminating separate logging messages in the tool script code.
 The `subj` field is part of the log message.
 
 `smtp_config` (config_item class instance)
@@ -350,7 +365,7 @@ The `subj` field is part of the log message.
 - Password for `EmailServer` login, if required by the server
 
 `DontEmail` (default False)
-- If True, messages are not sent. Useful for debug. Also blocks `snd_notif()` messages.
+- If True, messages are not sent. Useful for debug. Also blocks `snd_notif()` messages not sent thru a messaging service.
 
 `EmailVerbose` (default False)
 - If True, detailed transactions with the SMTP server are sent to stdout. Useful for debug.

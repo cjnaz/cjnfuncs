@@ -2,7 +2,7 @@
 
 Skip to [API documentation](#links)
 
-The core module provides a foundation for writing tool scripts, such as configuring the base logger
+The core module provides a foundation for writing tool scripts, such as configuring the root logger
 and establishing standardized paths for configuration, logging, working files, etc.
 
 <br>
@@ -45,7 +45,7 @@ Output:
     .log_dir_base     :  /home/me/.local/share/core_ex1
     .log_dir          :  None
     .log_file         :  None
-    .log_full_path    :  None
+    .log_full_path    :  __console__
 ```
 
 In the above example, `set_toolname()` has determined that the system-wide directories don't exist
@@ -64,12 +64,14 @@ by later changes.
 for that config file at `<core.tool.config_dir>/myconfig.cfg`.
 - A tool script may specify a log file (eg, `mylogfile.txt`).  `cjnfuncs.core.setuplogging()` will write
 log messages to `<core.tool.log_dir>/mylogfile.txt` (which is the same as `core.tool.log_full_path`).
+- `core.tool.log_full_path` = `__console__` if logging is currently configured to send to the console.
+Note that `set_toolname()` calls `setuplogging()` to establish the baseline logging configuration.
 - `set_toolname()` uses the [appdirs package](https://pypi.org/project/appdirs/), which is a close 
 implementation of the
 [XDG basedir specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
 
 - The `.user_` and `.site_`-prefixed attributes are as defined by the XDG spec and/or the appdirs package.  The 
-non-such-prefixed attributes are resolved based on the existing user or site environment, and are the attributes
+non-such-prefixed attributes (eg, `core.tool.data_dir`) are resolved based on the existing user or site environment, and are the attributes
 that generally should be used within tool scripts.
 - See other important **Behaviors, rules, and variances from the XDG spec and/or the appdirs package**
 in the [setuplogging](#setuplogging) API doc, below.
@@ -105,7 +107,7 @@ Example `print(core.tool)` for a user-specific setup:
     .log_dir_base     :  /home/me/.local/share/wanstatus
     .log_dir          :  None
     .log_file         :  None
-    .log_full_path    :  None
+    .log_full_path    :  __console__
 ```
     
 Example `print(core.tool)` for a site setup (.site_config_dir and/or .site_data_dir exist):
@@ -131,7 +133,7 @@ Example `print(core.tool)` for a site setup (.site_config_dir and/or .site_data_
     .log_dir_base     :  /usr/share/wanstatus
     .log_dir          :  None
     .log_file         :  None
-    .log_full_path    :  None
+    .log_full_path    :  __console__
 ```
 
 <br>
@@ -245,11 +247,11 @@ set_toolname('core_ex3')    # Configures the root logger to defaults, including 
 def myfunction():
     # With set and restore_logging_level calls uncommented I get debug logging within myfunction
 
-    set_logging_level(logging.DEBUG)    # Save current WARNING/30 level to the stack and set DEBUG/10 level
+    set_logging_level(logging.DEBUG, save=True) # Save current WARNING/30 level to the stack and set DEBUG/10 level
     # Do complicated stuff in this function
     logging.debug   (f"2 - Within myfunction()        - logging level: {logging.getLogger().level}. On the stack: {get_logging_level_stack()}")
 
-    restore_logging_level()             # Restore (and pop) the pre-existing level from from stack
+    restore_logging_level()                     # Restore (and pop) the pre-existing level from from stack
     return
 
 
@@ -264,8 +266,11 @@ $ ./core_ex3.py
        core_ex3.myfunction           -    DEBUG:  2 - Within myfunction()        - logging level: 10. On the stack: [30]
        core_ex3.<module>             -  WARNING:  3 - After  myfunction() return - logging level: 30. On the stack: []
 ```
-`set_logging_level()` and `restore_logging_level()` are used extensively within `rwt.run_with_timeout()` for validation and regression testing, and within `configman.loadconfig()` additionally for handling the 
-`LogLevel` setting from the config file.
+`set_logging_level()` and `restore_logging_level()` also support controlling 'child'/'named' (module-specific) logging.  For example, to enable 
+info level logging for a loadconfig() sequence:
+
+        set_logging_level(logging.INFO, 'cjnfuncs.configman')
+        loadconfig()
 
 <br>
 
@@ -340,11 +345,11 @@ $ ./core_ex4.py
 # Class set_toolname (toolname) - Set target directories for config and data storage
 
 set_toolname() centralizes and establishes a set of base directory path variables for use in
-the tool script.  It looks for existing directories, based on the specified toolname, in
-the site-wide (system-wide) and then user-specific locations.  Specifically, site-wide 
+the tool script.  It looks first for existing directories, based on the specified toolname, in
+the site-wide (system-wide) locations and then in user-specific locations.  Specifically, site-wide 
 config and/or data directories are looked for at `/etc/xdg/<toolname>` and/or 
 `/usr/share/<toolname>`.  If site-wide directories are not 
-found then user-specific is assumed.  No directories are created.
+found then the user-specific environment is assumed.  No directories are created.
 
 
 ### Args
@@ -362,7 +367,8 @@ found then user-specific is assumed.  No directories are created.
 If a config file is subsequently
 loaded then the `.log_dir_base` is changed to the `.user_config_dir`.  (Not changed for a `site` setup.)
 Thus, for a `user` setup, logging defaults to the configuration directory.  This is a 
-style variance, and can be reset in the tool script by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
+style variance, and can be disabled by setting `remap_logdirbase = False` on the config_item instantiation, or
+by reassigning: `core.tool.log_dir_base = core.tool.user_log_dir` (or any
 other directory) before a subsequent call to `loadconfig()` or `setuplogging()`.
 (The XDG spec says logging goes to the `.user_state_dir`, while appdirs sets it to the `.user_cache_dir/log`.)
 
@@ -385,7 +391,7 @@ also to the `.site_data_dir`.
 # setuplogging (call_logfile=None, call_logfile_wins=False, config_logfile=None, ConsoleLogFormat=None, FileLogFormat=None) - Set up the root logger
 
 Logging may be directed to the console (stdout), or to a file.  Each time setuplogging()
-is called the current/active log file (or console) may be reassigned.
+is called the root logger's output path (log file or console) may be reassigned.
 
 Calling `setuplogging()` with no args results in:
 - Logging output to the console
@@ -394,11 +400,11 @@ Calling `setuplogging()` with no args results in:
 
 setuplogging() works standalone or in conjunction with `cjnfuncs.configman.loadconfig()`.
 If a loaded config file has a `LogFile` parameter then loadconfig() passes it's value thru
-`config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins`
+`config_logfile`.  loadconfig() also passes along any `call_logfile` and `call_logfile_wins` switch
 that were passed to loadconfig() from the tool script.  This mechanism allows the tool script
 to override any config `LogFile`, such as for directing output to the console for a tool script's 
 interactive use.  For example, this call will set logging output to the console regardless of 
-the log file declared in the config file:
+the LogFile declared in the config file:
 
     setuplogging (call_logfile=None, call_logfile_wins=True, config_logfile='some_logfile.txt')
 
@@ -429,6 +435,15 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 ### Returns
 - None
+
+
+### Behaviors and rules
+- All cjnfuncs modules start with WARNING level logging.  To enable debug or info logging on a specific cjnfuncs 
+module set the named child logger from your tool script, eg:
+
+    logging.getLogger('cjnfuncs.rwt').setLevel(logging.DEBUG)
+
+These modules support setting child logger levels:  configman, deployfiles, resourcelock, rwt, SMTP
     
 <br/>
 
@@ -436,9 +451,11 @@ config_logfile may be an absolute path or relative to the `core.tool.log_dir_bas
 
 ---
 
-# set_logging_level (new_level, clear=False, save=True) - Save the current logging level and set the new_level
+# set_logging_level (new_level, logger_name='', clear=False, save=False) - Save the current logging level and set the new_level
 
-The current logging level is saved on a stack and can be restored by a call to `restore_logging_level()`.
+The current logging level is optionally saved on a stack and can be restored by a call to `restore_logging_level()`.
+Calling set_logging_level is exactly equivalent to `logging.getLogger(logger).setLevel(new_level)`, with the 
+added history mechanism (and a cleaner syntax).
 
 
 ### Args
@@ -447,16 +464,26 @@ The current logging level is saved on a stack and can be restored by a call to `
 equivalents (or to any integer value that makes sense):  logging.DEBUG (10), logging.INFO (20), logging.WARNING (30), 
 logging.ERROR (40), or logging.CRITICAL (50).
 
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, sets the root logger level
+
 `clear` (bool, default False)
 - If True, the logging level history stack is cleared
 
-`save` (bool, default True)
-- If True, the current logging level is saved to the stack
-- If clear=True, then the clear is done first.  If save=True also then the stack will have only the prior logging level.
+`save` (bool, default False)
+- If True, the current logging level is saved to the stack for being restored by `restore_logging_level()`.
+- If also clear=True, then the clear is done first, resulting in the stack having only the prior logging level.
 
 
 ### Returns
 - None
+
+
+### Behaviors
+- NOTE that a child logger that has not been set to a logging level will have a logging level = 0, which Python seems to
+treat the same as logging.WARNING (30).
+
     
 <br/>
 
@@ -464,10 +491,17 @@ logging.ERROR (40), or logging.CRITICAL (50).
 
 ---
 
-# restore_logging_level () - Restore the prior logging level from the stack
+# restore_logging_level (logger_name='') - Restore the prior logging level from the stack
 
-The prior saved logging level (from the prior set_logging_level call) is popped from the stack and set as the current logging level.
+The prior saved logging level for the specified child/root logger (from the prior set_logging_level call) is popped
+from the stack and set as the current logging level.
 If the stack is empty then the logging level is set to logging.WARNING (30).
+
+
+### Args
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, restores the root logger level
 
 
 ### Returns
@@ -479,13 +513,20 @@ If the stack is empty then the logging level is set to logging.WARNING (30).
 
 ---
 
-# get_logging_level_stack () - Return the content of the stack
+# get_logging_level_stack (logger_name='') - Return the content of the stack
 
-Useful for debug.  The stack may be cleared with a call to `set_logging_level(clear=True)` or `pop_logging_level_stack(clear=True)`.
+Useful for debug and testing.  The stack may be cleared with a call to `set_logging_level(clear=True)` or `pop_logging_level_stack(clear=True)`.
+
+
+### Args
+`logger` (str, default '' (root logger))
+- Optional child logger name to be set, eg: 'cjnfuncs.rwt'
+- If omitted, returns the root logger level stack
 
 
 ### Returns
-- A list of the prior saved logging levels
+- A list of the prior saved logging levels for the specified child/root logger, or an empty list if no
+values are on the stack or have previously been saved.
 
 <br/>
 
@@ -493,20 +534,22 @@ Useful for debug.  The stack may be cleared with a call to `set_logging_level(cl
 
 ---
 
-# pop_logging_level_stack (clear=False) - Discard top of the stack
+# pop_logging_level_stack (logger_name='', clear=False) - Discard top of the stack
 
-Useful if the preexisting logging level was saved to the stack, but should be discarded 
-when a new level is set.  Used in loadconfig() when a new logging level is assigned from
-the config file.
+Useful if the preexisting logging level was saved to the stack, but should be discarded.
 
 
 ### Args
+`logger` (str, default '' (root logger))
+- Optional child logger name to be stack popped, eg: 'cjnfuncs.rwt'
+- If omitted, pops the stack of the root logger
+
 `clear` (bool, default False)
-- If True, the logging level history stack is cleared, without setting a new logging level
+- If True, the logging level history stack is cleared
 
 
 ### Returns
-- Logging level stack after pop
+- Logging level stack after pop or clear
 
 <br/>
 
@@ -514,7 +557,7 @@ the config file.
 
 ---
 
-# periodic_log (message, category='Cat1', log_interval='10m', log_level=30) - Log a message infrequently
+# periodic_log (message, category='Cat1', logger_name='', log_interval='10m', log_level=30) - Log a message infrequently
 
 Log infrequently so as to avoid flooding the log.  The `category` arg provides for independent
 log intervals for different types of logging events.
@@ -530,9 +573,13 @@ log intervals for different types of logging events.
 - Allows for multiple, independent concurrent periodic_log streams
 - `category` should typically be an int or str.  Used as a dict key.
 
+`logger_name` (str, default '')
+- Name of child or root logger.  Only remembered on the first log call
+for this category (ignored of subsequent calls).
+
 `log_interval` (timevalue, default '10m')
 - How often this category's messages will be logged.  Only remembered on the first log call
-for this category (ignored of subsequent calls)
+for this category (ignored of subsequent calls).
 
 `log_level` (int, default logging.WARNING/30)
 - The default for this category is set on first call

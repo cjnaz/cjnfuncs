@@ -6,8 +6,8 @@ from cjnfuncs.configman   import config_item
 from cjnfuncs.deployfiles import deploy_files
 from cjnfuncs.SMTP        import snd_notif, snd_email
 
-tool = set_toolname('SMTP_ex1')
-
+set_toolname('SMTP_ex1')
+logging.getLogger('cjnfuncs.deployfiles').setLevel(logging.INFO)
 
 deploy_files([
     { 'source': 'SMTP_ex1.cfg',      'target_dir': 'USER_CONFIG_DIR' },
@@ -24,7 +24,7 @@ try:
               log=True, 
               smtp_config=myconfig)
 except SndEmailError as e:
-    logging.warning(f"snd_notif() failed:\n  {e}")
+    logging.warning(f"snd_notif() failed:\n  {type(e).__name__}: {e}")
 
 try:
     snd_email(subj='My first email send',
@@ -33,5 +33,4 @@ try:
               log=True,
               smtp_config=myconfig)
 except SndEmailError as e:
-    logging.warning(f"snd_email() failed:\n  {e}")
-    
+    logging.warning(f"snd_email() failed:\n  {type(e).__name__}: {e}")

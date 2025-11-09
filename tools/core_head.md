@@ -2,7 +2,7 @@
 
 Skip to [API documentation](#links)
 
-The core module provides a foundation for writing tool scripts, such as configuring the base logger
+The core module provides a foundation for writing tool scripts, such as configuring the root logger
 and establishing standardized paths for configuration, logging, working files, etc.
 
 <br>
@@ -45,7 +45,7 @@ Output:
     .log_dir_base     :  /home/me/.local/share/core_ex1
     .log_dir          :  None
     .log_file         :  None
-    .log_full_path    :  None
+    .log_full_path    :  __console__
 ```
 
 In the above example, `set_toolname()` has determined that the system-wide directories don't exist
@@ -64,12 +64,14 @@ by later changes.
 for that config file at `<core.tool.config_dir>/myconfig.cfg`.
 - A tool script may specify a log file (eg, `mylogfile.txt`).  `cjnfuncs.core.setuplogging()` will write
 log messages to `<core.tool.log_dir>/mylogfile.txt` (which is the same as `core.tool.log_full_path`).
+- `core.tool.log_full_path` = `__console__` if logging is currently configured to send to the console.
+Note that `set_toolname()` calls `setuplogging()` to establish the baseline logging configuration.
 - `set_toolname()` uses the [appdirs package](https://pypi.org/project/appdirs/), which is a close 
 implementation of the
 [XDG basedir specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
 
 - The `.user_` and `.site_`-prefixed attributes are as defined by the XDG spec and/or the appdirs package.  The 
-non-such-prefixed attributes are resolved based on the existing user or site environment, and are the attributes
+non-such-prefixed attributes (eg, `core.tool.data_dir`) are resolved based on the existing user or site environment, and are the attributes
 that generally should be used within tool scripts.
 - See other important **Behaviors, rules, and variances from the XDG spec and/or the appdirs package**
 in the [setuplogging](#setuplogging) API doc, below.
@@ -105,7 +107,7 @@ Example `print(core.tool)` for a user-specific setup:
     .log_dir_base     :  /home/me/.local/share/wanstatus
     .log_dir          :  None
     .log_file         :  None
-    .log_full_path    :  None
+    .log_full_path    :  __console__
 ```
     
 Example `print(core.tool)` for a site setup (.site_config_dir and/or .site_data_dir exist):
@@ -131,7 +133,7 @@ Example `print(core.tool)` for a site setup (.site_config_dir and/or .site_data_
     .log_dir_base     :  /usr/share/wanstatus
     .log_dir          :  None
     .log_file         :  None
-    .log_full_path    :  None
+    .log_full_path    :  __console__
 ```
 
 <br>
@@ -245,11 +247,11 @@ set_toolname('core_ex3')    # Configures the root logger to defaults, including 
 def myfunction():
     # With set and restore_logging_level calls uncommented I get debug logging within myfunction
 
-    set_logging_level(logging.DEBUG)    # Save current WARNING/30 level to the stack and set DEBUG/10 level
+    set_logging_level(logging.DEBUG, save=True) # Save current WARNING/30 level to the stack and set DEBUG/10 level
     # Do complicated stuff in this function
     logging.debug   (f"2 - Within myfunction()        - logging level: {logging.getLogger().level}. On the stack: {get_logging_level_stack()}")
 
-    restore_logging_level()             # Restore (and pop) the pre-existing level from from stack
+    restore_logging_level()                     # Restore (and pop) the pre-existing level from from stack
     return
 
 
@@ -264,8 +266,11 @@ $ ./core_ex3.py
        core_ex3.myfunction           -    DEBUG:  2 - Within myfunction()        - logging level: 10. On the stack: [30]
        core_ex3.<module>             -  WARNING:  3 - After  myfunction() return - logging level: 30. On the stack: []
 ```
-`set_logging_level()` and `restore_logging_level()` are used extensively within `rwt.run_with_timeout()` for validation and regression testing, and within `configman.loadconfig()` additionally for handling the 
-`LogLevel` setting from the config file.
+`set_logging_level()` and `restore_logging_level()` also support controlling 'child'/'named' (module-specific) logging.  For example, to enable 
+info level logging for a loadconfig() sequence:
+
+        set_logging_level(logging.INFO, 'cjnfuncs.configman')
+        loadconfig()
 
 <br>
 
