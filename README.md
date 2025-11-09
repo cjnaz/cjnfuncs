@@ -55,7 +55,12 @@ or using `core.set_logging.level(logging.INFO, 'cjnfuncs.configman')`.
 <br/>
 
 ## Revision history
-- 3.1  251107 - Windows fixes and improvements, implemented child loggers
+- 3.1  251109
+  Support for and use of child loggers, 
+  deployfiles create empty dir, 
+  Windows fixes, 
+  config_item() safe_mode switch, 
+  mungePath set_attributes from default False
 - 3.0.1 251005 - Allow '.' in config section names
 - 3.0 250705 - Added run_with_timeout, set / restore_logging_level, periodic_logging, get_next_dt.  Functional change to mungePath.
 - 2.5 250206 - Added multi-line and quoted string support to configman
