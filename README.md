@@ -50,6 +50,8 @@ or using `core.set_logging.level(logging.INFO, 'cjnfuncs.configman')`.
 
 - Changed mungePath set_attributes from default True to default False to avoid long processing time on Windows by default.
 
+- deployfiles can now create an empty target directory.
+
 <br/>
 
 ## Revision history

@@ -97,9 +97,11 @@ def do_base_setup(safe_mode=False):
 
 if __name__ == '__main__':
 
+    set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
+    set_logging_level (logging.INFO,  'cjnfuncs.deployfiles')
+
     if check_tnum('1'):
         print_test_header ("Tests for log file control")
-        set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
         deploy_files([
             { "source": "demo_config_T1.cfg",   "target_dir": "USER_CONFIG_DIR"},
             ], overwrite=True )

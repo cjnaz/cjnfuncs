@@ -50,7 +50,8 @@ the file and directory permissions for the pushed items.  Ownership matches the 
 `files_list` (list of dictionaries)
 - A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
   - `source` - Either an individual file or directory tree within and relative to `<package_dir>/deployment_files/`.
-    No wildcard support.
+    - No wildcard support
+    - `source = ''` will create an empty `target_dir`, if not already existing.
   - `target_dir` - A directory target for the pushed `source`.  It is expanded for user and environment vars, 
     and supports these substitutions (per `set_toolname()`):
     - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR
@@ -178,9 +179,11 @@ hosted on Linux.  Eg, a file permission of 0x644 will deploy with permission 0x6
     for item in files_list:
         file_stat=  item.get("file_stat", default_file_stat)
         dir_stat=   item.get("dir_stat",  default_dir_stat)
-        source =    Path(my_resources.joinpath(item["source"]))
+        source = item["source"]
+        if source != '':
+            source =    Path(my_resources.joinpath(item["source"]))
 
-        if source.is_file():
+        if source == ''  or  source.is_file():
             target_dir = resolve_target(item["target_dir"])
             didnt_exist = False
             if not target_dir.exists():         # TODO hang risk
@@ -190,13 +193,14 @@ hosted on Linux.  Eg, a file permission of 0x644 will deploy with permission 0x6
             if didnt_exist or overwrite:
                 target_dir.chmod(dir_stat)
 
-            outfile = target_dir / source.name
-            if not outfile.exists()  or  overwrite:
-                shutil.copy2 (source, outfile)
-                outfile.chmod(file_stat)
-                deployfiles_logger.info (f"Deployed  {outfile}")
-            else:
-                deployfiles_logger.info (f"File <{outfile}> already exists.  Skipped.")
+            if source != '':
+                outfile = target_dir / source.name
+                if not outfile.exists()  or  overwrite:
+                    shutil.copy2 (source, outfile)
+                    outfile.chmod(file_stat)
+                    deployfiles_logger.info (f"Deployed  {outfile}")
+                else:
+                    deployfiles_logger.info (f"File <{outfile}> already exists.  Skipped.")
 
         elif source.is_dir():
             # TODO ONLY WORKS if the source dir is on the file system (eg, not in a package .zip) ????

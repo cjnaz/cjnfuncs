@@ -59,6 +59,7 @@ set_toolname(TOOLNAME)
 print(core.tool)
 
 if args.setup_user:
+    set_logging_level(logging.INFO, 'cjnfuncs.deployfiles')
     deploy_files([
         { "source": CONFIG_FILE,        "target_dir": "USER_CONFIG_DIR" },
         { "source": "testfile.txt",     "target_dir": "USER_CONFIG_DIR" },

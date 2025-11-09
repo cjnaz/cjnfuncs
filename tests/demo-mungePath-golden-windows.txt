@@ -448,6 +448,3 @@ Test 33 - Rel path - attributes not set
 .is_dir       :  None
 .is_file      :  None
 
-Removing   Z:\dev\packages\cjnfuncs\tests\newdir
-Removing   Z:\dev\packages\cjnfuncs\tests\xyz
-Removing   C:\Users\stuff\AppData\Local\Temp\demo-mungePath

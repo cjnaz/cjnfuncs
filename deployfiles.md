@@ -159,7 +159,8 @@ the file and directory permissions for the pushed items.  Ownership matches the 
 `files_list` (list of dictionaries)
 - A list of dictionaries, each specifying a `source` file or directory tree to be copied to a `target_dir`.
   - `source` - Either an individual file or directory tree within and relative to `<package_dir>/deployment_files/`.
-    No wildcard support.
+    - No wildcard support
+    - `source = ''` will create an empty `target_dir`, if not already existing.
   - `target_dir` - A directory target for the pushed `source`.  It is expanded for user and environment vars, 
     and supports these substitutions (per `set_toolname()`):
     - USER_CONFIG_DIR, USER_DATA_DIR, USER_STATE_DIR, USER_CACHE_DIR

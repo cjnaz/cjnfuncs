@@ -1,6 +1,7 @@
 [project]
 name = 'cjnfuncs'
-version = '3.1rc4'
+version = '3.1rc5'
+    # 3.1rc5 - deployfiles create empty target_dir.  Testing final.
     # 3.1rc4 - Finished cleanup and doc work
     # 3.1rc3 - Testing scrub, doc work
     # 3.1rc2 - Windows fixes and improvements in core, rwt, configman.  Child loggers with support in set_logging_level & periodic_log.  Tests refresh.

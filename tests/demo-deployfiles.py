@@ -5,7 +5,7 @@ Produce / compare to golden results on Linux:
 
   As user on Linux:
     ./demo-deployfiles.py | diff demo-deployfiles-golden-user-linux.txt -
-        No differences expected on Linux
+        No differences expected
 
   As root Linux:
     ./demo-deployfiles.py --setup-site-mode
@@ -16,17 +16,19 @@ Produce / compare to golden results on Linux:
 Produce / compare to golden results on Windows:
 
   As user on Windows:
-    ./demo-deployfiles.py > tempfile.txt    Then check diff to demo-deployfiles-golden-user-windows.txt
+    demo-deployfiles.py > tempfile.txt    Then check diff to demo-deployfiles-golden-user-windows.txt
+        No differences expected
 
   As privileged user Windows:
     demo-deployfiles.py --setup-site-mode
     demo-deployfiles.py > tempfile.txt      Then check diff to demo-deployfiles-golden-site-windows.txt
+        No differences expected
     demo-deployfiles.py --remove-site-mode
 
 Linux and Windows test 6 will show significant difference due to .config_dir, .data_dir, and .state_dir
 all mapping to the same directory on Windows user mode:
     C:\\Users\\stuff\\AppData\\Local\\cjnfuncs_testdeployfiles
-Similar for site mode.
+    Similar for site mode.
 """
 
 #==========================================================
@@ -90,6 +92,7 @@ def dotest (testnum, desc, expect, *args, **kwargs):
 # Setups, support functions, and vars
 
 set_logging_level(logging.INFO, save=False)
+set_logging_level(logging.DEBUG, 'cjnfuncs.deployfiles')
 
 if sys.platform.startswith("win"):
     config_junk2 = Path(os.path.expandvars('%HOMEDRIVE%%HOMEPATH%/.config/junk2'))
@@ -114,6 +117,7 @@ if args.remove_site_mode:                       # Must be run as root
     rmtree(core.tool.site_config_dir)
     rmtree(core.tool.site_data_dir)
     rmtree(config_junk2)
+    rmtree(testpath)
     logging.info (f"Site mode disabled.  Removed:\n  {core.tool.site_config_dir}\n  {core.tool.site_data_dir}\n  {config_junk2}")
     sys.exit()
 
@@ -134,7 +138,7 @@ def dump_tree(start_path="."):
         if not entries:
             return
 
-        max_name_len = max(len(entry.name) for entry in entries)
+        # max_name_len = max(len(entry.name) for entry in entries)
 
         for i, entry in enumerate(entries):
             is_last = (i == len(entries) - 1)
@@ -256,6 +260,7 @@ if args.test == '0'  or  args.test == tnum:
         { "source": "test_dir",             "target_dir": "DATA_DIR/mydirs",        "file_stat": 0o604, "dir_stat": 0o704},
         { "source": "test_dir",             "target_dir": "DATA_DIR/mydirs/defaults"},  # use default file_stat, dir_stat
         { "source": "test_dir/subdir/x4",   "target_dir": "CONFIG_DIR/mydirs",      "file_stat": 0o605, "dir_stat": 0o705},
+        { "source": "",                     "target_dir": "CONFIG_DIR/dir3/emptydir2", "file_stat": 0o604, "dir_stat": 0o705},
         ])
 
     logging.info(f"\n------------------------------------\n{dump_tree(core.tool.config_dir)}")

@@ -1,7 +1,7 @@
       demo-deployfiles.<module>                 INFO:  
 Stats for set_toolname <cjnfuncs_testdeployfiles>:
 .toolname         :  cjnfuncs_testdeployfiles
-.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/./demo-deployfiles.py'>
+.main_module      :  <module '__main__' from '/mnt/share/dev/packages/cjnfuncs/tests/demo-deployfiles.py'>
 .main_full_path   :  /mnt/share/dev/packages/cjnfuncs/tests/demo-deployfiles.py
 .main_dir         :  /mnt/share/dev/packages/cjnfuncs/tests
 General user and site paths:
@@ -160,7 +160,7 @@ Contents of /tmp/cjnfuncs_testdeployfiles
 
 ==============================================================================================
 Test 6 - Deploy to various directories
-  GIVEN:      ([{'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR', 'file_stat': 385, 'dir_stat': 449}, {'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR/subdir', 'file_stat': 386, 'dir_stat': 450}, {'source': 'testfile.txt', 'target_dir': PosixPath('/root/.config/junk2'), 'file_stat': 387, 'dir_stat': 451}, {'source': 'testfile.txt', 'target_dir': 'CONFIG_DIR/dirxxx'}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs', 'file_stat': 388, 'dir_stat': 452}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs/defaults'}, {'source': 'test_dir/subdir/x4', 'target_dir': 'CONFIG_DIR/mydirs', 'file_stat': 389, 'dir_stat': 453}],), {}
+  GIVEN:      ([{'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR', 'file_stat': 385, 'dir_stat': 449}, {'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR/subdir', 'file_stat': 386, 'dir_stat': 450}, {'source': 'testfile.txt', 'target_dir': PosixPath('/root/.config/junk2'), 'file_stat': 387, 'dir_stat': 451}, {'source': 'testfile.txt', 'target_dir': 'CONFIG_DIR/dirxxx'}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs', 'file_stat': 388, 'dir_stat': 452}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs/defaults'}, {'source': 'test_dir/subdir/x4', 'target_dir': 'CONFIG_DIR/mydirs', 'file_stat': 389, 'dir_stat': 453}, {'source': '', 'target_dir': 'CONFIG_DIR/dir3/emptydir2', 'file_stat': 388, 'dir_stat': 453}],), {}
   EXPECT:     None (success)
            deployfiles.deploy_files             INFO:  Deployed  /etc/xdg/cjnfuncs_testdeployfiles/demo_deployfiles.cfg
            deployfiles.deploy_files             INFO:  Created   /etc/xdg/cjnfuncs_testdeployfiles/subdir
@@ -185,11 +185,14 @@ Test 6 - Deploy to various directories
            deployfiles.copytree                 INFO:  Created   /usr/share/cjnfuncs_testdeployfiles/mydirs/defaults/test_dir/emptydir
            deployfiles.deploy_files             INFO:  Created   /etc/xdg/cjnfuncs_testdeployfiles/mydirs
            deployfiles.deploy_files             INFO:  Deployed  /etc/xdg/cjnfuncs_testdeployfiles/mydirs/x4
+           deployfiles.deploy_files             INFO:  Created   /etc/xdg/cjnfuncs_testdeployfiles/dir3/emptydir2
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
       demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of /etc/xdg/cjnfuncs_testdeployfiles
+|-- dir3                      [drwxr-xr-x] 0o755      23 bytes
+|   `-- emptydir2             [drwx---r-x] 0o705       6 bytes
 |-- dirxxx                    [drwxr-xr-x] 0o755      26 bytes
 |   `-- testfile.txt          [-rw-r--r--] 0o644    1088 bytes
 |-- mydirs                    [drwx---r-x] 0o705      16 bytes

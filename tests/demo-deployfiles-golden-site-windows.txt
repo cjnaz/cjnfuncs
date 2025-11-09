@@ -157,7 +157,7 @@ Contents of C:\Users\stuff\AppData\Local\Temp\cjnfuncs_testdeployfiles
 
 ==============================================================================================
 Test 6 - Deploy to various directories
-  GIVEN:      ([{'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR', 'file_stat': 385, 'dir_stat': 449}, {'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR/subdir', 'file_stat': 386, 'dir_stat': 450}, {'source': 'testfile.txt', 'target_dir': WindowsPath('C:/Users/stuff/.config/junk2'), 'file_stat': 387, 'dir_stat': 451}, {'source': 'testfile.txt', 'target_dir': 'CONFIG_DIR/dirxxx'}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs', 'file_stat': 388, 'dir_stat': 452}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs/defaults'}, {'source': 'test_dir/subdir/x4', 'target_dir': 'CONFIG_DIR/mydirs', 'file_stat': 389, 'dir_stat': 453}],), {}
+  GIVEN:      ([{'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR', 'file_stat': 385, 'dir_stat': 449}, {'source': 'demo_deployfiles.cfg', 'target_dir': 'CONFIG_DIR/subdir', 'file_stat': 386, 'dir_stat': 450}, {'source': 'testfile.txt', 'target_dir': WindowsPath('C:/Users/stuff/.config/junk2'), 'file_stat': 387, 'dir_stat': 451}, {'source': 'testfile.txt', 'target_dir': 'CONFIG_DIR/dirxxx'}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs', 'file_stat': 388, 'dir_stat': 452}, {'source': 'test_dir', 'target_dir': 'DATA_DIR/mydirs/defaults'}, {'source': 'test_dir/subdir/x4', 'target_dir': 'CONFIG_DIR/mydirs', 'file_stat': 389, 'dir_stat': 453}, {'source': '', 'target_dir': 'CONFIG_DIR/dir3/emptydir2', 'file_stat': 388, 'dir_stat': 453}],), {}
   EXPECT:     None (success)
            deployfiles.deploy_files             INFO:  Created   C:\ProgramData\cjnfuncs_testdeployfiles
            deployfiles.deploy_files             INFO:  Deployed  C:\ProgramData\cjnfuncs_testdeployfiles\demo_deployfiles.cfg
@@ -182,11 +182,14 @@ Test 6 - Deploy to various directories
            deployfiles.copytree                 INFO:  Deployed  C:\ProgramData\cjnfuncs_testdeployfiles\mydirs\defaults\test_dir\x2
            deployfiles.copytree                 INFO:  Deployed  C:\ProgramData\cjnfuncs_testdeployfiles\mydirs\defaults\test_dir\x3
            deployfiles.deploy_files             INFO:  Deployed  C:\ProgramData\cjnfuncs_testdeployfiles\mydirs\x4
+           deployfiles.deploy_files             INFO:  Created   C:\ProgramData\cjnfuncs_testdeployfiles\dir3\emptydir2
       demo-deployfiles.dotest                WARNING:  
   RETURNED:   None
       demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of C:\ProgramData\cjnfuncs_testdeployfiles
+|-- dir3                      [drwxrwxrwx] 0o777       0 bytes
+|   `-- emptydir2             [drwxrwxrwx] 0o777       0 bytes
 |-- dirxxx                    [drwxrwxrwx] 0o777       0 bytes
 |   `-- testfile.txt          [-rw-rw-rw-] 0o666    1088 bytes
 |-- mydirs                    [drwxrwxrwx] 0o777       0 bytes
@@ -216,6 +219,8 @@ Contents of C:\Users\stuff\.config\junk2
       demo-deployfiles.<module>                 INFO:  
 ------------------------------------
 Contents of C:\ProgramData\cjnfuncs_testdeployfiles
+|-- dir3                      [drwxrwxrwx] 0o777       0 bytes
+|   `-- emptydir2             [drwxrwxrwx] 0o777       0 bytes
 |-- dirxxx                    [drwxrwxrwx] 0o777       0 bytes
 |   `-- testfile.txt          [-rw-rw-rw-] 0o666    1088 bytes
 |-- mydirs                    [drwxrwxrwx] 0o777       0 bytes

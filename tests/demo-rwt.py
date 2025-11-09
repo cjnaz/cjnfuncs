@@ -6,6 +6,10 @@ Produce / compare to golden results:
         Differences will be pids and function addresses
 
     ./demo-rwt.py --cleanup
+
+Note:  This test takes about 10s to run on Linux, but ~40s on Windows due to many spawned processes.
+Note:  On Windows logging from the worker will be erratic, and logging from the called function may
+lose formatting.
 """
 
 #==========================================================

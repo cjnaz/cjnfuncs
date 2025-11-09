@@ -2,9 +2,15 @@
 """Demo/test for mungePath
 
 Produce / compare to golden results:
-    ./demo-mungePath.py --cleanup | diff demo-mungePath-golden.txt -
+    ./demo-mungePath.py | diff demo-mungePath-golden-linux.txt -
+  or
+    demo-mungePath.py > tempfile.txt (On Windows, and then compare)
+
         No differences expected
 
+    ./demo-mungePath.py --cleanup
+
+Note:  This test takes about 1s to run on Linux, but > 1m on Windows due to many spawned processes.
 """
 #==========================================================
 #
@@ -70,10 +76,10 @@ if args.cleanup:
 def dotest (desc, expect, *args, **kwargs):
     logging.warning (f"\n\n==============================================================================================\n" +
                      f"Test {tnum} - {desc}\n" +
-                     f"  GIVEN:      {args}, {kwargs}\n"
+                     f"  GIVEN:      {args}, {kwargs}\n" +
                      f"  EXPECT:     {expect}")
     try:
-        result = mungePath(*args, **kwargs)
+        result = mungePath(*args, timeout=2.0, **kwargs)    # timeout set to 2s for Windows stability
         print (result)
         return result
     except Exception as e:
