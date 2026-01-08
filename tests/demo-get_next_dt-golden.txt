@@ -1,7 +1,7 @@
 demo-get_next_dt.dotest               -  WARNING:  
 
 ==============================================================================================
-Test 1 - Find next time within day 3
+Test 1a - Find next time within day 3
   Given:      (['02:15', '10:25', '18:55'], [1, 3, 4, 7]), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
   EXPECT:     2023-12-27 18:55:00, day # 3
 demo-get_next_dt.dotest               -  WARNING:  
@@ -9,7 +9,7 @@ demo-get_next_dt.dotest               -  WARNING:
 demo-get_next_dt.dotest               -  WARNING:  
 
 ==============================================================================================
-Test 1a - Find next time within day 3, usec_resolution ignored
+Test 1b - Find next time within day 3, usec_resolution ignored
   Given:      (['02:15', '10:25', '18:55'], [1, 3, 4, 7], True), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
   EXPECT:     2023-12-27 18:55:00, day # 3
 demo-get_next_dt.dotest               -  WARNING:  
@@ -202,10 +202,10 @@ demo-get_next_dt.dotest               -  WARNING:
 
 ==============================================================================================
 Test 17d - Invalid days list (dict order may vary)
-  Given:      ('14:00', {5, 'Tuesday', 7}), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  Given:      ('14:00', {'Tuesday', 5, 7}), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
   EXPECT:     ValueError: Invalid days arg <{'Tuesday', 5, 7}>
 demo-get_next_dt.dotest               -    ERROR:  
-  EXCEPTION:  ValueError: Invalid days arg <{5, 'Tuesday', 7}>
+  EXCEPTION:  ValueError: Invalid days arg <{'Tuesday', 5, 7}>
 demo-get_next_dt.dotest               -  WARNING:  
 
 ==============================================================================================
@@ -254,3 +254,107 @@ Test 18d - Invalid time
   EXPECT:     ValueError: Invalid times arg <13;45>
 demo-get_next_dt.dotest               -    ERROR:  
   EXCEPTION:  ValueError: Invalid times arg <13;45>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 19a - Find 8:00 3 days from now
+  Given:      ('8:00', '3d'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-30 08:00:00, day # 6
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-30 08:00:00, day # 6
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 19b - Find 8:00 3 days from now with times list
+  Given:      (['23:23', '8:00', '9:45:10'], '3D'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-30 08:00:00, day # 6
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-30 08:00:00, day # 6
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 19c - Find 8:00 12 days from now
+  Given:      ('8:00', '12d'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-01-08 08:00:00, day # 1
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-01-08 08:00:00, day # 1
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 19d - Find 8:00:23 365 days from now
+  Given:      ('8:00:23', '365d'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-12-26 08:00:23, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-12-26 08:00:23, day # 4
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 19e - Find 8:00 0 days from now
+  Given:      ('8:00', '0d'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-27 08:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 08:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 19f - Find 1 week from now
+  Given:      (['12:34', '08:00'], '1w'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-01-03 08:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-01-03 08:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 19g - Find 0 week from now
+  Given:      ('8:00', '0w'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2023-12-27 08:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2023-12-27 08:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 19h - Find 52 week from now
+  Given:      ('8:00', '52w'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     2024-12-25 08:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+  RETURNED:   2024-12-25 08:00:00, day # 3
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 20a - Invalid days value
+  Given:      ('8:00', '-1d'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid days arg <-1d>
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid days arg <-1d>
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 20b - Invalid days value
+  Given:      ('8:00', '1dd'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid days arg <1dd>:  invalid literal for int() with base 10: '1d'
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid days arg <1dd>:  invalid literal for int() with base 10: '1d'
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 20c - Invalid days value
+  Given:      ('8:00', '1.1d'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid days arg <1.1d>:  invalid literal for int() with base 10: '1.1'
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid days arg <1.1d>:  invalid literal for int() with base 10: '1.1'
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 20d - Invalid days value
+  Given:      ('8:00', 'd'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid days arg <d>:  invalid literal for int() with base 10: ''
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid days arg <d>:  invalid literal for int() with base 10: ''
+demo-get_next_dt.dotest               -  WARNING:  
+
+==============================================================================================
+Test 20e - Invalid days value
+  Given:      ('8:00', '1.1w'), {'test_dt': datetime.datetime(2023, 12, 27, 10, 43, 12, 123456)}
+  EXPECT:     ValueError: Invalid days arg <1.1w>:  invalid literal for int() with base 10: '1.1'
+demo-get_next_dt.dotest               -    ERROR:  
+  EXCEPTION:  ValueError: Invalid days arg <1.1w>:  invalid literal for int() with base 10: '1.1'

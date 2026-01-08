@@ -46,15 +46,18 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 
 - Named child loggers are now implemented on several cjnfuncs modules.  By default, logging from cjnfuncs modules is disabled (logging events are usually at the INFO or DEBUG
 level, while the default logging level is set to WARNING).  For example, logging from configman may be enabled by `logging.getLogger('cjnfuncs.configman').setLevel(logging.INFO)`,
-or using `core.set_logging.level(logging.INFO, 'cjnfuncs.configman')`.
+or using `core.set_logging_level(logging.INFO, 'cjnfuncs.configman')`.
 
 - Changed mungePath set_attributes from default True to default False to avoid long processing time on Windows by default.
 
 - deployfiles can now create an empty target directory.
 
+- get_next_dt now supports a days or weeks offset for the days arg
+
 <br/>
 
 ## Revision history
+- 3.1.1 260108 - get_next_dt days/weeks offset, mydev/mylive
 - 3.1  251109
   Support for and use of child loggers, 
   deployfiles create empty dir, 

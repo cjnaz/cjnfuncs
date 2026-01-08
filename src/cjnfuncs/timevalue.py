@@ -157,6 +157,10 @@ Note that using timevalue offsets may accumulate a time drift.
 - Day numbers:  1 = Monday, 7 = Sunday (`isoweekday()` numbering)
 - Day names accepted, case insensitive, eg 'MonDay'
 - `days = 0` means every day, equiv [1,2,3,4,5,6,7]
+- Alternately, if `days` is a str with a 'd' or 'w' suffix (case insensitive), the value is taken as a days or weeks 
+offset from now at the earliest time in the `times` list.  The days/weeks offset value must >= 0 (today).  Examples:
+  - Given `times = '08:00'` and `days = '3d'`, the returned datetime will be 3 days from today at 8AM
+  - Given `times = ['12:34', '08:00']` and `days = '3w'`, the returned datetime will be 3 weeks from today at 8AM
 
 `usec_resolution` (bool, default False)
 - If True, timevalue offsets retain sub-second resolution
@@ -175,7 +179,7 @@ Note that using timevalue offsets may accumulate a time drift.
     now_dt = datetime.datetime.now()  if test_dt is None  else test_dt
 
 
-    # ----- Timevalue case -----
+    # ----- timevalue case -----
     try:
         offset_sec = timevalue(times).seconds
         if not usec_resolution:
@@ -186,7 +190,46 @@ Note that using timevalue offsets may accumulate a time drift.
         pass
 
 
-    # ----- Days/Times lists case -----
+    # ----- days/weeks offset case -----
+    if isinstance(days, str)  and  (days.lower().endswith('d')  or  days.lower().endswith('w')):
+        try:
+            day_offset = int(days[:-1])
+            if days.lower().endswith('w'):
+                day_offset *= 7
+        except Exception as e:
+            raise ValueError (f"Invalid days arg <{days}>:  {e}")
+
+        if day_offset < 0:
+            raise ValueError (f"Invalid days arg <{days}>")
+
+        _times_list = times
+        if isinstance(_times_list, str):
+            _times_list = [_times_list]
+
+        _next_dt = now_dt + datetime.timedelta(day_offset)
+
+        for tme in _times_list:
+            try:
+                _time = tme.split(':')
+                if len(_time) in [2, 3]:
+                    target_hour = int(_time[0])
+                    target_minute = int(_time[1])
+                    if len(_time) == 3:
+                        target_second = int(_time[2])
+                    else:
+                        target_second = 0
+                else:
+                    raise ValueError (f"Invalid times arg <{tme}>")
+            except:
+                raise ValueError (f"Invalid times arg <{tme}>")
+
+            with_time_dt = _next_dt.replace(hour=target_hour, minute=target_minute, second=target_second, microsecond=0)
+            if with_time_dt < _next_dt:
+                _next_dt = with_time_dt
+        return _next_dt
+
+
+    # ----- days/times lists case -----
     _days_list = days
     if isinstance(_days_list, int)  or  isinstance(_days_list, str):
         _days_list = [_days_list]
@@ -210,7 +253,7 @@ Note that using timevalue offsets may accumulate a time drift.
             raise ValueError (f"Invalid days arg <{days}>")
 
     today_daynum = now_dt.isoweekday()
-    _next_dt = now_dt + datetime.timedelta(days=10)                     # start way out there and work back to now_dt
+    _next_dt = now_dt + datetime.timedelta(days=10)                     # start way out there and work back toward now_dt
 
     _times_list = times
     if isinstance(_times_list, str):
@@ -241,8 +284,6 @@ Note that using timevalue offsets may accumulate a time drift.
                 raise ValueError (f"Invalid times arg <{tme}>")
 
             with_time_dt = plus_day_dt.replace(hour=target_hour, minute=target_minute, second=target_second, microsecond=0)
-            # if not usec_resolution:
-            #     with_time_dt = with_time_dt.replace(microsecond=0)
             if with_time_dt <= now_dt:
                 if daynum == 0:
                     with_time_dt += datetime.timedelta(days=1)

@@ -1,6 +1,7 @@
 [project]
 name = 'cjnfuncs'
-version = '3.1'
+version = '3.1.1rc1'
+    # 3.1.1rc1 - get_next_dt days/weeks offset, mydev/mylive
     # 3.1 - release
     #   Support for and use of child loggers
     #   deployfiles create empty dir

@@ -71,7 +71,7 @@ w | weeks
 
 ## `get_next_dt()` - An event scheduler building block
 
-`get_next_dt()` returns a datetime for a future scheduled time, based on lists of times and days of the week. The produced datetime can be checked in a while loop to see if the current time has reached the target scheduled datetime.  If so, do the scheduled operation and call `get_next_dt()` again to schedule the next occurrence.
+`get_next_dt()` returns a datetime for a future time, based on lists of times and days of the week. The produced datetime can be checked in a while loop to see if the current time has reached the target scheduled datetime.  If so, do the scheduled operation and call `get_next_dt()` again to schedule the next occurrence.
 
 It is suggested that the `times` and `days` args get their values from a config file, thus allowing for config-based scheduling of operations within the tool script.
 
@@ -84,6 +84,9 @@ times arg | days arg | Returns datetime
 ['9:00', '15:00'] | 3 | If today is Wednesday and it's before 9AM then return datetime for 9AM today, or if after 9AM and before 3PM then return datetime for 3PM today.  Else return datetime for 9AM next Wednesday.
 '03:10:15' | [1, 3, 5] | 3:10:15 AM on the next Monday, Wednesday, or Friday
 ['9:00', '15:00'] | [1, 3, 5] | The next 9AM or 3PM on Monday, Wednesday, or Friday
+['9:00', '15:00'] | '4d' | 9AM four days from now
+
+New in version 3.1.1:  The `days` value may be suffixed with a 'd' (days offset) or 'w' (weeks offset) to specify a number of days or weeks from now at the earliest time in the `times` list.  For example, `days = '4w'` is equivalent to `days = '28d'`.
 
 
 ### Example usage
@@ -168,7 +171,7 @@ get_next_dt_ex1.<module>             -  WARNING:  Triggered quit at <2025-06-18 
 Notables
  1) A useful application might be to schedule backups of critical files every six hours.  In this example the times_list has been compressed for demo purposes.  `days_list = 0` means every day.
  2) `datetime.datetime.now()` returns microsecond resolution, while `get_next_dt()` returns 1 second resolution.
- 3) get_next_dt() accepts either `times, days` lists or a timevalue offset/interval, eg `'4m'` (the days arg is ignored).
+ 3) This get_next_dt() call uses the timevalue offset style.  The returned datetime will be 4 minutes from now.
  4) The start time for this example code run was after the first time in the times_list, so the first scheduled do_backup time was at the _second time_ in the times_list. Once the times_list is 
  worked through for today, the next do_backup operation is scheduled for the first time (15:56) the next day.
 
@@ -267,6 +270,10 @@ Note that using timevalue offsets may accumulate a time drift.
 - Day numbers:  1 = Monday, 7 = Sunday (`isoweekday()` numbering)
 - Day names accepted, case insensitive, eg 'MonDay'
 - `days = 0` means every day, equiv [1,2,3,4,5,6,7]
+- Alternately, if `days` is a str with a 'd' or 'w' suffix (case insensitive), the value is taken as a days or weeks 
+offset from now at the earliest time in the `times` list.  The days/weeks offset value must >= 0 (today).  Examples:
+  - Given `times = '08:00'` and `days = '3d'`, the returned datetime will be 3 days from today at 8AM
+  - Given `times = ['12:34', '08:00']` and `days = '3w'`, the returned datetime will be 3 weeks from today at 8AM
 
 `usec_resolution` (bool, default False)
 - If True, timevalue offsets retain sub-second resolution
