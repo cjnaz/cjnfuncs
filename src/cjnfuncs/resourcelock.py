@@ -29,6 +29,11 @@ __version__ = importlib.metadata.version(__package__ or __name__)
 resourcelock_logger = logging.getLogger('cjnfuncs.resourcelock')
 resourcelock_logger.setLevel(logging.WARNING)
 
+# Logging from the .is_locked method is enabled by:
+#       logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
+resourcelock_logger_islocked = logging.getLogger('cjnfuncs.resourcelock_islocked')
+resourcelock_logger_islocked.setLevel(logging.WARNING)
+
 
 #=====================================================================================
 #=====================================================================================
@@ -239,7 +244,7 @@ Not stored anywhere, nor available to a later call.
 - True if currently locked, else False
         """
         locked = True  if self.lock.value == 0  else False
-        resourcelock_logger.debug (f"<{self.lockname[1:]}> is currently locked?  <{locked}>  Prior info  <{self.get_lock_info()}>")
+        resourcelock_logger_islocked.debug (f"<{self.lockname[1:]}> is currently locked?  <{locked}>  Prior info  <{self.get_lock_info()}>")
         return locked
 
 
@@ -354,6 +359,7 @@ def cli():
     set_toolname ('resourcelock_cli')
     setuplogging()
     logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
+    logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
 
     GET_TIMEOUT = 0.5
     TRACE_INTERVAL = 0.5

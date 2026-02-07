@@ -2,18 +2,18 @@
 
 ## cjnfuncs is comprised of several modules (follow links to respective documentation)
 
-NOTE:  Since relative links to other .md files do not work on PyPI, please go to the [cjnfuncs GitHub repo](https://github.com/cjnaz/cjnfuncs) to read the documentation. 
+NOTE:  These link point to the github repo since relative links to other .md files do not work on PyPI.
 
 module | Description/Purpose
 --|--
-[core](core.md)                   | Set up the base environment
-[configman](configman.md)         | Feature-rich configuration file toolset
-[timevalue](timevalue.md)         | Handle time values with units, such as '5m' (5 minutes), and schedule future operations
-[mungePath](mungePath.md)         | Ease-of-use pathlib extension for constructing and manipulating file paths
-[rwt / run_with_timeout](rwt.md)  | Execute any function with an enforced timeout
-[deployfiles](deployfiles.md)     | Push bundled setup files within a package to the proper user/system locations
-[resourcelock](resourcelock.md)   | Inter-process resource lock mechanism
-[SMTP](SMTP.md)                   | Send notification and email messages
+[core](https://github.com/cjnaz/cjnfuncs/blob/main/core.md)                   | Set up the base environment
+[configman](https://github.com/cjnaz/cjnfuncs/blob/main/configman.md)         | Feature-rich configuration file toolset
+[timevalue](https://github.com/cjnaz/cjnfuncs/blob/main/timevalue.md)         | Handle time values with units, such as '5m' (5 minutes), and schedule future operations
+[mungePath](https://github.com/cjnaz/cjnfuncs/blob/main/mungePath.md)         | Ease-of-use pathlib extension for constructing and manipulating file paths
+[rwt / run_with_timeout](https://github.com/cjnaz/cjnfuncs/blob/main/rwt.md)  | Execute any function with an enforced timeout
+[deployfiles](https://github.com/cjnaz/cjnfuncs/blob/main/deployfiles.md)     | Push bundled setup files within a package to the proper user/system locations
+[resourcelock](https://github.com/cjnaz/cjnfuncs/blob/main/resourcelock.md)   | Inter-process resource lock mechanism
+[SMTP](https://github.com/cjnaz/cjnfuncs/blob/main/SMTP.md)                   | Send notification and email messages
 
 Developed and tested on Python 3.9.21 and supported on all higher Python versions.
 Developed on Linux.  Supported on Windows, except for the resourcelock module (posix-ipc module dependency).
@@ -40,6 +40,7 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 
 ## Key changes since the prior major public release (version 3.0)
 
+3.1 changes
 - Several issues with Windows support were fixed.
 
 - `configman.config_item()` now supports a safe_mode switch, which will speed up Windows usage of loadconfig() at some risk.  See the note on `config_item()`.
@@ -52,12 +53,14 @@ or using `core.set_logging_level(logging.INFO, 'cjnfuncs.configman')`.
 
 - deployfiles can now create an empty target directory.
 
+3.1.1 changes
 - get_next_dt now supports a days or weeks offset for the days arg
+- Added separate chiled logger `cjnfuncs.resourcelock_islocked` so that `is_locked()` may be called in a loop without flooding the log while `cjnfuncs.resourcelock` is set to debug
 
 <br/>
 
 ## Revision history
-- 3.1.1 260108 - get_next_dt days/weeks offset, mydev/mylive
+- 3.1.1 260207 - separate resourcelock_islocked logger, get_next_dt days/weeks offset
 - 3.1  251109
   Support for and use of child loggers, 
   deployfiles create empty dir, 

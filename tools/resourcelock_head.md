@@ -283,11 +283,19 @@ options:
 
 ## Controlling logging from within resourcelock code
 
-Logging within the resourcelock module uses the `cjnfuncs.resourcelock` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
-meaning that no logging messages are produced from within the resourcelock code.  For validation and debug purposes, logging from within resourcelock code 
-can be enabled by setting the logging level for this module's logger from within the tool script code:
+Logging within the resourcelock module uses the `cjnfuncs.resourcelock` and `cjnfuncs.resourcelock_islocked` named/child loggers.  By default these loggers are set to the `logging.WARNING` level, 
+meaning that no logging messages are produced from within the resourcelock code.  For validation and debug purposes, logging from within resourcelock code (other than from is_locked())
+can be enabled by setting this module's logging level as follows from within the tool script code:
 
         logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
 
         # Or alternately, use the core module set_logging_level() function:
         set_logging_level (logging.DEBUG, 'cjnfuncs.resourcelock')
+
+The `.is_locked()` method uses the separate `cjnfuncs.resourcelock_islocked` named/child logger so that .is_locked() may be used in a loop without flooding the log.  To enable debug logging from is_locked():
+
+        logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
+
+        # Or alternately, use the core module set_logging_level() function:
+        set_logging_level (logging.DEBUG, 'cjnfuncs.resourcelock_islocked')
+

@@ -25,6 +25,7 @@ from cjnfuncs.resourcelock import resource_lock
 
 set_toolname("demo-resourcelock")
 logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
+logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
 LOCK_NAME = 'test_lock'
 
 
