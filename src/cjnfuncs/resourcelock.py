@@ -105,6 +105,7 @@ checked and re-instantiate if needed.
         self.closed =           False
         self.I_have_the_lock =  False
         self.lock = posix_ipc.Semaphore(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, initial_value=1)
+        resourcelock_logger.info (f"<{self.lockname[1:]}> posix_ipc.Semaphore object info: <{self.lock}>")
 
         preexisting = False
         try:
@@ -112,6 +113,7 @@ checked and re-instantiate if needed.
             preexisting = True
         except posix_ipc.ExistentialError:
             memory = posix_ipc.SharedMemory(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, size=4096)
+        resourcelock_logger.info (f"<{self.lockname[1:]}> posix_ipc.SharedMemory object info: <{self.lock}>")
 
         self.mapfile = mmap.mmap(memory.fd, memory.size)
         os.close(memory.fd)
@@ -346,29 +348,32 @@ signal.signal(signal.SIGTERM, int_handler)      # kill
 
 
 def cli():
-    docplus = """
-    Commands:
-        get:    Get/set the lock named LockName.  '-a' specifies a automatic timed unget (only applied if the get was successful).
-        unget:  Force-release LockName.
-        state:  Print the current state of LockName.
-        trace:  Continuously print the state of LockName.  '-u' specifies update interval.  Ctrl-C to exit.
-    """
+    """**** Inter-process lock mechanism using posix_ipc ****
+
+Commands:
+    get:    Get/set the lock named LockName.  '-a' specifies a automatic timed unget (only applied if the get was successful).
+    unget:  Force-release LockName.
+    state:  Print the current state of LockName.
+    trace:  Continuously print the state of LockName.  '-u' specifies update interval.  Ctrl-C to exit.
+"""
     import argparse
     from time import sleep
 
-    set_toolname ('resourcelock_cli')
+    TOOLNAME =          'resourcelock'
+
+    set_toolname (TOOLNAME)
     setuplogging()
     logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
     logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
 
-    GET_TIMEOUT = 0.5
-    TRACE_INTERVAL = 0.5
+    GET_TIMEOUT =       0.5
+    TRACE_INTERVAL =    0.5
     
 
-    parser = argparse.ArgumentParser(description=__doc__ + __version__+docplus, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description=cli.__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('LockName',
                         help="Name of the system-wide lock to access")
-    parser.add_argument('Cmd', choices=['get', 'unget', 'state', 'trace'],
+    parser.add_argument('Command', choices=['get', 'unget', 'state', 'trace'],
                         help="Command choices")
     parser.add_argument('-t', '--get-timeout', type=float, default=GET_TIMEOUT,
                         help=f"Timeout value for a get call (default {GET_TIMEOUT} sec, -1 for no timeout)")
@@ -378,12 +383,14 @@ def cli():
                         help="After a successful get, unget the lock in (float) sec")
     parser.add_argument('-u', '--update', type=float, default=TRACE_INTERVAL,
                         help=f"Trace update interval (default {TRACE_INTERVAL} sec)")
+    parser.add_argument('-V', '--version', action='version', version=f"{TOOLNAME} {__version__}",
+                        help="Print version number and exit")
     args = parser.parse_args()
+
 
     lock = resource_lock(args.LockName)
 
-
-    if args.Cmd == "get":
+    if args.Command == "get":
         _timeout = args.get_timeout
         if _timeout == -1:
             _timeout = None
@@ -393,16 +400,13 @@ def cli():
                 sleep(args.auto_unget)
                 lock.unget_lock(where_called=f'{args.message} - auto unget')
 
-    elif args.Cmd == "unget":
+    elif args.Command == "unget":
         lock.unget_lock(force=True, where_called=args.message)
 
-    elif args.Cmd == "state":
+    elif args.Command == "state":
         lock.is_locked()
 
-    elif args.Cmd == "trace":
+    elif args.Command == "trace":
         while True:
             lock.is_locked()
             sleep (args.update)
-
-    else:
-        print ("How did we get here?")

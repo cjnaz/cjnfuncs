@@ -1,6 +1,7 @@
 [project]
 name = 'cjnfuncs'
-version = '3.1.1'
+version = '3.1.2rc1'
+    # 3.1.2rc1 - Added info logging of posix_ipc.Semaphore/SharedMemory to resource_lock.__init__()
     # 3.1.1 - separate resourcelock_islocked logger, get_next_dt days/weeks offset
     # 3.1 - release
     #   Support for and use of child loggers
