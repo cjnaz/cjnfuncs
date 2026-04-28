@@ -28,7 +28,7 @@ import time
 
 from cjnfuncs.core     import set_toolname, setuplogging, logging, ConfigError, set_logging_level
 from cjnfuncs.deployfiles import deploy_files
-from cjnfuncs.configman import config_item
+from cjnfuncs.configman import config_item, persistent_config
 from cjnfuncs.timevalue import timevalue, retime
 from cjnfuncs.mungePath import mungePath
 import cjnfuncs.core as core
@@ -57,10 +57,11 @@ def remove_file (file_path):
         os.remove(file_path)
 
 
-def dump_file(filepath):
+def dump_file(filepath, comment=''):
     _file = mungePath(filepath, core.tool.config_dir)
-    print (f"\n***** File <{_file.full_path}> content:")
+    print (f"\n==== File <{_file.full_path}> CONTENT {comment}:")
     print (_file.full_path.read_text())
+    print ("==== EOF ====")
 
 
 tnum_parse = re.compile(r"([\d]+)([\w]*)")
@@ -117,87 +118,89 @@ if __name__ == '__main__':
 
         print ("\n----- T1.2:  LogFile=None, call_logfile=None, call_logfile_wins=True >>>>  Log file: __console__")
         config_T1 = config_item("demo_config_T1.cfg")
-        config_T1.loadconfig(call_logfile=None, call_logfile_wins=True,    force_flush_reload=True)
+        config_T1.loadconfig(call_logfile=None, call_logfile_wins=True,    force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.2 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.3:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__ (override cfg_logfile)")
         config_T1.modify_configfile ("LogFile",   "cfg_logfile", add_if_not_existing=True, save=True)
-        config_T1.loadconfig (call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile=None, call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.3 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.4:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  call_logfile")
-        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.4 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.5:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (no change)")
-        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.5 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.6:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  'cfg_logfile'")
-        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=False,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.6 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.7:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  'cfg_logfile2'")
         config_T1.modify_configfile ("LogFile",   "cfg_logfile2", save=True)
-        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=False,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.7 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.8:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  'call_logfile' (again)")
-        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         print (core.tool)
         logging.warning (f"T1.8 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.9:  Change core.tool.log_dir_base.  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  mylogdir/call_logfile")
         core.tool.log_dir_base = core.tool.config_dir / "mylogdir"
-        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         print (core.tool)
         logging.warning (f"T1.9 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.10:  LogFile='cfg_logfile2', call_logfile='call_logfile', call_logfile_wins=False >>>>  Log file:  mylogdir/cfg_logfile2")
-        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=False,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=False,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         print (core.tool)
         logging.warning (f"T1.10 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.11:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__")
-        config_T1.loadconfig (call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile=None, call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         print (core.tool)
         logging.warning (f"T1.11 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__")
         config_T1.modify_configfile ("LogFile",   remove=True, save=True)
-        config_T1.loadconfig (call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile=None, call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.12 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.13: Modified console logging format >>>>  Log file:  __console__")
         config_T1.modify_configfile ("ConsoleLogFormat", "{levelname:>8}:  {message}", add_if_not_existing=True, save=True)
-        config_T1.loadconfig (call_logfile=None, call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile=None, call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.13 - Log to  <{core.tool.log_full_path}>")
 
         print ("\n----- T1.14: Modified file logging format >>>>  Log file:  call_logfile")
         config_T1.modify_configfile ("FileLogFormat", "{levelname:>8}:  {message}", add_if_not_existing=True, save=True)
-        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_flush_reload=True)
+        config_T1.loadconfig (call_logfile="call_logfile", call_logfile_wins=True,   force_reload=True, flush_on_reload=True)
         print (f"Current log file:              {core.tool.log_full_path}")
         logging.warning (f"T1.14 - Log to  <{core.tool.log_full_path}>")
 
 
     #===============================================================================================
     if check_tnum('2'):
-        print_test_header ("Tests for loadconfig logging level, config LogLevel, flush_on_reload, force_flush_reload")
+        print_test_header ("Tests for loadconfig logging level, config LogLevel, flush_on_reload, force_reload")
+        setuplogging()
         set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
 
         def print_stats ():
+            print (f"Loaded                     {config_T2.loaded}")
             print (f"(Re)loaded                 {reloaded}")
             print (f"Config file timestamp      {config_T2.config_timestamp}")
             print (f"Config LogLevel            {config_T2.getcfg('LogLevel', 'None')}")
@@ -215,6 +218,9 @@ if __name__ == '__main__':
             ], overwrite=True )
         config_T2 = config_item("demo_config_T2.cfg")
         
+        print ("\n----- T2.0:  Pre-load stats")
+        reloaded = 'n/a'
+        print_stats()
 
         print ("\n----- T2.1:  Initial load.  Default logging level 30")
         reloaded = config_T2.loadconfig()
@@ -261,15 +267,15 @@ if __name__ == '__main__':
         reloaded = config_T2.loadconfig(flush_on_reload=True)
         print_stats()
 
-        print ("\n----- T2.9:  loadconfig debug logging, force_flush_reload >>>>  Loadconfig logging")
-        reloaded = config_T2.loadconfig(force_flush_reload=True)
+        print ("\n----- T2.9:  loadconfig debug logging, force_reload >>>>  Loadconfig logging")
+        reloaded = config_T2.loadconfig(force_reload=True)
         print_stats()
 
         print ("\n----- T2.10:  loadconfig debug logging, LogLevel=20, var2 added >>>>  Reloaded")
         time.sleep(1)
         config_T2.modify_configfile ("LogLevel",   "20", add_if_not_existing=True)
         config_T2.modify_configfile ("var2",   "Hello", add_if_not_existing=True, save=True)
-        reloaded = config_T2.loadconfig(force_flush_reload=True)
+        reloaded = config_T2.loadconfig(force_reload=True)
         print_stats()
 
         print ("\n----- T2.11: loadconfig debug logging, LogLevel=40, var2 removed from config >>>>  var2 still defined, no logging")
@@ -279,27 +285,27 @@ if __name__ == '__main__':
         reloaded = config_T2.loadconfig()
         print_stats()
 
-        print ("\n----- T2.12: loadconfig debug logging, LogLevel=30, force_flush_reload=True >>>>  var2 gone")
+        print ("\n----- T2.12: loadconfig debug logging, LogLevel=30, force_reload=True >>>>  var2 gone")
         config_T2.modify_configfile ("LogLevel",   "30", save=True)
-        reloaded = config_T2.loadconfig(force_flush_reload=True)
+        reloaded = config_T2.loadconfig(force_reload=True, flush_on_reload=True)
         print_stats()
 
         print ("\n----- T2.13: Externally set log level = 20")
         time.sleep(1)
         config_T2.modify_configfile ("LogLevel",   remove=True, save=True)
         set_logging_level(20)
-        reloaded = config_T2.loadconfig(force_flush_reload=True)
+        reloaded = config_T2.loadconfig(force_reload=True, flush_on_reload=True)
         print_stats()
 
         print ("\n----- T2.14: Externally set log level = 10")
         set_logging_level(10)
-        reloaded = config_T2.loadconfig(force_flush_reload=True)
+        reloaded = config_T2.loadconfig(force_reload=True, flush_on_reload=True)
         print_stats()
 
         print ("\n----- T2.15: Externally set log level = 10 with loadconfig logging=30 (default)")
         set_logging_level(10)
         set_logging_level (logging.WARNING, 'cjnfuncs.configman')
-        reloaded = config_T2.loadconfig(force_flush_reload=True)
+        reloaded = config_T2.loadconfig(force_reload=True, flush_on_reload=True)
         print_stats()
 
 
@@ -421,7 +427,7 @@ if __name__ == '__main__':
 
     #===============================================================================================
     if check_tnum('9'):
-        print_test_header ("Test flush_on_reload  and  force_flush_reload cases, with callbacks")
+        print_test_header ("Test flush_on_reload  and  force_reload cases, with callbacks")
 
         def mycallback():
             logging.info("In mycallback()")
@@ -446,8 +452,13 @@ if __name__ == '__main__':
         print (f"----- T9.4:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because flush_on_reload == True)\n")
 
         config.cfg["dummy"] = True
-        config.loadconfig(force_flush_reload=True, prereload_callback=mycallback)
-        print (f"----- T9.5:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because force_flush_reload == True)\n")
+        config.loadconfig(force_reload=True, flush_on_reload=True, prereload_callback=mycallback)
+        print (f"----- T9.5:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be False because flush_on_reload == True)\n")
+
+        config.cfg["dummy"] = True
+        del config.cfg["Tint"]
+        config.loadconfig(force_reload=True, prereload_callback=mycallback)
+        print (f"----- T9.6:  var dummy in cfg:  {config.getcfg('dummy', False)}  (should be True because flush_on_reload == False), and Tint:  {config.getcfg('Tint')}\n")
 
         print (f"Logging level:  {logging.getLogger().level}")
 
@@ -517,14 +528,14 @@ if __name__ == '__main__':
             ], overwrite=True )
         nest_cfg = mungePath("import_nest_top.cfg", core.tool.config_dir).full_path
         xx = config_item(nest_cfg)
-        xx.loadconfig(tolerate_missing=True, force_flush_reload=True)
+        xx.loadconfig(tolerate_missing=True, force_reload=True)
         print (xx.dump())
         print (f"Logging level:  {logging.getLogger().level}")
         
         print (f"\n----- T13.4:  Missing nested imported config <import_nest_2.cfg> with tolerate_missing=True >>>>  Exception raised.")
         remove_file(mungePath("import_nest_2.cfg", core.tool.config_dir).full_path)
         try:
-            xx.loadconfig(tolerate_missing=True, force_flush_reload=True)
+            xx.loadconfig(tolerate_missing=True, force_reload=True)
         except ConfigError as e:
             print (f"Exception due to missing imported config file:\n  {type(e).__name__}: {e}")
             print (f"Logging level:  {logging.getLogger().level}")
@@ -532,7 +543,7 @@ if __name__ == '__main__':
         print (f"\n----- T13.5:  Missing imported config <import_nest_1.cfg> with tolerate_missing=True >>>>  Exception raised.")
         remove_file(mungePath("import_nest_1.cfg", core.tool.config_dir).full_path)
         try:
-            xx.loadconfig(tolerate_missing=True, force_flush_reload=True)
+            xx.loadconfig(tolerate_missing=True, force_reload=True)
         except Exception as e:
             print (f"Exception due to missing imported config file:\n  {type(e).__name__}: {e}")
             print (f"Logging level:  {logging.getLogger().level}")
@@ -577,7 +588,7 @@ if __name__ == '__main__':
         config.modify_configfile("a",                        "Modify all occurrences")
 
         config.modify_configfile(save=True)
-        config.loadconfig(force_flush_reload=True)
+        config.loadconfig(force_reload=True, flush_on_reload=True)
 
         print(config.dump())
         dump_file(config.config_full_path)
@@ -669,7 +680,7 @@ if __name__ == '__main__':
             ], overwrite=True )
         nest_cfg = mungePath("import_nest_top.cfg", core.tool.config_dir).full_path
         xx = config_item(nest_cfg)
-        xx.loadconfig(tolerate_missing=True, force_flush_reload=True)
+        xx.loadconfig(tolerate_missing=True, force_reload=True)
         print (f"Logging level:  {logging.getLogger().level}")
         print ("\n***** config contents *****")
         print (xx.dump())
@@ -866,8 +877,118 @@ e 20
 
 
     #===============================================================================================
-    if args.test == 50:
-        print_test_header (50, "development")
+    if check_tnum('30a'):
+        print_test_header ("persistent_config create from scratch")
+
+        persist = persistent_config (file_name='persist', force_new=True)
+        print (persist)
+        print (f"==== Content of persist config in memory:\n{persist.dump()}")
+        dump_file (persist.config_full_path, 'after force_new')
+
+        print (f"persist.new:  <{persist.new}>")
+        if persist.new:
+            persist.setcfg('count', 0)
+            persist.setcfg('param_in_section', section='abc', value=None)
+        persist.save()
+        print (persist)
+        print (f"==== Content of persist config in memory:\n{persist.dump()}")
+        dump_file (persist.config_full_path, 'after adds and save')
+
+
+    #===============================================================================================
+    if check_tnum('30b'):
+        print_test_header ("persistent_config counter")
+
+        persist = persistent_config ('persist', force_new=True)
+        persist.setcfg ('count', 0)
+        persist.setcfg ('count', 0, section='a section')
+
+        for _ in range(5):
+            persist.cfg['count'] += 1
+            persist.cfg['a section']['count'] += 5
+
+        print (f"count in top level:    <{persist.getcfg('count')}>")
+        print (f"count in [a section]:  <{persist.getcfg('count', section='a section')}>")
+
+        print (f"==== Content of persist config in memory:\n{persist.dump()}")
+
+        persist.save()
+        dump_file (persist.config_full_path, 'after adds and save')
+
+        persist.setcfg ('count', 0)
+        persist.setcfg ('count', 0, section='a section')
+        persist.load()
+        print (f"count in top level:    <{persist.getcfg('count')}>")
+        print (f"count in [a section]:  <{persist.getcfg('count', section='a section')}>")
+
+
+    #===============================================================================================
+    if check_tnum('30c'):
+        print_test_header ("persistent_config load(force_reload) options")
+
+        persist = persistent_config ('persist', force_new=True)
+        # print (persist)
+        # time.sleep(1.1)
+
+        persist.setcfg ('count', 0)
+        persist.setcfg ('count', 0, section='a section')
+        persist.save()
+        print (persist)
+        print (f"==== Content of persist config in memory INITIAL AND SAVED:\n{persist.dump()}\n")
+
+        persist.setcfg ('new_param')
+        persist.remove_param ('count')
+        print (f"==== Content of persist config in memory AFTER changes:\n{persist.dump()}\n")
+
+        # persist.load(force_reload=False)
+        time.sleep(1.1)
+        persist.config_full_path.touch()
+        persist.load(force_reload=False, flush_on_reload=False)
+        print (f"==== Content of persist config in memory AFTER flush_on_reload=False:\n{persist.dump()}\n")
+
+        persist.load(force_reload=True)
+        print (f"==== Content of persist config in memory AFTER force_reload=True, flush_on_reload=True:\n{persist.dump()}\n")
+
+
+    #===============================================================================================
+    if check_tnum('30d'): #, include0=False):
+        print_test_header ("persistent_config scheduled save - timevalue")
+
+        persist = persistent_config ('persist', force_new=True, save_schedule='1s')
+        persist.setcfg ('count', 0)
+        persist.save()
+
+        time.sleep(0.2)
+
+        for cnt in range (6):
+            persist.cfg['count'] += 1
+            dump_file (persist.config_full_path, f'cnt {cnt}')
+            time.sleep (0.5)
+
+        print (persist)
+        persist.save(exit=True)
+        dump_file (persist.config_full_path, f'final')
+        print (persist)
+
+
+
+    #===============================================================================================
+    if check_tnum('30e'): #, include0=False):
+        print_test_header ("persistent_config scheduled save - specific time")
+
+        persist = persistent_config ('persist', force_new=True, save_schedule='03:00')
+        persist.setcfg ('pi', 3.14)
+        print (persist)
+
+        persist.save(exit=True)
+        dump_file (persist.config_full_path, f'final')
+        print (persist)
+
+
+
+    #===============================================================================================
+    if check_tnum('50', include0=False):
+        print_test_header ("development")
 
         # def dump_file(filepath):
         #     _file = mungePath(filepath, core.tool.config_dir)
@@ -876,12 +997,52 @@ e 20
 
         set_toolname(TOOLNAME)
         set_logging_level (logging.WARNING, 'cjnfuncs.configman')
-        do_base_setup()
 
-        print (config.getcfg('whatever'))
+        persist = persistent_config ('my_pc', force_new=True)
+        # abc = persistent_config ('my_pc')
+        if persist.new:
+            persist.setcfg('count', 0)
+            persist.setcfg('param_in_section', section='abc', value=None)
+
+        
+        print (persist)
+        print (persist.dump())
+
+        print (persist.getcfg('first', 'No such param'))
+
+        persist.cfg['count'] += 1
+        print (1, persist.getcfg('count'))
+
+        persist.setcfg('xyz4', False, section='DEFAULT')
+        persist.setcfg('param2_in_section', section='abc')
+
+        persist.save()
+
+        persist.load()
+        print (persist.dump())
+        print (2, persist.getcfg('count'))
+
+        persist.delete_persistent_file()
+        print (3, persist.getcfg('count'))
+
+        persist.load(force_new=True)
+        try:
+            print (4, persist.getcfg('count'))
+        except:
+            print ("count not found")
+
+        if persist.new:
+            persist.setcfg('round2')
+        persist.save()
+
+
+
+        # do_base_setup()
+
+        # print (config.getcfg('whatever'))
 
         # set_logging_level(10, 'cjnfuncs.configman')
-        logging.getLogger().setLevel(10)
+        # logging.getLogger().setLevel(10)
         # deploy_files([
         #     { "source": CONFIG_FILE,            "target_dir": "USER_CONFIG_DIR"},
         #     { "source": "creds_SMTP",           "target_dir": "USER_CONFIG_DIR"},

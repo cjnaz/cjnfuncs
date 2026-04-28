@@ -93,7 +93,7 @@ except Exception as e:
     sys.exit()
 
 if args.dry_run:
-    config.read_dict({'DontEmail':True}, section_name='SMTP')
+    config.read_dict({'DontEmail':True}, section='SMTP')
 
 
 # --------------------------------------------------------------------
@@ -209,10 +209,10 @@ if check_tnum('15'):
 
 if check_tnum('16'):
     orig_port = config.getcfg('EmailServerPort', section='SMTP')
-    config.read_dict({'EmailServerPort':'badport'}, section_name='SMTP')
+    config.read_dict({'EmailServerPort':'badport'}, section='SMTP')
     dotest("Bad server port", "SndEmailError ... Config EmailServerPort <badport> is invalid",
         snd_email, to="EmailTo", body="To be, or not to be...", log=True)
-    config.read_dict({'EmailServerPort':orig_port}, section_name='SMTP')
+    config.read_dict({'EmailServerPort':orig_port}, section='SMTP')
 
 
 if check_tnum('17'):

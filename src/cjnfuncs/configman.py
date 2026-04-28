@@ -10,10 +10,16 @@
 
 import re
 import ast
+import time
+import sys
+import datetime
+from threading import Thread
 
 from .core      import setuplogging, logging, ConfigError #, set_logging_level, restore_logging_level, pop_logging_level_stack, get_logging_level_stack
 from .mungePath import mungePath, check_path_exists
 from .rwt       import run_with_timeout
+from .timevalue import timevalue, get_next_dt
+
 import cjnfuncs.core as core
 
 # Configs / Constants
@@ -25,7 +31,6 @@ RWT_TIMEOUT =   2.0
 # logging from this module add this within your tool script code:
 #       logging.getLogger('cjnfuncs.configman').setLevel(logging.DEBUG)
 configman_logger = logging.getLogger('cjnfuncs.configman')
-configman_logger.setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -83,7 +88,7 @@ The current values of all public class attributes may be printed using `print(my
 - Default params are stored here.
 
 `.sections_list` (list)
-- A list of string names for all defined sections.
+- A list of string names for all defined sections
 
 `.config_file` (str, or None)
 - The `config_file` as passed in at instantiation
@@ -142,12 +147,13 @@ produces no logging events from this module), eg:
         logging.getLogger('cjnfuncs.configman').setLevel(logging.INFO)
     """
 
-    def __init__(self, config_file=None, remap_logdirbase=True, force_str=False, secondary_config=False, safe_mode=False):
+    def __init__(self, config_file=None, remap_logdirbase=True, force_str=False, secondary_config=False, safe_mode=False, missing_ok=False):
         global tool
 
         self.force_str =            force_str
         self.secondary_config =     secondary_config
         self.safe_mode =            safe_mode
+        self.loaded =               False
         self.cfg =                  {}
         self.current_section_name = ''
         self.sections_list =        []
@@ -168,12 +174,12 @@ produces no logging events from this module), eg:
             else:
                 if config_mp.full_path.is_file():
                     found_it = True
-            if found_it:
-                self.config_file        = config_mp.name
-                self.config_dir         = config_mp.parent
-                self.config_full_path   = config_mp.full_path
-                self.config_timestamp   = 0
-                self.config_content     = ''    # Used by modify_configfile()
+            if found_it  or  missing_ok:
+                self.config_file =      config_mp.name
+                self.config_dir =       config_mp.parent
+                self.config_full_path = config_mp.full_path
+                self.config_timestamp = 0
+                self.config_content =   ''    # Used by modify_configfile()
             else:
                 raise ConfigError (f"Config file <{config_file}> not found.")
 
@@ -181,13 +187,13 @@ produces no logging events from this module), eg:
             core.tool.log_dir_base = core.tool.config_dir
 
 
-    def _add_key(self, key, value, section_name=''):
-        if section_name == '':
+    def _add_key(self, key, value, section=''):
+        if section == '':
             self.cfg[key] = value
-        elif section_name == 'DEFAULT':
+        elif section == 'DEFAULT':
             self.defaults[key] = value
         else:
-            self.cfg[section_name][key] = value
+            self.cfg[section][key] = value
 
 
 #=====================================================================================
@@ -197,24 +203,24 @@ produces no logging events from this module), eg:
 #=====================================================================================
 
     def loadconfig(self,
-            call_logfile        = None,
-            call_logfile_wins   = False,
-            flush_on_reload     = False,
-            force_flush_reload  = False,
-            isimport            = False,
-            tolerate_missing    = False,
-            prereload_callback  = None):
+            call_logfile =      None,
+            call_logfile_wins = False,
+            flush_on_reload =   False,
+            force_reload =      False,
+            isimport =          False,
+            tolerate_missing =  False,
+            prereload_callback= None):
         r"""
 ## loadconfig () - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
-    call_logfile        = None,
-    call_logfile_wins   = False,
-    flush_on_reload     = False,
-    force_flush_reload  = False,
-    isimport            = False,
-    tolerate_missing    = False,
-    prereload_callback  = None)        
+    call_logfile =      None,
+    call_logfile_wins = False,
+    flush_on_reload =   False,
+    force_reload =      False,
+    isimport =          False,
+    tolerate_missing =  False,
+    prereload_callback= None)
 ```
 ***config_item() class member function***
 
@@ -242,9 +248,9 @@ logging is directed to the console (with `call_logfile=None`) or an alternate fi
 - If the config file will be reloaded (due to a changed timestamp) then clean out the 
 `cfg` dictionary first.  See Returns, below.
 
-`force_flush_reload` (bool, default False)
-- Forces the `cfg` dictionary to be cleaned out and the config file to be reloaded, 
-regardless of whether the config file timestamp has changed
+`force_reload` (bool, default False)
+- Forces the config file to be reloaded regardless of whether the config file timestamp has changed.
+- Also set `flush_on_reload=True` to clean out the `cfg` dictionary before reloading.
 
 `isimport` (bool, default False)
 - Internally set True when handling imports.  Not used by tool script calls.
@@ -278,11 +284,11 @@ regardless of whether the config file timestamp has changed
     EG: `[  hello my name  is  Fred  ]` becomes section name `'hello my name  is  Fred'`.
    - Section names can contain most all characters, except `]`.
 
-1. **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
+1. **Native int, float, bool, list, tuple, dict, str, None support** - Bool true/false is case insensitive. A str
   type is stored in the `cfg` dictionary if none of the other types can be resolved for a given value_portion.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
   for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
-  getcfg() `types=[]` arg for basic type enforcement.
+  getcfg() and setcfg() `types=[]` arg for basic type enforcement.
 
 1. **Quoted strings** - If a value_portion cannot be resolved to a Python native type then it is loaded as a str,
   eg `My_name = George` loads George as a str.  A value_portion may be forced to be loaded as a str by using 
@@ -333,7 +339,7 @@ Sections are not allowed within an imported file - only in the main/top-level co
 A prime usage of `import` is to place email server credentials in your home directory with user-only readability,
 then import them in the tool script config file as such: `import ~/creds_SMTP`.  
 
-1. **Config reload if changed, `flush_on_reload`, and `force_flush_reload`** - loadconfig() may be called 
+1. **Config reload if changed, `flush_on_reload`, and `force_reload`** - loadconfig() may be called 
 periodically by the tool script, such as in a service loop.
 If the config file timestamp is unchanged then loadconfig() immediately returns `0`. 
 If the timestamp has changed then the config file will be reloaded and `1` is returned to indicate to 
@@ -344,10 +350,10 @@ the tool script to do any post-config-load operations.
   deleted in the config
   file it will still exist in `cfg` after the reload). [lanmonitor](https://github.com/cjnaz/lanmonitor) uses the
   `flush_on_reload=True` feature.
-   - `force_flush_reload=True` (default False) forces both a clear/flush of the `cfg` dictionary and then a fresh
-  reload of the config file. 
-   - **Note** that if using threading then a thread should be paused while the config file 
-  is being reloaded with `flush_on_reload=True` or `force_flush_reload=True` since the params will disappear briefly.
+   - `force_reload=True` (default False) forces a reload of the config file, either on top of existing loaded data
+   with `flush_on_reload=False`, or replacing all existing data with `flush_on_reload=True`.
+   - **Note** that if using threading, and a thread is accessing the config data, then the thread should be paused while the config file 
+  is being reloaded with `flush_on_reload=True` since the params will disappear briefly.
   Use the `prereload_callback` mechanism to manage any code dependencies before the cfg dictionary is purged.
    - Changes to imported files are not tracked for changes.
 
@@ -373,9 +379,16 @@ cannot be accessed.
         is_top_level = not isimport
         if is_top_level:
 
-            if force_flush_reload:
-                configman_logger.info(f"Config  <{self.config_file}>  force flushed (force_flush_reload)")
-                self.clear()
+            if force_reload:
+                if not flush_on_reload:
+                    configman_logger.info(f"Config  <{self.config_file}>  Force reload, not flushed")
+                else:
+                    self.clear()
+                    configman_logger.info(f"Config  <{self.config_file}>  Force reload, flushed first")
+                # configman_logger.info(f"Config  <{self.config_file}>  force reloaded (force_reload)")
+                # if flush_on_reload:
+                #     self.clear()
+                #     configman_logger.info(f"Config  <{self.config_file}>  flushed (flush_on_reload)")
                 self.config_timestamp = 0                       # Force reload of the config file
 
             # Check if config file is available and has changed
@@ -394,20 +407,32 @@ cannot be accessed.
                 else:
                     raise ConfigError (f"Could not find  <{self.config_file}>")
 
-            current_timestamp = int(self.config_full_path.stat().st_mtime)  # force integer-second resolution
+            current_timestamp = int(self.config_full_path.stat().st_mtime)  # force integer-second resolution   # Minor hang risk - above exists check should protect
             if self.config_timestamp == current_timestamp:
                 return 0                                        # 0 indicates that the config file was NOT (re)loaded
 
-            # It's an initial load call, or config file has changed, or force_flush_reload...  Do (re)load
+            # It's an initial load call, or config file has changed, or force_reload...  Do (re)load
             self.config_timestamp = current_timestamp
             if prereload_callback:
                 configman_logger.debug("Pre-reload callback user function called")
                 prereload_callback()
             configman_logger.info (f"Config  <{self.config_file}>  file timestamp: {current_timestamp}")
 
-            if flush_on_reload:
-                configman_logger.info (f"Config  <{self.config_file}>  flushed due to changed file (flush_on_reload)")
-                self.clear()
+            if not force_reload:
+                if not self.loaded:
+                    configman_logger.info(f"Config  <{self.config_file}>  Initial load")
+                    # self.loaded = True
+                else:
+                    if not flush_on_reload:
+                        configman_logger.info(f"Config  <{self.config_file}>  Reload due to changed file, not flushed")
+                    else:
+                        self.clear()
+                        configman_logger.info(f"Config  <{self.config_file}>  Reload due to changed file, flushed first")
+
+            # if flush_on_reload:
+            #     if not force_reload:
+            #         configman_logger.info (f"Config  <{self.config_file}>  flushed due to changed file (flush_on_reload)")
+            #     self.clear()
 
 
         # Load the config
@@ -417,8 +442,9 @@ cannot be accessed.
             # tool script code.
         configman_logger.info (f"Loading  <{config}>")
         try:
-            string_blob = config.read_text()
+            string_blob = config.read_text()        # Minor hang risk - above exists check should protect
             self.read_string (string_blob, isimport=isimport)
+            self.loaded = True
         except:
             raise
 
@@ -469,7 +495,7 @@ Loaded content is added to and/or modifies any previously loaded content.
 
 Note that loadconfig() calls read_string() for the actual loading of config data. loadconfig()
 handles the other loading features such as LogLevel, LogFile, logging formatting,
-flush_on_reload, force_flush_reload, and tolerate_missing.
+flush_on_reload, force_reload, and tolerate_missing.
 
 
 ### Args
@@ -520,11 +546,11 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                 param_name = value_portion = ''
                 out = split_line_re.match(line.strip())
                 if out:
-                    param_name    = out.group(1)
-                    value_portion = out.group(2)
+                    param_name =        out.group(1)
+                    value_portion =     out.group(2)
             else:
-                value_portion += ' ' + line.strip()
-                continuation_line = False
+                value_portion +=        ' ' + line.strip()
+                continuation_line =     False
 
             if value_portion != '':
                 # Remove after first '#' outside of quotes
@@ -534,8 +560,8 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                         break
 
             if value_portion.endswith('\\'):                            # Continuation line
-                value_portion = value_portion[:-1].strip()
-                continuation_line = True
+                value_portion =         value_portion[:-1].strip()
+                continuation_line =     True
                 continue
 
             if param_name != '':
@@ -564,17 +590,18 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
                             pass                                        # default to str
                     self._add_key(param_name, value_portion, self.current_section_name)
                     configman_logger.debug (f"Loaded {param_name} = <{value_portion}>  ({type(value_portion)})")
+        self.loaded = True
 
 
 #=====================================================================================
 #=====================================================================================
-#  read_dict
+#  r e a d _ d i c t
 #=====================================================================================
 #=====================================================================================
 
-    def read_dict(self, param_dict, section_name=''):
+    def read_dict(self, param_dict, section=''):
         """
-## read_dict (param_dict, section_name='') - Load the content of a dictionary into the cfg dictionary
+## read_dict (param_dict, section='') - Load the content of a dictionary into the cfg dictionary
 
 ***config_item() class member function***
 
@@ -584,7 +611,7 @@ Loaded content is added to and/or modifies any previously loaded content.
 `param_dict` (dict)
 - dictionary to be loaded
 
-`section_name` (str, default '' (top level))
+`section` (str, default '' (top level))
 - section to load the param_dict into.
 - The section will be created if not yet existing.
 - Content can only be loaded into one section per call to read_dict().
@@ -622,18 +649,18 @@ Loaded content is added to and/or modifies any previously loaded content.
         """
 
         try:
-            if section_name == '':
+            if section == '':
                 for key in param_dict:
                     self.cfg[key] = param_dict[key]
-            elif section_name == 'DEFAULT':
+            elif section == 'DEFAULT':
                 for key in param_dict:
                     self.defaults[key] = param_dict[key]
             else:
-                if section_name not in self.sections_list:
-                    self.cfg[section_name] = {}
-                    self.sections_list.append(section_name)
+                if section not in self.sections_list:
+                    self.cfg[section] = {}
+                    self.sections_list.append(section)
                 for key in param_dict:
-                    self.cfg[section_name][key] = param_dict[key]
+                    self.cfg[section][key] = param_dict[key]
         except Exception:
             raise ConfigError (f"Failed loading dictionary into cfg around key <{key}>")
 
@@ -795,7 +822,10 @@ reload call to avoid multiple config reloads.
             raise ConfigError ("Config file is None. Cannot modify config not loaded from a file.")
 
         if self.config_content == '':
-            self.config_content = self.config_full_path.read_text()
+            if self.safe_mode:
+                self.config_content = run_with_timeout(self.config_full_path.read_text, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+            else:
+                self.config_content = self.config_full_path.read_text()
         found_param = False
         updated_content = ''
         value = str(value)
@@ -833,12 +863,15 @@ reload call to avoid multiple config reloads.
             elif param==''  and  value==''  and  save==True: # Save-only call
                 pass
             else:
-                logging.warning (f"Modification of param <{param}> failed - not found in config file.  Modification skipped.")
+                configman_logger.warning (f"Modification of param <{param}> failed - not found in config file.  Modification skipped.")
 
         self.config_content = updated_content[:-1]          # Avoid adding extra \n at end of file
 
         if save:
-            self.config_full_path.write_text(self.config_content)
+            if self.safe_mode:
+                self.config_content = run_with_timeout(self.config_full_path.write_text, self.config_content, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+            else:
+                self.config_full_path.write_text(self.config_content)
             self.config_content = ''
 
 
@@ -889,9 +922,16 @@ reload call to avoid multiple config reloads.
         outfile = mungePath(savefile, core.tool.config_dir).full_path
 
         try:
-            run_with_timeout(outfile.write_text, cfg_list, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+            if self.safe_mode:
+                run_with_timeout(outfile.write_text, cfg_list, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+                stat = run_with_timeout(self.config_full_path.stat, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+            else:
+                outfile.write_text(cfg_list)
+                stat = self.config_full_path.stat()
         except Exception as e:
             raise ConfigError (f"Failed to write config {self.config_file} to file {outfile}\n  {type(e).__name__}: {e}")
+
+        self.config_timestamp = int(stat.st_mtime)
 
 
 #=====================================================================================
@@ -949,6 +989,7 @@ output:
             self.cfg.clear()
             self.sections_list = []
             self.defaults.clear()
+            self.loaded = False
         elif section in self.sections_list:
             self.cfg.pop(section, None)
             self.sections_list.remove(section)
@@ -971,6 +1012,7 @@ output:
         stats += f".config_dir             :  {self.config_dir}\n"
         stats += f".config_full_path       :  {self.config_full_path}\n"
         stats += f".config_timestamp       :  {self.config_timestamp}\n"
+        stats += f".safe_mode              :  {self.safe_mode}\n"
         stats += f".sections_list          :  {self.sections_list}\n"
         stats += f".force_str              :  {self.force_str}\n"
         stats += f".secondary_config       :  {self.secondary_config}\n"
@@ -1009,3 +1051,163 @@ output:
         return cfg_list[:-1]    # drop final '\n'
 
 
+    def setcfg(self, param, value=True, types=[], section=''):
+        # set param = value
+        # create param if not existing
+        # type check value
+
+
+        # Optional type checking
+        if isinstance(types, type):
+            types = [types]
+
+        if types != []  and  type(value) not in types:
+            raise ConfigError (f"Config parameter <[{section}] {param}> value <{value}> type {type(value)} not of expected type(s): {types}")
+
+
+        if section == '':                           # Top-level case
+            self.cfg[param] = value
+        elif section == 'DEFAULT':                  # DEFAULT case
+            self.defaults[param] = value
+        else:                                       # section case - create section if doesn't exist
+            if section not in self.sections_list:
+                self.cfg[section] = {}
+                self.sections_list.append(section)
+
+            self.cfg[section][param] = value
+        configman_logger.debug (f"Set [{section}] {param} = <{value}>  ({type(value)})")
+
+
+    def remove_param(self, param, section='', missing_ok=True):
+
+        if section == '':                           # Top-level case
+            if param in self.cfg:
+                del self.cfg[param]
+                configman_logger.debug (f"Removed [{section}] {param}")
+                return
+            elif missing_ok:
+                return
+            raise ConfigError (f"Param <{param}> not found in config {self.config_file}")
+
+        elif section == 'DEFAULT':                  # DEFAULT case
+            if param in self.defaults:
+                del self.defaults[param]
+                configman_logger.debug (f"Removed [{section}] {param}")
+                return
+            elif missing_ok:
+                return
+            raise ConfigError (f"Param <[DEFAULT] {param}> not found in config {self.config_file}")
+
+        else:                                       # section case
+            if section not in self.sections_list  and  not missing_ok:
+                raise ConfigError (f"Section <{section}> not found in config {self.config_file}")
+            if param in self.cfg[section]:
+                del self.cfg[section][param]
+                configman_logger.debug (f"Removed [{section}] {param}")
+                return
+            elif missing_ok:
+                return
+            raise ConfigError (f"Param <[{section}] {param}> not found in config {self.config_file}")
+
+
+#=====================================================================================
+#=====================================================================================
+#   persistent_config
+#=====================================================================================
+#=====================================================================================
+
+
+class persistent_config (config_item):
+
+    def __init__(self, file_name, force_new=False, safe_mode=False, save_schedule=None):
+        # Operation exceptions, including safe_mode run_with_timout timeouts, are not trapped, and must be dealt with by the calling code
+        self.safe_mode =        safe_mode
+        self.save_schedule =    save_schedule
+
+        pc_mp =                 mungePath(file_name, core.tool.data_dir)
+        if self.safe_mode:
+            run_with_timeout(pc_mp.parent.mkdir, exist_ok=True, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+        else:
+            pc_mp.parent.mkdir(exist_ok=True)
+
+        super().__init__(config_file=pc_mp.full_path, secondary_config=True, safe_mode=safe_mode, missing_ok=force_new)
+        self.load(force_new=force_new)
+
+        if self.save_schedule:
+            self.periodic_save_exit = False
+            self.save_thread = Thread(target=self._scheduled_save, name=f'{file_name} scheduled save')
+            self.save_thread.start()
+        else:
+            self.save_thread = None
+
+
+    def __repr__(self):
+        repr_str  =     super().__repr__()
+        repr_str +=     f".new                    :  {self.new}\n"
+        repr_str +=     f".save_thread            :  {self.save_thread}\n"
+        if self.save_thread:
+            repr_str += f".save_schedule          :  {self.save_schedule}\n"
+            repr_str += f".next_save_dt           :  {self.next_save_dt}\n"
+            repr_str += f".periodic_save_exit     :  {self.periodic_save_exit}\n"
+        return repr_str
+
+
+    def load(self, force_new=False, force_reload=True, flush_on_reload=True):
+        if force_new:
+            self.delete_persistent_file()
+
+        self.new =          False
+        if self.safe_mode:
+            if not check_path_exists(self.config_full_path):
+                run_with_timeout(self.config_full_path.touch, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+                self.new =  True
+        else:
+            if not self.config_full_path.exists():
+                self.config_full_path.touch()
+                self.new =  True
+
+        configman_logger.debug (f"Loading <{self.config_file}> data")
+
+        super().loadconfig(force_reload=force_reload, flush_on_reload=flush_on_reload)
+
+
+    def save(self, exit=False):
+        if not exit:
+            configman_logger.debug (f"Saving <{self.config_file}> data")
+            super().write(self.config_full_path)
+        else:
+            self.periodic_save_exit = True      # _scheduled_save saves on exit
+            self.save_thread.join()
+
+
+    def delete_persistent_file(self):
+        configman_logger.debug (f"Deleting <{self.config_file}> data file")
+        if self.safe_mode:
+            run_with_timeout(self.config_full_path.unlink, missing_ok=True, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+        else:
+            self.config_full_path.unlink(missing_ok=True)
+
+
+    def _scheduled_save(self):
+        # loop time is 0.5s:  Longest time to respond to periodic_save_exit
+
+        configman_logger.debug (f"Starting <{self.config_file}> scheduled save thread")
+        self.next_save_dt = get_next_dt(self.save_schedule)
+        configman_logger.debug (f"Next save <{self.next_save_dt}>")
+
+        while 1:
+            if self.periodic_save_exit:
+                configman_logger.debug (f"Stopping <{self.config_file}> scheduled save thread")
+                self.save()
+                time.sleep(1)
+                sys.exit(0)
+
+            if datetime.datetime.now() > self.next_save_dt:
+                self.save()
+                self.next_save_dt = get_next_dt(self.save_schedule)
+                configman_logger.debug (f"Next save <{self.next_save_dt}>")
+
+            time.sleep (0.5)
+
+
+    

@@ -43,15 +43,17 @@ test_dir.mkdir(exist_ok=True)
 parser = argparse.ArgumentParser(description=__doc__ + __version__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-t', '--test', default='0',
                     help="Test number to run (default 0).  0 runs all tests")
+parser.add_argument('-x', '--expand-exception', action='store_true',
+                    help="Expand exceptions with trace stack for test debug")
 parser.add_argument('--cleanup', action='store_true',
                     help="Remove test dirs/files.")
 
-args = parser.parse_args()
+cli_args = parser.parse_args()
 
 
 
 
-if args.cleanup:
+if cli_args.cleanup:
     try:
         print (f"Removing   {test_dir}")
         shutil.rmtree(test_dir)
@@ -71,17 +73,19 @@ def dotest (desc, expect, func, *args, **kwargs):
         logging.warning (f"  RETURNED:\n{result}")
         return result
     except Exception as e:
-        logging.error (f"\n  RAISED:     {type(e).__name__}: {e}")
-        # logging.exception (f"\n  RAISED:     {type(e).__name__}: {e}")
+        if cli_args.expand_exception:
+            logging.exception (f"\n  RAISED:     {type(e).__name__}: {e}")
+        else:
+            logging.error (f"\n  RAISED:     {type(e).__name__}: {e}")
         return e
 
 tnum_parse = re.compile(r"([\d]+)([\w]*)")
 def check_tnum(tnum_in, include0='0'):
     global tnum
     tnum = tnum_in
-    if args.test == include0  or  args.test == tnum_in:  return True
+    if cli_args.test == include0  or  cli_args.test == tnum_in:  return True
     try:
-        if int(args.test) == int(tnum_parse.match(tnum_in).group(1)):  return True
+        if int(cli_args.test) == int(tnum_parse.match(tnum_in).group(1)):  return True
     except:  pass
     return False
 
@@ -357,7 +361,7 @@ if __name__ == "__main__":
     # Debug / development
 
 
-    if args.test == '50':
+    if check_tnum('50', include0=False): #cli_args.test == '50':
         
         abc1 = 0
         for _ in range(2):  # On linux and windows this prints 0 1 1 2
@@ -377,21 +381,25 @@ if __name__ == "__main__":
         exit()      
 
 
-    if args.test == '51':
+    if check_tnum('51', include0=False):
         dotest ("Built-in print", "Pass, return None",
                 print, "Hello", "there", "again", rwt_timeout=1, sep=" blah ", end=" The end.\n")
 
-    if args.test == '52':
+    if check_tnum('52', include0=False):
         dotest ("Built-in print", "Pass, return None",
                 print, "Hello", "there", "again", rwt_timeout=1, sep=" blah ", end=" The end.\n")
 
-    if args.test == '53':
+    if check_tnum('53', include0=False):
                 run_with_timeout(print, "Hello", "there", "again", sep=" blah ", end=" The end.\n", flush=True,
                                  rwt_timeout=3)
 
-    if args.test == '54':
+    if check_tnum('54', include0=False):
                 run_with_timeout(time.sleep, 0.01,
                                  rwt_timeout=3)
+
+    # if check_tnum('55', include0=False):
+
+
 
     time.sleep(0.2)     # TODO debug
 
