@@ -68,7 +68,7 @@ then the `core.tool.log_dir_base` will be set to `core.tool.config_dir`.
 - Causes all params to be loaded as type `str`, overriding the default type identification.
 
 `secondary_config` (bool, default False)
-- Set to `True` when loading additional config files.  Disables logging setup related changes.
+- Set to True when loading additional config files.  Disables logging setup related changes.
 - The primary config file should be loaded first before any secondary_config loads, so that logging 
 is properly set up.
 
@@ -76,6 +76,7 @@ is properly set up.
 - If `safe_mode=True` then timeouts are enforced when checking for config files.
 - If `safe_mode=False` then checks for the existence of config files runs the risk of application hang.
 - See Behavior NOTE below.
+
 
 ### Useful class attributes
 The current values of all public class attributes may be printed using `print(my_config)`.
@@ -284,7 +285,7 @@ logging is directed to the console (with `call_logfile=None`) or an alternate fi
     EG: `[  hello my name  is  Fred  ]` becomes section name `'hello my name  is  Fred'`.
    - Section names can contain most all characters, except `]`.
 
-1. **Native int, float, bool, list, tuple, dict, str, None support** - Bool true/false is case insensitive. A str
+1. **Native str, int, float, bool, list, tuple, dict, None support** - Bool true/false is case insensitive. A str
   type is stored in the `cfg` dictionary if none of the other types can be resolved for a given value_portion.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
   for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
@@ -310,13 +311,13 @@ logging is directed to the console (with `call_logfile=None`) or an alternate fi
 1. **Logging level control** - Optional `LogLevel` in the primary config file will set the root logging level after
   the config file has been loaded.  If LogLevel is not specified in the primary config file, then 
   the root logging level is left unchanged (the Python default logging level is 30/WARNING).
-  The tool script code may also manually/explicitly set the root logging level _after the initial `loadconifig()` call_
+  The tool script code may also manually/explicitly set the root logging level _after the initial `loadconfig()` call_
   and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
-  switch feature.  Note that logging done _within_ loadconfig() uses the `cjnfuncs.configmap` child/named logger.
+  switch feature.  Note that logging done _within_ loadconfig() uses the `cjnfuncs.configman` child/named logger.
   `logging.getLogger('cjnfuncs.configman').setLevel(logging.INFO)` (or DEBUG) enables diagnostic logging from
   loadconfig.
 
-1. **Log file options** - Where to log has two separate fields:  `call_logifle` in the call to loadconfig(), and 
+1. **Log file options** - Where to log has two separate fields:  `call_logfile` in the call to loadconfig(), and 
   `LogFile` in the loaded primary config file, with `call_logfile_wins` selecting which is used.  This mechanism allows for
   a command line `--log-file` switch to override a _default_ log file defined in the config file.  If the selected 
   logging location is `None` then output goes to the console (stdout).
@@ -699,15 +700,15 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 
 `fallback` (any, default effectively `None`, technically '_nofallback')
 - if provided, is returned if `param` does not exist in cfg
-- No type enforcement - the fallback value need not be in the `types` list.
+- No type enforcement - the fallback value need not be in the `types` list
 
 `types` (single or list of as-expected types, default '[]' (any type accepted))
 - if provided, a ConfigError is raised if the param's value type is not in the list of expected types
 - `types` may be a single type (eg, `types=int`) or a list of types (eg, `types=[int, float]`)
-- Supported types: [str, int, float, bool, list, tuple, dict]
+- Supported types: [str, int, float, bool, list, tuple, dict, type(None)]
 
 `section` (str, default '' (top-level))
-- Select the section from which to get the param value.
+- Select the section from which to get the param value
 
 
 ### Returns
@@ -716,7 +717,7 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 - If the param is not found, or the param's type is not in the `types` list, if specified, then a ConfigError is raised.
         """
 
-        _value = None
+        _value = '__nonevalue__'
         if section == '':                           # Top-level case
             if param in self.cfg:
                 _value = self.cfg[param]
@@ -732,7 +733,7 @@ This can lead to cleaner tool script code.  Either access method may be used, al
                 if param in self.defaults:
                     _value = self.defaults[param]
 
-        if _value is None:
+        if _value == '__nonevalue__':
             if fallback != '_nofallback':
                 return fallback
             else:
@@ -749,6 +750,118 @@ This can lead to cleaner tool script code.  Either access method may be used, al
                     return _value
                 else:
                     raise ConfigError (f"Config parameter <[{section}] {param}> value <{_value}> type {type(_value)} not of expected type(s): {types}")
+
+
+#=====================================================================================
+#=====================================================================================
+#  s e t c f g
+#=====================================================================================
+#=====================================================================================
+
+    def setcfg(self, param, value=True, types=[], section=''):
+        """
+## setcfg (param, value=True, types=[], section='') - Set a param's value in the cfg dictionary
+
+***config_item() class member function***
+
+### Args
+`param` (str)
+- String name of param to be set in cfg
+- Created if not existing
+
+`types` (single or list of as-expected types, default '[]' (any type accepted))
+- if provided, a ConfigError is raised if the param's value type is not in the list of expected types
+- `types` may be a single type (eg, `types=int`) or a list of types (eg, `types=[int, float]`)
+- Supported types: [str, int, float, bool, list, tuple, dict, type(None)]
+
+`section` (str, default '' (top-level))
+- Select the section in which to save the param value
+
+
+### Returns
+- None on success
+- Raises ConfigError if type of value is not in the optional types list
+        """
+        # Optional type checking
+        if isinstance(types, type):
+            types = [types]
+
+        if types != []  and  type(value) not in types:
+            raise ConfigError (f"Config parameter <[{section}] {param}> value <{value}> type {type(value)} not of expected type(s): {types}")
+
+
+        if section == '':                           # Top-level case
+            self.cfg[param] = value
+        elif section == 'DEFAULT':                  # DEFAULT case
+            self.defaults[param] = value
+        else:                                       # section case - create section if doesn't exist
+            if section not in self.sections_list:
+                self.cfg[section] = {}
+                self.sections_list.append(section)
+
+            self.cfg[section][param] = value
+        configman_logger.debug (f"Set [{section}] {param} = <{value}>  ({type(value)})")
+
+
+#=====================================================================================
+#=====================================================================================
+#  r e m o v e _ p a r a m
+#=====================================================================================
+#=====================================================================================
+
+    def remove_param(self, param, section='', missing_ok=True):
+        """
+## remove_param (param, section='', missing_ok=True) - Remove a param from the cfg dictionary
+
+***config_item() class member function***
+
+### Args
+`param` (str)
+- String name of param to be removed
+
+`section` (str, default '' (top-level))
+- Specify the section in which the param is to be removed
+- The param is only removed from the designated section
+- The section itself is not removed.  See parent class `config_item.clear()` for removing sections
+
+`missing_ok` (book, default True)
+- If True, then if param does not exist in the designated section then remove_param simply returns
+- If False, then if the param does not exist in the designated section the ConfigError is raised
+
+
+### Returns
+- None on success
+- Raises ConfigError if missing_ok=False and the param does not exist in the designated section
+        """
+
+        if section == '':                           # Top-level case
+            if param in self.cfg:
+                del self.cfg[param]
+                configman_logger.debug (f"Removed [{section}] {param}")
+                return
+            elif missing_ok:
+                return
+            raise ConfigError (f"Param <{param}> not found in config {self.config_file}")
+
+        elif section == 'DEFAULT':                  # DEFAULT case
+            if param in self.defaults:
+                del self.defaults[param]
+                configman_logger.debug (f"Removed [{section}] {param}")
+                return
+            elif missing_ok:
+                return
+            raise ConfigError (f"Param <[DEFAULT] {param}> not found in config {self.config_file}")
+
+        else:                                       # section case
+            if section not in self.sections_list  and  not missing_ok:
+                raise ConfigError (f"Section <{section}> not found in config {self.config_file}")
+            if param in self.cfg[section]:
+                del self.cfg[section][param]
+                configman_logger.debug (f"Removed [{section}] {param}")
+                return
+            elif missing_ok:
+                return
+            raise ConfigError (f"Param <[{section}] {param}> not found in config {self.config_file}")
 
 
 #=====================================================================================
@@ -1051,111 +1164,106 @@ output:
         return cfg_list[:-1]    # drop final '\n'
 
 
-    def setcfg(self, param, value=True, types=[], section=''):
-        # set param = value
-        # create param if not existing
-        # type check value
-
-
-        # Optional type checking
-        if isinstance(types, type):
-            types = [types]
-
-        if types != []  and  type(value) not in types:
-            raise ConfigError (f"Config parameter <[{section}] {param}> value <{value}> type {type(value)} not of expected type(s): {types}")
-
-
-        if section == '':                           # Top-level case
-            self.cfg[param] = value
-        elif section == 'DEFAULT':                  # DEFAULT case
-            self.defaults[param] = value
-        else:                                       # section case - create section if doesn't exist
-            if section not in self.sections_list:
-                self.cfg[section] = {}
-                self.sections_list.append(section)
-
-            self.cfg[section][param] = value
-        configman_logger.debug (f"Set [{section}] {param} = <{value}>  ({type(value)})")
-
-
-    def remove_param(self, param, section='', missing_ok=True):
-
-        if section == '':                           # Top-level case
-            if param in self.cfg:
-                del self.cfg[param]
-                configman_logger.debug (f"Removed [{section}] {param}")
-                return
-            elif missing_ok:
-                return
-            raise ConfigError (f"Param <{param}> not found in config {self.config_file}")
-
-        elif section == 'DEFAULT':                  # DEFAULT case
-            if param in self.defaults:
-                del self.defaults[param]
-                configman_logger.debug (f"Removed [{section}] {param}")
-                return
-            elif missing_ok:
-                return
-            raise ConfigError (f"Param <[DEFAULT] {param}> not found in config {self.config_file}")
-
-        else:                                       # section case
-            if section not in self.sections_list  and  not missing_ok:
-                raise ConfigError (f"Section <{section}> not found in config {self.config_file}")
-            if param in self.cfg[section]:
-                del self.cfg[section][param]
-                configman_logger.debug (f"Removed [{section}] {param}")
-                return
-            elif missing_ok:
-                return
-            raise ConfigError (f"Param <[{section}] {param}> not found in config {self.config_file}")
-
 
 #=====================================================================================
 #=====================================================================================
-#   persistent_config
+#   C l a s s   p e r s i s t e n t _ c o n f i g
 #=====================================================================================
 #=====================================================================================
-
 
 class persistent_config (config_item):
+    """
+## Class persistent_config (config_file, force_new=False, safe_mode=False, save_schedule=None) - Create (if not existing) and load a persistent_config data file
 
-    def __init__(self, file_name, force_new=False, safe_mode=False, save_schedule=None):
-        # Operation exceptions, including safe_mode run_with_timout timeouts, are not trapped, and must be dealt with by the calling code
+***`persistent_config` is a derived class of `config_item`***
+
+The `persistent_config` class provides a mechanism for runtime data to survive a tool script restart or system reboot. 
+Behaviors on instantiation:
+- Create the persistent `config_file` if not existing, and set the `new` attribute accordingly
+- Load the config file
+- Start a thread for scheduled saves, if specified
+
+NOTE:  Documentation for this class assumes that a persistent_config has been loaded as:
+
+    persist = persistent_config('my_persistent_file')
+
+
+### Instantiation args
+`config_file` (Path or str)
+- Path to the configuration file, relative to the `core.tool.data_dir` directory, or an absolute path
+- Note that if a relative path is provided then persistent_config uses mungePath to create an absolute path based on `core.tool.data_dir`.
+
+`force_new` (bool, default False)
+- If True, any pre-existing config_file is deleted
+- If False, any pre-existing `config_file` is left in place
+- If `config_file` does not exist (due to never existed or being deleted) then an empty file is created and the instance attribute `new` is set True.
+
+`safe_mode` (bool, default False)
+- If True, all potentially blocking filesystem operations are wrapped in `run_with_timeout()` calls.  TimeoutError exceptions may be raised.
+- If False, all filesystem operations are called directly, with potential hang risk if accessing non-local filesystems.  See the `safe_mode` notes 
+in `config_item` _Behaviors and rules_, above.
+
+`save_schedule` (None, int, str, or list)
+- If an int or str, such as `7200` or `'2h'`, the value is interpreted as a timevalue between automatic saves
+- If a str clock time or a list of clock times, such as `'15:00'` or `['06:00', '18:00']` then automatic saves will be executed at these times
+- If None, no scheduled saves will be active
+- If `save_schedule` is used the tool script should exit with a call to `persist.save(exit=True)` to force a final save of the persistent data 
+and terminate the schedule save thread
+
+
+### Useful class attributes
+Since `persistent_config` is a derived class of `config_item`, all of `config_item`'s methods and instance attributes are also available.
+The current values of all public class attributes may be printed using `print(persist)`.
+
+`.new`
+- True if `force_new = True` or if the `config_file` doesn't exist at instantiation, otherwise False
+- User code may check this attribute after instantiation and do one-time initialization of the config data, as needed
+- Remains True or False for the remainder of the run unless changed by the tool script
+
+`.save_schedule`
+- The value passed in at instantiation.  `None` indicates no automatic saves are scheduled.
+
+`.next_save_dt`
+- If `persist.save_schedule is not None`, then this is the datetime of the next scheduled save
+- `None` if `persist.save_schedule is None`
+
+
+### Returns
+- Handle to the `persistent_config()` instance
+- Raises `TimeoutError` if `safe_mode=True` and upon any filesystem access issues
+- Raises other exceptions, such as `PermissionError` and `OSError`, as appropriate
+
+
+### Behaviors and rules
+1. Instantiating a persistent_config object also loads the config file into memory.
+1. The config data may be accessed via `xx = persist.getcfg('myvar')` and `persist.setcfg('myvar', 5)`, and by direct access to the 
+config data, e.g., `xx = persist.cfg['myvar']` and `persist.cfg['myvar'] = 5`
+1. If the `config_file` is not found then it will be created and the instance attribute `new` will be set to True.
+The path to the parent dir will also be created, as needed.
+1. The `save()` method must be called on controlled termination of your tool script in order to save the most recent data and to 
+terminate any schedule save thread.  Alternately (if not using scheduled saves), you may wish to 
+save after critical data has been written to the config.
+1. A persistent_config is considered a `config_item` secondary_config - loaded as an independent config, with no changes to the logging setup.
+
+"""
+    def __init__(self, config_file, force_new=False, safe_mode=False, save_schedule=None):
         self.safe_mode =        safe_mode
         self.save_schedule =    save_schedule
 
-        pc_mp =                 mungePath(file_name, core.tool.data_dir)
+        conf_file_mp =          mungePath(config_file, core.tool.data_dir)
+        self.config_full_path = conf_file_mp.full_path
+
+        # Make the target directory
         if self.safe_mode:
-            run_with_timeout(pc_mp.parent.mkdir, exist_ok=True, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
+            run_with_timeout(conf_file_mp.parent.mkdir, exist_ok=True, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
         else:
-            pc_mp.parent.mkdir(exist_ok=True)
+            conf_file_mp.parent.mkdir(exist_ok=True)
 
-        super().__init__(config_file=pc_mp.full_path, secondary_config=True, safe_mode=safe_mode, missing_ok=force_new)
-        self.load(force_new=force_new)
-
-        if self.save_schedule:
-            self.periodic_save_exit = False
-            self.save_thread = Thread(target=self._scheduled_save, name=f'{file_name} scheduled save')
-            self.save_thread.start()
-        else:
-            self.save_thread = None
-
-
-    def __repr__(self):
-        repr_str  =     super().__repr__()
-        repr_str +=     f".new                    :  {self.new}\n"
-        repr_str +=     f".save_thread            :  {self.save_thread}\n"
-        if self.save_thread:
-            repr_str += f".save_schedule          :  {self.save_schedule}\n"
-            repr_str += f".next_save_dt           :  {self.next_save_dt}\n"
-            repr_str += f".periodic_save_exit     :  {self.periodic_save_exit}\n"
-        return repr_str
-
-
-    def load(self, force_new=False, force_reload=True, flush_on_reload=True):
+        # Delete any existing file if force_new
         if force_new:
-            self.delete_persistent_file()
+            self.del_persistent_file()
 
+        # If config non-existing then create it and set new flag
         self.new =          False
         if self.safe_mode:
             if not check_path_exists(self.config_full_path):
@@ -1166,30 +1274,97 @@ class persistent_config (config_item):
                 self.config_full_path.touch()
                 self.new =  True
 
+        # Load the config
+        super().__init__(config_file=conf_file_mp.full_path, secondary_config=True, safe_mode=safe_mode, missing_ok=force_new)
         configman_logger.debug (f"Loading <{self.config_file}> data")
+        super().loadconfig(force_reload=True, flush_on_reload=True)
 
-        super().loadconfig(force_reload=force_reload, flush_on_reload=flush_on_reload)
+        # Set up scheduled saves
+        if self.save_schedule:
+            self.periodic_save_exit = False
+            self.save_thread = Thread(target=self._scheduled_save, name=f'{config_file} scheduled save')
+            self.save_thread.start()
+        else:
+            self.next_save_dt = None
+            self.save_thread = None
 
+
+#=====================================================================================
+#=====================================================================================
+#   s a v e
+#=====================================================================================
+#=====================================================================================
 
     def save(self, exit=False):
-        if not exit:
-            configman_logger.debug (f"Saving <{self.config_file}> data")
-            super().write(self.config_full_path)
-        else:
+        """
+## save (exit=False) - Force an explicit save to the config_file and terminate the scheduled save thread if running
+
+***persistent_config() class member function***
+
+
+### Args
+`exit` (bool, default False)
+- If True, informs the scheduled save thread to do a final save and then terminate
+- If False, the persistent_config data is directly written to the `config_file`
+
+
+### Returns
+- None on successful save and scheduled save thread exit (if enabled)
+- Raises ConfigError if the schedule save thread does not terminate within 5 seconds.  The config data has not been saved.
+- Raises other exceptions, such as `PermissionError` and `OSError`, as appropriate
+        """
+        if exit  and  self.save_thread:
             self.periodic_save_exit = True      # _scheduled_save saves on exit
-            self.save_thread.join()
+            self.save_thread.join(timeout=5)
+            if self.save_thread.is_alive():
+                raise ConfigError (f"Failed to save config {self.config_file} - save_thread did not terminate")
+            return
+
+        configman_logger.info (f"Saving <{self.config_file}> data")
+        super().write(self.config_full_path)
+        return True
 
 
-    def delete_persistent_file(self):
-        configman_logger.debug (f"Deleting <{self.config_file}> data file")
+#=====================================================================================
+#=====================================================================================
+#   d e l _ p e r s i s t e n t _ f i l e
+#=====================================================================================
+#=====================================================================================
+
+    def del_persistent_file(self):
+        """
+## del_persistent_file () - Delete the config_file
+
+***persistent_config() class member function***
+
+This method does _not_ delete any _loaded_ persistent data - if followed by a call to `save()` the file will 
+be written with the currently loaded config content.
+To purge the loaded config data call `persist.clear()` (provided by the `config_item` parent class).
+
+This method is normally not called from tool script code.  It is called during instantiation when `force_new=True`.
+
+
+### Returns
+- `None` if the file is successfully deleted, or the file does not exist
+- Raises TimeoutError if safe_mode = False and config_file cannot be accessed
+- Raises other errors as appropriate
+        """
+        configman_logger.debug (f"Deleting <{self.config_full_path}> data file")
         if self.safe_mode:
             run_with_timeout(self.config_full_path.unlink, missing_ok=True, rwt_ntries=RWT_NTRIES, rwt_timeout=RWT_TIMEOUT)
         else:
             self.config_full_path.unlink(missing_ok=True)
 
 
+#=====================================================================================
+#=====================================================================================
+#   _ s c h e d u l e d _ s a v e
+#=====================================================================================
+#=====================================================================================
+
     def _scheduled_save(self):
-        # loop time is 0.5s:  Longest time to respond to periodic_save_exit
+        # Private class method
+        # loop time is 0.2s:  Longest time to respond to periodic_save_exit + any time required for the file write
 
         configman_logger.debug (f"Starting <{self.config_file}> scheduled save thread")
         self.next_save_dt = get_next_dt(self.save_schedule)
@@ -1199,15 +1374,30 @@ class persistent_config (config_item):
             if self.periodic_save_exit:
                 configman_logger.debug (f"Stopping <{self.config_file}> scheduled save thread")
                 self.save()
-                time.sleep(1)
-                sys.exit(0)
+                # time.sleep(1)
+                sys.exit(0)         # Exit the scheduled save thread
 
             if datetime.datetime.now() > self.next_save_dt:
                 self.save()
                 self.next_save_dt = get_next_dt(self.save_schedule)
                 configman_logger.debug (f"Next save <{self.next_save_dt}>")
 
-            time.sleep (0.5)
+            time.sleep (0.2)
 
 
+#=====================================================================================
+#=====================================================================================
+#  _ _ r e p r _ _
+#=====================================================================================
+#=====================================================================================
+
+    def __repr__(self):
+        repr_str  =     super().__repr__()
+        repr_str +=     f".new                    :  {self.new}\n"
+        repr_str +=     f".save_schedule          :  {self.save_schedule}\n"
+        if self.save_schedule:
+            repr_str += f".save_thread            :  {self.save_thread}\n"
+            repr_str += f".next_save_dt           :  {self.next_save_dt}\n"
+            repr_str += f".periodic_save_exit     :  {self.periodic_save_exit}\n"
+        return repr_str
     

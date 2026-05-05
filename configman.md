@@ -435,6 +435,73 @@ Notables:
 
 <br>
 
+## Persistent data over tool script restarts and system reboots
+
+The `persistent_config` class provides a simple solution for retaining information over tool script restarts.
+`persistent_config` is a derived class of `config_item`, so all config_item class methods are available for persistent_config instances, such as getcfg(), setcfg(), sections(), loadconfig(), etc.
+
+The persistent data is stored in a file saved typically in core.tool.data_dir (eg, `/home/<me>/.local/share/mytool`).  The interface is simple:
+- The tool script simply instantiates a `persistent_config` instance and specifies the file containing the persistent data.  The data is loaded at instantiation.
+- Accesses to the data may be made via `setcfg()` and `getcfg()` (or directly to the instance `cfg` dictionary).
+- Periodically (and/or on exit) the persistent config is saved back to the file for safe keeping.
+
+Here's a working example:
+
+```
+#!/usr/bin/env python3
+# ***** configman_ex4.py *****
+
+from cjnfuncs.core      import set_toolname, logging, set_logging_level
+from cjnfuncs.configman import persistent_config
+
+set_toolname('configman_ex4')
+set_logging_level(logging.INFO, logger_name='cjnfuncs.configman')
+
+persist = persistent_config('persist.cfg', safe_mode=True)      # Load persistent config data
+
+if persist.new:                                                 # If new then initialize user params/values
+    persist.setcfg('abc', 5)                                    # Access by setcfg()
+    persist.setcfg('counter', 0, section='my_section')
+
+print (f"sections:  {persist.sections()}")
+
+for _ in range(5):
+    persist.cfg['my_section']['counter'] += 1                   # Access directly
+    xx = persist.getcfg('counter', section='my_section')        # Access by getcfg()
+    print (f"counter value:  {xx}")
+
+persist.save()                                                  # Save on exit
+```
+And two runs, starting from scratch (no pre-existing persistent data file):
+
+```
+$ ./configman_ex4.py 
+      configman.loadconfig           -     INFO:  Config  <persist.cfg>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist.cfg>  file timestamp: 1777999259
+      configman.loadconfig           -     INFO:  Loading  </home/<me>/.local/share/configman_ex4/persist.cfg>
+sections:  ['my_section']
+counter value:  1
+counter value:  2
+counter value:  3
+counter value:  4
+counter value:  5
+      configman.save                 -     INFO:  Saving <persist.cfg> data
+
+$ ./configman_ex4.py 
+      configman.loadconfig           -     INFO:  Config  <persist.cfg>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist.cfg>  file timestamp: 1777999259
+      configman.loadconfig           -     INFO:  Loading  </home/<me>/.local/share/configman_ex4/persist.cfg>
+sections:  ['my_section']
+counter value:  6
+counter value:  7
+counter value:  8
+counter value:  9
+counter value:  10
+      configman.save                 -     INFO:  Saving <persist.cfg> data
+```
+
+<br>
+
 ## Controlling logging from within configman code
 
 Logging within the configman module uses the `cjnfuncs.configman` named/child logger.  By default this logger is set to the `logging.WARNING` level, 
@@ -462,11 +529,16 @@ can be enabled by setting the logging level for this module's logger from within
 - [read_string](#read_string)
 - [read_dict](#read_dict)
 - [getcfg](#getcfg)
+- [setcfg](#setcfg)
+- [remove_param](#remove_param)
 - [modify_configfile](#modify_configfile)
 - [write](#write)
 - [sections](#sections)
 - [clear](#clear)
 - [dump](#dump)
+- [persistent_config](#persistent_config)
+- [save](#save)
+- [del_persistent_file](#del_persistent_file)
 
 
 
@@ -500,7 +572,7 @@ then the `core.tool.log_dir_base` will be set to `core.tool.config_dir`.
 - Causes all params to be loaded as type `str`, overriding the default type identification.
 
 `secondary_config` (bool, default False)
-- Set to `True` when loading additional config files.  Disables logging setup related changes.
+- Set to True when loading additional config files.  Disables logging setup related changes.
 - The primary config file should be loaded first before any secondary_config loads, so that logging 
 is properly set up.
 
@@ -508,6 +580,7 @@ is properly set up.
 - If `safe_mode=True` then timeouts are enforced when checking for config files.
 - If `safe_mode=False` then checks for the existence of config files runs the risk of application hang.
 - See Behavior NOTE below.
+
 
 ### Useful class attributes
 The current values of all public class attributes may be printed using `print(my_config)`.
@@ -520,7 +593,7 @@ The current values of all public class attributes may be printed using `print(my
 - Default params are stored here.
 
 `.sections_list` (list)
-- A list of string names for all defined sections.
+- A list of string names for all defined sections
 
 `.config_file` (str, or None)
 - The `config_file` as passed in at instantiation
@@ -587,13 +660,13 @@ produces no logging events from this module), eg:
 # loadconfig () - Load a configuration file into the cfg dictionary
 ```
 loadconfig(
-    call_logfile        = None,
-    call_logfile_wins   = False,
-    flush_on_reload     = False,
-    force_flush_reload  = False,
-    isimport            = False,
-    tolerate_missing    = False,
-    prereload_callback  = None)        
+    call_logfile =      None,
+    call_logfile_wins = False,
+    flush_on_reload =   False,
+    force_reload =      False,
+    isimport =          False,
+    tolerate_missing =  False,
+    prereload_callback= None)
 ```
 ***config_item() class member function***
 
@@ -621,9 +694,9 @@ logging is directed to the console (with `call_logfile=None`) or an alternate fi
 - If the config file will be reloaded (due to a changed timestamp) then clean out the 
 `cfg` dictionary first.  See Returns, below.
 
-`force_flush_reload` (bool, default False)
-- Forces the `cfg` dictionary to be cleaned out and the config file to be reloaded, 
-regardless of whether the config file timestamp has changed
+`force_reload` (bool, default False)
+- Forces the config file to be reloaded regardless of whether the config file timestamp has changed.
+- Also set `flush_on_reload=True` to clean out the `cfg` dictionary before reloading.
 
 `isimport` (bool, default False)
 - Internally set True when handling imports.  Not used by tool script calls.
@@ -657,11 +730,11 @@ regardless of whether the config file timestamp has changed
     EG: `[  hello my name  is  Fred  ]` becomes section name `'hello my name  is  Fred'`.
    - Section names can contain most all characters, except `]`.
 
-1. **Native int, float, bool, list, tuple, dict, str support** - Bool true/false is case insensitive. A str
+1. **Native str, int, float, bool, list, tuple, dict, None support** - Bool true/false is case insensitive. A str
   type is stored in the `cfg` dictionary if none of the other types can be resolved for a given value_portion.
   Automatic typing avoids most explicit type casting clutter in the tool script. Be careful to error trap
   for type errors (eg, expecting a float but user input error resulted in a str). Also see the 
-  getcfg() `types=[]` arg for basic type enforcement.
+  getcfg() and setcfg() `types=[]` arg for basic type enforcement.
 
 1. **Quoted strings** - If a value_portion cannot be resolved to a Python native type then it is loaded as a str,
   eg `My_name = George` loads George as a str.  A value_portion may be forced to be loaded as a str by using 
@@ -683,13 +756,13 @@ regardless of whether the config file timestamp has changed
 1. **Logging level control** - Optional `LogLevel` in the primary config file will set the root logging level after
   the config file has been loaded.  If LogLevel is not specified in the primary config file, then 
   the root logging level is left unchanged (the Python default logging level is 30/WARNING).
-  The tool script code may also manually/explicitly set the root logging level _after the initial `loadconifig()` call_
+  The tool script code may also manually/explicitly set the root logging level _after the initial `loadconfig()` call_
   and this value will be retained over later calls to loadconfig, thus allowing for a command line `--verbose`
-  switch feature.  Note that logging done _within_ loadconfig() uses the `cjnfuncs.configmap` child/named logger.
+  switch feature.  Note that logging done _within_ loadconfig() uses the `cjnfuncs.configman` child/named logger.
   `logging.getLogger('cjnfuncs.configman').setLevel(logging.INFO)` (or DEBUG) enables diagnostic logging from
   loadconfig.
 
-1. **Log file options** - Where to log has two separate fields:  `call_logifle` in the call to loadconfig(), and 
+1. **Log file options** - Where to log has two separate fields:  `call_logfile` in the call to loadconfig(), and 
   `LogFile` in the loaded primary config file, with `call_logfile_wins` selecting which is used.  This mechanism allows for
   a command line `--log-file` switch to override a _default_ log file defined in the config file.  If the selected 
   logging location is `None` then output goes to the console (stdout).
@@ -712,7 +785,7 @@ Sections are not allowed within an imported file - only in the main/top-level co
 A prime usage of `import` is to place email server credentials in your home directory with user-only readability,
 then import them in the tool script config file as such: `import ~/creds_SMTP`.  
 
-1. **Config reload if changed, `flush_on_reload`, and `force_flush_reload`** - loadconfig() may be called 
+1. **Config reload if changed, `flush_on_reload`, and `force_reload`** - loadconfig() may be called 
 periodically by the tool script, such as in a service loop.
 If the config file timestamp is unchanged then loadconfig() immediately returns `0`. 
 If the timestamp has changed then the config file will be reloaded and `1` is returned to indicate to 
@@ -723,10 +796,10 @@ the tool script to do any post-config-load operations.
   deleted in the config
   file it will still exist in `cfg` after the reload). [lanmonitor](https://github.com/cjnaz/lanmonitor) uses the
   `flush_on_reload=True` feature.
-   - `force_flush_reload=True` (default False) forces both a clear/flush of the `cfg` dictionary and then a fresh
-  reload of the config file. 
-   - **Note** that if using threading then a thread should be paused while the config file 
-  is being reloaded with `flush_on_reload=True` or `force_flush_reload=True` since the params will disappear briefly.
+   - `force_reload=True` (default False) forces a reload of the config file, either on top of existing loaded data
+   with `flush_on_reload=False`, or replacing all existing data with `flush_on_reload=True`.
+   - **Note** that if using threading, and a thread is accessing the config data, then the thread should be paused while the config file 
+  is being reloaded with `flush_on_reload=True` since the params will disappear briefly.
   Use the `prereload_callback` mechanism to manage any code dependencies before the cfg dictionary is purged.
    - Changes to imported files are not tracked for changes.
 
@@ -751,7 +824,7 @@ Loaded content is added to and/or modifies any previously loaded content.
 
 Note that loadconfig() calls read_string() for the actual loading of config data. loadconfig()
 handles the other loading features such as LogLevel, LogFile, logging formatting,
-flush_on_reload, force_flush_reload, and tolerate_missing.
+flush_on_reload, force_reload, and tolerate_missing.
 
 
 ### Args
@@ -772,7 +845,7 @@ flush_on_reload, force_flush_reload, and tolerate_missing.
 
 ---
 
-# read_dict (param_dict, section_name='') - Load the content of a dictionary into the cfg dictionary
+# read_dict (param_dict, section='') - Load the content of a dictionary into the cfg dictionary
 
 ***config_item() class member function***
 
@@ -782,7 +855,7 @@ Loaded content is added to and/or modifies any previously loaded content.
 `param_dict` (dict)
 - dictionary to be loaded
 
-`section_name` (str, default '' (top level))
+`section` (str, default '' (top level))
 - section to load the param_dict into.
 - The section will be created if not yet existing.
 - Content can only be loaded into one section per call to read_dict().
@@ -850,21 +923,77 @@ This can lead to cleaner tool script code.  Either access method may be used, al
 
 `fallback` (any, default effectively `None`, technically '_nofallback')
 - if provided, is returned if `param` does not exist in cfg
-- No type enforcement - the fallback value need not be in the `types` list.
+- No type enforcement - the fallback value need not be in the `types` list
 
 `types` (single or list of as-expected types, default '[]' (any type accepted))
 - if provided, a ConfigError is raised if the param's value type is not in the list of expected types
 - `types` may be a single type (eg, `types=int`) or a list of types (eg, `types=[int, float]`)
-- Supported types: [str, int, float, bool, list, tuple, dict]
+- Supported types: [str, int, float, bool, list, tuple, dict, type(None)]
 
 `section` (str, default '' (top-level))
-- Select the section from which to get the param value.
+- Select the section from which to get the param value
 
 
 ### Returns
 - The param value from 1) from the specified `section` if defined, 2) from the `DEFAULT` section if defined,
   or 3) from the `fallback` value if specified.
 - If the param is not found, or the param's type is not in the `types` list, if specified, then a ConfigError is raised.
+        
+<br/>
+
+<a id="setcfg"></a>
+
+---
+
+# setcfg (param, value=True, types=[], section='') - Set a param's value in the cfg dictionary
+
+***config_item() class member function***
+
+### Args
+`param` (str)
+- String name of param to be set in cfg
+- Created if not existing
+
+`types` (single or list of as-expected types, default '[]' (any type accepted))
+- if provided, a ConfigError is raised if the param's value type is not in the list of expected types
+- `types` may be a single type (eg, `types=int`) or a list of types (eg, `types=[int, float]`)
+- Supported types: [str, int, float, bool, list, tuple, dict, type(None)]
+
+`section` (str, default '' (top-level))
+- Select the section in which to save the param value
+
+
+### Returns
+- None on success
+- Raises ConfigError if type of value is not in the optional types list
+        
+<br/>
+
+<a id="remove_param"></a>
+
+---
+
+# remove_param (param, section='', missing_ok=True) - Remove a param from the cfg dictionary
+
+***config_item() class member function***
+
+### Args
+`param` (str)
+- String name of param to be removed
+
+`section` (str, default '' (top-level))
+- Specify the section in which the param is to be removed
+- The param is only removed from the designated section
+- The section itself is not removed.  See parent class `config_item.clear()` for removing sections
+
+`missing_ok` (book, default True)
+- If True, then if param does not exist in the designated section then remove_param simply returns
+- If False, then if the param does not exist in the designated section the ConfigError is raised
+
+
+### Returns
+- None on success
+- Raises ConfigError if missing_ok=False and the param does not exist in the designated section
         
 <br/>
 
@@ -1006,4 +1135,127 @@ output:
 
 ### Returns
 - str type pretty formatted content of the cfg dictionary, along with any sections and defaults
+        
+<br/>
+
+<a id="persistent_config"></a>
+
+---
+
+# Class persistent_config (config_file, force_new=False, safe_mode=False, save_schedule=None) - Create (if not existing) and load a persistent_config data file
+
+***`persistent_config` is a derived class of `config_item`***
+
+The `persistent_config` class provides a mechanism for runtime data to survive a tool script restart or system reboot. 
+Behaviors on instantiation:
+- Create the persistent `config_file` if not existing, and set the `new` attribute accordingly
+- Load the config file
+- Start a thread for scheduled saves, if specified
+
+NOTE:  Documentation for this class assumes that a persistent_config has been loaded as:
+
+    persist = persistent_config('my_persistent_file')
+
+
+### Instantiation args
+`config_file` (Path or str)
+- Path to the configuration file, relative to the `core.tool.data_dir` directory, or an absolute path
+- Note that if a relative path is provided then persistent_config uses mungePath to create an absolute path based on `core.tool.data_dir`.
+
+`force_new` (bool, default False)
+- If True, any pre-existing config_file is deleted
+- If False, any pre-existing `config_file` is left in place
+- If `config_file` does not exist (due to never existed or being deleted) then an empty file is created and the instance attribute `new` is set True.
+
+`safe_mode` (bool, default False)
+- If True, all potentially blocking filesystem operations are wrapped in `run_with_timeout()` calls.  TimeoutError exceptions may be raised.
+- If False, all filesystem operations are called directly, with potential hang risk if accessing non-local filesystems.  See the `safe_mode` notes 
+in `config_item` _Behaviors and rules_, above.
+
+`save_schedule` (None, int, str, or list)
+- If an int or str, such as `7200` or `'2h'`, the value is interpreted as a timevalue between automatic saves
+- If a str clock time or a list of clock times, such as `'15:00'` or `['06:00', '18:00']` then automatic saves will be executed at these times
+- If None, no scheduled saves will be active
+- If `save_schedule` is used the tool script should exit with a call to `persist.save(exit=True)` to force a final save of the persistent data 
+and terminate the schedule save thread
+
+
+### Useful class attributes
+Since `persistent_config` is a derived class of `config_item`, all of `config_item`'s methods and instance attributes are also available.
+The current values of all public class attributes may be printed using `print(persist)`.
+
+`.new`
+- True if `force_new = True` or if the `config_file` doesn't exist at instantiation, otherwise False
+- User code may check this attribute after instantiation and do one-time initialization of the config data, as needed
+- Remains True or False for the remainder of the run unless changed by the tool script
+
+`.save_schedule`
+- The value passed in at instantiation.  `None` indicates no automatic saves are scheduled.
+
+`.next_save_dt`
+- If `persist.save_schedule is not None`, then this is the datetime of the next scheduled save
+- `None` if `persist.save_schedule is None`
+
+
+### Returns
+- Handle to the `persistent_config()` instance
+- Raises `TimeoutError` if `safe_mode=True` and upon any filesystem access issues
+- Raises other exceptions, such as `PermissionError` and `OSError`, as appropriate
+
+
+### Behaviors and rules
+1. Instantiating a persistent_config object also loads the config file into memory.
+1. The config data may be accessed via `xx = persist.getcfg('myvar')` and `persist.setcfg('myvar', 5)`, and by direct access to the 
+config data, e.g., `xx = persist.cfg['myvar']` and `persist.cfg['myvar'] = 5`
+1. If the `config_file` is not found then it will be created and the instance attribute `new` will be set to True.
+The path to the parent dir will also be created, as needed.
+1. The `save()` method must be called on controlled termination of your tool script in order to save the most recent data and to 
+terminate any schedule save thread.  Alternately (if not using scheduled saves), you may wish to 
+save after critical data has been written to the config.
+1. A persistent_config is considered a `config_item` secondary_config - loaded as an independent config, with no changes to the logging setup.
+
+
+<br/>
+
+<a id="save"></a>
+
+---
+
+# save (exit=False) - Force an explicit save to the config_file and terminate the scheduled save thread if running
+
+***persistent_config() class member function***
+
+
+### Args
+`exit` (bool, default False)
+- If True, informs the scheduled save thread to do a final save and then terminate
+- If False, the persistent_config data is directly written to the `config_file`
+
+
+### Returns
+- None on successful save and scheduled save thread exit (if enabled)
+- Raises ConfigError if the schedule save thread does not terminate within 5 seconds.  The config data has not been saved.
+- Raises other exceptions, such as `PermissionError` and `OSError`, as appropriate
+        
+<br/>
+
+<a id="del_persistent_file"></a>
+
+---
+
+# del_persistent_file () - Delete the config_file
+
+***persistent_config() class member function***
+
+This method does _not_ delete any _loaded_ persistent data - if followed by a call to `save()` the file will 
+be written with the currently loaded config content.
+To purge the loaded config data call `persist.clear()` (provided by the `config_item` parent class).
+
+This method is normally not called from tool script code.  It is called during instantiation when `force_new=True`.
+
+
+### Returns
+- `None` if the file is successfully deleted, or the file does not exist
+- Raises TimeoutError if safe_mode = False and config_file cannot be accessed
+- Raises other errors as appropriate
         

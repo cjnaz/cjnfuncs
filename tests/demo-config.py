@@ -5,17 +5,19 @@ Produce / compare to golden results:
     ./demo-config.py -t 0 | diff demo-config-golden.txt -
         Config file timestamps will be different
         Line numbers in test T23.1a can vary
-
+        Test 30d count values in file dumps can vary due to save timing
+        Test 30d and 30e thread identifiers will vary
+        Test 30d and 30e _scheduled_save Next save messages can move due to separate thread
     ./demo-config.py --cleanup
 """
 
 #==========================================================
 #
-#  Chris Nelson, 2024-2025
+#  Chris Nelson, 2024-2026
 #
 #==========================================================
 
-__version__ = "3.1"
+__version__ = "3.2"
 TOOLNAME    = "cjnfuncs_testcfg"
 CONFIG_FILE = "demo_config.cfg"
 
@@ -620,6 +622,7 @@ if __name__ == '__main__':
 
         dump("Tint",   types=[int, float])
         dump("Tint",   types=int)
+        dump("a_none", types=[type(None)])
         dump("a_list", types=[list])
         dump("Tsec",   types=[int, str])
         dump("y",      types=float,    section='Test #section 2')
@@ -868,8 +871,9 @@ e 20
 
         xx = config_item(outfile)
         xx.loadconfig()
-        print (f"Getting a value from the written then loaded <{outfile}>:  <a_tuple> = {xx.getcfg('a_tuple')}")
-        print (f"Getting a value from the written then loaded <{outfile}>:  <bad_list> = {xx.getcfg('bad_list')}")
+        print (f"Getting a value from the written then loaded <{outfile}>:  <a_tuple> =  {xx.getcfg('a_tuple')}, {type(xx.getcfg('a_tuple'))}")
+        print (f"Getting a value from the written then loaded <{outfile}>:  <bad_list> = {xx.getcfg('bad_list')}, {type(xx.getcfg('bad_list'))}")
+        print (f"Getting a value from the written then loaded <{outfile}>:  <a_none> =   {xx.getcfg('a_none')}, {type(xx.getcfg('a_none'))}")
 
         print ("Comparing dumps of original and written configs...")
         if config.dump() == xx.dump():
@@ -879,13 +883,13 @@ e 20
     #===============================================================================================
     if check_tnum('30a'):
         print_test_header ("persistent_config create from scratch")
+        set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
 
-        persist = persistent_config (file_name='persist', force_new=True)
+        persist = persistent_config (config_file='persist', force_new=True)
         print (persist)
         print (f"==== Content of persist config in memory:\n{persist.dump()}")
         dump_file (persist.config_full_path, 'after force_new')
 
-        print (f"persist.new:  <{persist.new}>")
         if persist.new:
             persist.setcfg('count', 0)
             persist.setcfg('param_in_section', section='abc', value=None)
@@ -898,6 +902,7 @@ e 20
     #===============================================================================================
     if check_tnum('30b'):
         print_test_header ("persistent_config counter")
+        set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
 
         persist = persistent_config ('persist', force_new=True)
         persist.setcfg ('count', 0)
@@ -917,48 +922,54 @@ e 20
 
         persist.setcfg ('count', 0)
         persist.setcfg ('count', 0, section='a section')
-        persist.load()
+        # persist.load()
+        persist.loadconfig(flush_on_reload=True, force_reload=True)
         print (f"count in top level:    <{persist.getcfg('count')}>")
         print (f"count in [a section]:  <{persist.getcfg('count', section='a section')}>")
 
 
     #===============================================================================================
     if check_tnum('30c'):
-        print_test_header ("persistent_config load(force_reload) options")
+        print_test_header ("persistent_config loadconfig() options")
+        set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
 
+        print ("\n\n********  Initial setup force_new=True and abc & count assigned")
         persist = persistent_config ('persist', force_new=True)
-        # print (persist)
-        # time.sleep(1.1)
-
-        persist.setcfg ('count', 0)
+        persist.setcfg ('abc', 0)
         persist.setcfg ('count', 0, section='a section')
         persist.save()
         print (persist)
         print (f"==== Content of persist config in memory INITIAL AND SAVED:\n{persist.dump()}\n")
 
-        persist.setcfg ('new_param')
-        persist.remove_param ('count')
+        print ("\n\n********  Changes in cfg top-level - new_param and delete abc")
+        persist.setcfg ('new_param', None)
+        persist.remove_param ('abc')
         print (f"==== Content of persist config in memory AFTER changes:\n{persist.dump()}\n")
 
-        # persist.load(force_reload=False)
+        print ("\n\n********  change-based loadconfig() not reloaded")
+        print (f"loadconfig() returned {persist.loadconfig()}")
+
+        print ("\n\n********  change-based loadconfig() reloaded, no flush")
         time.sleep(1.1)
         persist.config_full_path.touch()
-        persist.load(force_reload=False, flush_on_reload=False)
-        print (f"==== Content of persist config in memory AFTER flush_on_reload=False:\n{persist.dump()}\n")
+        print (f"loadconfig() returned {persist.loadconfig()}")
+        print (f"==== Content of persist config in memory AFTER reload no-flush :\n{persist.dump()}\n")
 
-        persist.load(force_reload=True)
+        print ("\n\n********  forced reload loadconfig() with flush_on_reload ")
+        print (f"loadconfig() returned {persist.loadconfig(flush_on_reload=True, force_reload=True)}")
         print (f"==== Content of persist config in memory AFTER force_reload=True, flush_on_reload=True:\n{persist.dump()}\n")
 
 
     #===============================================================================================
-    if check_tnum('30d'): #, include0=False):
+    if check_tnum('30d'):
         print_test_header ("persistent_config scheduled save - timevalue")
+        set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
 
         persist = persistent_config ('persist', force_new=True, save_schedule='1s')
         persist.setcfg ('count', 0)
         persist.save()
 
-        time.sleep(0.2)
+        time.sleep(0.7)
 
         for cnt in range (6):
             persist.cfg['count'] += 1
@@ -973,8 +984,9 @@ e 20
 
 
     #===============================================================================================
-    if check_tnum('30e'): #, include0=False):
+    if check_tnum('30e'):
         print_test_header ("persistent_config scheduled save - specific time")
+        set_logging_level (logging.DEBUG, 'cjnfuncs.configman')
 
         persist = persistent_config ('persist', force_new=True, save_schedule='03:00')
         persist.setcfg ('pi', 3.14)

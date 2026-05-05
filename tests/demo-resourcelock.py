@@ -2,23 +2,25 @@
 """Demo/test for cjnfuncs resourcelock functions
 
 Produce / compare to golden results:
-    ./demo-resourcelock.py | diff demo-resourcelock-initial-unlocked-golden.txt -
+    sudo rm /dev/shm/demo-resourcelock-shm; sudo rm /dev/shm/test_lock
+    ./demo-resourcelock.py > testrun.txt
+    Compare to:     demo-resourcelock-initial-unlocked-golden.txt
         Test comments are for this case
         Timestamps will be different
-        Test 1 Prior info (who locked) may be different
 
     resourcelock test_lock get
-    ./demo-resourcelock.py | diff demo-resourcelock-initial-locked-golden.txt -
+    ./demo-resourcelock.py > testrun.txt
+    Compare to:     demo-resourcelock-initial-locked-golden.txt
         Timestamps will be different
 """
 
 #==========================================================
 #
-#  Chris Nelson, 2024-2025
+#  Chris Nelson, 2024-2026
 #
 #==========================================================
 
-__version__ = "3.1"
+__version__ = "3.2"     # Added test 10
 
 from cjnfuncs.core import set_toolname, logging
 from cjnfuncs.resourcelock import resource_lock
@@ -81,6 +83,20 @@ my_lock.is_locked()
 my_lock.lock_value()
 
 my_lock.close()
+
+
+print ("\n***** 10 - set_lock_info/get_lock_info")
+my_shm = resource_lock('demo-resourcelock-shm')
+print (f"demo-resourcelock-shm on init:    <{my_shm.get_lock_info()}>")
+
+my_shm.set_lock_info("""Hello, my name is Scarecrow.
+I could while away the hours, conferrin' with the flowers...
+    If I only had a brain.
+""")
+print (f"demo-resourcelock-shm after set:  <{my_shm.get_lock_info()}>")
+
+my_shm.close()
+
 
 print ()
 print (f"Using the cli, get the lock ('resourcelock {LOCK_NAME} get') and run the test again")

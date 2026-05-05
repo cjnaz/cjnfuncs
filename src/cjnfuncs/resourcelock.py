@@ -27,12 +27,10 @@ __version__ = importlib.metadata.version(__package__ or __name__)
 # logging from this module add this within your tool script code:
 #       logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
 resourcelock_logger = logging.getLogger('cjnfuncs.resourcelock')
-resourcelock_logger.setLevel(logging.WARNING)
 
 # Logging from the .is_locked method is enabled by:
 #       logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
 resourcelock_logger_islocked = logging.getLogger('cjnfuncs.resourcelock_islocked')
-resourcelock_logger_islocked.setLevel(logging.WARNING)
 
 
 #=====================================================================================
@@ -43,7 +41,7 @@ resourcelock_logger_islocked.setLevel(logging.WARNING)
 
 class resource_lock():
     """
-## Class resource_lock (lockname) - Inter-process lock mechanism using posix_ipc
+## Class resource_lock (lockname, shared_mem_size=4096) - Inter-process lock mechanism using posix_ipc
 
 __NOTE:  This module only works on Linux.__
 
@@ -86,6 +84,10 @@ such as in your interrupt-trapped cleanup code.
 `lockname` (str)
 - All processes sharing a given resource must use the same lockname.
 
+`shared_mem_size` (int, default 4096)
+- The size of the shared memory block associated with `lockname`
+
+
 ### Class attributes
 `lockname` (str)
 - As specified when the resource_lock was instantiated
@@ -98,27 +100,27 @@ such as in your interrupt-trapped cleanup code.
 checked and re-instantiate if needed.
     """
 
-    def __init__ (self, lockname):
+    def __init__ (self, lockname, shared_mem_size=4096):
         if not lockname.startswith('/'):
             lockname = '/'+lockname         # lockname is required to start with '/'
         self.lockname =         lockname
         self.closed =           False
         self.I_have_the_lock =  False
         self.lock = posix_ipc.Semaphore(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, initial_value=1)
-        resourcelock_logger.info (f"<{self.lockname[1:]}> posix_ipc.Semaphore object info: <{self.lock}>")
+        resourcelock_logger.debug (f"<{self.lockname[1:]}> posix_ipc.Semaphore object info: <{self.lock}>")
 
         preexisting = False
         try:
             memory = posix_ipc.SharedMemory(self.lockname, flags=0)
             preexisting = True
         except posix_ipc.ExistentialError:
-            memory = posix_ipc.SharedMemory(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, size=4096)
-        resourcelock_logger.info (f"<{self.lockname[1:]}> posix_ipc.SharedMemory object info: <{self.lock}>")
+            memory = posix_ipc.SharedMemory(self.lockname, flags=posix_ipc.O_CREAT, mode=0o0600, size=shared_mem_size)
+        resourcelock_logger.debug (f"<{self.lockname[1:]}> posix_ipc.SharedMemory object info: <{self.lock}>")
 
         self.mapfile = mmap.mmap(memory.fd, memory.size)
         os.close(memory.fd)
         if not preexisting:
-            self._set_lock_info('')
+            self.set_lock_info('')
 
 
 #=====================================================================================
@@ -170,7 +172,7 @@ with timeout.
         try:
             self.lock.acquire(timeout)
             lock_text = f"{datetime.datetime.now()} - {lock_info}"
-            self._set_lock_info(lock_text)
+            self.set_lock_info(lock_text)
             self.I_have_the_lock = True
             resourcelock_logger.debug (f"<{self.lockname[1:]}> lock request successful - Granted         <{lock_text}>")
             return True
@@ -272,6 +274,69 @@ Not stored anywhere, nor available to a later call.
 
 #=====================================================================================
 #=====================================================================================
+#  s e t _ l o c k _ i n f o
+#=====================================================================================
+#=====================================================================================
+
+    def set_lock_info(self, desc):
+        """
+## set_lock_info (desc) - Set the shared memory block to `desc`
+
+***resource_lock() class member function***
+
+### Args
+
+desc (str)
+- String content written to the shared memory block
+- Max size is as defined at lock instantiation via `shared_mem_size`, default 4k bytes
+
+
+### Returns
+- None
+
+
+### Behaviors and rules
+- `get_lock()` writes info for who requested the lock and when to shared memory.
+- The shared memory block is allocated when the lock is instantiated, and may be written and read
+independent of `get_lock()` and `unget_lock()`, thus used as a shared memory string block.
+- Data stored in the shared memory block is stored as bytes.  `set_lock_info()` encodes `desc` as bytes, and 
+`get_lock_info()` decodes the shared memory bytes to str.
+- In shared memory the bytes list is terminated by a null character (0x00).
+        """
+        self.mapfile.seek(0)
+        desc += '\0'
+        self.mapfile.write(desc.encode())
+       
+
+#=====================================================================================
+#=====================================================================================
+#  g e t _ l o c k _ i n f o
+#=====================================================================================
+#=====================================================================================
+
+    def get_lock_info(self):
+        """
+## get_lock_info () - Returns the `desc` string from previous `set_lock_info` call
+
+***resource_lock() class member function***
+
+### Returns
+- `set_lock_info(desc)` string
+        """
+        self.mapfile.seek(0)
+        s = []
+        c = self.mapfile.read_byte()
+        while c != 0:    # NULL_CHAR
+            s.append(c)
+            c = self.mapfile.read_byte()
+
+        s = ''.join([chr(c) for c in s])
+
+        return s
+
+
+#=====================================================================================
+#=====================================================================================
 #  c l o s e
 #=====================================================================================
 #=====================================================================================
@@ -290,47 +355,6 @@ Not stored anywhere, nor available to a later call.
         self.closed = True
         resourcelock_logger.debug (f"<{self.lockname[1:]}> semaphore closed")
 
-
-#=====================================================================================
-#=====================================================================================
-#  g e t _ l o c k _ i n f o
-#=====================================================================================
-#=====================================================================================
-
-    def get_lock_info(self):
-        """
-## get_lock_info () - Returns the lock_info string from previous get_lock call
-
-***resource_lock() class member function***
-
-### Returns
-- lock_info string
-        """
-        self.mapfile.seek(0)
-        s = []
-        c = self.mapfile.read_byte()
-        while c != 0:    # NULL_CHAR
-            s.append(c)
-            c = self.mapfile.read_byte()
-
-        s = ''.join([chr(c) for c in s])
-
-        return s
-
-
-#=====================================================================================
-#=====================================================================================
-#  _ s e t _ l o c k _ i n f o   (private function)
-#=====================================================================================
-#=====================================================================================
-
-    def _set_lock_info(self, desc):
-        # While the shared memory segment and memory mapped block are 4k bytes log, the actual 
-        # lock_info description is terminated by a null character (0x00)
-        self.mapfile.seek(0)
-        desc += '\0'
-        self.mapfile.write(desc.encode())
-       
 
 
 #=====================================================================================

@@ -435,6 +435,73 @@ Notables:
 
 <br>
 
+## Persistent data over tool script restarts and system reboots
+
+The `persistent_config` class provides a simple solution for retaining information over tool script restarts.
+`persistent_config` is a derived class of `config_item`, so all config_item class methods are available for persistent_config instances, such as getcfg(), setcfg(), sections(), loadconfig(), etc.
+
+The persistent data is stored in a file saved typically in core.tool.data_dir (eg, `/home/<me>/.local/share/mytool`).  The interface is simple:
+- The tool script simply instantiates a `persistent_config` instance and specifies the file containing the persistent data.  The data is loaded at instantiation.
+- Accesses to the data may be made via `setcfg()` and `getcfg()` (or directly to the instance `cfg` dictionary).
+- Periodically (and/or on exit) the persistent config is saved back to the file for safe keeping.
+
+Here's a working example:
+
+```
+#!/usr/bin/env python3
+# ***** configman_ex4.py *****
+
+from cjnfuncs.core      import set_toolname, logging, set_logging_level
+from cjnfuncs.configman import persistent_config
+
+set_toolname('configman_ex4')
+set_logging_level(logging.INFO, logger_name='cjnfuncs.configman')
+
+persist = persistent_config('persist.cfg', safe_mode=True)      # Load persistent config data
+
+if persist.new:                                                 # If new then initialize user params/values
+    persist.setcfg('abc', 5)                                    # Access by setcfg()
+    persist.setcfg('counter', 0, section='my_section')
+
+print (f"sections:  {persist.sections()}")
+
+for _ in range(5):
+    persist.cfg['my_section']['counter'] += 1                   # Access directly
+    xx = persist.getcfg('counter', section='my_section')        # Access by getcfg()
+    print (f"counter value:  {xx}")
+
+persist.save()                                                  # Save on exit
+```
+And two runs, starting from scratch (no pre-existing persistent data file):
+
+```
+$ ./configman_ex4.py 
+      configman.loadconfig           -     INFO:  Config  <persist.cfg>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist.cfg>  file timestamp: 1777999259
+      configman.loadconfig           -     INFO:  Loading  </home/<me>/.local/share/configman_ex4/persist.cfg>
+sections:  ['my_section']
+counter value:  1
+counter value:  2
+counter value:  3
+counter value:  4
+counter value:  5
+      configman.save                 -     INFO:  Saving <persist.cfg> data
+
+$ ./configman_ex4.py 
+      configman.loadconfig           -     INFO:  Config  <persist.cfg>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist.cfg>  file timestamp: 1777999259
+      configman.loadconfig           -     INFO:  Loading  </home/<me>/.local/share/configman_ex4/persist.cfg>
+sections:  ['my_section']
+counter value:  6
+counter value:  7
+counter value:  8
+counter value:  9
+counter value:  10
+      configman.save                 -     INFO:  Saving <persist.cfg> data
+```
+
+<br>
+
 ## Controlling logging from within configman code
 
 Logging within the configman module uses the `cjnfuncs.configman` named/child logger.  By default this logger is set to the `logging.WARNING` level, 

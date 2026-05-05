@@ -20,7 +20,7 @@ Current log file:              __console__
 
 ----- T1.3:  LogFile='cfg_logfile', call_logfile=None, call_logfile_wins=True >>>>  Log file:  __console__ (override cfg_logfile)
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  Force reload, flushed first
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1777409189
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1778012468
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
@@ -30,7 +30,7 @@ Current log file:              __console__
 
 ----- T1.4:  LogFile='cfg_logfile', call_logfile='call_logfile', call_logfile_wins=True >>>>  Log file:  call_logfile
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  Force reload, flushed first
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1777409189
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1778012468
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded LogFile = <cfg_logfile>  (<class 'str'>)
@@ -157,7 +157,7 @@ Based on found user or site dirs:
 
 ----- T1.12: LogFile=None, call_logfile=None, call_logfile_wins=False >>>>  Log file:  __console__
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  Force reload, flushed first
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1777409189
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1778012468
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
@@ -166,7 +166,7 @@ Current log file:              __console__
 
 ----- T1.13: Modified console logging format >>>>  Log file:  __console__
       configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  Force reload, flushed first
-      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1777409189
+      configman.loadconfig           -     INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1778012468
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
@@ -176,7 +176,7 @@ Current log file:              __console__
 
 ----- T1.14: Modified file logging format >>>>  Log file:  call_logfile
     INFO:  Config  <demo_config_T1.cfg>  Force reload, flushed first
-    INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1777409189
+    INFO:  Config  <demo_config_T1.cfg>  file timestamp: 1778012468
     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T1.cfg>
    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
    DEBUG:  Loaded ConsoleLogFormat = <{levelname:>8}:  {message}>  (<class 'str'>)
@@ -230,7 +230,7 @@ Current log file           __console__
     demo-config.print_stats          -  WARNING:  Warning level message
 
 ----- T2.3:  LogLevel=10, loadconfig debug logging
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1777409190
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1778012469
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  Reload due to changed file, flushed first
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
@@ -238,7 +238,7 @@ Current log file           __console__
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <10>
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409190
+Config file timestamp      1778012469
 Config LogLevel            10
 root logging level         10
 configman logging level    10
@@ -252,7 +252,7 @@ Current log file           __console__
 ----- T2.4:  LogLevel=10, loadconfig logging=30 (default) >>>>  No loadconfig logging, Logging DEBUG, INFO, and WARNING messages
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409191
+Config file timestamp      1778012470
 Config LogLevel            10
 root logging level         10
 configman logging level    30
@@ -266,7 +266,7 @@ Current log file           __console__
 ----- T2.5:  LogLevel=30, loadconfig logging=30 (default),  >>>>  Log only WARNING
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409192
+Config file timestamp      1778012471
 Config LogLevel            30
 root logging level         30
 configman logging level    30
@@ -276,13 +276,13 @@ Current log file           __console__
     demo-config.print_stats          -  WARNING:  Warning level message
 
 ----- T2.6:  loadconfig debug logging, No LogLevel >>>>  Restore preexisting level (30)
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1777409193
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1778012472
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  Reload due to changed file, flushed first
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409193
+Config file timestamp      1778012472
 Config LogLevel            None
 root logging level         30
 configman logging level    10
@@ -294,7 +294,7 @@ Current log file           __console__
 ----- T2.7:  loadconfig logging=30 (default), No changes >>>>  NOT Reloaded
 Loaded                     True
 (Re)loaded                 0
-Config file timestamp      1777409193
+Config file timestamp      1778012472
 Config LogLevel            None
 root logging level         30
 configman logging level    30
@@ -306,7 +306,7 @@ Current log file           __console__
 ----- T2.8:  loadconfig debug logging, flush_on_reload >>>>  NOT Reloaded
 Loaded                     True
 (Re)loaded                 0
-Config file timestamp      1777409193
+Config file timestamp      1778012472
 Config LogLevel            None
 root logging level         30
 configman logging level    10
@@ -317,12 +317,12 @@ Current log file           __console__
 
 ----- T2.9:  loadconfig debug logging, force_reload >>>>  Loadconfig logging
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  Force reload, not flushed
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1777409193
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1778012472
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409193
+Config file timestamp      1778012472
 Config LogLevel            None
 root logging level         30
 configman logging level    10
@@ -333,7 +333,7 @@ Current log file           __console__
 
 ----- T2.10:  loadconfig debug logging, LogLevel=20, var2 added >>>>  Reloaded
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  Force reload, not flushed
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1777409194
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1778012473
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
@@ -341,7 +341,7 @@ Current log file           __console__
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <20>
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409194
+Config file timestamp      1778012473
 Config LogLevel            20
 root logging level         20
 configman logging level    10
@@ -352,7 +352,7 @@ Current log file           __console__
     demo-config.print_stats          -     INFO:  Info    level message
 
 ----- T2.11: loadconfig debug logging, LogLevel=40, var2 removed from config >>>>  var2 still defined, no logging
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1777409195
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1778012474
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  Reload due to changed file, not flushed
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
@@ -360,7 +360,7 @@ Current log file           __console__
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <40>
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409195
+Config file timestamp      1778012474
 Config LogLevel            40
 root logging level         40
 configman logging level    10
@@ -370,14 +370,14 @@ Current log file           __console__
 
 ----- T2.12: loadconfig debug logging, LogLevel=30, force_reload=True >>>>  var2 gone
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  Force reload, flushed first
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1777409195
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1778012474
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
       configman.read_string          -    DEBUG:  Loaded LogLevel = <30>  (<class 'int'>)
       configman.loadconfig           -     INFO:  Logging level set to config LogLevel <30>
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409195
+Config file timestamp      1778012474
 Config LogLevel            30
 root logging level         30
 configman logging level    10
@@ -388,12 +388,12 @@ Current log file           __console__
 
 ----- T2.13: Externally set log level = 20
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  Force reload, flushed first
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1777409196
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1778012475
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409196
+Config file timestamp      1778012475
 Config LogLevel            None
 root logging level         20
 configman logging level    10
@@ -405,12 +405,12 @@ Current log file           __console__
 
 ----- T2.14: Externally set log level = 10
       configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  Force reload, flushed first
-      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1777409196
+      configman.loadconfig           -     INFO:  Config  <demo_config_T2.cfg>  file timestamp: 1778012475
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config_T2.cfg>
       configman.read_string          -    DEBUG:  Loaded testvar = <True>  (<class 'bool'>)
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409196
+Config file timestamp      1778012475
 Config LogLevel            None
 root logging level         10
 configman logging level    10
@@ -424,7 +424,7 @@ Current log file           __console__
 ----- T2.15: Externally set log level = 10 with loadconfig logging=30 (default)
 Loaded                     True
 (Re)loaded                 1
-Config file timestamp      1777409196
+Config file timestamp      1778012475
 Config LogLevel            None
 root logging level         10
 configman logging level    30
@@ -443,7 +443,7 @@ Current log file           __console__
     deployfiles.deploy_files         -     INFO:  Deployed  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736461826
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778005590
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Initial load
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
@@ -453,6 +453,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+      configman.read_string          -    DEBUG:  Loaded a_none = <None>  (<class 'NoneType'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
@@ -548,7 +549,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1736461826
+.config_timestamp       :  1778005590
 .safe_mode              :  False
 .sections_list          :  ['SMTP', 'Test section 1', 'Test #section 2']
 .force_str              :  False
@@ -563,6 +564,7 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
  7893&(%$,.nasf||\a@ = Hello:  <class 'str'>
      Equals_in_value = Look! an = equals!  <class 'str'>
                again = True  <class 'bool'>
+              a_none = None  <class 'NoneType'>
              a_float = 42.0  <class 'float'>
         a_float_calc = 6 * 7.0  <class 'str'>
               a_list = ['he#llo', 3.14, {'abc': 42.0}]  <class 'list'>
@@ -641,7 +643,7 @@ Logging level:  20
     deployfiles.deploy_files         -     INFO:  Deployed  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736461826
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778005590
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Initial load
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/creds_SMTP>
@@ -664,7 +666,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
     deployfiles.deploy_files         -     INFO:  Deployed  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736461826
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778005590
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Initial load
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
@@ -674,6 +676,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+      configman.read_string          -    DEBUG:  Loaded a_none = <None>  (<class 'NoneType'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
@@ -745,7 +748,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1736461826
+.config_timestamp       :  1778005590
 .safe_mode              :  True
 .sections_list          :  ['SMTP', 'Test section 1', 'Test #section 2']
 .force_str              :  False
@@ -767,7 +770,7 @@ In main...  ConfigError: Config file <nosuchfile.cfg> not found.
     deployfiles.deploy_files         -     INFO:  Deployed  /home/cjn/.config/cjnfuncs_testcfg/creds_SMTP
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736461826
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778005590
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Initial load
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/creds_SMTP>
@@ -778,7 +781,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1736461826
+.config_timestamp       :  1778005590
 .safe_mode              :  False
 .sections_list          :  ['SMTP', 'Test section 1', 'Test #section 2']
 .force_str              :  False
@@ -877,7 +880,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 
       configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
     demo-config.mycallback           -     INFO:  In mycallback()
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1777409197
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778012476
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Reload due to changed file, not flushed
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
@@ -887,6 +890,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+      configman.read_string          -    DEBUG:  Loaded a_none = <None>  (<class 'NoneType'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
@@ -957,7 +961,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 
       configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
     demo-config.mycallback           -     INFO:  In mycallback()
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1777409198
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778012477
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Reload due to changed file, flushed first
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
@@ -967,6 +971,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+      configman.read_string          -    DEBUG:  Loaded a_none = <None>  (<class 'NoneType'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
@@ -1038,7 +1043,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Force reload, flushed first
       configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
     demo-config.mycallback           -     INFO:  In mycallback()
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1777409198
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778012477
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
@@ -1047,6 +1052,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+      configman.read_string          -    DEBUG:  Loaded a_none = <None>  (<class 'NoneType'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
@@ -1118,7 +1124,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Force reload, not flushed
       configman.loadconfig           -    DEBUG:  Pre-reload callback user function called
     demo-config.mycallback           -     INFO:  In mycallback()
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1777409198
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778012477
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'int'>)
       configman.read_string          -    DEBUG:  Loaded param_no_value = <True>  (<class 'bool'>)
@@ -1127,6 +1133,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'bool'>)
+      configman.read_string          -    DEBUG:  Loaded a_none = <None>  (<class 'NoneType'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'float'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_list = <['he#llo', 3.14, {'abc': 42.0}]>  (<class 'list'>)
@@ -1361,6 +1368,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
  7893&(%$,.nasf||\a@ = Hello:  <class 'str'>
      Equals_in_value = Look! an = equals!  <class 'str'>
                again = True  <class 'bool'>
+              a_none = None  <class 'NoneType'>
              a_float = 42.0  <class 'float'>
         a_float_calc = 6 * 7.0  <class 'str'>
               a_list = ['he#llo', 3.14, {'abc': 42.0}]  <class 'list'>
@@ -1448,6 +1456,7 @@ Test.Bool       false       # '.' is not special.  True and false values not cas
 Equals_in_value:Look! an = equals!
 again:true                  # ':' separator, no whitespace
 
+a_none          None
 a_float         42.0
 a_float_calc    6 * 7.0
 a_list:         ["he#llo", 3.14, {"abc":42.}]   # '#' within string in list
@@ -1594,6 +1603,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
 Param <Tint> value <10>, type <<class 'int'>>, expected types <[<class 'int'>, <class 'float'>]>
 Param <Tint> value <10>, type <<class 'int'>>, expected types <<class 'int'>>
+Param <a_none> value <None>, type <<class 'NoneType'>>, expected types <[<class 'NoneType'>]>
 Param <a_list> value <['he#llo', 3.14, {'abc': 42.0}]>, type <<class 'list'>>, expected types <[<class 'list'>]>
 Param <Tsec> value <5s>, type <<class 'str'>>, expected types <[<class 'int'>, <class 'str'>]>
 Param <y> value <2.54>, type <<class 'float'>>, expected types <<class 'float'>>
@@ -1634,6 +1644,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
  7893&(%$,.nasf||\a@ = Hello:  <class 'str'>
      Equals_in_value = Look! an = equals!  <class 'str'>
                again = True  <class 'bool'>
+              a_none = None  <class 'NoneType'>
              a_float = 42.0  <class 'float'>
         a_float_calc = 6 * 7.0  <class 'str'>
               a_list = ['he#llo', 3.14, {'abc': 42.0}]  <class 'list'>
@@ -1705,7 +1716,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1736461826
+.config_timestamp       :  1778005590
 .safe_mode              :  False
 .sections_list          :  ['SMTP', 'Test section 1', 'Test #section 2']
 .force_str              :  False
@@ -1900,7 +1911,7 @@ Logging level:  10
 
 
 Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1736461826
+      configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  file timestamp: 1778005590
       configman.loadconfig           -     INFO:  Config  <demo_config.cfg>  Initial load
       configman.loadconfig           -     INFO:  Loading  </home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg>
       configman.read_string          -    DEBUG:  Loaded LogLevel = <20>  (<class 'str'>)
@@ -1910,6 +1921,7 @@ Load config /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
       configman.read_string          -    DEBUG:  Loaded 7893&(%$,.nasf||\a@ = <Hello:>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded Equals_in_value = <Look! an = equals!>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded again = <True>  (<class 'str'>)
+      configman.read_string          -    DEBUG:  Loaded a_none = <None>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_float = <42.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_float_calc = <6 * 7.0>  (<class 'str'>)
       configman.read_string          -    DEBUG:  Loaded a_list = <["he#llo", 3.14, {"abc":42.}]>  (<class 'str'>)
@@ -1981,7 +1993,7 @@ Stats for config file <demo_config.cfg>:
 .config_file            :  demo_config.cfg
 .config_dir             :  /home/cjn/.config/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.config/cjnfuncs_testcfg/demo_config.cfg
-.config_timestamp       :  1736461826
+.config_timestamp       :  1778005590
 .safe_mode              :  False
 .sections_list          :  ['SMTP', 'Test section 1', 'Test #section 2']
 .force_str              :  True
@@ -1996,6 +2008,7 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
  7893&(%$,.nasf||\a@ = Hello:  <class 'str'>
      Equals_in_value = Look! an = equals!  <class 'str'>
                again = True  <class 'str'>
+              a_none = None  <class 'str'>
              a_float = 42.0  <class 'str'>
         a_float_calc = 6 * 7.0  <class 'str'>
               a_list = ["he#llo", 3.14, {"abc":42.}]  <class 'str'>
@@ -2091,15 +2104,16 @@ Logging level:  23
       configman.read_string          -    DEBUG:  Loaded a = <5>  (<class 'int'>)
     demo-config.<module>             -    ERROR:  ----- T23.1a:  Section defined within imported config file
 Traceback (most recent call last):
-  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py", line 820, in <module>
+  File "/mnt/share/dev/packages/cjnfuncs/tests/./demo-config.py", line 823, in <module>
     T23_config.loadconfig()
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 446, in loadconfig
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 447, in loadconfig
     self.read_string (string_blob, isimport=isimport)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 571, in read_string
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 572, in read_string
     imported_config.loadconfig(isimport=True)           # May raise exception, caught by higher level
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 446, in loadconfig
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 447, in loadconfig
     self.read_string (string_blob, isimport=isimport)
-  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 541, in read_string
+  File "/mnt/share/dev/packages/cjnfuncs/src/cjnfuncs/configman.py", line 542, in read_string
     raise ConfigError ("Section within imported file is not supported.")
 cjnfuncs.core.ConfigError: Section within imported file is not supported.
 Logging level:  23
@@ -2234,6 +2248,7 @@ Test.Bool            = False
 7893&(%$,.nasf||\a@  = Hello:
 Equals_in_value      = Look! an = equals!
 again                = True
+a_none               = None
 a_float              = 42.0
 a_float_calc         = 6 * 7.0
 a_list               = ['he#llo', 3.14, {'abc': 42.0}]
@@ -2306,8 +2321,9 @@ x                    = 42
 y                    = 2.54
 
 ==== EOF ====
-Getting a value from the written then loaded <T25config.cfg>:  <a_tuple> = ('Im a #tuple', 7.0)
-Getting a value from the written then loaded <T25config.cfg>:  <bad_list> = ["hello", 3.14 {"ab#c":42.}]
+Getting a value from the written then loaded <T25config.cfg>:  <a_tuple> =  ('Im a #tuple', 7.0), <class 'tuple'>
+Getting a value from the written then loaded <T25config.cfg>:  <bad_list> = ["hello", 3.14 {"ab#c":42.}], <class 'str'>
+Getting a value from the written then loaded <T25config.cfg>:  <a_none> =   None, <class 'NoneType'>
 Comparing dumps of original and written configs...
 They match!
 
@@ -2315,19 +2331,24 @@ They match!
 ***** Test number 30a: persistent_config create from scratch *****
 ======================================================================================================
 
+      configman.del_persistent_file  -    DEBUG:  Deleting </home/cjn/.local/share/cjnfuncs_testcfg/persist> data file
+      configman.__init__             -    DEBUG:  Loading <persist> data
+      configman.loadconfig           -     INFO:  Config  <persist>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist>  file timestamp: 1778012479
+      configman.loadconfig           -     INFO:  Loading  </home/cjn/.local/share/cjnfuncs_testcfg/persist>
 
 Stats for config file <persist>:
 .config_file            :  persist
 .config_dir             :  /home/cjn/.local/share/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.local/share/cjnfuncs_testcfg/persist
-.config_timestamp       :  1777409200
+.config_timestamp       :  1778012479
 .safe_mode              :  False
 .sections_list          :  []
 .force_str              :  False
 .secondary_config       :  True
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 .new                    :  True
-.save_thread            :  None
+.save_schedule          :  None
 
 ==== Content of persist config in memory:
 ***** Section [] *****
@@ -2336,20 +2357,22 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 ==== File </home/cjn/.local/share/cjnfuncs_testcfg/persist> CONTENT after force_new:
 
 ==== EOF ====
-persist.new:  <True>
+      configman.setcfg               -    DEBUG:  Set [] count = <0>  (<class 'int'>)
+      configman.setcfg               -    DEBUG:  Set [abc] param_in_section = <None>  (<class 'NoneType'>)
+      configman.save                 -     INFO:  Saving <persist> data
 
 Stats for config file <persist>:
 .config_file            :  persist
 .config_dir             :  /home/cjn/.local/share/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.local/share/cjnfuncs_testcfg/persist
-.config_timestamp       :  1777409200
+.config_timestamp       :  1778012479
 .safe_mode              :  False
 .sections_list          :  ['abc']
 .force_str              :  False
 .secondary_config       :  True
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 .new                    :  True
-.save_thread            :  None
+.save_schedule          :  None
 
 ==== Content of persist config in memory:
 ***** Section [] *****
@@ -2372,6 +2395,13 @@ param_in_section     = None
 ***** Test number 30b: persistent_config counter *****
 ======================================================================================================
 
+      configman.del_persistent_file  -    DEBUG:  Deleting </home/cjn/.local/share/cjnfuncs_testcfg/persist> data file
+      configman.__init__             -    DEBUG:  Loading <persist> data
+      configman.loadconfig           -     INFO:  Config  <persist>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist>  file timestamp: 1778012479
+      configman.loadconfig           -     INFO:  Loading  </home/cjn/.local/share/cjnfuncs_testcfg/persist>
+      configman.setcfg               -    DEBUG:  Set [] count = <0>  (<class 'int'>)
+      configman.setcfg               -    DEBUG:  Set [a section] count = <0>  (<class 'int'>)
 count in top level:    <5>
 count in [a section]:  <25>
 ==== Content of persist config in memory:
@@ -2380,6 +2410,7 @@ count in [a section]:  <25>
 ***** Section [a section] *****
                count = 25  <class 'int'>
 ***** Section [DEFAULT] *****
+      configman.save                 -     INFO:  Saving <persist> data
 
 ==== File </home/cjn/.local/share/cjnfuncs_testcfg/persist> CONTENT after adds and save:
 count                = 5
@@ -2390,52 +2421,97 @@ count                = 5
 count                = 25
 
 ==== EOF ====
+      configman.setcfg               -    DEBUG:  Set [] count = <0>  (<class 'int'>)
+      configman.setcfg               -    DEBUG:  Set [a section] count = <0>  (<class 'int'>)
+      configman.loadconfig           -     INFO:  Config  <persist>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist>  file timestamp: 1778012479
+      configman.loadconfig           -     INFO:  Loading  </home/cjn/.local/share/cjnfuncs_testcfg/persist>
+      configman.read_string          -    DEBUG:  Loaded count = <5>  (<class 'int'>)
+      configman.read_string          -    DEBUG:  Loaded count = <25>  (<class 'int'>)
 count in top level:    <5>
 count in [a section]:  <25>
 
 ======================================================================================================
-***** Test number 30c: persistent_config load(force_reload) options *****
+***** Test number 30c: persistent_config loadconfig() options *****
 ======================================================================================================
 
+
+
+********  Initial setup force_new=True and abc & count assigned
+      configman.del_persistent_file  -    DEBUG:  Deleting </home/cjn/.local/share/cjnfuncs_testcfg/persist> data file
+      configman.__init__             -    DEBUG:  Loading <persist> data
+      configman.loadconfig           -     INFO:  Config  <persist>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist>  file timestamp: 1778012479
+      configman.loadconfig           -     INFO:  Loading  </home/cjn/.local/share/cjnfuncs_testcfg/persist>
+      configman.setcfg               -    DEBUG:  Set [] abc = <0>  (<class 'int'>)
+      configman.setcfg               -    DEBUG:  Set [a section] count = <0>  (<class 'int'>)
+      configman.save                 -     INFO:  Saving <persist> data
 
 Stats for config file <persist>:
 .config_file            :  persist
 .config_dir             :  /home/cjn/.local/share/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.local/share/cjnfuncs_testcfg/persist
-.config_timestamp       :  1777409200
+.config_timestamp       :  1778012479
 .safe_mode              :  False
 .sections_list          :  ['a section']
 .force_str              :  False
 .secondary_config       :  True
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 .new                    :  True
-.save_thread            :  None
+.save_schedule          :  None
 
 ==== Content of persist config in memory INITIAL AND SAVED:
 ***** Section [] *****
-               count = 0  <class 'int'>
+                 abc = 0  <class 'int'>
 ***** Section [a section] *****
                count = 0  <class 'int'>
 ***** Section [DEFAULT] *****
 
+
+
+********  Changes in cfg top-level - new_param and delete abc
+      configman.setcfg               -    DEBUG:  Set [] new_param = <None>  (<class 'NoneType'>)
+      configman.remove_param         -    DEBUG:  Removed [] abc
 ==== Content of persist config in memory AFTER changes:
 ***** Section [] *****
-           new_param = True  <class 'bool'>
+           new_param = None  <class 'NoneType'>
 ***** Section [a section] *****
                count = 0  <class 'int'>
 ***** Section [DEFAULT] *****
 
-==== Content of persist config in memory AFTER flush_on_reload=False:
+
+
+********  change-based loadconfig() not reloaded
+loadconfig() returned 0
+
+
+********  change-based loadconfig() reloaded, no flush
+      configman.loadconfig           -     INFO:  Config  <persist>  file timestamp: 1778012480
+      configman.loadconfig           -     INFO:  Config  <persist>  Reload due to changed file, not flushed
+      configman.loadconfig           -     INFO:  Loading  </home/cjn/.local/share/cjnfuncs_testcfg/persist>
+      configman.read_string          -    DEBUG:  Loaded abc = <0>  (<class 'int'>)
+      configman.read_string          -    DEBUG:  Loaded count = <0>  (<class 'int'>)
+loadconfig() returned 1
+==== Content of persist config in memory AFTER reload no-flush :
 ***** Section [] *****
-           new_param = True  <class 'bool'>
-               count = 0  <class 'int'>
+           new_param = None  <class 'NoneType'>
+                 abc = 0  <class 'int'>
 ***** Section [a section] *****
                count = 0  <class 'int'>
 ***** Section [DEFAULT] *****
 
+
+
+********  forced reload loadconfig() with flush_on_reload 
+      configman.loadconfig           -     INFO:  Config  <persist>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist>  file timestamp: 1778012480
+      configman.loadconfig           -     INFO:  Loading  </home/cjn/.local/share/cjnfuncs_testcfg/persist>
+      configman.read_string          -    DEBUG:  Loaded abc = <0>  (<class 'int'>)
+      configman.read_string          -    DEBUG:  Loaded count = <0>  (<class 'int'>)
+loadconfig() returned 1
 ==== Content of persist config in memory AFTER force_reload=True, flush_on_reload=True:
 ***** Section [] *****
-               count = 0  <class 'int'>
+                 abc = 0  <class 'int'>
 ***** Section [a section] *****
                count = 0  <class 'int'>
 ***** Section [DEFAULT] *****
@@ -2445,6 +2521,17 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 ***** Test number 30d: persistent_config scheduled save - timevalue *****
 ======================================================================================================
 
+      configman.del_persistent_file  -    DEBUG:  Deleting </home/cjn/.local/share/cjnfuncs_testcfg/persist> data file
+      configman.__init__             -    DEBUG:  Loading <persist> data
+      configman.loadconfig           -     INFO:  Config  <persist>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist>  file timestamp: 1778012480
+      configman.loadconfig           -     INFO:  Loading  </home/cjn/.local/share/cjnfuncs_testcfg/persist>
+      configman._scheduled_save      -    DEBUG:  Starting <persist> scheduled save thread
+      configman._scheduled_save      -    DEBUG:  Next save <2026-05-05 13:21:21>
+      configman.setcfg               -    DEBUG:  Set [] count = <0>  (<class 'int'>)
+      configman.save                 -     INFO:  Saving <persist> data
+      configman.save                 -     INFO:  Saving <persist> data
+      configman._scheduled_save      -    DEBUG:  Next save <2026-05-05 13:21:22>
 
 ==== File </home/cjn/.local/share/cjnfuncs_testcfg/persist> CONTENT cnt 0:
 count                = 0
@@ -2459,6 +2546,8 @@ count                = 0
 [DEFAULT]
 
 ==== EOF ====
+      configman.save                 -     INFO:  Saving <persist> data
+      configman._scheduled_save      -    DEBUG:  Next save <2026-05-05 13:21:23>
 
 ==== File </home/cjn/.local/share/cjnfuncs_testcfg/persist> CONTENT cnt 2:
 count                = 2
@@ -2473,6 +2562,8 @@ count                = 2
 [DEFAULT]
 
 ==== EOF ====
+      configman.save                 -     INFO:  Saving <persist> data
+      configman._scheduled_save      -    DEBUG:  Next save <2026-05-05 13:21:24>
 
 ==== File </home/cjn/.local/share/cjnfuncs_testcfg/persist> CONTENT cnt 4:
 count                = 4
@@ -2487,23 +2578,27 @@ count                = 4
 [DEFAULT]
 
 ==== EOF ====
+      configman.save                 -     INFO:  Saving <persist> data
+      configman._scheduled_save      -    DEBUG:  Next save <2026-05-05 13:21:25>
 
 Stats for config file <persist>:
 .config_file            :  persist
 .config_dir             :  /home/cjn/.local/share/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.local/share/cjnfuncs_testcfg/persist
-.config_timestamp       :  1777409205
+.config_timestamp       :  1778012484
 .safe_mode              :  False
 .sections_list          :  []
 .force_str              :  False
 .secondary_config       :  True
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 .new                    :  True
-.save_thread            :  <Thread(persist scheduled save, started 140204198782528)>
 .save_schedule          :  1s
-.next_save_dt           :  2026-04-28 13:46:46
+.save_thread            :  <Thread(persist scheduled save, started 140483140826688)>
+.next_save_dt           :  2026-05-05 13:21:25
 .periodic_save_exit     :  False
 
+      configman._scheduled_save      -    DEBUG:  Stopping <persist> scheduled save thread
+      configman.save                 -     INFO:  Saving <persist> data
 
 ==== File </home/cjn/.local/share/cjnfuncs_testcfg/persist> CONTENT final:
 count                = 6
@@ -2516,16 +2611,16 @@ Stats for config file <persist>:
 .config_file            :  persist
 .config_dir             :  /home/cjn/.local/share/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.local/share/cjnfuncs_testcfg/persist
-.config_timestamp       :  1777409205
+.config_timestamp       :  1778012484
 .safe_mode              :  False
 .sections_list          :  []
 .force_str              :  False
 .secondary_config       :  True
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 .new                    :  True
-.save_thread            :  <Thread(persist scheduled save, stopped 140204198782528)>
 .save_schedule          :  1s
-.next_save_dt           :  2026-04-28 13:46:46
+.save_thread            :  <Thread(persist scheduled save, stopped 140483140826688)>
+.next_save_dt           :  2026-05-05 13:21:25
 .periodic_save_exit     :  True
 
 
@@ -2533,23 +2628,33 @@ core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 ***** Test number 30e: persistent_config scheduled save - specific time *****
 ======================================================================================================
 
+      configman.del_persistent_file  -    DEBUG:  Deleting </home/cjn/.local/share/cjnfuncs_testcfg/persist> data file
+      configman.__init__             -    DEBUG:  Loading <persist> data
+      configman.loadconfig           -     INFO:  Config  <persist>  Force reload, flushed first
+      configman.loadconfig           -     INFO:  Config  <persist>  file timestamp: 1778012484
+      configman.loadconfig           -     INFO:  Loading  </home/cjn/.local/share/cjnfuncs_testcfg/persist>
+      configman._scheduled_save      -    DEBUG:  Starting <persist> scheduled save thread
+      configman._scheduled_save      -    DEBUG:  Next save <2026-05-06 03:00:00>
+      configman.setcfg               -    DEBUG:  Set [] pi = <3.14>  (<class 'float'>)
 
 Stats for config file <persist>:
 .config_file            :  persist
 .config_dir             :  /home/cjn/.local/share/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.local/share/cjnfuncs_testcfg/persist
-.config_timestamp       :  1777409206
+.config_timestamp       :  1778012484
 .safe_mode              :  False
 .sections_list          :  []
 .force_str              :  False
 .secondary_config       :  True
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 .new                    :  True
-.save_thread            :  <Thread(persist scheduled save, started 140204198782528)>
 .save_schedule          :  03:00
-.next_save_dt           :  2026-04-29 03:00:00
+.save_thread            :  <Thread(persist scheduled save, started 140483140826688)>
+.next_save_dt           :  2026-05-06 03:00:00
 .periodic_save_exit     :  False
 
+      configman._scheduled_save      -    DEBUG:  Stopping <persist> scheduled save thread
+      configman.save                 -     INFO:  Saving <persist> data
 
 ==== File </home/cjn/.local/share/cjnfuncs_testcfg/persist> CONTENT final:
 pi                   = 3.14
@@ -2562,15 +2667,15 @@ Stats for config file <persist>:
 .config_file            :  persist
 .config_dir             :  /home/cjn/.local/share/cjnfuncs_testcfg
 .config_full_path       :  /home/cjn/.local/share/cjnfuncs_testcfg/persist
-.config_timestamp       :  1777409207
+.config_timestamp       :  1778012484
 .safe_mode              :  False
 .sections_list          :  []
 .force_str              :  False
 .secondary_config       :  True
 core.tool.log_dir_base  :  /home/cjn/.config/cjnfuncs_testcfg
 .new                    :  True
-.save_thread            :  <Thread(persist scheduled save, stopped 140204198782528)>
 .save_schedule          :  03:00
-.next_save_dt           :  2026-04-29 03:00:00
+.save_thread            :  <Thread(persist scheduled save, stopped 140483140826688)>
+.next_save_dt           :  2026-05-06 03:00:00
 .periodic_save_exit     :  True
 
