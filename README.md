@@ -40,12 +40,20 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 
 ## Key changes since the prior major public release (version 3.0)
 
+3.2 changes
+- `persistent_config` - Layered on top of config_item, this new class provides a clean and simple tool for carrying runtime data across tool 
+script restarts and system reboots.
+
+- Shared memory block handling - Extending resourcelock's features, read/write access is provided to the shared memory block associated with
+a user-defined lock.  
+
+
 3.1 changes
 - Several issues with Windows support were fixed.
 
 - `configman.config_item()` now supports a safe_mode switch, which will speed up Windows usage of loadconfig() at some risk.  See the note on `config_item()`.
 
-- Named child loggers are now implemented on several cjnfuncs modules.  By default, logging from cjnfuncs modules is disabled (logging events are usually at the INFO or DEBUG
+- Named child loggers are now implemented on several cjnfuncs modules.  By default, logging from cjnfuncs modules is disabled (internal logging events are usually at the INFO or DEBUG
 level, while the default logging level is set to WARNING).  For example, logging from configman may be enabled by `logging.getLogger('cjnfuncs.configman').setLevel(logging.INFO)`,
 or using `core.set_logging_level(logging.INFO, 'cjnfuncs.configman')`.
 
@@ -55,11 +63,13 @@ or using `core.set_logging_level(logging.INFO, 'cjnfuncs.configman')`.
 
 3.1.1 changes
 - get_next_dt now supports a days or weeks offset for the days arg
-- Added separate chiled logger `cjnfuncs.resourcelock_islocked` so that `is_locked()` may be called in a loop without flooding the log while `cjnfuncs.resourcelock` is set to debug
+- Added separate child logger `cjnfuncs.resourcelock_islocked` so that `is_locked()` may be called in a loop without flooding the log while `cjnfuncs.resourcelock` is set to debug
 
 <br/>
 
 ## Revision history
+
+- 3.2 - 260506 - New features:  persistent_config and shared memory block handling
 - 3.1.1 260207 - separate resourcelock_islocked logger, get_next_dt days/weeks offset
 - 3.1  251109
   Support for and use of child loggers, 

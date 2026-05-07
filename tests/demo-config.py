@@ -49,6 +49,16 @@ if args.cleanup:
     if os.path.exists(core.tool.config_dir):
         print (f"Removing 1  {core.tool.config_dir}")
         shutil.rmtree(core.tool.config_dir)
+
+    persist_dir = core.tool.data_dir / '../configman_ex4'
+    if os.path.exists(persist_dir):
+        print (f"Removing 1  {persist_dir}")
+        shutil.rmtree(persist_dir)
+
+    if os.path.exists(core.tool.data_dir):
+        print (f"Removing 1  {core.tool.data_dir}")
+        shutil.rmtree(core.tool.data_dir)
+
     sys.exit()
 
 

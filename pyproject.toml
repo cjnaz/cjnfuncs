@@ -1,9 +1,7 @@
 [project]
 name = 'cjnfuncs'
-version = '3.2b2'
-    # 3.2b2 - resource_lock.set_lock_info and general shared memory str block, persistent_config final with doc
-    # 3.2b1 - persistent_config, completed config safe_mode
-    # 3.1.2rc1 - Added info logging of posix_ipc.Semaphore/SharedMemory to resource_lock.__init__()
+version = '3.2'
+    # 3.2 - Release - New features:  persistent_config and shared memory block handling
     # 3.1.1 - separate resourcelock_islocked logger, get_next_dt days/weeks offset
     # 3.1 - release
     #   Support for and use of child loggers
