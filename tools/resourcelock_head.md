@@ -273,7 +273,7 @@ Using the cli, get the lock ('resourcelock test_lock get') and run the test agai
 
 <br>
 
-## string block shared across processes
+## String block shared across processes
 
 Associated with an instantiated lock is also a shared memory block.  When `get_lock()` is called the `lock_info` string is stored
 in this associated shared memory block.  

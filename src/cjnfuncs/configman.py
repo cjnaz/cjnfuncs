@@ -1305,7 +1305,7 @@ save after critical data has been written to the config.
 ### Args
 `exit` (bool, default False)
 - If True, informs the scheduled save thread to do a final save and then terminate
-- If False, the persistent_config data is directly written to the `config_file`
+- If False, or no scheduled save thread is running, the persistent_config data is directly written to the `config_file`
 
 
 ### Returns

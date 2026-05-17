@@ -16,7 +16,7 @@ import posix_ipc
 import mmap
 import os
 import datetime
-from .core import logging, set_toolname, setuplogging
+from .core import logging, set_toolname, setuplogging, set_logging_level
 
 import importlib.metadata
 __version__ = importlib.metadata.version(__package__ or __name__)
@@ -225,7 +225,7 @@ Not stored anywhere, nor available to a later call.
                     resourcelock_logger.debug (f"<{self.lockname[1:]}> lock force released  <{where_called}>")
                     return True
                 else:
-                    resourcelock_logger.debug (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process  <{where_called}>")
+                    resourcelock_logger.warning (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process  <{where_called}>")
                     return False
         else:
             resourcelock_logger.debug (f"<{self.lockname[1:]}> Extraneous lock unget request ignored  <{where_called}>")
@@ -387,8 +387,8 @@ Commands:
 
     set_toolname (TOOLNAME)
     setuplogging()
-    logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
-    logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
+    # logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
+    # logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
 
     GET_TIMEOUT =       0.5
     TRACE_INTERVAL =    0.5
@@ -407,12 +407,20 @@ Commands:
                         help="After a successful get, unget the lock in (float) sec")
     parser.add_argument('-u', '--update', type=float, default=TRACE_INTERVAL,
                         help=f"Trace update interval (default {TRACE_INTERVAL} sec)")
+    parser.add_argument('-v', '--verbose', action='count', default=0,
+                        help="Print status and activity messages (-vv for debug level logging)")
     parser.add_argument('-V', '--version', action='version', version=f"{TOOLNAME} {__version__}",
                         help="Print version number and exit")
     args = parser.parse_args()
 
+    ll = [logging.WARNING, logging.INFO, logging.DEBUG][args.verbose]
+    set_logging_level (ll)
+    set_logging_level (ll, logger_name='cjnfuncs.resourcelock')
+    set_logging_level (ll, logger_name='cjnfuncs.resourcelock_islocked')
 
     lock = resource_lock(args.LockName)
+    set_logging_level (logging.DEBUG, logger_name='cjnfuncs.resourcelock')
+    set_logging_level (logging.DEBUG, logger_name='cjnfuncs.resourcelock_islocked')
 
     if args.Command == "get":
         _timeout = args.get_timeout
@@ -429,8 +437,10 @@ Commands:
 
     elif args.Command == "state":
         lock.is_locked()
+        # logging.warning(f"<{lock.lockname[1:]}> is currently locked?  <{lock.is_locked()}>  Prior info  <{lock.get_lock_info()}>")
 
     elif args.Command == "trace":
+        # set_logging_level (logging.DEBUG, logger_name='cjnfuncs.resourcelock_islocked')
         while True:
             lock.is_locked()
             sleep (args.update)

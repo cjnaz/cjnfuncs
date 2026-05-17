@@ -460,6 +460,8 @@ class _periodic_log:
             _logger = logging.getLogger(self.logger_name)
             _logger.log(log_level, f"[PLog-{cat}] {message}")
             self.next_dt = now_dt + self.log_interval
+            return True
+        return False
 
 
 def periodic_log(message, category='Cat1', logger_name='', log_interval='10m', log_level=None):
@@ -494,7 +496,13 @@ for this category (ignored of subsequent calls).
 
 
 ### Returns
-- None
+- True:  This call was logged
+- False: This call was skipped due to `log_interval` not being met
+- Raises TypeError if input params are not valid
+
+
+### Behaviors and rules
+- A call to periodic_log() returns a boolean (True/False) which may be used to gate further operations, such as sending a notification.
       """
     if category not in cats:
         if log_level is None:
@@ -503,4 +511,4 @@ for this category (ignored of subsequent calls).
         cats[category] = xx
     
     p_logger = cats[category]
-    p_logger.plog(message, log_level, category)
+    return p_logger.plog(message, log_level, category)
