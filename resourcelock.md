@@ -51,7 +51,9 @@ my_lock.close()
 And running this code:
 ```
 $ ./resourcelock_ex.py 
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2025-11-06 10:38:11.545309 - resourcelock_ex.module #1>
+   resourcelock.__init__             -    DEBUG:  <test_lock> posix_ipc.Semaphore object info: </test_lock>
+   resourcelock.__init__             -    DEBUG:  <test_lock> posix_ipc.SharedMemory object info: </test_lock>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2026-05-26 16:01:52.943062 - resourcelock_ex.module #1>
 resourcelock_ex.<module>             -  WARNING:  I have the <test_lock> lock
    resourcelock.unget_lock           -    DEBUG:  <test_lock> lock released  <at end of code>
 resourcelock_ex.<module>             -  WARNING:  Lock <test_lock> released
@@ -60,22 +62,24 @@ resourcelock_ex.<module>             -  WARNING:  Lock <test_lock> released
 
 $ # Get the lock using the CLI tool
 $ resourcelock test_lock get
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2025-11-06 10:39:00.512996 - cli>
-
+<test_lock> get_lock called - Returned <True>, Currently locked: <True>, Lock info: <2026-05-26 16:02:05.500835 - cli>
 
 $ ./resourcelock_ex.py 
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request timed out  - Current owner   <2025-11-06 10:39:00.512996 - cli>
+   resourcelock.__init__             -    DEBUG:  <test_lock> posix_ipc.Semaphore object info: </test_lock>
+   resourcelock.__init__             -    DEBUG:  <test_lock> posix_ipc.SharedMemory object info: </test_lock>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request timed out  - Current owner   <2026-05-26 16:02:05.500835 - cli>
 resourcelock_ex.<module>             -  WARNING:  Lock <test_lock> request timeout
    resourcelock.close                -    DEBUG:  <test_lock> semaphore closed
 
 
 $ # Unget the lock to allow the code to run again
 $ resourcelock test_lock unget
-   resourcelock.unget_lock           -    DEBUG:  <test_lock> lock force released  <cli>
-
+<test_lock> unget_lock called - Returned <True>, Currently locked: <False>, Lock info: <2026-05-26 16:02:05.500835 - cli>
 
 $ ./resourcelock_ex.py 
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2025-11-06 10:43:02.482497 - resourcelock_ex.module #1>
+   resourcelock.__init__             -    DEBUG:  <test_lock> posix_ipc.Semaphore object info: </test_lock>
+   resourcelock.__init__             -    DEBUG:  <test_lock> posix_ipc.SharedMemory object info: </test_lock>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2026-05-26 16:02:18.493402 - resourcelock_ex.module #1>
 resourcelock_ex.<module>             -  WARNING:  I have the <test_lock> lock
    resourcelock.unget_lock           -    DEBUG:  <test_lock> lock released  <at end of code>
 resourcelock_ex.<module>             -  WARNING:  Lock <test_lock> released
@@ -195,7 +199,6 @@ print (f"Using the cli, get the lock ('resourcelock {LOCK_NAME} get') and run th
 And the output results:
 
 ```
-$ ./demo-resourcelock.py
 
 ***** 0 - Lock instantiation
    resourcelock.__init__             -    DEBUG:  <test_lock> posix_ipc.Semaphore object info: </test_lock>
@@ -207,54 +210,54 @@ is_lock returned    <False> - Expecting <False> for initial unlocked test case, 
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
 
 ***** 2 - Get the lock
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2026-05-04 09:14:00.512516 - Lock in test #2>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2026-05-26 15:40:33.069404 - Lock in test #2>
 get_lock returned   <True> - Expecting <True> if lock request is successful
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-04 09:14:00.512516 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-26 15:40:33.069404 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
 
 ***** 3 - Get the lock a second time, same_process_ok=False
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request timed out  - Current owner   <2026-05-04 09:14:00.512516 - Lock in test #2>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request timed out  - Current owner   <2026-05-26 15:40:33.069404 - Lock in test #2>
 get_lock returned   <False> - Expecting <False> Repeated lock request fails
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-04 09:14:00.512516 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-26 15:40:33.069404 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
 
 ***** 4 - Get the lock a third time, same_process_ok=True
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock already acquired   - Prior grant     <2026-05-04 09:14:00.512516 - Lock in test #2>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock already acquired   - Prior grant     <2026-05-26 15:40:33.069404 - Lock in test #2>
 get_lock returned   <True> - Expecting <True> Repeated lock request passes with switch
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-04 09:14:00.512516 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-26 15:40:33.069404 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
 
 ***** 5 - Unget the lock
    resourcelock.unget_lock           -    DEBUG:  <test_lock> lock released  <In test #5>
 unget_lock returned <True> - Expecting <True> if lock is successfully released
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2026-05-04 09:14:00.512516 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2026-05-26 15:40:33.069404 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
 
 ***** 6 - Unget the lock a second time
    resourcelock.unget_lock           -    DEBUG:  <test_lock> Extraneous lock unget request ignored  <In test #6>
 unget_lock returned <False> - Expecting <False> since the lock is not currently set
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2026-05-04 09:14:00.512516 - Lock in test #2>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2026-05-26 15:40:33.069404 - Lock in test #2>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
 
 ***** 7 - Attempt to Unget the lock not owned by current process
-   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2026-05-04 09:14:00.614527 - Lock in test #7>
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-04 09:14:00.614527 - Lock in test #7>
+   resourcelock.get_lock             -    DEBUG:  <test_lock> lock request successful - Granted         <2026-05-26 15:40:33.170282 - Lock in test #7>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-26 15:40:33.170282 - Lock in test #7>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
-   resourcelock.unget_lock           -    DEBUG:  <test_lock> lock unget request ignored - lock not owned by current process  <In test #7>
+   resourcelock.unget_lock           -     INFO:  <test_lock> lock unget request ignored - lock not owned by current process  <In test #7>
 unget_lock returned <False> - Expecting <False> since lock not obtained by current process
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-04 09:14:00.614527 - Lock in test #7>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <True>  Prior info  <2026-05-26 15:40:33.170282 - Lock in test #7>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 0
 
 ***** 8 - Force Unget
    resourcelock.unget_lock           -    DEBUG:  <test_lock> lock force released  <In test #8>
 unget_lock returned <True> - Expecting <True> since lock was set and forced unget
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2026-05-04 09:14:00.614527 - Lock in test #7>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2026-05-26 15:40:33.170282 - Lock in test #7>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
 
 ***** 9 - Force Unget when lock not set
    resourcelock.unget_lock           -    DEBUG:  <test_lock> Extraneous lock unget request ignored  <In test #9>
 unget_lock returned <False> - Expecting <False> since lock was not set
-   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2026-05-04 09:14:00.614527 - Lock in test #7>
+   resourcelock.is_locked            -    DEBUG:  <test_lock> is currently locked?  <False>  Prior info  <2026-05-26 15:40:33.170282 - Lock in test #7>
    resourcelock.lock_value           -    DEBUG:  <test_lock> semaphore = 1
    resourcelock.close                -    DEBUG:  <test_lock> semaphore closed
 
@@ -273,7 +276,7 @@ Using the cli, get the lock ('resourcelock test_lock get') and run the test agai
 
 <br>
 
-## string block shared across processes
+## String block shared across processes
 
 Associated with an instantiated lock is also a shared memory block.  When `get_lock()` is called the `lock_info` string is stored
 in this associated shared memory block.  
@@ -336,18 +339,16 @@ your tool script's handling of get_lock timeouts.
 
 ```
 $ resourcelock -h
-usage: resourcelock [-h] [-t GET_TIMEOUT] [-m MESSAGE] [-a AUTO_UNGET] [-u UPDATE] LockName {get,unget,state,trace}
+usage: resourcelock [-h] [-t GET_TIMEOUT] [-m MESSAGE] [-a AUTO_UNGET] [-u UPDATE] [-v] [-V] LockName {get,unget,state,trace}
 
-Inter-process lock mechanism using posix_ipc
+**** Inter-process lock mechanism using posix_ipc ****
 
-Only works on Linux
-3.2
-    Commands:
-        get:    Get/set the lock named LockName.  '-a' specifies a automatic timed unget (only applied if the get was successful).
-        unget:  Force-release LockName.
-        state:  Print the current state of LockName.
-        trace:  Continuously print the state of LockName.  '-u' specifies update interval.  Ctrl-C to exit.
-    
+Commands:
+    get:    Get/set the lock named LockName.  '-a' specifies a automatic timed unget (only applied if the get was successful).
+    unget:  Force-release LockName.
+    state:  Print the current state of LockName.
+    trace:  Continuously print the state of LockName.  '-u' specifies update interval.  Ctrl-C to exit.
+3.2.1
 
 positional arguments:
   LockName              Name of the system-wide lock to access
@@ -364,6 +365,8 @@ options:
                         After a successful get, unget the lock in (float) sec
   -u UPDATE, --update UPDATE
                         Trace update interval (default 0.5 sec)
+  -v, --verbose         Print status and activity messages (-vv for debug level logging)
+  -V, --version         Print version number and exit
 ```
 
 <br>
@@ -448,8 +451,8 @@ Use the CLI command `resourcelock <lockname> unget` to manually release the lock
 resource_lock() uses `posix_ipc.Semaphore`, which is a counter mechanism. `get_lock()` 
 decrements the counter to 0, indicating a locked state.  `unget_lock()` increments the
 counter (non-zero is unlocked). `unget_lock()` wont increment the counter unless the counter is 
-currently 0 (indicating locked), so it is ***recommended*** to have (possibly extraneous) `unget_lock()` calls, 
-such as in your interrupt-trapped cleanup code.
+currently 0 (indicating locked), so it is ***recommended*** to place (possibly extraneous) `unget_lock()` calls 
+in your interrupt-trapped cleanup code so that interrupted code certainly releases the lock.
 
 
 ### Args
@@ -502,10 +505,10 @@ with timeout.
 
 `lock_info` (str, default '')
 - Optional debugging info string for indicating when and by whom the lock was set.  Logged at the debug level.
-- The datetime is prepended to lock_info.
+- The current datetime is prepended to lock_info.
 - A useful lock_info string format might be `<module_name>.<function_name> <get_lock_call_instance_number>`, eg, 
 `tempmon.measure_loop #3`.
-- This string remains in place after an unget() call (`is_locked() == False`) for lock history purposes while debugging.
+- This string remains in place after an unget() call for lock history purposes while debugging.
 
 ### Returns
 - True:  Lock successfully acquired, timeout time not exceeded
@@ -525,7 +528,7 @@ If the lock was acquired by the current process then release the lock.
 - If the lock is not currently set then the `unget_lock()` call is discarded, leaving the lock
 in the same unset state.
 - If the lock is currently set but _not_ acquired by this process then don't release the lock,
-unless `force=True`.
+unless `force=True`.  _Lock unget request ignored_ calls are logged at the info level.
 
 ### Arg
 `force` (bool, default False)
@@ -535,7 +538,7 @@ unless `force=True`.
 
 `where_called` (str, default '')
 - Debugging aid string for indicating what code released the lock.  Logged at the debug level.
-Not stored anywhere, nor available to a later call.
+Not stored nor available to a later call.
 
 ### Returns
 - True:  Lock successfully released
@@ -550,6 +553,9 @@ Not stored anywhere, nor available to a later call.
 # is_locked () - Returns the current state of the lock
 
 ***resource_lock() class member function***
+
+Note that `is_locked()` uses a separate child logger - `'cjnfuncs.resourcelock_islocked'` - so that `is_locked()` may be 
+checked in a loop without flooding the log.  `is_locked()` calls are logged at the debug level.
 
 ### Returns
 - True if currently locked, else False

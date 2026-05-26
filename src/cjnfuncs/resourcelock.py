@@ -6,7 +6,7 @@ Only works on Linux
 
 #==========================================================
 #
-#  Chris Nelson, Copyright 2024-2025
+#  Chris Nelson, Copyright 2024-2026
 #
 #==========================================================
 
@@ -76,8 +76,8 @@ Use the CLI command `resourcelock <lockname> unget` to manually release the lock
 resource_lock() uses `posix_ipc.Semaphore`, which is a counter mechanism. `get_lock()` 
 decrements the counter to 0, indicating a locked state.  `unget_lock()` increments the
 counter (non-zero is unlocked). `unget_lock()` wont increment the counter unless the counter is 
-currently 0 (indicating locked), so it is ***recommended*** to have (possibly extraneous) `unget_lock()` calls, 
-such as in your interrupt-trapped cleanup code.
+currently 0 (indicating locked), so it is ***recommended*** to place (possibly extraneous) `unget_lock()` calls 
+in your interrupt-trapped cleanup code so that interrupted code certainly releases the lock.
 
 
 ### Args
@@ -156,10 +156,10 @@ with timeout.
 
 `lock_info` (str, default '')
 - Optional debugging info string for indicating when and by whom the lock was set.  Logged at the debug level.
-- The datetime is prepended to lock_info.
+- The current datetime is prepended to lock_info.
 - A useful lock_info string format might be `<module_name>.<function_name> <get_lock_call_instance_number>`, eg, 
 `tempmon.measure_loop #3`.
-- This string remains in place after an unget() call (`is_locked() == False`) for lock history purposes while debugging.
+- This string remains in place after an unget() call for lock history purposes while debugging.
 
 ### Returns
 - True:  Lock successfully acquired, timeout time not exceeded
@@ -197,7 +197,7 @@ If the lock was acquired by the current process then release the lock.
 - If the lock is not currently set then the `unget_lock()` call is discarded, leaving the lock
 in the same unset state.
 - If the lock is currently set but _not_ acquired by this process then don't release the lock,
-unless `force=True`.
+unless `force=True`.  _Lock unget request ignored_ calls are logged at the info level.
 
 ### Arg
 `force` (bool, default False)
@@ -207,7 +207,7 @@ unless `force=True`.
 
 `where_called` (str, default '')
 - Debugging aid string for indicating what code released the lock.  Logged at the debug level.
-Not stored anywhere, nor available to a later call.
+Not stored nor available to a later call.
 
 ### Returns
 - True:  Lock successfully released
@@ -225,7 +225,7 @@ Not stored anywhere, nor available to a later call.
                     resourcelock_logger.debug (f"<{self.lockname[1:]}> lock force released  <{where_called}>")
                     return True
                 else:
-                    resourcelock_logger.warning (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process  <{where_called}>")
+                    resourcelock_logger.info (f"<{self.lockname[1:]}> lock unget request ignored - lock not owned by current process  <{where_called}>")
                     return False
         else:
             resourcelock_logger.debug (f"<{self.lockname[1:]}> Extraneous lock unget request ignored  <{where_called}>")
@@ -243,6 +243,9 @@ Not stored anywhere, nor available to a later call.
 ## is_locked () - Returns the current state of the lock
 
 ***resource_lock() class member function***
+
+Note that `is_locked()` uses a separate child logger - `'cjnfuncs.resourcelock_islocked'` - so that `is_locked()` may be 
+checked in a loop without flooding the log.  `is_locked()` calls are logged at the debug level.
 
 ### Returns
 - True if currently locked, else False
@@ -387,8 +390,6 @@ Commands:
 
     set_toolname (TOOLNAME)
     setuplogging()
-    # logging.getLogger('cjnfuncs.resourcelock').setLevel(logging.DEBUG)
-    # logging.getLogger('cjnfuncs.resourcelock_islocked').setLevel(logging.DEBUG)
 
     GET_TIMEOUT =       0.5
     TRACE_INTERVAL =    0.5
@@ -413,34 +414,33 @@ Commands:
                         help="Print version number and exit")
     args = parser.parse_args()
 
+
     ll = [logging.WARNING, logging.INFO, logging.DEBUG][args.verbose]
-    set_logging_level (ll)
     set_logging_level (ll, logger_name='cjnfuncs.resourcelock')
     set_logging_level (ll, logger_name='cjnfuncs.resourcelock_islocked')
 
     lock = resource_lock(args.LockName)
-    set_logging_level (logging.DEBUG, logger_name='cjnfuncs.resourcelock')
-    set_logging_level (logging.DEBUG, logger_name='cjnfuncs.resourcelock_islocked')
 
     if args.Command == "get":
         _timeout = args.get_timeout
         if _timeout == -1:
             _timeout = None
-        get_status = lock.get_lock(timeout=_timeout, lock_info=args.message)
-        if get_status and args.auto_unget:
-                print (f"Release lock after <{args.auto_unget}> sec delay")
-                sleep(args.auto_unget)
-                lock.unget_lock(where_called=f'{args.message} - auto unget')
+        get_result = lock.get_lock(timeout=_timeout, lock_info=args.message)
+        print (f"<{args.LockName}> get_lock called - Returned <{get_result}>, Currently locked: <{lock.is_locked()}>, Lock info: <{lock.get_lock_info()}>")
+        if get_result and args.auto_unget:
+            print (f"Release lock after <{args.auto_unget}> sec delay")
+            sleep(args.auto_unget)
+            unget_result = lock.unget_lock(where_called=f'{args.message} - auto unget')
+            print (f"<{args.LockName}> unget_lock called - Returned <{unget_result}>, Currently locked: <{lock.is_locked()}>, Lock info: <{lock.get_lock_info()}>")
 
     elif args.Command == "unget":
-        lock.unget_lock(force=True, where_called=args.message)
+        unget_result = lock.unget_lock(force=True, where_called=args.message)
+        print (f"<{args.LockName}> unget_lock called - Returned <{unget_result}>, Currently locked: <{lock.is_locked()}>, Lock info: <{lock.get_lock_info()}>")
 
     elif args.Command == "state":
-        lock.is_locked()
-        # logging.warning(f"<{lock.lockname[1:]}> is currently locked?  <{lock.is_locked()}>  Prior info  <{lock.get_lock_info()}>")
+        print (f"<{args.LockName}> Currently locked: <{lock.is_locked()}>, Lock info: <{lock.get_lock_info()}>")
 
     elif args.Command == "trace":
-        # set_logging_level (logging.DEBUG, logger_name='cjnfuncs.resourcelock_islocked')
         while True:
-            lock.is_locked()
+            print (f"<{args.LockName} Currently locked: <{lock.is_locked()}>, Lock info: <{lock.get_lock_info()}>")
             sleep (args.update)

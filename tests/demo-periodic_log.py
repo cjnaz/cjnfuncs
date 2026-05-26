@@ -12,7 +12,7 @@ Produce / compare to golden results:
 #
 #==========================================================
 
-__version__ = "3.1"
+__version__ = "3.2.1"
 
 
 import time
@@ -27,38 +27,38 @@ def dotest (testnum, message, category, log_level=None, logger_name='', log_inte
     logging.getLogger(logger_name).setLevel(logger_level)
     print ("\n=============================================")
     print (f"Test {testnum} - category <{category:4}> logger <{logger_name}> - {message}")
-    periodic_log (message, category, logger_name, log_interval, log_level)
+    print (f"periodic_log returned: {periodic_log (message, category, logger_name, log_interval, log_level)}")
 
 
 # Root logger '' tests
-dotest(1, "Expect logged message, WARNING [PLog-Cat1]",     'Cat1', log_level=30, log_interval=0.2)
-dotest(2, "Expect logged message,    INFO [PLog-2]",        2,      log_level=20, log_interval=0.2)
-dotest(3, "Expect NOT LOGGED",                              'Cat1', log_level=30)
-dotest(4, "Expect NOT LOGGED",                              2,      log_level=30)
+dotest(1, "Expect logged message, WARNING [PLog-Cat1], return True",    'Cat1', log_level=30, log_interval=0.2)
+dotest(2, "Expect logged message,    INFO [PLog-2], return True",       2,      log_level=20, log_interval=0.2)
+dotest(3, "Expect NOT LOGGED, return False",                            'Cat1', log_level=30)
+dotest(4, "Expect NOT LOGGED, return False",                            2,      log_level=30)
 
 # Override default level, Ignore log_interval
 time.sleep(0.2)
-dotest(5, "Expect logged message,   DEBUG [PLog-Cat1]",     'Cat1', log_level=10, log_interval=300)
-dotest(6, "Expect logged message, WARNING [PLog-2]",        2,      log_level=30, log_interval=300)
+dotest(5, "Expect logged message,   DEBUG [PLog-Cat1], return True",    'Cat1', log_level=10, log_interval=300)
+dotest(6, "Expect logged message, WARNING [PLog-2], return True",       2,      log_level=30, log_interval=300)
 
 # Default logging level established on first calls
 time.sleep(0.2)
-dotest(7, "Expect logged message, WARNING [PLog-Cat1]",     'Cat1')
-dotest(8, "Expect logged message,    INFO [PLog-2]",        2)
+dotest(7, "Expect logged message, WARNING [PLog-Cat1], return True",    'Cat1')
+dotest(8, "Expect logged message,    INFO [PLog-2], return True",       2)
 
 # Logger level set higher than message log level
 time.sleep(0.2)
-dotest(9, "Expect NOT LOGGED",                              'Cat1', log_level=20, logger_level=30)
+dotest(9, "Expect NOT LOGGED due to log_level < logger level, return True", 'Cat1', log_level=20, logger_level=30)
 
 
 # Child/named logging tests
-dotest(20, "Expect logged message,    INFO [PLog-abc]",     category='abc',  logger_name='xyz', log_level=logging.INFO)
-dotest(21, "Expect logged message, WARNING [PLog-def]",     category='def',  logger_name='ghi', log_level=logging.WARNING)
+dotest(20, "Expect logged message,    INFO [PLog-abc], return True",    category='abc',  logger_name='xyz', log_level=logging.INFO)
+dotest(21, "Expect logged message, WARNING [PLog-def], return True",    category='def',  logger_name='ghi', log_level=logging.WARNING)
 
 # logger_name changes ignored.  Use default log_levels
 time.sleep(0.2)
-dotest(22, "Expect logged message,    INFO [PLog-abc]",     category='abc',  logger_name='mmm')
-dotest(23, "Expect logged message, WARNING [PLog-def]",     category='def',  logger_name='ppp')
+dotest(22, "Expect logged message,    INFO [PLog-abc], return True",    category='abc',  logger_name='mmm')
+dotest(23, "Expect logged message, WARNING [PLog-def], return True",    category='def',  logger_name='ppp')
 
 
 print ("\n\n=====================\nKnown categories")

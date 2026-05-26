@@ -1,52 +1,65 @@
 
 =============================================
-Test 1 - category <Cat1> logger <> - Expect logged message, WARNING [PLog-Cat1]
-           core.plog                 -  WARNING:  [PLog-Cat1] Expect logged message, WARNING [PLog-Cat1]
+Test 1 - category <Cat1> logger <> - Expect logged message, WARNING [PLog-Cat1], return True
+           core.plog                 -  WARNING:  [PLog-Cat1] Expect logged message, WARNING [PLog-Cat1], return True
+periodic_log returned: True
 
 =============================================
-Test 2 - category <   2> logger <> - Expect logged message,    INFO [PLog-2]
-           core.plog                 -     INFO:  [PLog-2] Expect logged message,    INFO [PLog-2]
+Test 2 - category <   2> logger <> - Expect logged message,    INFO [PLog-2], return True
+           core.plog                 -     INFO:  [PLog-2] Expect logged message,    INFO [PLog-2], return True
+periodic_log returned: True
 
 =============================================
-Test 3 - category <Cat1> logger <> - Expect NOT LOGGED
+Test 3 - category <Cat1> logger <> - Expect NOT LOGGED, return False
+periodic_log returned: False
 
 =============================================
-Test 4 - category <   2> logger <> - Expect NOT LOGGED
+Test 4 - category <   2> logger <> - Expect NOT LOGGED, return False
+periodic_log returned: False
 
 =============================================
-Test 5 - category <Cat1> logger <> - Expect logged message,   DEBUG [PLog-Cat1]
-           core.plog                 -    DEBUG:  [PLog-Cat1] Expect logged message,   DEBUG [PLog-Cat1]
+Test 5 - category <Cat1> logger <> - Expect logged message,   DEBUG [PLog-Cat1], return True
+           core.plog                 -    DEBUG:  [PLog-Cat1] Expect logged message,   DEBUG [PLog-Cat1], return True
+periodic_log returned: True
 
 =============================================
-Test 6 - category <   2> logger <> - Expect logged message, WARNING [PLog-2]
-           core.plog                 -  WARNING:  [PLog-2] Expect logged message, WARNING [PLog-2]
+Test 6 - category <   2> logger <> - Expect logged message, WARNING [PLog-2], return True
+           core.plog                 -  WARNING:  [PLog-2] Expect logged message, WARNING [PLog-2], return True
+periodic_log returned: True
 
 =============================================
-Test 7 - category <Cat1> logger <> - Expect logged message, WARNING [PLog-Cat1]
-           core.plog                 -  WARNING:  [PLog-Cat1] Expect logged message, WARNING [PLog-Cat1]
+Test 7 - category <Cat1> logger <> - Expect logged message, WARNING [PLog-Cat1], return True
+           core.plog                 -  WARNING:  [PLog-Cat1] Expect logged message, WARNING [PLog-Cat1], return True
+periodic_log returned: True
 
 =============================================
-Test 8 - category <   2> logger <> - Expect logged message,    INFO [PLog-2]
-           core.plog                 -     INFO:  [PLog-2] Expect logged message,    INFO [PLog-2]
+Test 8 - category <   2> logger <> - Expect logged message,    INFO [PLog-2], return True
+           core.plog                 -     INFO:  [PLog-2] Expect logged message,    INFO [PLog-2], return True
+periodic_log returned: True
 
 =============================================
-Test 9 - category <Cat1> logger <> - Expect NOT LOGGED
+Test 9 - category <Cat1> logger <> - Expect NOT LOGGED due to log_level < logger level, return True
+periodic_log returned: True
 
 =============================================
-Test 20 - category <abc > logger <xyz> - Expect logged message,    INFO [PLog-abc]
-           core.plog                 -     INFO:  [PLog-abc] Expect logged message,    INFO [PLog-abc]
+Test 20 - category <abc > logger <xyz> - Expect logged message,    INFO [PLog-abc], return True
+           core.plog                 -     INFO:  [PLog-abc] Expect logged message,    INFO [PLog-abc], return True
+periodic_log returned: True
 
 =============================================
-Test 21 - category <def > logger <ghi> - Expect logged message, WARNING [PLog-def]
-           core.plog                 -  WARNING:  [PLog-def] Expect logged message, WARNING [PLog-def]
+Test 21 - category <def > logger <ghi> - Expect logged message, WARNING [PLog-def], return True
+           core.plog                 -  WARNING:  [PLog-def] Expect logged message, WARNING [PLog-def], return True
+periodic_log returned: True
 
 =============================================
-Test 22 - category <abc > logger <mmm> - Expect logged message,    INFO [PLog-abc]
-           core.plog                 -     INFO:  [PLog-abc] Expect logged message,    INFO [PLog-abc]
+Test 22 - category <abc > logger <mmm> - Expect logged message,    INFO [PLog-abc], return True
+           core.plog                 -     INFO:  [PLog-abc] Expect logged message,    INFO [PLog-abc], return True
+periodic_log returned: True
 
 =============================================
-Test 23 - category <def > logger <ppp> - Expect logged message, WARNING [PLog-def]
-           core.plog                 -  WARNING:  [PLog-def] Expect logged message, WARNING [PLog-def]
+Test 23 - category <def > logger <ppp> - Expect logged message, WARNING [PLog-def], return True
+           core.plog                 -  WARNING:  [PLog-def] Expect logged message, WARNING [PLog-def], return True
+periodic_log returned: True
 
 
 =====================

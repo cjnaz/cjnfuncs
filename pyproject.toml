@@ -1,21 +1,21 @@
 [project]
 name = 'cjnfuncs'
-version = '3.2.1rc1'
-    # 3.2.1rc1
-    #   resourcelock warning level log on lock unget request ignored - lock not owned by current process and not forced
-    #   resourcelock --verbose
+version = '3.2.1'
+    # 3.2.1 - Release
+    #   resourcelock info level log on lock unget request ignored if lock not owned by current process and not forced
+    #   resourcelock --verbose switch
     #   periodic_log returns True/False whether call was logged
     #   doc fixes
     # 3.2 - Release - New features:  persistent_config and shared memory block handling
     # 3.1.1 - separate resourcelock_islocked logger, get_next_dt days/weeks offset
-    # 3.1 - release
+    # 3.1 - Release
     #   Support for and use of child loggers
     #   deployfiles create empty dir
     #   Windows fixes
     #   config_item() safe_mode switch
     #   mungePath set_attributes from default False
     # 3.0.1 - Allow '.' in config section names
-    # 3.0 - release
+    # 3.0 - Release
     #   added get_next_dt
     #   reworked deployfiles and tests
     #   added rwt_debug

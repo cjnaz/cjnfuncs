@@ -587,5 +587,11 @@ for this category (ignored of subsequent calls).
 
 
 ### Returns
-- None
+- True:  This call was logged
+- False: This call was skipped due to `log_interval` not being met
+- Raises TypeError if input params are not valid
+
+
+### Behaviors and rules
+- A call to periodic_log() returns a boolean (True/False) which may be used to gate further operations, such as sending a notification.
       
