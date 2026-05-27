@@ -40,6 +40,9 @@ Project repo:  https://github.com/cjnaz/cjnfuncs
 
 ## Key changes since the prior major public release (version 3.0)
 
+3.2.1 change
+- periodic_log returns True/False whether call was logged - useful for follow on code that needs to run if the logging event happened.
+
 3.2 changes
 - `persistent_config` - Layered on top of config_item, this new class provides a clean and simple tool for carrying runtime data across tool 
 script restarts and system reboots.
@@ -69,6 +72,7 @@ or using `core.set_logging_level(logging.INFO, 'cjnfuncs.configman')`.
 
 ## Revision history
 
+- 3.2.1 - 260526 - periodic_log now returns True/False whether the the call was logged.  Minor changes in resourcelock.
 - 3.2 - 260506 - New features:  persistent_config and shared memory block handling
 - 3.1.1 260207 - separate resourcelock_islocked logger, get_next_dt days/weeks offset
 - 3.1  251109
