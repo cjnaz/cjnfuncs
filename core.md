@@ -481,8 +481,8 @@ logging.ERROR (40), or logging.CRITICAL (50).
 
 
 ### Behaviors
-- NOTE that a child logger that has not been set to a logging level will have a logging level = 0, which Python seems to
-treat the same as logging.WARNING (30).
+- NOTE that a child logger that has not been set to a logging level will have a logging level = 0.  Python then
+falls back to parent's logging level, etc., and if unset then falls back to the root logging level.
 
     
 <br/>
@@ -562,6 +562,9 @@ Useful if the preexisting logging level was saved to the stack, but should be di
 Log infrequently so as to avoid flooding the log.  The `category` arg provides for independent
 log intervals for different types of logging events.
 
+The log message is preceded with `[category - <package>.<module>.<function>(<line number>)]` for debug traceability of
+where the log event came from.
+
 
 ### Args
 
@@ -593,5 +596,6 @@ for this category (ignored of subsequent calls).
 
 
 ### Behaviors and rules
-- A call to periodic_log() returns a boolean (True/False) which may be used to gate further operations, such as sending a notification.
+- A call to periodic_log() returns a boolean (True/False) which may be used to gate further operations, such as 
+sending a notification.
       

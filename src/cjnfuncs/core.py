@@ -4,7 +4,7 @@
 
 #==========================================================
 #
-#  Chris Nelson, 2018-2025
+#  Chris Nelson, 2018-2026
 #
 # TODO Identification of the main module / tool script file may be wrong if a script imports a script that then imports cjnfuncs.
 #==========================================================
@@ -337,8 +337,8 @@ logging.ERROR (40), or logging.CRITICAL (50).
 
 
 ### Behaviors
-- NOTE that a child logger that has not been set to a logging level will have a logging level = 0, which Python seems to
-treat the same as logging.WARNING (30).
+- NOTE that a child logger that has not been set to a logging level will have a logging level = 0.  Python then
+falls back to parent's logging level, etc., and if unset then falls back to the root logging level.
 
     """
 
@@ -400,7 +400,6 @@ values are on the stack or have previously been saved.
         return known_loggers[logger_name]
     except:
         return []
-    return ll_history
 
 
 def pop_logging_level_stack(logger_name='', clear=False):
@@ -453,13 +452,18 @@ class _periodic_log:
         self.logger_name = logger_name
 
     def plog(self, message, log_level, cat):
-        now_dt = datetime.datetime.now()
+        now_dt =            datetime.datetime.now()
         if now_dt > self.next_dt:
             if log_level is None:
                 log_level = self.log_level
-            _logger = logging.getLogger(self.logger_name)
-            _logger.log(log_level, f"[PLog-{cat}] {message}")
-            self.next_dt = now_dt + self.log_interval
+            logger =        logging.getLogger(self.logger_name)
+            frame =         inspect.currentframe().f_back.f_back
+            module =        inspect.getmodule(frame)
+            module_name =   module.__name__  if module  else None
+            func =          frame.f_code.co_name
+            lineno =        frame.f_lineno
+            logger.log(log_level, f"[{cat} - {module_name}.{func}({lineno})] {message}")
+            self.next_dt =  now_dt + self.log_interval
             return True
         return False
 
@@ -470,6 +474,9 @@ def periodic_log(message, category='Cat1', logger_name='', log_interval='10m', l
 
 Log infrequently so as to avoid flooding the log.  The `category` arg provides for independent
 log intervals for different types of logging events.
+
+The log message is preceded with `[category - <package>.<module>.<function>(<line number>)]` for debug traceability of
+where the log event came from.
 
 
 ### Args
@@ -502,7 +509,8 @@ for this category (ignored of subsequent calls).
 
 
 ### Behaviors and rules
-- A call to periodic_log() returns a boolean (True/False) which may be used to gate further operations, such as sending a notification.
+- A call to periodic_log() returns a boolean (True/False) which may be used to gate further operations, such as
+sending a notification.
       """
     if category not in cats:
         if log_level is None:

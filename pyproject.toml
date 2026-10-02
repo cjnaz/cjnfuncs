@@ -1,6 +1,7 @@
 [project]
 name = 'cjnfuncs'
-version = '3.2.1'
+version = '3.2.2'
+    # 3.2.2 261002 Release - periodic_log [category - <package>.<module>.<function>(<line number>)]
     # 3.2.1 - Release
     #   resourcelock info level log on lock unget request ignored if lock not owned by current process and not forced
     #   resourcelock --verbose switch
